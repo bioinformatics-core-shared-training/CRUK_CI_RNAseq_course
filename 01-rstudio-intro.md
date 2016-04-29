@@ -1,8 +1,8 @@
 ---
 layout: page
-title: R for reproducible scientific analysis
-subtitle: Introduction to R and RStudio
-minutes: 45
+title: R for RNAseq analysis
+subtitle: Project management with RStudio
+minutes: 30
 ---
 
 
@@ -11,16 +11,12 @@ minutes: 45
 >
 > * To gain familiarity with the various panes in the RStudio IDE
 > * To gain familiarity with the buttons, short cuts and options in the RStudio IDE
-> * To understand variables and how to assign to them
 > * To be able to manage your workspace in an interactive R session
-> * To be able to use mathematical and comparison operations
-> * To be able to call functions
-> * Introduction to package management
-> 
+> * To be able to create self-contained projects in RStudio
+> * To manage and preserve data
+>
 
 ## Introduction to RStudio
-
-Welcome to the R portion of the Software Carpentry workshop.
 
 Throughout this lesson, we're going to teach you some of the fundamentals of
 the R language as well as some best practices for organising code for
@@ -46,12 +42,12 @@ in the top left.
 There are two main ways one can work within RStudio.
 
 1. Test and play within the interactive R console then copy code into
-a .R file to run later. 
+a .R file to run later.
    *  This works well when doing small tests and initially starting off.
    *  It quickly becomes laborious
 2. Start writing in an .R file and use RStudio's command / short cut
 to push current line, selected lines or modified lines to the
-interactive R console. 
+interactive R console.
    * This is a great way to start; all your code is saved for later
    * You will be able to run the file you create from within RStudio
    or using R's `source()`  function.
@@ -69,7 +65,7 @@ interactive R console.
 > along, `Re-run the previous region`. This will run the previous code block
 > inculding the modifications you have made.
 
-## Introduction to R
+## Your RStudio environment
 
 Much of your time in R will be spent in the R interactive
 console. This is where you will run all of your code, and can be a
@@ -131,343 +127,9 @@ prompt.
 > currently writing.
 >
 
-When using R as a calculator, the order of operations is the same as you
-would have learnt back in school.
-
-From highest to lowest precedence:
-
- * Parentheses: `(`, `)`
- * Exponents: `^` or `**`
- * Divide: `/`
- * Multiply: `*`
- * Add: `+`
- * Subtract: `-`
-
-
-~~~{.r}
-3 + 5 * 2
-~~~
-
-
-
-~~~{.output}
-[1] 13
-
-~~~
-
-Use parentheses to group operations in order to force the order of
-evaluation if it differs from the default, or to make clear what you 
-intend.
-
-
-~~~{.r}
-(3 + 5) * 2
-~~~
-
-
-
-~~~{.output}
-[1] 16
-
-~~~
-
-This can get unwieldy when not needed, but  clarifies your intentions.
-Remember that others may later read your code.
-
-
-~~~{.r}
-(3 + (5 * (2 ^ 2))) # hard to read
-3 + 5 * 2 ^ 2       # clear, if you remember the rules
-3 + 5 * (2 ^ 2)     # if you forget some rules, this might help
-~~~
-
-
-The text after each line of code is called a
-"comment". Anything that follows after the hash (or octothorpe) symbol
-`#` is ignored by R when it executes code.
-
-Really small or large numbers get a scientific notation:
-
-
-~~~{.r}
-2/10000
-~~~
-
-
-
-~~~{.output}
-[1] 2e-04
-
-~~~
-
-Which is shorthand for "multiplied by `10^XX`". So `2e-4`
-is shorthand for `2 * 10^(-4)`.
-
-You can write numbers in scientific notation too:
-
-
-~~~{.r}
-5e3  # Note the lack of minus here
-~~~
-
-
-
-~~~{.output}
-[1] 5000
-
-~~~
-
-## Mathematical functions
-
-R has many built in mathematical functions. To call a function,
-we simply type its name, followed by  open and closing parentheses.
-Anything we type inside the parentheses is called the function's
-arguments:
-
-
-~~~{.r}
-sin(1)  # trigonometry functions
-~~~
-
-
-
-~~~{.output}
-[1] 0.841471
-
-~~~
-
-
-~~~{.r}
-log(1)  # natural logarithm
-~~~
-
-
-
-~~~{.output}
-[1] 0
-
-~~~
-
-
-~~~{.r}
-log10(10) # base-10 logarithm
-~~~
-
-
-
-~~~{.output}
-[1] 1
-
-~~~
-
-
-~~~{.r}
-exp(0.5) # e^(1/2)
-~~~
-
-
-
-~~~{.output}
-[1] 1.648721
-
-~~~
-
-Don't worry about trying to remember every function in R. You
-can simply look them up on google, or if you can remember the
-start of the function's name, use the tab completion in RStudio.
-
-This is one advantage that RStudio has over R on its own, it
-has autocompletion abilities that allow you to more easily
-look up functions, their arguments, and the values that they
-take.
-
-Typing a `?` before the name of a command will open the help page
-for that command. As well as providing a detailed description of
-the command and how it works, scrolling ot the bottom of the
-help page will usually show a collection of code examples which
-illustrate command usage. We'll go through an example later.
-
-## Comparing things
-
-We can also do comparison in R:
-
-
-~~~{.r}
-1 == 1  # equality (note two equals signs, read as "is equal to")
-~~~
-
-
-
-~~~{.output}
-[1] TRUE
-
-~~~
-
-
-~~~{.r}
-1 != 2  # inequality (read as "is not equal to")
-~~~
-
-
-
-~~~{.output}
-[1] TRUE
-
-~~~
-
-
-~~~{.r}
-1 <  2  # less than
-~~~
-
-
-
-~~~{.output}
-[1] TRUE
-
-~~~
-
-
-~~~{.r}
-1 <= 1  # less than or equal to
-~~~
-
-
-
-~~~{.output}
-[1] TRUE
-
-~~~
-
-
-~~~{.r}
-1 > 0  # greater than
-~~~
-
-
-
-~~~{.output}
-[1] TRUE
-
-~~~
-
-
-~~~{.r}
-1 >= -9 # greater than or equal to
-~~~
-
-
-
-~~~{.output}
-[1] TRUE
-
-~~~
-
-> ## Tip: Comparing Numbers {.callout}
->
-> A word of warning about comparing numbers: you should
-> never use `==` to compare two numbers unless they are
-> integers (a data type which can specifically represent
-> only whole numbers).
->
-> Computers may only represent decimal numbers with a
-> certain degree of precision, so two numbers which look
-> the same when printed out by R, may actually have
-> different underlying representations and therefore be
-> different by a small margin of error (called Machine
-> numeric tolerance).
->
-> Instead you should use the `all.equal` function.
->
-> Further reading: [http://floating-point-gui.de/](http://floating-point-gui.de/)
->
-
-## Variables and assignment
-
-We can store values in variables using the assignment operator `<-`, like this:
-
-
-~~~{.r}
-x <- 1/40
-~~~
-
-Notice that assignment does not print a value. Instead, we stored it for later
-in something called a **variable**. `x` now contains the **value** `0.025`:
-
-
-~~~{.r}
-x
-~~~
-
-
-
-~~~{.output}
-[1] 0.025
-
-~~~
-
-More precisely, the stored value is a *decimal approximation* of
-this fraction called a [floating point number](http://en.wikipedia.org/wiki/Floating_point).
-
-Look for the `Environment` tab in one of the panes of RStudio, and you will see that `x` and its value
-have appeared. Our variable `x` can be used in place of a number in any calculation that expects a number:
-
-
-~~~{.r}
-log(x)
-~~~
-
-
-
-~~~{.output}
-[1] -3.688879
-
-~~~
-
-Notice also that variables can be reassigned:
-
-
-~~~{.r}
-x <- 100
-~~~
-
-`x` used to contain the value 0.025 and and now it has the value 100.
-
-Assignment values can contain the variable being assigned to:
-
-
-~~~{.r}
-x <- x + 1 #notice how RStudio updates its description of x on the top right tab
-~~~
-
-The right hand side of the assignment can be any valid R expression.
-The right hand side is *fully evaluated* before the assignment occurs.
-
-Variable names can contain letters, numbers, underscores and periods. They
-cannot start with a number nor contain spaces at all. Different people use
-different conventions for long variable names, these include
-
-  * periods.between.words
-  * underscores\_between_words
-  * camelCaseToSeparateWords
-
-What you use is up to you, but **be consistent**.
-
-It is also possible to use the `=` operator for assignment:
-
-
-~~~{.r}
-x = 1/40
-~~~
-
-But this is much less common among R users.  The most important thing is to
-**be consistent** with the operator you use. There are occasionally places
-where it is less confusing to use `<-` than `=`, and it is the most common
-symbol used in the community. So the recommendation is to use `<-`.
-
 ## Vectorization
 
-One final thing to be aware of is that R is *vectorized*, meaning that
+R is *vectorized*, meaning that
 variables and functions can have vectors as values. For example
 
 
@@ -583,7 +245,7 @@ function (name, pos = -1L, envir = as.environment(pos), all.names = FALSE,
     }
     else all.names
 }
-<bytecode: 0x7f877b2fbd50>
+<bytecode: 0x7fb05c33ddf8>
 <environment: namespace:base>
 
 ~~~
@@ -652,47 +314,161 @@ network). R and RStudio have functionality for managing packages:
 * You can remove a package with `remove.packages("packagename")`
 * You can make a package available for use with `library(packagename)`
 
-> ## Challenge 1 {.challenge}
-> Which of the following are valid R variable names?
+
+## RStudio project management
+
+The scientific process is naturally incremental, and many projects
+start life as random notes, some code, then a manuscript, and
+eventually everything is a bit mixed together.
+
+<blockquote class="twitter-tweet"><p>Managing your projects in a reproducible fashion doesn't just make your science reproducible, it makes your life easier.</p>&mdash; Vince Buffalo (@vsbuffalo) <a href="https://twitter.com/vsbuffalo/status/323638476153167872">April 15, 2013</a></blockquote>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+Most people tend to organize their projects like this:
+
+![](fig/bad_layout.png)
+
+There are many reasons why we should *ALWAYS* avoid this:
+
+1. It is really hard to tell which version of your data is
+the original and which is the modified;
+2. It gets really messy because it mixes files with various
+extensions together;
+3. It probably takes you a lot of time to actually find
+things, and relate the correct figures to the exact code
+that has been used to generate it;
+
+A good project layout will ultimately make your life easier:
+
+* It will help ensure the integrity of your data;
+* It makes it simpler to share your code with someone else
+(a lab-mate, collaborator, or supervisor);
+* It allows you to easily upload your code with your manuscript submission;
+* It makes it easier to pick the project back up after a break.
+
+## A possible solution
+
+Fortunately, there are tools and packages which can help you manage your work effectively.
+
+One of the most powerful and useful aspects of RStudio is its project management
+functionality. We'll be using this today to create a self-contained, reproducible
+project.
+
+
+> ## Challenge: Creating a self-contained project {.challenge}
+>
+> We're going to create a new project in RStudio:
+>
+> 1. Click the "File" menu button, then "New Project".
+> 2. Click "New Directory".
+> 3. Click "Empty Project".
+> 4. Type in the name of the directory to store your project, e.g. "my_project".
+> 5. Make sure that the checkbox for "Create a git repository" is selected.
+> 6. Click the "Create Project" button.
+>
+
+Now when we start R in this project directory, or open this project with RStudio,
+all of our work on this project will be entirely self-contained in this directory.
+
+## Best practices for project organisation
+
+Although there is no "best" way to lay out a project, there are some general
+principles to adhere to that will make project management easier:
+
+## Treat data as read only
+
+This is probably the most important goal of setting up a project. Data is
+typically time consuming and/or expensive to collect. Working with them
+interactively (e.g., in Excel) where they can be modified means you are never
+sure of where the data came from, or how it has been modified since collection.
+It is therefore a good idea to treat your data as "read-only".
+
+## Data Cleaning
+
+In many cases your data will be "dirty": it will need significant preprocessing
+to get into a format R (or any other programming language) will find useful. This
+task is sometimes called "data munging". I find it useful to store these scripts
+in a separate folder, and create a second "read-only" data folder to hold the
+"cleaned" data sets.
+
+## Treat generated output as disposable
+
+Anything generated by your scripts should be treated as disposable: it should
+all be able to be regenerated from your scripts.
+
+There are lots of different was to manage this output. I find it useful to
+have an output folder with different sub-directories for each separate
+analysis. This makes it easier later, as many of my analyses are exploratory
+and don't end up being used in the final project, and some of the analyses
+get shared between projects.
+
+> ## Tip: ProjectTemplate - a possible solution {.callout}
+>
+> One way to automate the management of projects is to install the third-party package, `ProjectTemplate`.
+> This package will set up an ideal directory structure for project management.
+> This is very useful as it enables you to have your analysis pipeline/workflow organised and structured.
+> Together with the default RStudio project functionality and Git you will be able to keep track of your
+> work as well as be able to share your work with collaborators.
+>
+> 1. Install `ProjectTemplate`.
+> 2. Load the library
+> 3. Initialise the project:
+>
 > 
 > ~~~{.r}
-> min_height
-> max.height
-> _age
-> .mass
-> MaxLength
-> min-length
-> 2widths
-> celsius2kelvin
+> install.packages("ProjectTemplate")
+> library(ProjectTemplate)
+> create.project("../my_project", merge.strategy = "allow.non.conflict")
 > ~~~
+>
+> For more information on ProjectTemplate and its functionality visit the
+> home page [ProjectTemplate](http://projecttemplate.net/index.html)
+>
+
+## Separate function definition and application
+
+The most effective way I find to work in R, is to play around in the interactive
+session, then copy commands across to a script file when I'm sure they work and
+do what I want. You can also save all the commands you've entered using the
+`history` command, but I don't find it useful because when I'm typing its 90%
+trial and error.
+
+When your project is new and shiny, the script file usually contains many lines
+of directly executed code. As it matures, reusable chunks get pulled into their
+own functions. It's a good idea to separate these into separate folders; one
+to store useful functions that you'll reuse across analyses and projects, and
+one to store the analysis scripts.
+
+> ## Tip: avoiding duplication {.callout}
+>
+> You may find yourself using data or analysis scripts across several projects.
+> Typically you want to avoid duplication to save space and avoid having to
+> make updates to code in multiple places.
+>
+> In this case I find it useful to make "symbolic links", which are essentially
+> shortcuts to files somewhere else on a filesystem. On Linux and OS X you can
+> use the `ln -s` command, and on windows you can either create a shortcut or
+> use the `mklink` command from the windows terminal.
+>
+
+## Save the data in the data directory
+
+Now we have a good directory structure we will now place/save the data file in the `data/` directory.
+
+> ## Challenge 1 {.challenge}
+> Download the gapminder data from [here](https://raw.githubusercontent.com/resbaz/r-novice-gapminder-files/master/data/gapminder-FiveYearData.csv).
+>
+> 1. Download the file (CTRL + S, right mouse click -> "Save as", or File -> "Save page as")
+> 2. Make sure it's saved under the name `gapminder-FiveYearData.csv`
+> 3. Save the file in the `data/` folder within your project.
+>
+> We will load and inspect these data later.
 
 > ## Challenge 2 {.challenge}
->
-> What will be the value of each  variable  after each
-> statement in the following program?
->
-> 
-> ~~~{.r}
-> mass <- 47.5
-> age <- 122
-> mass <- mass * 2.3
-> age <- age - 20
-> ~~~
->
-
-> ## Challenge 3 {.challenge}
->
-> Run the code from the previous challenge, and write a command to
-> compare mass to age. Is mass larger than age?
->
-
-> ## Challenge 4 {.challenge}
->
-> Clean up your working environment by deleting the mass and age
-> variables.
->
-
-> ## Challenge 5 {.challenge}
-> 
-> Install the following packages: `ggplot2`, `plyr`, `gapminder`
-> 
+> It is useful to get some general idea about the dataset, directly from the
+> command line, before loading it into R. Understanding the dataset better
+> will come handy when making decisions on how to load it in R. Use command-line
+> shell to answer the following questions:
+> 1. What is the size of the file?
+> 2. How many rows of data does it contain?
+> 3. What are the data types of values stored in this file?

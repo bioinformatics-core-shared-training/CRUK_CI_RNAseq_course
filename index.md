@@ -18,14 +18,15 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 
 ## Topics
 
-- R for RNAseq
+### R for RNAseq
 
-1.  [Introduction to R and RStudio](01-rstudio-intro.html)
-2.  [Project management with RStudio](02-project-intro.html)
-3.  [Seeking help](03-seeking-help.html)
-4.  [Data structures](04-data-structures-part1.html)
-5.  [Data frames and reading in data](05-data-structures-part2.html)
-6.  [Subsetting data](06-data-subsetting.html)
+- [Project management with RStudio](01-rstudio-intro.html)
+- [Seeking help](03-seeking-help.html)
+- [Data structures](04-data-structures-part1.html)
+- [Data frames and reading in data](05-data-structures-part2.html)
+- [Subsetting data](06-data-subsetting.html)
+
+### RNAseq
 
 - [RNAseq Day1](xx-rnaseq-day1.html)
 
