@@ -29,7 +29,12 @@
                     <h1 class="title"></h1>
           <h2 id="install-packages-move-this-to-a-set-up-section">Install packages (move this to a set-up section?)</h2>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">source</span>(<span class="st">&quot;http://bioconductor.org/biocLite.R&quot;</span>)
-<span class="kw">biocLite</span>(<span class="kw">c</span>(<span class="st">&quot;limma&quot;</span>, <span class="st">&quot;edgeR&quot;</span>, <span class="st">&quot;gplots&quot;</span>, <span class="st">&quot;org.Mm.eg.db&quot;</span>, <span class="st">&quot;EDASeq&quot;</span>, <span class="st">&quot;RColorBrewer&quot;</span>))</code></pre>
+<span class="kw">biocLite</span>(<span class="kw">c</span>(<span class="st">&quot;limma&quot;</span>, <span class="st">&quot;edgeR&quot;</span>, <span class="st">&quot;gplots&quot;</span>, <span class="st">&quot;org.Mm.eg.db&quot;</span>, <span class="st">&quot;EDASeq&quot;</span>, <span class="st">&quot;RColorBrewer&quot;</span>))
+
+<span class="co"># Install Glimma from source - version for Mac OS X 10.9 (Mavericks)</span>
+<span class="kw">install.packages</span>(<span class="st">&quot;https://www.bioconductor.org/packages/devel/bioc/bin/macosx/mavericks/contrib/3.3/Glimma_0.99.5.tgz&quot;</span>, <span class="dt">repos =</span> <span class="ot">NULL</span>, <span class="dt">type=</span><span class="st">&quot;source&quot;</span>)
+<span class="co"># Install Rsubread (not required for this lesson, but for a later one)</span>
+<span class="kw">biocLite</span>(<span class="st">&quot;Rsubread&quot;</span>)</code></pre>
 <h2 id="resources-and-data-files">Resources and data files</h2>
 <p>This material has been created using the following resources:<br />http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf<br />http://monashbioinformaticsplatform.github.io/RNAseq-DE-analysis-with-R/99-RNAseq_DE_analysis_with_R.html</p>
 <p>Other potential refs:<br />https://github.com/datacarpentry/archive-datacarpentry/tree/master/lessons/rnaseq-data-analysis<br />https://www.bioconductor.org/help/course-materials/2015/LearnBioconductorFeb2015/B02.1.1_RNASeqLab.html<br />https://www.bioconductor.org/packages/3.3/bioc/vignettes/limma/inst/doc/usersguide.pdf</p>
@@ -874,16 +879,16 @@ fit &lt;-<span class="st"> </span><span class="kw">lmFit</span>(v,design)</code>
 <p>We have a list of significantly differentially expressed genes, but the only annotation we can see is the Entrez Gene ID, which is not very informative. We would like to add some annotation information. There are a number of ways to do this. We will demonstrate how to do this using the <em>org.Mm.eg.db</em> package.</p>
 <p>First we need to decide what information we want. In order to see what we can extract we can run the <code>columns</code> function on the annotation database.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">columns</span>(org.Mm.eg.db)</code></pre>
-<pre><code>##  [1] &quot;ENTREZID&quot;     &quot;PFAM&quot;         &quot;IPI&quot;          &quot;PROSITE&quot;     
-##  [5] &quot;ACCNUM&quot;       &quot;ALIAS&quot;        &quot;CHR&quot;          &quot;CHRLOC&quot;      
-##  [9] &quot;CHRLOCEND&quot;    &quot;ENZYME&quot;       &quot;PATH&quot;         &quot;PMID&quot;        
-## [13] &quot;REFSEQ&quot;       &quot;SYMBOL&quot;       &quot;UNIGENE&quot;      &quot;ENSEMBL&quot;     
-## [17] &quot;ENSEMBLPROT&quot;  &quot;ENSEMBLTRANS&quot; &quot;GENENAME&quot;     &quot;UNIPROT&quot;     
-## [21] &quot;GO&quot;           &quot;EVIDENCE&quot;     &quot;ONTOLOGY&quot;     &quot;GOALL&quot;       
-## [25] &quot;EVIDENCEALL&quot;  &quot;ONTOLOGYALL&quot;  &quot;MGI&quot;</code></pre>
+<pre><code>##  [1] &quot;ACCNUM&quot;       &quot;ALIAS&quot;        &quot;ENSEMBL&quot;      &quot;ENSEMBLPROT&quot; 
+##  [5] &quot;ENSEMBLTRANS&quot; &quot;ENTREZID&quot;     &quot;ENZYME&quot;       &quot;EVIDENCE&quot;    
+##  [9] &quot;EVIDENCEALL&quot;  &quot;GENENAME&quot;     &quot;GO&quot;           &quot;GOALL&quot;       
+## [13] &quot;IPI&quot;          &quot;MGI&quot;          &quot;ONTOLOGY&quot;     &quot;ONTOLOGYALL&quot; 
+## [17] &quot;PATH&quot;         &quot;PFAM&quot;         &quot;PMID&quot;         &quot;PROSITE&quot;     
+## [21] &quot;REFSEQ&quot;       &quot;SYMBOL&quot;       &quot;UNIGENE&quot;      &quot;UNIPROT&quot;</code></pre>
 <p>We definitely want gene symbols and perhaps the full gene name. Let’s build up our annotation information in a separate data frame using the <code>select</code> function.</p>
-<pre class="sourceCode r"><code class="sourceCode r">ann &lt;-<span class="st"> </span><span class="kw">select</span>(org.Mm.eg.db,<span class="dt">keys=</span><span class="kw">rownames</span>(fit.cont),<span class="dt">columns=</span><span class="kw">c</span>(<span class="st">&quot;ENTREZID&quot;</span>,<span class="st">&quot;SYMBOL&quot;</span>,<span class="st">&quot;GENENAME&quot;</span>))
-<span class="co"># Have a look at the annotation</span>
+<pre class="sourceCode r"><code class="sourceCode r">ann &lt;-<span class="st"> </span><span class="kw">select</span>(org.Mm.eg.db,<span class="dt">keys=</span><span class="kw">rownames</span>(fit.cont),<span class="dt">columns=</span><span class="kw">c</span>(<span class="st">&quot;ENTREZID&quot;</span>,<span class="st">&quot;SYMBOL&quot;</span>,<span class="st">&quot;GENENAME&quot;</span>))</code></pre>
+<pre><code>## &#39;select()&#39; returned 1:1 mapping between keys and columns</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Have a look at the annotation</span>
 <span class="kw">head</span>(ann)</code></pre>
 <pre><code>##   ENTREZID SYMBOL                                             GENENAME
 ## 1   497097   Xkr4 X Kell blood group precursor related family member 4
@@ -1105,12 +1110,30 @@ down50.counts.voom &lt;-<span class="st"> </span>v$E[md50, ]
 <h3 id="gene-ontology-testing-with-goana">Gene ontology testing with goana</h3>
 <p>First, we will perform a gene ontology (GO) enrichment analysis using the <code>goana</code> function in <em>limma</em>. There are approximately 20,000 GO terms, and they are split into three categories: BP (biological process), MF (molecular function) and CC (cellular component). <code>goana</code> uses annotation from the appropriate Bioconductor package and can be used for any of the five species specified (Hs, Mm, Rn, Dm or Pt). <code>goana</code> has an advantage over other methods, such as DAVID, in that there is the option to take into account the gene length bias inherent in RNA-Seq data.</p>
 <p>Suppose we want to identify GO terms that are over-represented in the basal lactating group compared to the basal pregnancy group. This can be achieved by applying the goana function to the differential expression results of that comparison. <code>goana</code> takes the <code>fit.cont</code> object, the coefficient of interest and the species. The top set of most enriched GO terms can be viewed with the topGO function.</p>
-<pre class="sourceCode r"><code class="sourceCode r">go &lt;-<span class="st"> </span><span class="kw">goana</span>(fit.cont, <span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">species =</span> <span class="st">&quot;Mm&quot;</span>)</code></pre>
-<pre><code>## Warning in library(package, lib.loc = lib.loc, character.only = TRUE,
-## logical.return = TRUE, : there is no package called &#39;GO.db&#39;</code></pre>
-<pre><code>## Error in goana.default(de = DEGenes, universe = universe, ...): GO.db package not available</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topGO</span>(go, <span class="dt">n=</span><span class="dv">10</span>)</code></pre>
-<pre><code>## Error in is.data.frame(results): object &#39;go&#39; not found</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">go &lt;-<span class="st"> </span><span class="kw">goana</span>(fit.cont, <span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">species =</span> <span class="st">&quot;Mm&quot;</span>)
+<span class="kw">topGO</span>(go, <span class="dt">n=</span><span class="dv">10</span>)</code></pre>
+<pre><code>##                                            Term Ont    N  Up Down
+## GO:0044822                  poly(A) RNA binding  MF 1089 403  112
+## GO:0003723                          RNA binding  MF 1408 473  155
+## GO:0030529            ribonucleoprotein complex  CC  625 246   46
+## GO:0022613 ribonucleoprotein complex biogenesis  BP  309 145   22
+## GO:0022626                   cytosolic ribosome  CC   85  66    1
+## GO:0042254                  ribosome biogenesis  BP  202 110    7
+## GO:0003676                 nucleic acid binding  MF 2810 705  425
+## GO:1901363        heterocyclic compound binding  MF 4310 965  682
+## GO:0006364                      rRNA processing  BP  142  80    2
+## GO:0005730                            nucleolus  CC  671 225   94
+##                    P.Up    P.Down
+## GO:0044822 1.023184e-60 1.0000000
+## GO:0003723 5.314314e-57 1.0000000
+## GO:0030529 1.088768e-41 1.0000000
+## GO:0022613 1.302828e-34 1.0000000
+## GO:0022626 1.749135e-34 0.9999999
+## GO:0042254 7.486654e-34 1.0000000
+## GO:0003676 2.429937e-33 0.9999405
+## GO:1901363 5.748009e-27 0.9998453
+## GO:0006364 2.837929e-26 1.0000000
+## GO:0005730 2.860724e-26 0.9951386</code></pre>
 <p>The row names of the output are the universal identifiers of the GO terms, with one term per row. The Term column gives the names of the GO terms. These terms cover three domains - biological process (BP), cellular component (CC) and molecular function (MF), as shown in the Ont column. The N column represents the total number of genes that are annotated with each GO term. The Up and Down columns represent the number of differentially expressed genes that overlap with the genes in the GO term. The P.Up and P.Down columns contain the p-values for over-representation of the GO term across the set of up- and down-regulated genes, respectively. The output table is sorted by the minimum of P.Up and P.Down by default.</p>
 <p>An additional refinement is to supply <code>goana</code> with the gene lengths using the <code>covariate</code> argument. In the original data matrix that we loaded into R, there is a column called “Length”.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">colnames</span>(seqdata)</code></pre>
@@ -1134,50 +1157,137 @@ gene_length &lt;-<span class="st"> </span>seqdata$Length[m]
 <span class="kw">head</span>(gene_length)</code></pre>
 <pre><code>## [1] 3634 3130 4203 2433 2847 2241</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Rerun goana with gene length information</span>
-go_length &lt;-<span class="st"> </span><span class="kw">goana</span>(fit.cont,<span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">species=</span><span class="st">&quot;Mm&quot;</span>,<span class="dt">covariate=</span>gene_length)</code></pre>
-<pre><code>## Warning in library(package, lib.loc = lib.loc, character.only = TRUE,
-## logical.return = TRUE, : there is no package called &#39;GO.db&#39;</code></pre>
-<pre><code>## Error in goana.default(de = DEGenes, universe = universe, ...): GO.db package not available</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topGO</span>(go_length, <span class="dt">n=</span><span class="dv">10</span>)</code></pre>
-<pre><code>## Error in is.data.frame(results): object &#39;go_length&#39; not found</code></pre>
+go_length &lt;-<span class="st"> </span><span class="kw">goana</span>(fit.cont,<span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">species=</span><span class="st">&quot;Mm&quot;</span>,<span class="dt">covariate=</span>gene_length)
+<span class="kw">topGO</span>(go_length, <span class="dt">n=</span><span class="dv">10</span>)</code></pre>
+<pre><code>##                                            Term Ont    N  Up Down
+## GO:0044822                  poly(A) RNA binding  MF 1089 403  112
+## GO:0003723                          RNA binding  MF 1408 473  155
+## GO:0030529            ribonucleoprotein complex  CC  625 246   46
+## GO:0022626                   cytosolic ribosome  CC   85  66    1
+## GO:0042254                  ribosome biogenesis  BP  202 110    7
+## GO:0022613 ribonucleoprotein complex biogenesis  BP  309 145   22
+## GO:0003676                 nucleic acid binding  MF 2810 705  425
+## GO:0005840                             ribosome  CC  195  97    5
+## GO:0044391                    ribosomal subunit  CC  138  76    2
+## GO:0006364                      rRNA processing  BP  142  80    2
+##                    P.Up    P.Down
+## GO:0044822 2.274027e-61 1.0000000
+## GO:0003723 3.716227e-58 1.0000000
+## GO:0030529 2.644116e-45 1.0000000
+## GO:0022626 1.780504e-38 0.9999992
+## GO:0042254 4.456874e-36 1.0000000
+## GO:0022613 4.912403e-36 0.9999999
+## GO:0003676 6.406921e-32 0.9999852
+## GO:0005840 1.720275e-30 1.0000000
+## GO:0044391 2.402151e-28 1.0000000
+## GO:0006364 5.785544e-28 1.0000000</code></pre>
 <p>Notes • Users can specify the domain of the enriched GO terms in topGO. For instance, topGO(go,ontology=“BP”) lists the top set of most enriched GO terms that are related to a biological process. This avoids other domains that are not of interest. • The goana function uses the NCBI RefSeq annotation. Therefore, the Entrez Gene identifier (ID) should be supplied for each gene as the row names of the fit object. • Users should set species according to the organism being studied.</p>
 <h3 id="kegg-pathway-analysis-with-kegga">Kegg pathway analysis with kegga</h3>
 <p>The <code>kegga</code> function in <em>limma</em> offers KEGG pathway analysis in a similar way to <code>goana</code>. There are many species that have associated KEGG pathways, see http://www.kegg.jp/kegg/catalog/org_list.html for details. <code>kegga</code> requires an internet connection to run.</p>
-<pre class="sourceCode r"><code class="sourceCode r">kegg &lt;-<span class="st"> </span><span class="kw">kegga</span>(fit.cont, <span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>, <span class="dt">species.KEGG=</span><span class="st">&quot;mmu&quot;</span>)</code></pre>
-<pre><code>## Error in kegga.default(de = DEGenes, universe = universe, ...): KEGGREST required but is not available</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topKEGG</span>(kegg)</code></pre>
-<pre><code>## Error in is.data.frame(results): object &#39;kegg&#39; not found</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">kegg &lt;-<span class="st"> </span><span class="kw">kegga</span>(fit.cont, <span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>, <span class="dt">species.KEGG=</span><span class="st">&quot;mmu&quot;</span>)
+<span class="kw">topKEGG</span>(kegg)</code></pre>
+<pre><code>##                                                   Pathway    N  Up Down
+## path:mmu01100                          Metabolic pathways 1029 233  141
+## path:mmu03010                                    Ribosome  133  84    2
+## path:mmu05012                         Parkinson&#39;s disease  132  60    3
+## path:mmu00190                   Oxidative phosphorylation  123  55    6
+## path:mmu03008           Ribosome biogenesis in eukaryotes   75  43    6
+## path:mmu05010                         Alzheimer&#39;s disease  154  57   19
+## path:mmu05016                        Huntington&#39;s disease  173  60   19
+## path:mmu05200                          Pathways in cancer  350  73   69
+## path:mmu03013                               RNA transport  151  52    8
+## path:mmu04144                                 Endocytosis  258  33   58
+## path:mmu04932   Non-alcoholic fatty liver disease (NAFLD)  140  49   19
+## path:mmu04151                  PI3K-Akt signaling pathway  289  56   61
+## path:mmu04360                               Axon guidance  160  19   45
+## path:mmu04921                  Oxytocin signaling pathway  134  16   41
+## path:mmu04010                      MAPK signaling pathway  221  32   51
+## path:mmu04070       Phosphatidylinositol signaling system   93   8   34
+## path:mmu03040                                 Spliceosome  128  44   10
+## path:mmu04810            Regulation of actin cytoskeleton  184  27   46
+## path:mmu04141 Protein processing in endoplasmic reticulum  160  48   22
+## path:mmu00240                       Pyrimidine metabolism   96  37    9
+##                       P.Up       P.Down
+## path:mmu01100 1.272681e-82 4.243390e-38
+## path:mmu03010 7.535922e-72 9.748160e-01
+## path:mmu05012 4.077555e-40 9.113996e-01
+## path:mmu00190 2.157792e-36 3.918972e-01
+## path:mmu03008 1.174023e-34 8.706645e-02
+## path:mmu05010 2.641037e-32 1.849157e-05
+## path:mmu05016 4.163991e-32 9.283830e-05
+## path:mmu05200 2.887747e-23 4.147251e-28
+## path:mmu03013 8.215507e-28 2.799837e-01
+## path:mmu04144 6.474264e-06 7.043391e-27
+## path:mmu04932 1.198814e-26 4.587326e-06
+## path:mmu04151 1.321670e-16 1.238849e-26
+## path:mmu04360 1.390872e-03 1.848705e-25
+## path:mmu04921 3.029041e-03 7.114558e-25
+## path:mmu04010 5.975490e-07 2.527794e-24
+## path:mmu04070 1.428083e-01 1.012092e-23
+## path:mmu03040 1.083311e-23 3.789407e-02
+## path:mmu04810 3.431642e-06 1.280790e-23
+## path:mmu04141 8.592637e-23 6.609825e-07
+## path:mmu00240 3.898539e-22 1.698380e-02</code></pre>
 <p><span style="color:blue">Exercise: Run <code>kegga</code> with gene length information (this will only work if you are using the latest version of R with the latest version of limma as there was a bug in the code.)</span></p>
 <h3 id="camera-gene-set-testing-using-the-broads-curated-gene-sets">CAMERA gene set testing using the Broad’s curated gene sets</h3>
 <p>Other databases of gene sets that are available come from the Broad Institute’s Molecular Signatures Database (MSigDB). CAMERA is good option for testing a very large number of gene sets such as the MSigDB sets, as it is very fast. CAMERA is known as a competitive gene set test, however it has the advantage that it can take into account inter-gene correlation within each gene set. It also works seemlessly with a <code>voom</code> object, taking into account the mean-variance relationship in RNA-Seq data.</p>
 <p>Here we will be using the C2 gene sets for mouse, available as .rdata files from the WEHI bioinformatics page (http://bioinf.wehi.edu.au/software/MSigDB/index.html). The C2 gene sets contain 4725 curated gene sets collected from a variety of places: BioCarta, KEGG, Pathway Interaction Database, Reactome as well as some published studies.It doesn’t include GO terms.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Load in the mouse c2 gene sets</span>
 <span class="co"># The R object is called Mm.c2</span>
-<span class="kw">load</span>(<span class="st">&quot;D:/mouse_c2_v5.rdata&quot;</span>)</code></pre>
-<pre><code>## Warning in readChar(con, 5L, useBytes = TRUE): cannot open compressed file
-## &#39;D:/mouse_c2_v5.rdata&#39;, probable reason &#39;No such file or directory&#39;</code></pre>
-<pre><code>## Error in readChar(con, 5L, useBytes = TRUE): cannot open the connection</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Have a look at the first few gene sets</span>
+<span class="kw">load</span>(<span class="st">&quot;data/mouse_c2_v5.rdata&quot;</span>)
+<span class="co"># Have a look at the first few gene sets</span>
 <span class="kw">names</span>(Mm.c2)[<span class="dv">1</span>:<span class="dv">5</span>]</code></pre>
-<pre><code>## Error in eval(expr, envir, enclos): object &#39;Mm.c2&#39; not found</code></pre>
+<pre><code>## [1] &quot;KEGG_GLYCOLYSIS_GLUCONEOGENESIS&quot;              
+## [2] &quot;KEGG_CITRATE_CYCLE_TCA_CYCLE&quot;                 
+## [3] &quot;KEGG_PENTOSE_PHOSPHATE_PATHWAY&quot;               
+## [4] &quot;KEGG_PENTOSE_AND_GLUCURONATE_INTERCONVERSIONS&quot;
+## [5] &quot;KEGG_FRUCTOSE_AND_MANNOSE_METABOLISM&quot;</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Number of gene sets in C2</span>
 <span class="kw">length</span>(Mm.c2)</code></pre>
-<pre><code>## Error in eval(expr, envir, enclos): object &#39;Mm.c2&#39; not found</code></pre>
+<pre><code>## [1] 4725</code></pre>
 <p>The gene identifiers are Entrez Gene ID, which is the same as the rownames of our voom object. We need to map the Entrez gene ids between the list of gene sets and our voom object. We can do this using the <code>ids2indices</code> function.</p>
 <pre class="sourceCode r"><code class="sourceCode r">c2.ind &lt;-<span class="st"> </span><span class="kw">ids2indices</span>(Mm.c2, <span class="kw">rownames</span>(v))</code></pre>
-<pre><code>## Error in ids2indices(Mm.c2, rownames(v)): object &#39;Mm.c2&#39; not found</code></pre>
 <p>CAMERA takes as input the voom object <code>v</code>, the indexed list of gene sets <code>c2.ind</code>, the design matrix, the contrast being tested, as well as some other arguments. By default, CAMERA can estimate the correlation for each gene set separately. However, in practise, it works well to set a small inter-gene correlation of about 0.05 using the <code>inter.gene.cor</code> argument.</p>
 <pre class="sourceCode r"><code class="sourceCode r">gst.camera &lt;-<span class="st"> </span><span class="kw">camera</span>(v,<span class="dt">index=</span>c2.ind,<span class="dt">design=</span>design,<span class="dt">contrast =</span> cont.matrix[,<span class="dv">1</span>],<span class="dt">inter.gene.cor=</span><span class="fl">0.05</span>)</code></pre>
-<pre><code>## Error in camera.default(v, index = c2.ind, design = design, contrast = cont.matrix[, : object &#39;c2.ind&#39; not found</code></pre>
 <p>CAMERA outputs a dataframe of the resulting statistics, with each row denoting a different gene set. The output is ordered by p-value so that the most significant should be at the top. Let’s look at the top 5 gene sets:</p>
 <pre class="sourceCode r"><code class="sourceCode r">gst.camera[<span class="dv">1</span>:<span class="dv">5</span>,]</code></pre>
-<pre><code>## Error in eval(expr, envir, enclos): object &#39;gst.camera&#39; not found</code></pre>
+<pre><code>##                                                                            NGenes
+## REACTOME_PEPTIDE_CHAIN_ELONGATION                                              81
+## KEGG_RIBOSOME                                                                  83
+## REACTOME_3_UTR_MEDIATED_TRANSLATIONAL_REGULATION                              102
+## REACTOME_FORMATION_OF_THE_TERNARY_COMPLEX_AND_SUBSEQUENTLY_THE_43S_COMPLEX     48
+## REACTOME_SRP_DEPENDENT_COTRANSLATIONAL_PROTEIN_TARGETING_TO_MEMBRANE          108
+##                                                                            Correlation
+## REACTOME_PEPTIDE_CHAIN_ELONGATION                                                 0.05
+## KEGG_RIBOSOME                                                                     0.05
+## REACTOME_3_UTR_MEDIATED_TRANSLATIONAL_REGULATION                                  0.05
+## REACTOME_FORMATION_OF_THE_TERNARY_COMPLEX_AND_SUBSEQUENTLY_THE_43S_COMPLEX        0.05
+## REACTOME_SRP_DEPENDENT_COTRANSLATIONAL_PROTEIN_TARGETING_TO_MEMBRANE              0.05
+##                                                                            Direction
+## REACTOME_PEPTIDE_CHAIN_ELONGATION                                                 Up
+## KEGG_RIBOSOME                                                                     Up
+## REACTOME_3_UTR_MEDIATED_TRANSLATIONAL_REGULATION                                  Up
+## REACTOME_FORMATION_OF_THE_TERNARY_COMPLEX_AND_SUBSEQUENTLY_THE_43S_COMPLEX        Up
+## REACTOME_SRP_DEPENDENT_COTRANSLATIONAL_PROTEIN_TARGETING_TO_MEMBRANE              Up
+##                                                                                  PValue
+## REACTOME_PEPTIDE_CHAIN_ELONGATION                                          3.711614e-10
+## KEGG_RIBOSOME                                                              4.242401e-10
+## REACTOME_3_UTR_MEDIATED_TRANSLATIONAL_REGULATION                           1.484636e-09
+## REACTOME_FORMATION_OF_THE_TERNARY_COMPLEX_AND_SUBSEQUENTLY_THE_43S_COMPLEX 1.477539e-08
+## REACTOME_SRP_DEPENDENT_COTRANSLATIONAL_PROTEIN_TARGETING_TO_MEMBRANE       1.716413e-08
+##                                                                                     FDR
+## REACTOME_PEPTIDE_CHAIN_ELONGATION                                          1.001631e-06
+## KEGG_RIBOSOME                                                              1.001631e-06
+## REACTOME_3_UTR_MEDIATED_TRANSLATIONAL_REGULATION                           2.336816e-06
+## REACTOME_FORMATION_OF_THE_TERNARY_COMPLEX_AND_SUBSEQUENTLY_THE_43S_COMPLEX 1.620981e-05
+## REACTOME_SRP_DEPENDENT_COTRANSLATIONAL_PROTEIN_TARGETING_TO_MEMBRANE       1.620981e-05</code></pre>
 <p>The total number of significant gene sets at 5% FDR is</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(gst.camera$FDR &lt;<span class="st"> </span><span class="fl">0.05</span>)</code></pre>
-<pre><code>## Error in eval(expr, envir, enclos): object &#39;gst.camera&#39; not found</code></pre>
+<pre><code>## 
+## FALSE  TRUE 
+##  4593   129</code></pre>
 <p>You can write out the camera results to a csv file to open in excel.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">write.csv</span>(gst.camera,<span class="dt">file=</span><span class="st">&quot;gst_BPregVsLac.csv&quot;</span>)</code></pre>
-<pre><code>## Error in is.data.frame(x): object &#39;gst.camera&#39; not found</code></pre>
 <p><span style="color:blue">Exercise: (1) Run <code>camera</code> on the second contrast in the contrast matrix. (2) Run <code>camera</code> on a different set of MSigDB gene sets, the hallmark datasets, <code>mouse_H_v5.rdata</code>. You will need to load in the hallmark gene sets.</span></p>
 <h3 id="roast-gene-set-testing">ROAST gene set testing</h3>
 <p>ROAST is an example of a self-contained gene set test. It asks the question, “Do the genes in my set tend to be differentially expressed between my conditions of interest?”. ROAST doesn’t care about what the other genes in the experiment are doing, which is different to CAMERA, <code>goana</code> and <code>kegga</code>. ROAST is a good option for when you’re interested in a specific set, or a few sets. It is not really used to test thousands of sets at one time.</p>
@@ -1207,18 +1317,78 @@ go_length &lt;-<span class="st"> </span><span class="kw">goana</span>(fit.cont,<
 ## 14620   3.600094 3.525281  16.46627 1.113755e-09 1.718703e-06 12.54071</code></pre>
 <p>The top genes is Wnt inhibitory factor 1. Let’s see if there are any WNT signalling pathways in MsigDB C2 collection. We can do this with the <code>grep</code> command on the names of the gene sets.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">grep</span>(<span class="st">&quot;WNT&quot;</span>,<span class="kw">names</span>(c2.ind))</code></pre>
-<pre><code>## Error in grep(&quot;WNT&quot;, names(c2.ind)): object &#39;c2.ind&#39; not found</code></pre>
+<pre><code>##  [1]  106  402  405  421  441  467  504  513  666 2642 3403 3671 3672 3675
+## [15] 3676</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s save these so that we can subset c2.ind to test all gene sets with WNT in the name</span>
-wnt &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="st">&quot;WNT&quot;</span>,<span class="kw">names</span>(c2.ind))</code></pre>
-<pre><code>## Error in grep(&quot;WNT&quot;, names(c2.ind)): object &#39;c2.ind&#39; not found</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># What are these pathways called?</span>
+wnt &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="st">&quot;WNT&quot;</span>,<span class="kw">names</span>(c2.ind))
+<span class="co"># What are these pathways called?</span>
 <span class="kw">names</span>(c2.ind)[wnt]</code></pre>
-<pre><code>## Error in eval(expr, envir, enclos): object &#39;c2.ind&#39; not found</code></pre>
+<pre><code>##  [1] &quot;KEGG_WNT_SIGNALING_PATHWAY&quot;         
+##  [2] &quot;BIOCARTA_WNT_PATHWAY&quot;               
+##  [3] &quot;ST_WNT_CA2_CYCLIC_GMP_PATHWAY&quot;      
+##  [4] &quot;WNT_SIGNALING&quot;                      
+##  [5] &quot;ST_WNT_BETA_CATENIN_PATHWAY&quot;        
+##  [6] &quot;PID_WNT_NONCANONICAL_PATHWAY&quot;       
+##  [7] &quot;PID_WNT_SIGNALING_PATHWAY&quot;          
+##  [8] &quot;PID_WNT_CANONICAL_PATHWAY&quot;          
+##  [9] &quot;REACTOME_SIGNALING_BY_WNT&quot;          
+## [10] &quot;WILLERT_WNT_SIGNALING&quot;              
+## [11] &quot;SANSOM_WNT_PATHWAY_REQUIRE_MYC&quot;     
+## [12] &quot;LABBE_WNT3A_TARGETS_UP&quot;             
+## [13] &quot;LABBE_WNT3A_TARGETS_DN&quot;             
+## [14] &quot;LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP&quot;
+## [15] &quot;LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN&quot;</code></pre>
 <p>Let’s use ROAST to see if these WNT related gene sets tend to be differentially expressed. Note that the syntax for <code>camera</code> and <code>roast</code> is almost identical.</p>
-<pre class="sourceCode r"><code class="sourceCode r">wnt.rst &lt;-<span class="st"> </span><span class="kw">roast</span>(v,<span class="dt">index=</span>c2.ind[wnt],<span class="dt">design=</span>design,<span class="dt">contrast=</span>cont.matrix[,<span class="dv">1</span>],<span class="dt">nrot=</span><span class="dv">9999</span>)</code></pre>
-<pre><code>## Error in roast.default(v, index = c2.ind[wnt], design = design, contrast = cont.matrix[, : object &#39;c2.ind&#39; not found</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">wnt.rst</code></pre>
-<pre><code>## Error in eval(expr, envir, enclos): object &#39;wnt.rst&#39; not found</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">wnt.rst &lt;-<span class="st"> </span><span class="kw">roast</span>(v,<span class="dt">index=</span>c2.ind[wnt],<span class="dt">design=</span>design,<span class="dt">contrast=</span>cont.matrix[,<span class="dv">1</span>],<span class="dt">nrot=</span><span class="dv">9999</span>)
+wnt.rst</code></pre>
+<pre><code>##                                     NGenes  PropDown     PropUp Direction
+## WILLERT_WNT_SIGNALING                   22 0.2272727 0.54545455        Up
+## PID_WNT_NONCANONICAL_PATHWAY            31 0.4516129 0.09677419      Down
+## LABBE_WNT3A_TARGETS_UP                 104 0.2307692 0.49038462        Up
+## SANSOM_WNT_PATHWAY_REQUIRE_MYC          53 0.1886792 0.45283019        Up
+## REACTOME_SIGNALING_BY_WNT               62 0.1290323 0.50000000        Up
+## PID_WNT_CANONICAL_PATHWAY               19 0.4736842 0.21052632      Down
+## BIOCARTA_WNT_PATHWAY                    24 0.2500000 0.33333333        Up
+## ST_WNT_BETA_CATENIN_PATHWAY             32 0.3125000 0.34375000        Up
+## KEGG_WNT_SIGNALING_PATHWAY             131 0.3740458 0.25190840      Down
+## LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP    100 0.3400000 0.38000000        Up
+## PID_WNT_SIGNALING_PATHWAY               23 0.3043478 0.30434783        Up
+## LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN     90 0.2555556 0.40000000        Up
+## ST_WNT_CA2_CYCLIC_GMP_PATHWAY           14 0.2857143 0.35714286        Up
+## LABBE_WNT3A_TARGETS_DN                  65 0.2615385 0.27692308        Up
+## WNT_SIGNALING                           75 0.3600000 0.30666667      Down
+##                                     PValue       FDR PValue.Mixed
+## WILLERT_WNT_SIGNALING               0.0001 0.0007500       0.0003
+## PID_WNT_NONCANONICAL_PATHWAY        0.0002 0.0011250       0.0007
+## LABBE_WNT3A_TARGETS_UP              0.0003 0.0012500       0.0006
+## SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0023 0.0084375       0.0001
+## REACTOME_SIGNALING_BY_WNT           0.0153 0.0421250       0.0029
+## PID_WNT_CANONICAL_PATHWAY           0.0169 0.0421250       0.0003
+## BIOCARTA_WNT_PATHWAY                0.0447 0.0817500       0.0002
+## ST_WNT_BETA_CATENIN_PATHWAY         0.0468 0.0817500       0.0002
+## KEGG_WNT_SIGNALING_PATHWAY          0.0491 0.0817500       0.0001
+## LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0600 0.0899250       0.0002
+## PID_WNT_SIGNALING_PATHWAY           0.0919 0.1252500       0.0002
+## LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.1595 0.1993125       0.0001
+## ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.2645 0.3051346       0.0005
+## LABBE_WNT3A_TARGETS_DN              0.5103 0.5466964       0.0001
+## WNT_SIGNALING                       0.8831 0.8831000       0.0001
+##                                        FDR.Mixed
+## WILLERT_WNT_SIGNALING               0.0003409091
+## PID_WNT_NONCANONICAL_PATHWAY        0.0007000000
+## LABBE_WNT3A_TARGETS_UP              0.0006346154
+## SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0001500000
+## REACTOME_SIGNALING_BY_WNT           0.0029000000
+## PID_WNT_CANONICAL_PATHWAY           0.0003409091
+## BIOCARTA_WNT_PATHWAY                0.0002500000
+## ST_WNT_BETA_CATENIN_PATHWAY         0.0002500000
+## KEGG_WNT_SIGNALING_PATHWAY          0.0001500000
+## LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0002500000
+## PID_WNT_SIGNALING_PATHWAY           0.0002500000
+## LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.0001500000
+## ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.0005625000
+## LABBE_WNT3A_TARGETS_DN              0.0001500000
+## WNT_SIGNALING                       0.0001500000</code></pre>
 <p>Each row corresponds to a single gene set. The NGenes column gives the number of genes in each set. The PropDown and PropUp columns contain the proportions of genes in the set that are down- and up-regulated, respectively, with absolute fold changes greater than √ 2. The net direction of change is determined from the significance of changes in each direction, and is shown in the Direction column. The PValue provides evidence for whether the majority of genes in the set are DE in the specified direction, whereas the PValue.Mixed tests for differential expression in any direction. FDRs are computed from the corresponding p-values across all sets.</p>
 <p><span style="color:blue">Exercise: (1) test whether the wnt signalling pathways tend to be differentially expressed between luminal pregnant vs lactating (the second contrast) (2) Look for gene sets containing “MYC” in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.</span></p>
 <p>Notes • A common application of ROAST is to use a set of DE genes that was defined from an analysis of an independent data set. ROAST can then determine whether similar changes are observed in the contrast of interest for the current data set. • Even for GO-defined gene sets, goana and ROAST have different behaviours. In goana, the significance of differential expression for a GO term is determined relative to other DE genes that are not annotated with that term. In ROAST, only differential expression for the genes in the set are relevant to the significance of that set and its corresponding term. goana depends on a significance cutoff to choose DE genes, whereas ROAST does not require a cutoff and evaluates all genes in the set. • ROAST estimates p-values by simulation, so the results may change slightly between runs. More precise p-values can be obtained by increasing the number of rotations, albeit at the cost of increased computational time. • The smallest p-value that can be reported is 1/(2 · nrot + 1) where nrot is the number of rotations. This lower bound can be decreased by increasing nrot.</p>
@@ -1255,11 +1425,13 @@ wnt &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="st">
 ##   58175    1.5788218</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
 <span class="co"># barcode plot with logFCs</span>
-<span class="kw">barcodeplot</span>(fit.cont$coeff[,<span class="dv">1</span>], <span class="dt">index=</span>c2.ind[[<span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>]], <span class="dt">main=</span><span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>)</code></pre>
-<pre><code>## Error in barcodeplot(fit.cont$coeff[, 1], index = c2.ind[[&quot;MENSSEN_MYC_TARGETS&quot;]], : object &#39;c2.ind&#39; not found</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># barcode plot using t-statistics</span>
+<span class="kw">barcodeplot</span>(fit.cont$coeff[,<span class="dv">1</span>], <span class="dt">index=</span>c2.ind[[<span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>]], <span class="dt">main=</span><span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>)
+<span class="co"># barcode plot using t-statistics</span>
 <span class="kw">barcodeplot</span>(fit.cont$t[,<span class="dv">1</span>], <span class="dt">index=</span>c2.ind[[<span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>]], <span class="dt">main=</span><span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>)</code></pre>
-<pre><code>## Error in barcodeplot(fit.cont$t[, 1], index = c2.ind[[&quot;MENSSEN_MYC_TARGETS&quot;]], : object &#39;c2.ind&#39; not found</code></pre>
+<div class="figure">
+<img src="figure/unnamed-chunk-73-1.png" alt="plot of chunk unnamed-chunk-73" />
+<p class="caption">plot of chunk unnamed-chunk-73</p>
+</div>
 <p>Generate plot and discuss.</p>
 <p>Here, genes are represented by bars and are ranked from left to right by decreasing log-fold change or t-statistic. This forms the barcode-like pattern. The line above the barcode shows the relative local enrichment of the vertical bars in each part of the plot. The barcodeplot shows that the genes in this gene set tend to be up-regulated between pregnant and lactating in basal cells.</p>
 <p><span style="color:blue">Exercise: (1) Produce a barcodeplot for luminal pregnant vs lactating for this gene set. Does the pattern of enrichment look as strong? (2) Choose one of the wnt signalling pathways and produce a barcode plot for both comparisons.(3) You can put two gene sets on one plot, for example a set that is up-regulated and one that is down-regulated, by adding a gene set to the <code>index2</code> argument. Produce a barcodeplot with two sets of your choosing.</span></p>
@@ -1278,30 +1450,40 @@ wnt &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="st">
 ## [8] datasets  base     
 ## 
 ## other attached packages:
-##  [1] RColorBrewer_1.1-2      org.Mm.eg.db_3.1.2     
-##  [3] RSQLite_1.0.0           DBI_0.3.1              
-##  [5] AnnotationDbi_1.30.1    gplots_3.0.1           
-##  [7] EDASeq_2.2.0            ShortRead_1.26.0       
-##  [9] GenomicAlignments_1.4.2 Rsamtools_1.20.5       
-## [11] GenomicRanges_1.20.8    GenomeInfoDb_1.4.3     
-## [13] Biostrings_2.36.4       XVector_0.8.0          
-## [15] IRanges_2.2.9           S4Vectors_0.6.6        
-## [17] BiocParallel_1.2.22     Biobase_2.28.0         
-## [19] BiocGenerics_0.14.0     edgeR_3.10.5           
-## [21] limma_3.24.15          
+##  [1] GO.db_3.2.2                RColorBrewer_1.1-2        
+##  [3] org.Mm.eg.db_3.2.3         RSQLite_1.0.0             
+##  [5] DBI_0.3.1                  AnnotationDbi_1.32.3      
+##  [7] gplots_3.0.1               EDASeq_2.4.1              
+##  [9] ShortRead_1.28.0           GenomicAlignments_1.6.3   
+## [11] SummarizedExperiment_1.0.2 Rsamtools_1.22.0          
+## [13] GenomicRanges_1.22.4       GenomeInfoDb_1.6.3        
+## [15] Biostrings_2.38.4          XVector_0.10.0            
+## [17] IRanges_2.4.8              S4Vectors_0.8.11          
+## [19] BiocParallel_1.4.3         Biobase_2.30.0            
+## [21] BiocGenerics_0.16.1        edgeR_3.12.1              
+## [23] limma_3.26.9              
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] formatR_1.2.1        futile.logger_1.4.1  R.methodsS3_1.7.1   
-##  [4] bitops_1.0-6         futile.options_1.0.0 R.utils_2.3.0       
-##  [7] tools_3.2.4          zlibbioc_1.14.0      annotate_1.46.1     
-## [10] evaluate_0.8         lattice_0.20-33      DESeq_1.20.0        
-## [13] genefilter_1.50.0    hwriter_1.3.2        stringr_1.0.0       
-## [16] knitr_1.11           caTools_1.17.1       gtools_3.5.0        
-## [19] aroma.light_2.4.0    grid_3.2.4           XML_3.98-1.3        
-## [22] survival_2.38-3      gdata_2.17.0         latticeExtra_0.6-28 
-## [25] geneplotter_1.46.0   lambda.r_1.1.7       magrittr_1.5        
-## [28] splines_3.2.4        matrixStats_0.50.2   xtable_1.8-2        
-## [31] KernSmooth_2.23-15   stringi_0.5-5        R.oo_1.20.0</code></pre>
+##  [1] formatR_1.3             futile.logger_1.4.1    
+##  [3] GenomicFeatures_1.22.13 R.methodsS3_1.7.1      
+##  [5] bitops_1.0-6            futile.options_1.0.0   
+##  [7] R.utils_2.3.0           tools_3.2.4            
+##  [9] zlibbioc_1.16.0         biomaRt_2.26.1         
+## [11] annotate_1.48.0         evaluate_0.8.3         
+## [13] lattice_0.20-33         Matrix_1.2-5           
+## [15] DESeq_1.22.1            rtracklayer_1.30.4     
+## [17] genefilter_1.52.1       stringr_1.0.0          
+## [19] hwriter_1.3.2           knitr_1.12.3           
+## [21] caTools_1.17.1          gtools_3.5.0           
+## [23] aroma.light_3.0.0       grid_3.2.4             
+## [25] survival_2.39-2         XML_3.98-1.4           
+## [27] BiasedUrn_1.07          gdata_2.17.0           
+## [29] latticeExtra_0.6-28     geneplotter_1.48.0     
+## [31] lambda.r_1.1.7          magrittr_1.5           
+## [33] splines_3.2.4           matrixStats_0.50.2     
+## [35] xtable_1.8-2            KernSmooth_2.23-15     
+## [37] stringi_1.0-1           RCurl_1.95-4.8         
+## [39] R.oo_1.20.0</code></pre>
         </div>
       </div>
       </article>
