@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="generator" content="pandoc">
-    <title>Software Carpentry: R for reproducible scientific analysis</title>
+    <title>R for reproducible scientific analysis</title>
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
@@ -18,11 +18,7 @@
   </head>
   <body class="lesson">
     <div class="container card">
-      <div class="banner">
-        <a href="http://software-carpentry.org" title="Software Carpentry">
-          <img alt="Software Carpentry banner" src="img/software-carpentry-banner.png" />
-        </a>
-      </div>
+      
       <article>
       <div class="row">
         <div class="col-md-10 col-md-offset-1">
@@ -71,24 +67,28 @@
 <p class="caption">Countries and colors</p>
 </div>
 <h2 id="dyplr-gives-us">dyplr gives us …</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)
 cors &lt;-<span class="st"> </span>gapminder %&gt;%
 <span class="st">  </span><span class="kw">group_by</span>(year) %&gt;%
 <span class="st">  </span><span class="kw">summarise</span>(
     <span class="dt">gdpPercap.lifeExp =</span> <span class="kw">cor</span>(gdpPercap, lifeExp),
     <span class="dt">gdpPercap.pop =</span> <span class="kw">cor</span>(gdpPercap, pop),
-    <span class="dt">pop.lifeExp =</span> <span class="kw">cor</span>(pop, lifeExp))</code></pre></div>
+    <span class="dt">pop.lifeExp =</span> <span class="kw">cor</span>(pop, lifeExp))</code></pre>
 <h2 id="pairwise-correlations">… pairwise correlations</h2>
 <pre><code>head(cors, 1)
 Source: local data frame [1 x 4]
 year gdpPercap.lifeExp gdpPercap.pop  pop.lifeExp
 1 1952         0.2780236   -0.02526041 -0.002724782</code></pre>
 <h2 id="restructuring-the-table">Restructuring the table …</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(tidyr)
-tidy.cors &lt;-<span class="st"> </span>cors %&gt;%<span class="st"> </span><span class="kw">gather</span>(
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(tidyr)</code></pre>
+<pre class="error"><code>Error in library(tidyr): there is no package called &#39;tidyr&#39;
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">tidy.cors &lt;-<span class="st"> </span>cors %&gt;%<span class="st"> </span><span class="kw">gather</span>(
   variables, correlation,
   gdpPercap.lifeExp, gdpPercap.pop,
-  pop.lifeExp)</code></pre></div>
+  pop.lifeExp)</code></pre>
+<pre class="error"><code>Error in function_list[[k]](value): could not find function &quot;gather&quot;
+</code></pre>
 <h2 id="a-subtle-art">… a subtle art …</h2>
 <pre><code>head(tidy.cors, 1)
 
@@ -103,15 +103,11 @@ Source: local data frame [1 x 3]
         </div>
       </div>
       </article>
-      <div class="footer">
-        <a class="label swc-blue-bg" href="http://software-carpentry.org">Software Carpentry</a>
-        <a class="label swc-blue-bg" href="https://github.com/swcarpentry/lesson-template">Source</a>
-        <a class="label swc-blue-bg" href="mailto:admin@software-carpentry.org">Contact</a>
-        <a class="label swc-blue-bg" href="LICENSE.html">License</a>
-      </div>
+      
     </div>
     <!-- Javascript placed at the end of the document so the pages load faster -->
     <script src="http://software-carpentry.org/v5/js/jquery-1.9.1.min.js"></script>
     <script src="css/bootstrap/bootstrap-js/bootstrap.js"></script>
+    <script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
   </body>
 </html>

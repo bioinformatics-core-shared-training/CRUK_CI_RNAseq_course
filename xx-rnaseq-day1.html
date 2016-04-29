@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="generator" content="pandoc">
-    <title>Software Carpentry: </title>
+    <title></title>
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
@@ -18,11 +18,7 @@
   </head>
   <body class="lesson">
     <div class="container card">
-      <div class="banner">
-        <a href="http://software-carpentry.org" title="Software Carpentry">
-          <img alt="Software Carpentry banner" src="img/software-carpentry-banner.png" />
-        </a>
-      </div>
+      
       <article>
       <div class="row">
         <div class="col-md-10 col-md-offset-1">
@@ -1342,15 +1338,15 @@ wnt &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="st">
 <pre class="sourceCode r"><code class="sourceCode r">wnt.rst &lt;-<span class="st"> </span><span class="kw">roast</span>(v,<span class="dt">index=</span>c2.ind[wnt],<span class="dt">design=</span>design,<span class="dt">contrast=</span>cont.matrix[,<span class="dv">1</span>],<span class="dt">nrot=</span><span class="dv">9999</span>)
 wnt.rst</code></pre>
 <pre><code>##                                     NGenes  PropDown     PropUp Direction
-## WILLERT_WNT_SIGNALING                   22 0.2272727 0.54545455        Up
-## PID_WNT_NONCANONICAL_PATHWAY            31 0.4516129 0.09677419      Down
 ## LABBE_WNT3A_TARGETS_UP                 104 0.2307692 0.49038462        Up
+## PID_WNT_NONCANONICAL_PATHWAY            31 0.4516129 0.09677419      Down
+## WILLERT_WNT_SIGNALING                   22 0.2272727 0.54545455        Up
 ## SANSOM_WNT_PATHWAY_REQUIRE_MYC          53 0.1886792 0.45283019        Up
 ## REACTOME_SIGNALING_BY_WNT               62 0.1290323 0.50000000        Up
 ## PID_WNT_CANONICAL_PATHWAY               19 0.4736842 0.21052632      Down
 ## BIOCARTA_WNT_PATHWAY                    24 0.2500000 0.33333333        Up
-## ST_WNT_BETA_CATENIN_PATHWAY             32 0.3125000 0.34375000        Up
 ## KEGG_WNT_SIGNALING_PATHWAY             131 0.3740458 0.25190840      Down
+## ST_WNT_BETA_CATENIN_PATHWAY             32 0.3125000 0.34375000        Up
 ## LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP    100 0.3400000 0.38000000        Up
 ## PID_WNT_SIGNALING_PATHWAY               23 0.3043478 0.30434783        Up
 ## LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN     90 0.2555556 0.40000000        Up
@@ -1358,36 +1354,36 @@ wnt.rst</code></pre>
 ## LABBE_WNT3A_TARGETS_DN                  65 0.2615385 0.27692308        Up
 ## WNT_SIGNALING                           75 0.3600000 0.30666667      Down
 ##                                     PValue       FDR PValue.Mixed
-## WILLERT_WNT_SIGNALING               0.0001 0.0007500       0.0003
-## PID_WNT_NONCANONICAL_PATHWAY        0.0002 0.0011250       0.0007
-## LABBE_WNT3A_TARGETS_UP              0.0003 0.0012500       0.0006
-## SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0023 0.0084375       0.0001
-## REACTOME_SIGNALING_BY_WNT           0.0153 0.0421250       0.0029
-## PID_WNT_CANONICAL_PATHWAY           0.0169 0.0421250       0.0003
-## BIOCARTA_WNT_PATHWAY                0.0447 0.0817500       0.0002
-## ST_WNT_BETA_CATENIN_PATHWAY         0.0468 0.0817500       0.0002
-## KEGG_WNT_SIGNALING_PATHWAY          0.0491 0.0817500       0.0001
-## LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0600 0.0899250       0.0002
-## PID_WNT_SIGNALING_PATHWAY           0.0919 0.1252500       0.0002
-## LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.1595 0.1993125       0.0001
-## ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.2645 0.3051346       0.0005
-## LABBE_WNT3A_TARGETS_DN              0.5103 0.5466964       0.0001
-## WNT_SIGNALING                       0.8831 0.8831000       0.0001
+## LABBE_WNT3A_TARGETS_UP              0.0001 0.0003750        5e-04
+## PID_WNT_NONCANONICAL_PATHWAY        0.0001 0.0003750        3e-04
+## WILLERT_WNT_SIGNALING               0.0003 0.0012500        5e-04
+## SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0020 0.0073125        1e-04
+## REACTOME_SIGNALING_BY_WNT           0.0137 0.0366250        2e-03
+## PID_WNT_CANONICAL_PATHWAY           0.0147 0.0366250        3e-04
+## BIOCARTA_WNT_PATHWAY                0.0413 0.0877500        1e-04
+## KEGG_WNT_SIGNALING_PATHWAY          0.0477 0.0877500        1e-04
+## ST_WNT_BETA_CATENIN_PATHWAY         0.0527 0.0877500        2e-04
+## LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0601 0.0900750        2e-04
+## PID_WNT_SIGNALING_PATHWAY           0.0970 0.1322045        2e-04
+## LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.1607 0.2008125        1e-04
+## ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.2601 0.3000577        4e-04
+## LABBE_WNT3A_TARGETS_DN              0.5030 0.5388750        3e-04
+## WNT_SIGNALING                       0.8812 0.8812000        1e-04
 ##                                        FDR.Mixed
-## WILLERT_WNT_SIGNALING               0.0003409091
-## PID_WNT_NONCANONICAL_PATHWAY        0.0007000000
-## LABBE_WNT3A_TARGETS_UP              0.0006346154
+## LABBE_WNT3A_TARGETS_UP              0.0005000000
+## PID_WNT_NONCANONICAL_PATHWAY        0.0003409091
+## WILLERT_WNT_SIGNALING               0.0005000000
 ## SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0001500000
-## REACTOME_SIGNALING_BY_WNT           0.0029000000
+## REACTOME_SIGNALING_BY_WNT           0.0020000000
 ## PID_WNT_CANONICAL_PATHWAY           0.0003409091
-## BIOCARTA_WNT_PATHWAY                0.0002500000
-## ST_WNT_BETA_CATENIN_PATHWAY         0.0002500000
+## BIOCARTA_WNT_PATHWAY                0.0001500000
 ## KEGG_WNT_SIGNALING_PATHWAY          0.0001500000
-## LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0002500000
-## PID_WNT_SIGNALING_PATHWAY           0.0002500000
+## ST_WNT_BETA_CATENIN_PATHWAY         0.0002812500
+## LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0002812500
+## PID_WNT_SIGNALING_PATHWAY           0.0002812500
 ## LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.0001500000
-## ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.0005625000
-## LABBE_WNT3A_TARGETS_DN              0.0001500000
+## ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.0004375000
+## LABBE_WNT3A_TARGETS_DN              0.0003409091
 ## WNT_SIGNALING                       0.0001500000</code></pre>
 <p>Each row corresponds to a single gene set. The NGenes column gives the number of genes in each set. The PropDown and PropUp columns contain the proportions of genes in the set that are down- and up-regulated, respectively, with absolute fold changes greater than √ 2. The net direction of change is determined from the significance of changes in each direction, and is shown in the Direction column. The PValue provides evidence for whether the majority of genes in the set are DE in the specified direction, whereas the PValue.Mixed tests for differential expression in any direction. FDRs are computed from the corresponding p-values across all sets.</p>
 <p><span style="color:blue">Exercise: (1) test whether the wnt signalling pathways tend to be differentially expressed between luminal pregnant vs lactating (the second contrast) (2) Look for gene sets containing “MYC” in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.</span></p>
@@ -1487,12 +1483,7 @@ wnt.rst</code></pre>
         </div>
       </div>
       </article>
-      <div class="footer">
-        <a class="label swc-blue-bg" href="http://software-carpentry.org">Software Carpentry</a>
-        <a class="label swc-blue-bg" href="https://github.com/swcarpentry/lesson-template">Source</a>
-        <a class="label swc-blue-bg" href="mailto:admin@software-carpentry.org">Contact</a>
-        <a class="label swc-blue-bg" href="LICENSE.html">License</a>
-      </div>
+      
     </div>
     <!-- Javascript placed at the end of the document so the pages load faster -->
     <script src="http://software-carpentry.org/v5/js/jquery-1.9.1.min.js"></script>

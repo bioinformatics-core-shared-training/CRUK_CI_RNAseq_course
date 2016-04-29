@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="generator" content="pandoc">
-    <title>Software Carpentry: R for reproducible scientific analysis</title>
+    <title>R for reproducible scientific analysis</title>
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
@@ -18,11 +18,7 @@
   </head>
   <body class="lesson">
     <div class="container card">
-      <div class="banner">
-        <a href="http://software-carpentry.org" title="Software Carpentry">
-          <img alt="Software Carpentry banner" src="img/software-carpentry-banner.png" />
-        </a>
-      </div>
+      
       <article>
       <div class="row">
         <div class="col-md-10 col-md-offset-1">
@@ -85,12 +81,12 @@
 <p>The first thing you will see in the R interactive session is a bunch of information, followed by a “&gt;” and a blinking cursor. In many ways this is similar to the shell environment you learned about during the shell lessons: it operates on the same idea of a “Read, evaluate, print loop”: you type in commands, R tries to execute them, and then returns a result.</p>
 <h2 id="using-r-as-a-calculator">Using R as a calculator</h2>
 <p>The simplest thing you could do with R is do arithmetic:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> +<span class="st"> </span><span class="dv">100</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> +<span class="st"> </span><span class="dv">100</span></code></pre>
 <pre class="output"><code>[1] 101
 </code></pre>
 <p>And R will print out the answer, with a preceding “[1]”. Don’t worry about this for now, we’ll explain that later. For now think of it as indicating ouput.</p>
 <p>Just like bash, if you type in an incomplete command, R will wait for you to complete it:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="dv">1</span> +</code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="dv">1</span> +</code></pre>
 <pre class="output"><code>+</code></pre>
 <p>Any time you hit return and the R session shows a “+” instead of a “&gt;”, it means it’s waiting for you to complete the command. If you want to cancel a command you can simply hit “Esc” and RStudio will give you back the “&gt;” prompt.</p>
 <aside class="callout panel panel-info">
@@ -112,39 +108,39 @@
 <li>Add: <code>+</code></li>
 <li>Subtract: <code>-</code></li>
 </ul>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="dv">3</span> +<span class="st"> </span><span class="dv">5</span> *<span class="st"> </span><span class="dv">2</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">3</span> +<span class="st"> </span><span class="dv">5</span> *<span class="st"> </span><span class="dv">2</span></code></pre>
 <pre class="output"><code>[1] 13
 </code></pre>
 <p>Use parentheses to group operations in order to force the order of evaluation if it differs from the default, or to make clear what you intend.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">(<span class="dv">3</span> +<span class="st"> </span><span class="dv">5</span>) *<span class="st"> </span><span class="dv">2</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r">(<span class="dv">3</span> +<span class="st"> </span><span class="dv">5</span>) *<span class="st"> </span><span class="dv">2</span></code></pre>
 <pre class="output"><code>[1] 16
 </code></pre>
 <p>This can get unwieldy when not needed, but clarifies your intentions. Remember that others may later read your code.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">(<span class="dv">3</span> +<span class="st"> </span>(<span class="dv">5</span> *<span class="st"> </span>(<span class="dv">2</span> ^<span class="st"> </span><span class="dv">2</span>))) <span class="co"># hard to read</span>
+<pre class="sourceCode r"><code class="sourceCode r">(<span class="dv">3</span> +<span class="st"> </span>(<span class="dv">5</span> *<span class="st"> </span>(<span class="dv">2</span> ^<span class="st"> </span><span class="dv">2</span>))) <span class="co"># hard to read</span>
 <span class="dv">3</span> +<span class="st"> </span><span class="dv">5</span> *<span class="st"> </span><span class="dv">2</span> ^<span class="st"> </span><span class="dv">2</span>       <span class="co"># clear, if you remember the rules</span>
-<span class="dv">3</span> +<span class="st"> </span><span class="dv">5</span> *<span class="st"> </span>(<span class="dv">2</span> ^<span class="st"> </span><span class="dv">2</span>)     <span class="co"># if you forget some rules, this might help</span></code></pre></div>
+<span class="dv">3</span> +<span class="st"> </span><span class="dv">5</span> *<span class="st"> </span>(<span class="dv">2</span> ^<span class="st"> </span><span class="dv">2</span>)     <span class="co"># if you forget some rules, this might help</span></code></pre>
 <p>The text after each line of code is called a “comment”. Anything that follows after the hash (or octothorpe) symbol <code>#</code> is ignored by R when it executes code.</p>
 <p>Really small or large numbers get a scientific notation:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="dv">2</span>/<span class="dv">10000</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">2</span>/<span class="dv">10000</span></code></pre>
 <pre class="output"><code>[1] 2e-04
 </code></pre>
 <p>Which is shorthand for “multiplied by <code>10^XX</code>”. So <code>2e-4</code> is shorthand for <code>2 * 10^(-4)</code>.</p>
 <p>You can write numbers in scientific notation too:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="fl">5e3</span>  <span class="co"># Note the lack of minus here</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="fl">5e3</span>  <span class="co"># Note the lack of minus here</span></code></pre>
 <pre class="output"><code>[1] 5000
 </code></pre>
 <h2 id="mathematical-functions">Mathematical functions</h2>
 <p>R has many built in mathematical functions. To call a function, we simply type its name, followed by open and closing parentheses. Anything we type inside the parentheses is called the function’s arguments:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sin</span>(<span class="dv">1</span>)  <span class="co"># trigonometry functions</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sin</span>(<span class="dv">1</span>)  <span class="co"># trigonometry functions</span></code></pre>
 <pre class="output"><code>[1] 0.841471
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">log</span>(<span class="dv">1</span>)  <span class="co"># natural logarithm</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">log</span>(<span class="dv">1</span>)  <span class="co"># natural logarithm</span></code></pre>
 <pre class="output"><code>[1] 0
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">log10</span>(<span class="dv">10</span>) <span class="co"># base-10 logarithm</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">log10</span>(<span class="dv">10</span>) <span class="co"># base-10 logarithm</span></code></pre>
 <pre class="output"><code>[1] 1
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">exp</span>(<span class="fl">0.5</span>) <span class="co"># e^(1/2)</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">exp</span>(<span class="fl">0.5</span>) <span class="co"># e^(1/2)</span></code></pre>
 <pre class="output"><code>[1] 1.648721
 </code></pre>
 <p>Don’t worry about trying to remember every function in R. You can simply look them up on google, or if you can remember the start of the function’s name, use the tab completion in RStudio.</p>
@@ -152,22 +148,22 @@
 <p>Typing a <code>?</code> before the name of a command will open the help page for that command. As well as providing a detailed description of the command and how it works, scrolling ot the bottom of the help page will usually show a collection of code examples which illustrate command usage. We’ll go through an example later.</p>
 <h2 id="comparing-things">Comparing things</h2>
 <p>We can also do comparison in R:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> ==<span class="st"> </span><span class="dv">1</span>  <span class="co"># equality (note two equals signs, read as &quot;is equal to&quot;)</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> ==<span class="st"> </span><span class="dv">1</span>  <span class="co"># equality (note two equals signs, read as &quot;is equal to&quot;)</span></code></pre>
 <pre class="output"><code>[1] TRUE
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> !=<span class="st"> </span><span class="dv">2</span>  <span class="co"># inequality (read as &quot;is not equal to&quot;)</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> !=<span class="st"> </span><span class="dv">2</span>  <span class="co"># inequality (read as &quot;is not equal to&quot;)</span></code></pre>
 <pre class="output"><code>[1] TRUE
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> &lt;<span class="st">  </span><span class="dv">2</span>  <span class="co"># less than</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> &lt;<span class="st">  </span><span class="dv">2</span>  <span class="co"># less than</span></code></pre>
 <pre class="output"><code>[1] TRUE
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> &lt;=<span class="st"> </span><span class="dv">1</span>  <span class="co"># less than or equal to</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> &lt;=<span class="st"> </span><span class="dv">1</span>  <span class="co"># less than or equal to</span></code></pre>
 <pre class="output"><code>[1] TRUE
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> &gt;<span class="st"> </span><span class="dv">0</span>  <span class="co"># greater than</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> &gt;<span class="st"> </span><span class="dv">0</span>  <span class="co"># greater than</span></code></pre>
 <pre class="output"><code>[1] TRUE
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> &gt;=<span class="st"> </span>-<span class="dv">9</span> <span class="co"># greater than or equal to</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> &gt;=<span class="st"> </span>-<span class="dv">9</span> <span class="co"># greater than or equal to</span></code></pre>
 <pre class="output"><code>[1] TRUE
 </code></pre>
 <aside class="callout panel panel-info">
@@ -183,21 +179,21 @@
 </aside>
 <h2 id="variables-and-assignment">Variables and assignment</h2>
 <p>We can store values in variables using the assignment operator <code>&lt;-</code>, like this:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span><span class="dv">1</span>/<span class="dv">40</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span><span class="dv">1</span>/<span class="dv">40</span></code></pre>
 <p>Notice that assignment does not print a value. Instead, we stored it for later in something called a <strong>variable</strong>. <code>x</code> now contains the <strong>value</strong> <code>0.025</code>:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x</code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r">x</code></pre>
 <pre class="output"><code>[1] 0.025
 </code></pre>
 <p>More precisely, the stored value is a <em>decimal approximation</em> of this fraction called a <a href="http://en.wikipedia.org/wiki/Floating_point">floating point number</a>.</p>
 <p>Look for the <code>Environment</code> tab in one of the panes of RStudio, and you will see that <code>x</code> and its value have appeared. Our variable <code>x</code> can be used in place of a number in any calculation that expects a number:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">log</span>(x)</code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">log</span>(x)</code></pre>
 <pre class="output"><code>[1] -3.688879
 </code></pre>
 <p>Notice also that variables can be reassigned:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span><span class="dv">100</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span><span class="dv">100</span></code></pre>
 <p><code>x</code> used to contain the value 0.025 and and now it has the value 100.</p>
 <p>Assignment values can contain the variable being assigned to:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span>x +<span class="st"> </span><span class="dv">1</span> <span class="co">#notice how RStudio updates its description of x on the top right tab</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span>x +<span class="st"> </span><span class="dv">1</span> <span class="co">#notice how RStudio updates its description of x on the top right tab</span></code></pre>
 <p>The right hand side of the assignment can be any valid R expression. The right hand side is <em>fully evaluated</em> before the assignment occurs.</p>
 <p>Variable names can contain letters, numbers, underscores and periods. They cannot start with a number nor contain spaces at all. Different people use different conventions for long variable names, these include</p>
 <ul>
@@ -207,25 +203,25 @@
 </ul>
 <p>What you use is up to you, but <strong>be consistent</strong>.</p>
 <p>It is also possible to use the <code>=</code> operator for assignment:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span><span class="dv">1</span>/<span class="dv">40</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span><span class="dv">1</span>/<span class="dv">40</span></code></pre>
 <p>But this is much less common among R users. The most important thing is to <strong>be consistent</strong> with the operator you use. There are occasionally places where it is less confusing to use <code>&lt;-</code> than <code>=</code>, and it is the most common symbol used in the community. So the recommendation is to use <code>&lt;-</code>.</p>
 <h2 id="vectorization">Vectorization</h2>
 <p>One final thing to be aware of is that R is <em>vectorized</em>, meaning that variables and functions can have vectors as values. For example</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span>:<span class="dv">5</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span>:<span class="dv">5</span></code></pre>
 <pre class="output"><code>[1] 1 2 3 4 5
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="dv">2</span>^(<span class="dv">1</span>:<span class="dv">5</span>)</code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">2</span>^(<span class="dv">1</span>:<span class="dv">5</span>)</code></pre>
 <pre class="output"><code>[1]  2  4  8 16 32
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span><span class="dv">1</span>:<span class="dv">5</span>
-<span class="dv">2</span>^x</code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span><span class="dv">1</span>:<span class="dv">5</span>
+<span class="dv">2</span>^x</code></pre>
 <pre class="output"><code>[1]  2  4  8 16 32
 </code></pre>
 <p>This is incredibly powerful; we will discuss this further in an upcoming lesson.</p>
 <h2 id="managing-your-environment">Managing your environment</h2>
 <p>There are a few useful commands you can use to interact with the R session.</p>
 <p><code>ls</code> will list all of the variables and functions stored in the global environment (your working R session):</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ls</span>()</code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ls</span>()</code></pre>
 <pre class="output"><code>[1] &quot;hook_error&quot; &quot;hook_in&quot;    &quot;hook_out&quot;   &quot;x&quot;         
 </code></pre>
 <aside class="callout panel panel-info">
@@ -238,7 +234,7 @@
 </aside>
 <p>Note here that we didn’t given any arguments to <code>ls</code>, but we still needed to give the parentheses to tell R to call the function.</p>
 <p>If we type <code>ls</code> by itself, R will print out the source code for that function!</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ls</code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r">ls</code></pre>
 <pre class="output"><code>function (name, pos = -1L, envir = as.environment(pos), all.names = FALSE, 
     pattern, sorted = TRUE) 
 {
@@ -270,17 +266,17 @@
     }
     else all.names
 }
-&lt;bytecode: 0x7f877b2fbd50&gt;
+&lt;bytecode: 0x7fb1622ad3f8&gt;
 &lt;environment: namespace:base&gt;
 </code></pre>
 <p>You can use <code>rm</code> to delete objects you no longer need:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rm</span>(x)</code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rm</span>(x)</code></pre>
 <p>If you have lots of things in your environment and want to delete all of them, you can pass the results of <code>ls</code> to the <code>rm</code> function:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rm</span>(<span class="dt">list =</span> <span class="kw">ls</span>())</code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rm</span>(<span class="dt">list =</span> <span class="kw">ls</span>())</code></pre>
 <p>In this case we’ve combined the two. Just like the order of operations, anything inside the innermost parentheses is evaluated first, and so on.</p>
 <p>In this case we’ve specified that the results of <code>ls</code> should be used for the <code>list</code> argument in <code>rm</code>. When assigning values to arguments by name, you <em>must</em> use the <code>=</code> operator!!</p>
 <p>If instead we use <code>&lt;-</code>, there will be unintended side effects, or you may just get an error message:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rm</span>(list &lt;-<span class="st"> </span><span class="kw">ls</span>())</code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rm</span>(list &lt;-<span class="st"> </span><span class="kw">ls</span>())</code></pre>
 <pre class="error"><code>Error in rm(list &lt;- ls()): ... must contain names or character strings
 </code></pre>
 <aside class="callout panel panel-info">
@@ -307,14 +303,14 @@
 </div>
 <div class="panel-body">
 <p>Which of the following are valid R variable names?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">min_height
+<pre class="sourceCode r"><code class="sourceCode r">min_height
 max.height
 _age
 .mass
 MaxLength
 min-length
 2widths
-celsius2kelvin</code></pre></div>
+celsius2kelvin</code></pre>
 </div>
 </section>
 <section class="challenge panel panel-success">
@@ -323,10 +319,10 @@ celsius2kelvin</code></pre></div>
 </div>
 <div class="panel-body">
 <p>What will be the value of each variable after each statement in the following program?</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mass &lt;-<span class="st"> </span><span class="fl">47.5</span>
+<pre class="sourceCode r"><code class="sourceCode r">mass &lt;-<span class="st"> </span><span class="fl">47.5</span>
 age &lt;-<span class="st"> </span><span class="dv">122</span>
 mass &lt;-<span class="st"> </span>mass *<span class="st"> </span><span class="fl">2.3</span>
-age &lt;-<span class="st"> </span>age -<span class="st"> </span><span class="dv">20</span></code></pre></div>
+age &lt;-<span class="st"> </span>age -<span class="st"> </span><span class="dv">20</span></code></pre>
 </div>
 </section>
 <section class="challenge panel panel-success">
@@ -356,12 +352,7 @@ age &lt;-<span class="st"> </span>age -<span class="st"> </span><span class="dv"
         </div>
       </div>
       </article>
-      <div class="footer">
-        <a class="label swc-blue-bg" href="http://software-carpentry.org">Software Carpentry</a>
-        <a class="label swc-blue-bg" href="https://github.com/swcarpentry/lesson-template">Source</a>
-        <a class="label swc-blue-bg" href="mailto:admin@software-carpentry.org">Contact</a>
-        <a class="label swc-blue-bg" href="LICENSE.html">License</a>
-      </div>
+      
     </div>
     <!-- Javascript placed at the end of the document so the pages load faster -->
     <script src="http://software-carpentry.org/v5/js/jquery-1.9.1.min.js"></script>

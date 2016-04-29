@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="generator" content="pandoc">
-    <title>Software Carpentry: R for reproducible scientific analysis</title>
+    <title>R for reproducible scientific analysis</title>
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
@@ -18,11 +18,7 @@
   </head>
   <body class="lesson">
     <div class="container card">
-      <div class="banner">
-        <a href="http://software-carpentry.org" title="Software Carpentry">
-          <img alt="Software Carpentry banner" src="img/software-carpentry-banner.png" />
-        </a>
-      </div>
+      
       <article>
       <div class="row">
         <div class="col-md-10 col-md-offset-1">
@@ -42,8 +38,8 @@
 </section>
 <h2 id="reading-help-files">Reading Help files</h2>
 <p>R, and every package, provide help files for functions. To search for help on a function from a specific function that is in a package loaded into your namespace (your interactive R session):</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">?function_name
-<span class="kw">help</span>(function_name)</code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r">?function_name
+<span class="kw">help</span>(function_name)</code></pre>
 <p>This will load up a help page in RStudio (or as plain text in R by itself).</p>
 <p>Each help page is broken down into sections:</p>
 <ul>
@@ -66,27 +62,27 @@
 </aside>
 <h2 id="special-operators">Special Operators</h2>
 <p>To seek help on special operators, use quotes:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">?<span class="st">&quot;+&quot;</span></code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r">?<span class="st">&quot;+&quot;</span></code></pre>
 <h2 id="getting-help-on-packages">Getting help on packages</h2>
 <p>Many packages come with “vignettes”: tutorials and extended example documentation. Without any arguments, <code>vignette()</code> will list all vignettes for all installed packages; <code>vignette(package=&quot;package-name&quot;)</code> will list all available vignettes for <code>package-name</code>, and <code>vignette(&quot;vignette-name&quot;)</code> will open the specified vignette.</p>
 <p>If a package doesn’t have any vignettes, you can usually find help by typing <code>help(&quot;package-name&quot;)</code>.</p>
 <h2 id="when-you-kind-of-remember-the-function">When you kind of remember the function</h2>
 <p>If you’re not sure what package a function is in, or how it’s specifically spelled you can do a fuzzy search:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">??function_name</code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r">??function_name</code></pre>
 <h2 id="when-you-have-no-idea-where-to-begin">When you have no idea where to begin</h2>
 <p>If you don’t know what function or package you need to use <a href="http://cran.at.r-project.org/web/views">CRAN Task Views</a> is a specially maintained list of packages grouped into fields. This can be a good starting point.</p>
 <h2 id="when-your-code-doesnt-work-seeking-help-from-your-peers">When your code doesn’t work: seeking help from your peers</h2>
 <p>If you’re having trouble using a function, 9 times out of 10, the answers you are seeking have already been answered on <a href="http://stackoverflow.com/">Stack Overflow</a>. You can search using the <code>[r]</code> tag.</p>
 <p>If you can’t find the answer, there are a few useful functions to help you ask a question from your peers:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">?dput</code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r">?dput</code></pre>
 <p>Will dump the data you’re working with into a format so that it can be copy and pasted by anyone else into their R session.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sessionInfo</span>()</code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sessionInfo</span>()</code></pre>
 <pre class="output"><code>R version 3.2.4 (2016-03-10)
-Platform: x86_64-apple-darwin15.3.0 (64-bit)
-Running under: OS X 10.11.3 (El Capitan)
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+Running under: OS X 10.11.4 (El Capitan)
 
 locale:
-[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+[1] en_AU.UTF-8/en_AU.UTF-8/en_AU.UTF-8/C/en_AU.UTF-8/en_AU.UTF-8
 
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  base     
@@ -105,9 +101,9 @@ loaded via a namespace (and not attached):
 </div>
 <div class="panel-body">
 <p>Look at the help for the <code>c</code> function. What kind of vector do you expect you will create if you evaluate the following:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>)
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>)
 <span class="kw">c</span>(<span class="st">&#39;d&#39;</span>, <span class="st">&#39;e&#39;</span>, <span class="st">&#39;f&#39;</span>)
-<span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="st">&#39;f&#39;</span>)<span class="st">`</span></code></pre></div>
+<span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="st">&#39;f&#39;</span>)<span class="st">`</span></code></pre>
 </div>
 </section>
 <section class="challenge panel panel-success">
@@ -147,19 +143,14 @@ loaded via a namespace (and not attached):
 </div>
 <div class="panel-body">
 <p>Look at the help for the <code>paste</code> function. You’ll need to use this later.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">help</span>(<span class="st">&quot;paste&quot;</span>)
-?paste</code></pre></div>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">help</span>(<span class="st">&quot;paste&quot;</span>)
+?paste</code></pre>
 </div>
 </section>
         </div>
       </div>
       </article>
-      <div class="footer">
-        <a class="label swc-blue-bg" href="http://software-carpentry.org">Software Carpentry</a>
-        <a class="label swc-blue-bg" href="https://github.com/swcarpentry/lesson-template">Source</a>
-        <a class="label swc-blue-bg" href="mailto:admin@software-carpentry.org">Contact</a>
-        <a class="label swc-blue-bg" href="LICENSE.html">License</a>
-      </div>
+      
     </div>
     <!-- Javascript placed at the end of the document so the pages load faster -->
     <script src="http://software-carpentry.org/v5/js/jquery-1.9.1.min.js"></script>
