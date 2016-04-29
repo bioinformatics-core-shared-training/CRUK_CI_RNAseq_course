@@ -27,6 +27,8 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 5.  [Data frames and reading in data](05-data-structures-part2.html)
 6.  [Subsetting data](06-data-subsetting.html)
 
+- [RNAseq Day1](xx-rnaseq-day1.html)
+
 - Differential expression
 - Alignment and feature counting
 - Gene set testing
