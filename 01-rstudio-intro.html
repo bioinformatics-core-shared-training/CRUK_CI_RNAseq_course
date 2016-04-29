@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="generator" content="pandoc">
-    <title>R for reproducible scientific analysis</title>
+    <title>R for RNAseq analysis</title>
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
@@ -22,8 +22,8 @@
       <article>
       <div class="row">
         <div class="col-md-10 col-md-offset-1">
-                    <a href="index.html"><h1 class="title">R for reproducible scientific analysis</h1></a>
-          <h2 class="subtitle">Introduction to R and RStudio</h2>
+                    <a href="index.html"><h1 class="title">R for RNAseq analysis</h1></a>
+          <h2 class="subtitle">Introduction to RStudio</h2>
           <section class="objectives panel panel-warning">
 <div class="panel-heading">
 <h2 id="learning-objectives"><span class="glyphicon glyphicon-certificate"></span>Learning Objectives</h2>
@@ -32,11 +32,7 @@
 <ul>
 <li>To gain familiarity with the various panes in the RStudio IDE</li>
 <li>To gain familiarity with the buttons, short cuts and options in the RStudio IDE</li>
-<li>To understand variables and how to assign to them</li>
 <li>To be able to manage your workspace in an interactive R session</li>
-<li>To be able to use mathematical and comparison operations</li>
-<li>To be able to call functions</li>
-<li>Introduction to package management</li>
 </ul>
 </div>
 </section>
@@ -76,7 +72,7 @@
 <p>RStudio offers you great flexibility in running code from within the editor window. There are buttons, menu choices, and keyboard shortcuts. To run the current line, you can 1. click on the <code>Run</code> button just above the editor panel, or 2. select “Run Lines” from the “Code” menu, or 3. hit Ctrl-Enter in Windows or Linux or Command-Enter on OS X. (This shortcut can also be seen by hovering the mouse over the button). To run a block of code, select it and then <code>Run</code>. If you have modified a line of code within a block of code you have just run, there is no need to reselct the section and <code>Run</code>, you can use the next button along, <code>Re-run the previous region</code>. This will run the previous code block inculding the modifications you have made.</p>
 </div>
 </aside>
-<h2 id="introduction-to-r">Introduction to R</h2>
+<h2 id="your-rstudio-environment">Your RStudio environment</h2>
 <p>Much of your time in R will be spent in the R interactive console. This is where you will run all of your code, and can be a useful environment to try out ideas before adding them to an R script file. This console in RStudio is the same as the one you would get if you just typed in <code>R</code> in your commandline environment.</p>
 <p>The first thing you will see in the R interactive session is a bunch of information, followed by a “&gt;” and a blinking cursor. In many ways this is similar to the shell environment you learned about during the shell lessons: it operates on the same idea of a “Read, evaluate, print loop”: you type in commands, R tries to execute them, and then returns a result.</p>
 <h2 id="using-r-as-a-calculator">Using R as a calculator</h2>
@@ -98,115 +94,8 @@
 <p>Cancelling a command isn’t just useful for killing incomplete commands: you can also use it to tell R to stop running code (for example if its taking much longer than you expect), or to get rid of the code you’re currently writing.</p>
 </div>
 </aside>
-<p>When using R as a calculator, the order of operations is the same as you would have learnt back in school.</p>
-<p>From highest to lowest precedence:</p>
-<ul>
-<li>Parentheses: <code>(</code>, <code>)</code></li>
-<li>Exponents: <code>^</code> or <code>**</code></li>
-<li>Divide: <code>/</code></li>
-<li>Multiply: <code>*</code></li>
-<li>Add: <code>+</code></li>
-<li>Subtract: <code>-</code></li>
-</ul>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">3</span> +<span class="st"> </span><span class="dv">5</span> *<span class="st"> </span><span class="dv">2</span></code></pre>
-<pre class="output"><code>[1] 13
-</code></pre>
-<p>Use parentheses to group operations in order to force the order of evaluation if it differs from the default, or to make clear what you intend.</p>
-<pre class="sourceCode r"><code class="sourceCode r">(<span class="dv">3</span> +<span class="st"> </span><span class="dv">5</span>) *<span class="st"> </span><span class="dv">2</span></code></pre>
-<pre class="output"><code>[1] 16
-</code></pre>
-<p>This can get unwieldy when not needed, but clarifies your intentions. Remember that others may later read your code.</p>
-<pre class="sourceCode r"><code class="sourceCode r">(<span class="dv">3</span> +<span class="st"> </span>(<span class="dv">5</span> *<span class="st"> </span>(<span class="dv">2</span> ^<span class="st"> </span><span class="dv">2</span>))) <span class="co"># hard to read</span>
-<span class="dv">3</span> +<span class="st"> </span><span class="dv">5</span> *<span class="st"> </span><span class="dv">2</span> ^<span class="st"> </span><span class="dv">2</span>       <span class="co"># clear, if you remember the rules</span>
-<span class="dv">3</span> +<span class="st"> </span><span class="dv">5</span> *<span class="st"> </span>(<span class="dv">2</span> ^<span class="st"> </span><span class="dv">2</span>)     <span class="co"># if you forget some rules, this might help</span></code></pre>
-<p>The text after each line of code is called a “comment”. Anything that follows after the hash (or octothorpe) symbol <code>#</code> is ignored by R when it executes code.</p>
-<p>Really small or large numbers get a scientific notation:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">2</span>/<span class="dv">10000</span></code></pre>
-<pre class="output"><code>[1] 2e-04
-</code></pre>
-<p>Which is shorthand for “multiplied by <code>10^XX</code>”. So <code>2e-4</code> is shorthand for <code>2 * 10^(-4)</code>.</p>
-<p>You can write numbers in scientific notation too:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="fl">5e3</span>  <span class="co"># Note the lack of minus here</span></code></pre>
-<pre class="output"><code>[1] 5000
-</code></pre>
-<h2 id="mathematical-functions">Mathematical functions</h2>
-<p>R has many built in mathematical functions. To call a function, we simply type its name, followed by open and closing parentheses. Anything we type inside the parentheses is called the function’s arguments:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sin</span>(<span class="dv">1</span>)  <span class="co"># trigonometry functions</span></code></pre>
-<pre class="output"><code>[1] 0.841471
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">log</span>(<span class="dv">1</span>)  <span class="co"># natural logarithm</span></code></pre>
-<pre class="output"><code>[1] 0
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">log10</span>(<span class="dv">10</span>) <span class="co"># base-10 logarithm</span></code></pre>
-<pre class="output"><code>[1] 1
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">exp</span>(<span class="fl">0.5</span>) <span class="co"># e^(1/2)</span></code></pre>
-<pre class="output"><code>[1] 1.648721
-</code></pre>
-<p>Don’t worry about trying to remember every function in R. You can simply look them up on google, or if you can remember the start of the function’s name, use the tab completion in RStudio.</p>
-<p>This is one advantage that RStudio has over R on its own, it has autocompletion abilities that allow you to more easily look up functions, their arguments, and the values that they take.</p>
-<p>Typing a <code>?</code> before the name of a command will open the help page for that command. As well as providing a detailed description of the command and how it works, scrolling ot the bottom of the help page will usually show a collection of code examples which illustrate command usage. We’ll go through an example later.</p>
-<h2 id="comparing-things">Comparing things</h2>
-<p>We can also do comparison in R:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> ==<span class="st"> </span><span class="dv">1</span>  <span class="co"># equality (note two equals signs, read as &quot;is equal to&quot;)</span></code></pre>
-<pre class="output"><code>[1] TRUE
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> !=<span class="st"> </span><span class="dv">2</span>  <span class="co"># inequality (read as &quot;is not equal to&quot;)</span></code></pre>
-<pre class="output"><code>[1] TRUE
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> &lt;<span class="st">  </span><span class="dv">2</span>  <span class="co"># less than</span></code></pre>
-<pre class="output"><code>[1] TRUE
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> &lt;=<span class="st"> </span><span class="dv">1</span>  <span class="co"># less than or equal to</span></code></pre>
-<pre class="output"><code>[1] TRUE
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> &gt;<span class="st"> </span><span class="dv">0</span>  <span class="co"># greater than</span></code></pre>
-<pre class="output"><code>[1] TRUE
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> &gt;=<span class="st"> </span>-<span class="dv">9</span> <span class="co"># greater than or equal to</span></code></pre>
-<pre class="output"><code>[1] TRUE
-</code></pre>
-<aside class="callout panel panel-info">
-<div class="panel-heading">
-<h2 id="tip-comparing-numbers"><span class="glyphicon glyphicon-pushpin"></span>Tip: Comparing Numbers</h2>
-</div>
-<div class="panel-body">
-<p>A word of warning about comparing numbers: you should never use <code>==</code> to compare two numbers unless they are integers (a data type which can specifically represent only whole numbers).</p>
-<p>Computers may only represent decimal numbers with a certain degree of precision, so two numbers which look the same when printed out by R, may actually have different underlying representations and therefore be different by a small margin of error (called Machine numeric tolerance).</p>
-<p>Instead you should use the <code>all.equal</code> function.</p>
-<p>Further reading: <a href="http://floating-point-gui.de/" class="uri">http://floating-point-gui.de/</a></p>
-</div>
-</aside>
-<h2 id="variables-and-assignment">Variables and assignment</h2>
-<p>We can store values in variables using the assignment operator <code>&lt;-</code>, like this:</p>
-<pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span><span class="dv">1</span>/<span class="dv">40</span></code></pre>
-<p>Notice that assignment does not print a value. Instead, we stored it for later in something called a <strong>variable</strong>. <code>x</code> now contains the <strong>value</strong> <code>0.025</code>:</p>
-<pre class="sourceCode r"><code class="sourceCode r">x</code></pre>
-<pre class="output"><code>[1] 0.025
-</code></pre>
-<p>More precisely, the stored value is a <em>decimal approximation</em> of this fraction called a <a href="http://en.wikipedia.org/wiki/Floating_point">floating point number</a>.</p>
-<p>Look for the <code>Environment</code> tab in one of the panes of RStudio, and you will see that <code>x</code> and its value have appeared. Our variable <code>x</code> can be used in place of a number in any calculation that expects a number:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">log</span>(x)</code></pre>
-<pre class="output"><code>[1] -3.688879
-</code></pre>
-<p>Notice also that variables can be reassigned:</p>
-<pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span><span class="dv">100</span></code></pre>
-<p><code>x</code> used to contain the value 0.025 and and now it has the value 100.</p>
-<p>Assignment values can contain the variable being assigned to:</p>
-<pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span>x +<span class="st"> </span><span class="dv">1</span> <span class="co">#notice how RStudio updates its description of x on the top right tab</span></code></pre>
-<p>The right hand side of the assignment can be any valid R expression. The right hand side is <em>fully evaluated</em> before the assignment occurs.</p>
-<p>Variable names can contain letters, numbers, underscores and periods. They cannot start with a number nor contain spaces at all. Different people use different conventions for long variable names, these include</p>
-<ul>
-<li>periods.between.words</li>
-<li>underscores_between_words</li>
-<li>camelCaseToSeparateWords</li>
-</ul>
-<p>What you use is up to you, but <strong>be consistent</strong>.</p>
-<p>It is also possible to use the <code>=</code> operator for assignment:</p>
-<pre class="sourceCode r"><code class="sourceCode r">x =<span class="st"> </span><span class="dv">1</span>/<span class="dv">40</span></code></pre>
-<p>But this is much less common among R users. The most important thing is to <strong>be consistent</strong> with the operator you use. There are occasionally places where it is less confusing to use <code>&lt;-</code> than <code>=</code>, and it is the most common symbol used in the community. So the recommendation is to use <code>&lt;-</code>.</p>
 <h2 id="vectorization">Vectorization</h2>
-<p>One final thing to be aware of is that R is <em>vectorized</em>, meaning that variables and functions can have vectors as values. For example</p>
+<p>R is <em>vectorized</em>, meaning that variables and functions can have vectors as values. For example</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span>:<span class="dv">5</span></code></pre>
 <pre class="output"><code>[1] 1 2 3 4 5
 </code></pre>
@@ -266,7 +155,7 @@
     }
     else all.names
 }
-&lt;bytecode: 0x7fb1622ad3f8&gt;
+&lt;bytecode: 0x7fd1c1c093f8&gt;
 &lt;environment: namespace:base&gt;
 </code></pre>
 <p>You can use <code>rm</code> to delete objects you no longer need:</p>
@@ -297,58 +186,6 @@
 <li>You can remove a package with <code>remove.packages(&quot;packagename&quot;)</code></li>
 <li>You can make a package available for use with <code>library(packagename)</code></li>
 </ul>
-<section class="challenge panel panel-success">
-<div class="panel-heading">
-<h2 id="challenge-1"><span class="glyphicon glyphicon-pencil"></span>Challenge 1</h2>
-</div>
-<div class="panel-body">
-<p>Which of the following are valid R variable names?</p>
-<pre class="sourceCode r"><code class="sourceCode r">min_height
-max.height
-_age
-.mass
-MaxLength
-min-length
-2widths
-celsius2kelvin</code></pre>
-</div>
-</section>
-<section class="challenge panel panel-success">
-<div class="panel-heading">
-<h2 id="challenge-2"><span class="glyphicon glyphicon-pencil"></span>Challenge 2</h2>
-</div>
-<div class="panel-body">
-<p>What will be the value of each variable after each statement in the following program?</p>
-<pre class="sourceCode r"><code class="sourceCode r">mass &lt;-<span class="st"> </span><span class="fl">47.5</span>
-age &lt;-<span class="st"> </span><span class="dv">122</span>
-mass &lt;-<span class="st"> </span>mass *<span class="st"> </span><span class="fl">2.3</span>
-age &lt;-<span class="st"> </span>age -<span class="st"> </span><span class="dv">20</span></code></pre>
-</div>
-</section>
-<section class="challenge panel panel-success">
-<div class="panel-heading">
-<h2 id="challenge-3"><span class="glyphicon glyphicon-pencil"></span>Challenge 3</h2>
-</div>
-<div class="panel-body">
-<p>Run the code from the previous challenge, and write a command to compare mass to age. Is mass larger than age?</p>
-</div>
-</section>
-<section class="challenge panel panel-success">
-<div class="panel-heading">
-<h2 id="challenge-4"><span class="glyphicon glyphicon-pencil"></span>Challenge 4</h2>
-</div>
-<div class="panel-body">
-<p>Clean up your working environment by deleting the mass and age variables.</p>
-</div>
-</section>
-<section class="challenge panel panel-success">
-<div class="panel-heading">
-<h2 id="challenge-5"><span class="glyphicon glyphicon-pencil"></span>Challenge 5</h2>
-</div>
-<div class="panel-body">
-<p>Install the following packages: <code>ggplot2</code>, <code>plyr</code>, <code>gapminder</code></p>
-</div>
-</section>
         </div>
       </div>
       </article>

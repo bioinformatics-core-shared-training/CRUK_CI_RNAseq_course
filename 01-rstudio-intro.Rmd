@@ -1,7 +1,7 @@
 ---
 layout: page
-title: R for reproducible scientific analysis
-subtitle: Introduction to R and RStudio
+title: R for RNAseq analysis
+subtitle: Introduction to RStudio
 minutes: 45
 ---
 
@@ -13,12 +13,8 @@ source("tools/chunk-options.R")
 >
 > * To gain familiarity with the various panes in the RStudio IDE
 > * To gain familiarity with the buttons, short cuts and options in the RStudio IDE
-> * To understand variables and how to assign to them
 > * To be able to manage your workspace in an interactive R session
-> * To be able to use mathematical and comparison operations
-> * To be able to call functions
-> * Introduction to package management
-> 
+>
 
 ## Introduction to RStudio
 
@@ -48,12 +44,12 @@ in the top left.
 There are two main ways one can work within RStudio.
 
 1. Test and play within the interactive R console then copy code into
-a .R file to run later. 
+a .R file to run later.
    *  This works well when doing small tests and initially starting off.
    *  It quickly becomes laborious
 2. Start writing in an .R file and use RStudio's command / short cut
 to push current line, selected lines or modified lines to the
-interactive R console. 
+interactive R console.
    * This is a great way to start; all your code is saved for later
    * You will be able to run the file you create from within RStudio
    or using R's `source()`  function.
@@ -71,7 +67,7 @@ interactive R console.
 > along, `Re-run the previous region`. This will run the previous code block
 > inculding the modifications you have made.
 
-## Introduction to R
+## Your RStudio environment
 
 Much of your time in R will be spent in the R interactive
 console. This is where you will run all of your code, and can be a
@@ -125,210 +121,9 @@ prompt.
 > currently writing.
 >
 
-When using R as a calculator, the order of operations is the same as you
-would have learnt back in school.
-
-From highest to lowest precedence:
-
- * Parentheses: `(`, `)`
- * Exponents: `^` or `**`
- * Divide: `/`
- * Multiply: `*`
- * Add: `+`
- * Subtract: `-`
-
-```{r}
-3 + 5 * 2
-```
-
-Use parentheses to group operations in order to force the order of
-evaluation if it differs from the default, or to make clear what you 
-intend.
-
-```{r}
-(3 + 5) * 2
-```
-
-This can get unwieldy when not needed, but  clarifies your intentions.
-Remember that others may later read your code.
-
-```{r, eval=FALSE}
-(3 + (5 * (2 ^ 2))) # hard to read
-3 + 5 * 2 ^ 2       # clear, if you remember the rules
-3 + 5 * (2 ^ 2)     # if you forget some rules, this might help
-```
-
-
-The text after each line of code is called a
-"comment". Anything that follows after the hash (or octothorpe) symbol
-`#` is ignored by R when it executes code.
-
-Really small or large numbers get a scientific notation:
-
-```{r}
-2/10000
-```
-
-Which is shorthand for "multiplied by `10^XX`". So `2e-4`
-is shorthand for `2 * 10^(-4)`.
-
-You can write numbers in scientific notation too:
-
-```{r}
-5e3  # Note the lack of minus here
-```
-
-## Mathematical functions
-
-R has many built in mathematical functions. To call a function,
-we simply type its name, followed by  open and closing parentheses.
-Anything we type inside the parentheses is called the function's
-arguments:
-
-```{r}
-sin(1)  # trigonometry functions
-```
-
-```{r}
-log(1)  # natural logarithm
-```
-
-```{r}
-log10(10) # base-10 logarithm
-```
-
-```{r}
-exp(0.5) # e^(1/2)
-```
-
-Don't worry about trying to remember every function in R. You
-can simply look them up on google, or if you can remember the
-start of the function's name, use the tab completion in RStudio.
-
-This is one advantage that RStudio has over R on its own, it
-has autocompletion abilities that allow you to more easily
-look up functions, their arguments, and the values that they
-take.
-
-Typing a `?` before the name of a command will open the help page
-for that command. As well as providing a detailed description of
-the command and how it works, scrolling ot the bottom of the
-help page will usually show a collection of code examples which
-illustrate command usage. We'll go through an example later.
-
-## Comparing things
-
-We can also do comparison in R:
-
-```{r}
-1 == 1  # equality (note two equals signs, read as "is equal to")
-```
-
-```{r}
-1 != 2  # inequality (read as "is not equal to")
-```
-
-```{r}
-1 <  2  # less than
-```
-
-```{r}
-1 <= 1  # less than or equal to
-```
-
-```{r}
-1 > 0  # greater than
-```
-
-```{r}
-1 >= -9 # greater than or equal to
-```
-
-> ## Tip: Comparing Numbers {.callout}
->
-> A word of warning about comparing numbers: you should
-> never use `==` to compare two numbers unless they are
-> integers (a data type which can specifically represent
-> only whole numbers).
->
-> Computers may only represent decimal numbers with a
-> certain degree of precision, so two numbers which look
-> the same when printed out by R, may actually have
-> different underlying representations and therefore be
-> different by a small margin of error (called Machine
-> numeric tolerance).
->
-> Instead you should use the `all.equal` function.
->
-> Further reading: [http://floating-point-gui.de/](http://floating-point-gui.de/)
->
-
-## Variables and assignment
-
-We can store values in variables using the assignment operator `<-`, like this:
-
-```{r}
-x <- 1/40
-```
-
-Notice that assignment does not print a value. Instead, we stored it for later
-in something called a **variable**. `x` now contains the **value** `0.025`:
-
-```{r}
-x
-```
-
-More precisely, the stored value is a *decimal approximation* of
-this fraction called a [floating point number](http://en.wikipedia.org/wiki/Floating_point).
-
-Look for the `Environment` tab in one of the panes of RStudio, and you will see that `x` and its value
-have appeared. Our variable `x` can be used in place of a number in any calculation that expects a number:
-
-```{r}
-log(x)
-```
-
-Notice also that variables can be reassigned:
-
-```{r}
-x <- 100
-```
-
-`x` used to contain the value 0.025 and and now it has the value 100.
-
-Assignment values can contain the variable being assigned to:
-
-```{r}
-x <- x + 1 #notice how RStudio updates its description of x on the top right tab
-```
-
-The right hand side of the assignment can be any valid R expression.
-The right hand side is *fully evaluated* before the assignment occurs.
-
-Variable names can contain letters, numbers, underscores and periods. They
-cannot start with a number nor contain spaces at all. Different people use
-different conventions for long variable names, these include
-
-  * periods.between.words
-  * underscores\_between_words
-  * camelCaseToSeparateWords
-
-What you use is up to you, but **be consistent**.
-
-It is also possible to use the `=` operator for assignment:
-
-```{r}
-x = 1/40
-```
-
-But this is much less common among R users.  The most important thing is to
-**be consistent** with the operator you use. There are occasionally places
-where it is less confusing to use `<-` than `=`, and it is the most common
-symbol used in the community. So the recommendation is to use `<-`.
-
 ## Vectorization
 
-One final thing to be aware of is that R is *vectorized*, meaning that
+R is *vectorized*, meaning that
 variables and functions can have vectors as values. For example
 
 ```{r}
@@ -422,46 +217,3 @@ network). R and RStudio have functionality for managing packages:
 * You can update installed packages by typing `update.packages()`
 * You can remove a package with `remove.packages("packagename")`
 * You can make a package available for use with `library(packagename)`
-
-> ## Challenge 1 {.challenge}
-> Which of the following are valid R variable names?
-> ```{r, eval=FALSE}
-> min_height
-> max.height
-> _age
-> .mass
-> MaxLength
-> min-length
-> 2widths
-> celsius2kelvin
-> ```
-
-> ## Challenge 2 {.challenge}
->
-> What will be the value of each  variable  after each
-> statement in the following program?
->
-> ```{r, eval=FALSE}
-> mass <- 47.5
-> age <- 122
-> mass <- mass * 2.3
-> age <- age - 20
-> ```
->
-
-> ## Challenge 3 {.challenge}
->
-> Run the code from the previous challenge, and write a command to
-> compare mass to age. Is mass larger than age?
->
-
-> ## Challenge 4 {.challenge}
->
-> Clean up your working environment by deleting the mass and age
-> variables.
->
-
-> ## Challenge 5 {.challenge}
-> 
-> Install the following packages: `ggplot2`, `plyr`, `gapminder`
-> 

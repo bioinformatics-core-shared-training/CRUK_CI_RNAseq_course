@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="generator" content="pandoc">
-    <title>R for reproducible scientific analysis</title>
+    <title>R for RNAseq analysis</title>
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
@@ -22,7 +22,7 @@
       <article>
       <div class="row">
         <div class="col-md-10 col-md-offset-1">
-                    <a href="index.html"><h1 class="title">R for reproducible scientific analysis</h1></a>
+                    <a href="index.html"><h1 class="title">R for RNAseq analysis</h1></a>
           <h2 class="subtitle">Data structures</h2>
           <section class="objectives panel panel-warning">
 <div class="panel-heading">
@@ -226,7 +226,6 @@ names_example</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">str</span>(cats$coat)</code></pre>
 <pre class="output"><code> Factor w/ 3 levels &quot;black&quot;,&quot;calico&quot;,..: 2 1 3
 </code></pre>
-<h2 id="factors-1">Factors</h2>
 <p>Another important data structure is called a <em>factor</em>. Factors usually look like character data, but are typically used to represent categorical information. For example, let’s make a vector of strings labeling cat colorations for all the cats in our study:</p>
 <pre class="sourceCode r"><code class="sourceCode r">coats &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&#39;tabby&#39;</span>, <span class="st">&#39;tortoiseshell&#39;</span>, <span class="st">&#39;tortoiseshell&#39;</span>, <span class="st">&#39;black&#39;</span>, <span class="st">&#39;tabby&#39;</span>)
 coats</code></pre>
