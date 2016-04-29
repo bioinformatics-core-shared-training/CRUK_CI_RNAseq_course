@@ -33,6 +33,3 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 - Applying RNAseq
 
 ## Other Resources
-
-*   [Reference](reference.html)
-*   [Instructor's Guide](instructors.html)
