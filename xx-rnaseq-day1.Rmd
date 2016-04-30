@@ -24,13 +24,16 @@ This material has been created using the following resources:
 http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf  
 http://monashbioinformaticsplatform.github.io/RNAseq-DE-analysis-with-R/99-RNAseq_DE_analysis_with_R.html  
 
-Other potential refs:  
-https://github.com/datacarpentry/archive-datacarpentry/tree/master/lessons/rnaseq-data-analysis   
-https://www.bioconductor.org/help/course-materials/2015/LearnBioconductorFeb2015/B02.1.1_RNASeqLab.html   
-https://www.bioconductor.org/packages/3.3/bioc/vignettes/limma/inst/doc/usersguide.pdf  
-
 Data files downloaded from:  
-ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE60nnn/GSE60450/matrix/GSE60450_series_matrix.txt.gz  
+ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE60nnn/GSE60450/suppl/GSE60450_Lactation-GenewiseCounts.txt.gz
+http://bioinf.wehi.edu.au/software/MSigDB/mouse_c2_v5.rdata
+http://bioinf.wehi.edu.au/software/MSigDB/mouse_H_v5.rdata 
+
+Data files for Day 1:  
+targets.txt 
+GSE60450_Lactation-GenewiseCounts.txt  
+mouse_c2_v5.rdata  
+mouse_H_v5.rdata
 
 Packages used:
 limma,
@@ -40,12 +43,6 @@ org.Mm.eg.db,
 EDASeq,
 RColorBrewer,
 Glimma
-
-Data files for Day 1:  
-GSE60450_Lactation-GenewiseCounts.txt  
-targets.txt  
-mouse_c2_v5.rdata  
-mouse_H_v5.rdata  
 
 ## Overview of Day 1
 
@@ -60,9 +57,9 @@ mouse_H_v5.rdata
 
 ## Introduction and data import
 
-Measuring gene expression on a genome-wide scale has become common practise over the last two decades or so, with microarrays predominantly used pre-2008. With the advent of next generation sequencing technology in 2008, an increasing number of scientists use this technology to measure and understand changes in gene expression in often complex systems. As sequencing costs have decreased, using RNA-Seq to simultaneously measure the expression of tens of thousands of genes for multiple samples has never been easier. The cost of these experiments has now moved from generating the data to storing and analysing it.
+Measuring gene expression on a genome-wide scale has become common practice over the last two decades or so, with microarrays predominantly used pre-2008. With the advent of next generation sequencing technology in 2008, an increasing number of scientists use this technology to measure and understand changes in gene expression in often complex systems. As sequencing costs have decreased, using RNA-Seq to simultaneously measure the expression of tens of thousands of genes for multiple samples has never been easier. The cost of these experiments has now moved from generating the data to storing and analysing it.
 
-There are many steps involved in analysing an RNA-Seq experiment. Analyzing an RNAseq experiment begins with sequencing reads. These are aligned to a reference genome, then the number of reads mapped to each gene can be counted. This results in a table of counts, which is what we perform statistical analyses on in R. While mapping and counting are important and necessary tasks, today we will be starting from the count data and getting stuck into analysis.
+There are many steps involved in analysing an RNA-Seq experiment. Analysing an RNAseq experiment begins with sequencing reads. These are aligned to a reference genome, then the number of reads mapped to each gene can be counted. This results in a table of counts, which is what we perform statistical analyses on in R. While mapping and counting are important and necessary tasks, today we will be starting from the count data and getting stuck into analysis.
 
 First, let's load all the packages we will need to analyse the data.
 
@@ -73,15 +70,17 @@ library(EDASeq)
 library(gplots)
 library(org.Mm.eg.db)
 library(RColorBrewer)
+library(Glimma)
 ```
 
 
 ### Mouse mammary gland dataset
 
-The data for this tutorial comes from a Nature Cell Biology paper, *EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival*. Both the raw data (sequence reads) and processed data (counts) can be downloaded from Gene Expression Omnibus database (GEO) under accession number GSE60450.
+The data for this tutorial comes from a Nature Cell Biology paper, [*EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival*](http://www.ncbi.nlm.nih.gov/pubmed/25730472). Both the raw data (sequence reads) and processed data (counts) can be downloaded from Gene Expression Omnibus database (GEO) under accession number [GSE60450](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60450).
 
 This study examines the expression profiles of basal stem-cell enriched cells (B) and committed luminal cells (L) in the mammary gland of virgin, pregnant and lactating mice. Six groups are present, with one for each combination of cell type and mouse status. Each group contains two biological replicates.
-We will first use the counts file as a starting point for our analysis. This data has already been aligned to the mouse genome. The command line tool featureCounts was used to count reads mapped to human genes from Refseq annotation (see paper for details).
+
+We will first use the counts file as a starting point for our analysis. This data has already been aligned to the mouse genome. The command line tool featureCounts was used to count reads mapped to human genes from Refseq annotation (see the [paper](http://www.ncbi.nlm.nih.gov/pubmed/25730472) for details).
 
 ### Reading in the data
 
@@ -101,7 +100,7 @@ head(seqdata)
 dim(seqdata)
 ```
 
-The `seqdata` object contains information about genes (one gene per row), the first column has the Entrez gene id, the second has the gene length and the remaining columns contain information about the number of reads aligning to the gene in each experimental sample. There are two replicates for each cell type and timepoint (detailed sample info can be found in file "GSE60450_series_matrix.txt" from the GEO website). The targets file contains the basic information about the samples that we will need for the analysis today.
+The `seqdata` object contains information about genes (one gene per row), the first column has the Entrez gene id, the second has the gene length and the remaining columns contain information about the number of reads aligning to the gene in each experimental sample. There are two replicates for each cell type and timepoint (detailed sample info can be found in file "GSE60450_series_matrix.txt" from the [GEO website](http://www.ncbi.nlm.nih.gov/pubmed/25730472)). The targets file contains the basic information about the samples that we will need for the analysis today.
 
 ```{r}
 targets
@@ -417,7 +416,7 @@ Now that we are happy that we have normalised the data and that the quality look
 
 ### Create the design matrix
 
-First we need to create a design matrix for the groups. See the excellent limma user guide for more information on design matrices. There are many different ways to set up your design matrix, and it is dictated by what comparisons you would like to test. We will follow the set-up from pg 43 of the limma vignette ("Interaction models: 2X2 factorial designs").
+First we need to create a design matrix for the groups (see the excellent [limma user guide](https://bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf) for more information on design matrices). There are many different ways to set up your design matrix, and it is dictated by what comparisons you would like to test. We will follow the set-up from pg 43 of the limma vignette ("Interaction models: 2X2 factorial designs").
 
 In this analysis let's assume that we will be testing differences in status in the different cell types separately. For example, we want to know which genes are differentially expressed between virgin and pregnant in basal cells only. We have already coded our `group` variable for our final MDSplot, which was a concatenation of cell type and status. Coding the cell type and status in this way allows us to be flexible in specifying which comparisons we are interested in.
 
@@ -528,8 +527,6 @@ topTable(fit.cont,coef="B.PregVsLac",sort.by="p")
 topTable(fit.cont,coef=1,sort.by="p")
 ```
 
-Explain topTable output.
-
 ### Adding annotation and saving the results
 
 We have a list of significantly differentially expressed genes, but the only annotation we can see is the Entrez Gene ID, which is not very informative. We would like to add some annotation information. There are a number of ways to do this. We will demonstrate how to do this using the *org.Mm.eg.db* package.
@@ -639,7 +636,7 @@ abline(h=0,col="grey")
 * Load in the results from the limma-voom analysis using the Degust GUI
 * Visualise the plots and results
 
-## Generating heatmaps for DE genes [if there is enough time]
+## Generating heatmaps for DE genes
 
 For visualisation purposes, we can make heatmaps of the most differentially expressed genes.
 First we'll select out the significant genes, the genes below a specified adj.P.value. In this case we'll use 0.01
@@ -709,7 +706,7 @@ heatmap.2(down50.counts.voom, Rowv = F, Colv = F, trace="none", ColSideColors=ni
 
 Sometimes there is quite a long list of differentially expressed genes to interpret after a differential expression analysis, and it is usually infeasible to go through the list one gene at a time trying to understand it's biological function. A common downstream procedure is gene set testing, which aims to understand which pathways/gene networks the differentially expressed genes are implicated in.
 
-There are a number of different ways to go about testing for enrichment of biological pathways, and the test you choose usually depends on the question you're asking. There are two kinds of tests: self-contained and competitive gene set tests. Self-contained tests, which include the `ROAST` procedure, ask the question "Are the genes in the set/pathway differentially expressed as a whole?" Competitive gene set tests, like `goana` and `camera` and `qusage` (?) ask the question whether the differentially expressed genes tend to be over-represented in the gene set, compared to all the other genes in the experiment. These different questions use different statistical methodology.
+There are a number of different ways to go about testing for enrichment of biological pathways, and the test you choose usually depends on the question you're asking. There are two kinds of tests: self-contained and competitive gene set tests. Self-contained tests, which include the `ROAST` procedure, ask the question "Are the genes in the set/pathway differentially expressed as a whole?" Competitive gene set tests, like `goana` and `camera` ask the question whether the differentially expressed genes tend to be over-represented in the gene set, compared to all the other genes in the experiment. These different questions use different statistical methodology.
 
 ### Gene ontology testing with goana
 
@@ -749,7 +746,7 @@ Notes
 
 ### Kegg pathway analysis with kegga
 
-The `kegga` function in *limma* offers KEGG pathway analysis in a similar way to `goana`. There are many species that have associated KEGG pathways, see  http://www.kegg.jp/kegg/catalog/org_list.html for details. `kegga` requires an internet connection to run.
+The `kegga` function in *limma* offers KEGG pathway analysis in a similar way to `goana`. There are many species that have associated KEGG pathways, see  [http://www.kegg.jp/kegg/catalog/org_list.html](http://www.kegg.jp/kegg/catalog/org_list.html) for details. `kegga` requires an internet connection to run.
 
 ```{r}
 kegg <- kegga(fit.cont, coef="B.PregVsLac", species.KEGG="mmu")
@@ -760,10 +757,9 @@ topKEGG(kegg)
 
 ### CAMERA gene set testing using the Broad's curated gene sets
 
-Other databases of gene sets that are available come from the Broad Institute's Molecular Signatures Database (MSigDB). CAMERA is good option for testing a very large number of gene sets such as the MSigDB sets, as it is very fast. CAMERA is known as a competitive gene set test, however it has the advantage that it can take into account inter-gene correlation within each gene set. It also works seemlessly with a `voom` object, taking into account the mean-variance relationship in RNA-Seq data.
+Other databases of gene sets that are available come from the Broad Institute's Molecular Signatures Database ([MSigDB](http://software.broadinstitute.org/gsea/msigdb)). CAMERA is good option for testing a very large number of gene sets such as the MSigDB sets, as it is very fast. CAMERA is known as a competitive gene set test, however it has the advantage that it can take into account inter-gene correlation within each gene set. It also works seemlessly with a `voom` object, taking into account the mean-variance relationship in RNA-Seq data.
 
-Here we will be using the C2 gene sets for mouse, available as .rdata files from the WEHI bioinformatics page (http://bioinf.wehi.edu.au/software/MSigDB/index.html). The C2 gene sets contain 4725 curated gene sets collected from a variety
-of places: BioCarta, KEGG, Pathway Interaction Database, Reactome as well as some published studies.It doesn't include GO terms.
+Here we will be using the C2 gene sets for mouse, available as .rdata files from the WEHI bioinformatics page [http://bioinf.wehi.edu.au/software/MSigDB/index.html](http://bioinf.wehi.edu.au/software/MSigDB/index.html). The C2 gene sets contain 4725 curated gene sets collected from a variety of places: BioCarta, KEGG, Pathway Interaction Database, Reactome as well as some published studies.It doesn't include GO terms.
 
 ```{r}
 # Load in the mouse c2 gene sets
@@ -810,7 +806,7 @@ write.csv(gst.camera,file="gst_BPregVsLac.csv")
 
 ### ROAST gene set testing
 
-ROAST is an example of a self-contained gene set test. It asks the question, "Do the genes in my set tend to be differentially expressed between my conditions of interest?". ROAST doesn't care about what the other genes in the experiment are doing, which is different to CAMERA, `goana` and `kegga`. ROAST is a good option for when you're interested in a specific set, or a few sets. It is not really used to test thousands of sets at one time.
+ROAST is an example of a self-contained gene set test. It asks the question, "Do the genes in my set tend to be differentially expressed between my conditions of interest?". ROAST doesn't care about what the other genes in the experiment are doing, which is different to `camera`, `goana` and `kegga`. ROAST is a good option for when you're interested in a specific set, or a few sets. It is not really used to test thousands of sets at one time.
 
 Let's have a look at the top 10 genes differentially expressed in the basal pregant vs lactating group.
 
@@ -818,7 +814,7 @@ Let's have a look at the top 10 genes differentially expressed in the basal preg
 topTable(fit.cont,coef=1,sort.by="p")
 ```
 
-The top genes is Wnt inhibitory factor 1. Let's see if there are any WNT signalling pathways in MsigDB C2 collection. We can do this with the `grep` command on the names of the gene sets.
+The top gene is Wnt inhibitory factor 1. Let's see if there are any WNT signalling pathways in MsigDB C2 collection. We can do this with the `grep` command on the names of the gene sets.
 
 ```{r}
 grep("WNT",names(c2.ind))
@@ -864,11 +860,9 @@ barcodeplot(fit.cont$coeff[,1], index=c2.ind[["MENSSEN_MYC_TARGETS"]], main="MEN
 barcodeplot(fit.cont$t[,1], index=c2.ind[["MENSSEN_MYC_TARGETS"]], main="MENSSEN_MYC_TARGETS")
 ```
 
-Generate plot and discuss.
-
 Here, genes are represented by bars and are ranked from left to right by decreasing log-fold change or t-statistic. This forms the barcode-like pattern. The line above the barcode shows the relative local enrichment of the vertical bars in each part of the plot. The barcodeplot shows that the genes in this gene set tend to be up-regulated between pregnant and lactating in basal cells.
 
-<span style="color:blue">Exercise: (1) Produce a barcodeplot for luminal pregnant vs lactating for this gene set. Does the pattern of enrichment look as strong? (2) Choose one of the wnt signalling pathways and produce a barcode plot for both comparisons.(3) You can put two gene sets on one plot, for example a set that is up-regulated and one that is down-regulated, by adding a gene set to the `index2` argument. Produce a barcodeplot with two sets of your choosing.</span>
+<span style="color:blue">Exercise: (1) Produce a barcodeplot for luminal pregnant vs lactating for this gene set. Does the pattern of enrichment look as strong? (2) Choose one of the Wnt signalling pathways and produce a barcode plot for both comparisons.(3) You can put two gene sets on one plot, for example a set that is up-regulated and one that is down-regulated, by adding a gene set to the `index2` argument. Produce a barcodeplot with two sets of your choosing.</span>
 
 # Record package and version info with sessionInfo()
 The session information describes the versions of R and of the packages that were used in the analysis. This is useful for record-keeping purposes, and ensures that an analysis can be reproduced even when the software is updated over time.
