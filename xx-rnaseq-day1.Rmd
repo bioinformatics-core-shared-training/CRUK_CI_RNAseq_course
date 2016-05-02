@@ -7,6 +7,10 @@ date: "11 - 12 May 2016"
 minutes: ?
 ---
 
+```{r, include=FALSE}
+source("tools/chunk-options.R")
+```
+
 ## Install packages (move this to a set-up section?)
 ```{r, eval = FALSE}
 source("http://bioconductor.org/biocLite.R")
@@ -27,10 +31,10 @@ http://monashbioinformaticsplatform.github.io/RNAseq-DE-analysis-with-R/99-RNAse
 Data files downloaded from:  
 ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE60nnn/GSE60450/suppl/GSE60450_Lactation-GenewiseCounts.txt.gz
 http://bioinf.wehi.edu.au/software/MSigDB/mouse_c2_v5.rdata
-http://bioinf.wehi.edu.au/software/MSigDB/mouse_H_v5.rdata 
+http://bioinf.wehi.edu.au/software/MSigDB/mouse_H_v5.rdata
 
 Data files for Day 1:  
-targets.txt 
+targets.txt
 GSE60450_Lactation-GenewiseCounts.txt  
 mouse_c2_v5.rdata  
 mouse_H_v5.rdata
