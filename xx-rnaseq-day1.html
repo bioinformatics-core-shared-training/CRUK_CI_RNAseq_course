@@ -60,8 +60,6 @@
 <span class="kw">library</span>(Glimma)</code></pre>
 <pre class="error"><code>Warning: package &#39;Glimma&#39; was built under R version 3.3.0
 </code></pre>
-<pre class="error"><code>Error: package or namespace load failed for &#39;Glimma&#39;
-</code></pre>
 <h3 id="mouse-mammary-gland-dataset">Mouse mammary gland dataset</h3>
 <p>The data for this tutorial comes from a Nature Cell Biology paper, <a href="http://www.ncbi.nlm.nih.gov/pubmed/25730472"><em>EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival</em></a>. Both the raw data (sequence reads) and processed data (counts) can be downloaded from Gene Expression Omnibus database (GEO) under accession number <a href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60450">GSE60450</a>.</p>
 <p>This study examines the expression profiles of basal stem-cell enriched cells (B) and committed luminal cells (L) in the mammary gland of virgin, pregnant and lactating mice. Six groups are present, with one for each combination of cell type and mouse status. Each group contains two biological replicates.</p>
@@ -1341,12 +1339,12 @@ wnt &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="st">
 <pre class="sourceCode r"><code class="sourceCode r">wnt.rst &lt;-<span class="st"> </span><span class="kw">roast</span>(v,<span class="dt">index=</span>c2.ind[wnt],<span class="dt">design=</span>design,<span class="dt">contrast=</span>cont.matrix[,<span class="dv">1</span>],<span class="dt">nrot=</span><span class="dv">9999</span>)
 wnt.rst</code></pre>
 <pre class="output"><code>                                    NGenes  PropDown     PropUp Direction
-LABBE_WNT3A_TARGETS_UP                 104 0.2307692 0.49038462        Up
 PID_WNT_NONCANONICAL_PATHWAY            31 0.4516129 0.09677419      Down
+LABBE_WNT3A_TARGETS_UP                 104 0.2307692 0.49038462        Up
 WILLERT_WNT_SIGNALING                   22 0.2272727 0.54545455        Up
 SANSOM_WNT_PATHWAY_REQUIRE_MYC          53 0.1886792 0.45283019        Up
-REACTOME_SIGNALING_BY_WNT               62 0.1290323 0.50000000        Up
 PID_WNT_CANONICAL_PATHWAY               19 0.4736842 0.21052632      Down
+REACTOME_SIGNALING_BY_WNT               62 0.1290323 0.50000000        Up
 BIOCARTA_WNT_PATHWAY                    24 0.2500000 0.33333333        Up
 ST_WNT_BETA_CATENIN_PATHWAY             32 0.3125000 0.34375000        Up
 KEGG_WNT_SIGNALING_PATHWAY             131 0.3740458 0.25190840      Down
@@ -1356,38 +1354,38 @@ LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN     90 0.2555556 0.40000000        Up
 ST_WNT_CA2_CYCLIC_GMP_PATHWAY           14 0.2857143 0.35714286        Up
 LABBE_WNT3A_TARGETS_DN                  65 0.2615385 0.27692308        Up
 WNT_SIGNALING                           75 0.3600000 0.30666667      Down
-                                    PValue       FDR PValue.Mixed
-LABBE_WNT3A_TARGETS_UP              0.0001 0.0007500       0.0002
-PID_WNT_NONCANONICAL_PATHWAY        0.0003 0.0018750       0.0003
-WILLERT_WNT_SIGNALING               0.0005 0.0022500       0.0001
-SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0028 0.0103125       0.0001
-REACTOME_SIGNALING_BY_WNT           0.0142 0.0356250       0.0033
-PID_WNT_CANONICAL_PATHWAY           0.0143 0.0356250       0.0004
-BIOCARTA_WNT_PATHWAY                0.0464 0.0854250       0.0004
-ST_WNT_BETA_CATENIN_PATHWAY         0.0472 0.0854250       0.0002
-KEGG_WNT_SIGNALING_PATHWAY          0.0541 0.0854250       0.0001
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0570 0.0854250       0.0002
-PID_WNT_SIGNALING_PATHWAY           0.0932 0.1270227       0.0001
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.1635 0.2043125       0.0001
-ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.2609 0.3009808       0.0005
-LABBE_WNT3A_TARGETS_DN              0.4968 0.5322321       0.0002
-WNT_SIGNALING                       0.8821 0.8821000       0.0001
+                                    PValue        FDR PValue.Mixed
+PID_WNT_NONCANONICAL_PATHWAY        0.0001 0.00075000       0.0008
+LABBE_WNT3A_TARGETS_UP              0.0002 0.00112500       0.0005
+WILLERT_WNT_SIGNALING               0.0008 0.00375000       0.0004
+SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0018 0.00656250       0.0002
+PID_WNT_CANONICAL_PATHWAY           0.0171 0.04812500       0.0001
+REACTOME_SIGNALING_BY_WNT           0.0193 0.04812500       0.0044
+BIOCARTA_WNT_PATHWAY                0.0366 0.07832143       0.0002
+ST_WNT_BETA_CATENIN_PATHWAY         0.0525 0.08557500       0.0001
+KEGG_WNT_SIGNALING_PATHWAY          0.0540 0.08557500       0.0001
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0571 0.08557500       0.0001
+PID_WNT_SIGNALING_PATHWAY           0.0994 0.13547727       0.0001
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.1604 0.20043750       0.0001
+ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.2566 0.29601923       0.0003
+LABBE_WNT3A_TARGETS_DN              0.5040 0.53994643       0.0001
+WNT_SIGNALING                       0.8848 0.88480000       0.0002
                                        FDR.Mixed
-LABBE_WNT3A_TARGETS_UP              0.0002250000
-PID_WNT_NONCANONICAL_PATHWAY        0.0003409091
-WILLERT_WNT_SIGNALING               0.0001250000
-SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0001250000
-REACTOME_SIGNALING_BY_WNT           0.0033000000
-PID_WNT_CANONICAL_PATHWAY           0.0004038462
-BIOCARTA_WNT_PATHWAY                0.0004038462
-ST_WNT_BETA_CATENIN_PATHWAY         0.0002250000
-KEGG_WNT_SIGNALING_PATHWAY          0.0001250000
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0002250000
-PID_WNT_SIGNALING_PATHWAY           0.0001250000
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.0001250000
-ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.0005000000
-LABBE_WNT3A_TARGETS_DN              0.0002250000
-WNT_SIGNALING                       0.0001250000
+PID_WNT_NONCANONICAL_PATHWAY        0.0008035714
+LABBE_WNT3A_TARGETS_UP              0.0005192308
+WILLERT_WNT_SIGNALING               0.0004375000
+SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0002250000
+PID_WNT_CANONICAL_PATHWAY           0.0001071429
+REACTOME_SIGNALING_BY_WNT           0.0044000000
+BIOCARTA_WNT_PATHWAY                0.0002250000
+ST_WNT_BETA_CATENIN_PATHWAY         0.0001071429
+KEGG_WNT_SIGNALING_PATHWAY          0.0001071429
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0001071429
+PID_WNT_SIGNALING_PATHWAY           0.0001071429
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.0001071429
+ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.0003409091
+LABBE_WNT3A_TARGETS_DN              0.0001071429
+WNT_SIGNALING                       0.0002250000
 </code></pre>
 <p>Each row corresponds to a single gene set. The NGenes column gives the number of genes in each set. The PropDown and PropUp columns contain the proportions of genes in the set that are down- and up-regulated, respectively, with absolute fold changes greater than √ 2. The net direction of change is determined from the significance of changes in each direction, and is shown in the Direction column. The PValue provides evidence for whether the majority of genes in the set are DE in the specified direction, whereas the PValue.Mixed tests for differential expression in any direction. FDRs are computed from the corresponding p-values across all sets.</p>
 <p><span style="color:blue">Exercise: (1) test whether the wnt signalling pathways tend to be differentially expressed between luminal pregnant vs lactating (the second contrast) (2) Look for gene sets containing “MYC” in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.</span></p>
@@ -1449,39 +1447,49 @@ attached base packages:
 [8] datasets  base     
 
 other attached packages:
- [1] GO.db_3.2.2                RColorBrewer_1.1-2        
- [3] org.Mm.eg.db_3.2.3         RSQLite_1.0.0             
- [5] DBI_0.3.1                  AnnotationDbi_1.32.3      
- [7] gplots_3.0.1               EDASeq_2.4.1              
- [9] ShortRead_1.28.0           GenomicAlignments_1.6.3   
-[11] SummarizedExperiment_1.0.2 Rsamtools_1.22.0          
-[13] GenomicRanges_1.22.4       GenomeInfoDb_1.6.3        
-[15] Biostrings_2.38.4          XVector_0.10.0            
-[17] IRanges_2.4.8              S4Vectors_0.8.11          
-[19] BiocParallel_1.4.3         Biobase_2.30.0            
-[21] BiocGenerics_0.16.1        edgeR_3.12.1              
-[23] limma_3.26.9               knitr_1.12.3              
+ [1] GO.db_3.2.2                Glimma_0.99.5             
+ [3] RColorBrewer_1.1-2         org.Mm.eg.db_3.2.3        
+ [5] RSQLite_1.0.0              DBI_0.3.1                 
+ [7] AnnotationDbi_1.32.3       gplots_3.0.1              
+ [9] EDASeq_2.4.1               ShortRead_1.28.0          
+[11] GenomicAlignments_1.6.3    SummarizedExperiment_1.0.2
+[13] Rsamtools_1.22.0           GenomicRanges_1.22.4      
+[15] GenomeInfoDb_1.6.3         Biostrings_2.38.4         
+[17] XVector_0.10.0             IRanges_2.4.8             
+[19] S4Vectors_0.8.11           BiocParallel_1.4.3        
+[21] Biobase_2.30.0             BiocGenerics_0.16.1       
+[23] edgeR_3.12.1               limma_3.26.9              
+[25] knitr_1.12.3              
 
 loaded via a namespace (and not attached):
- [1] formatR_1.3             futile.logger_1.4.1    
- [3] GenomicFeatures_1.22.13 R.methodsS3_1.7.1      
- [5] bitops_1.0-6            futile.options_1.0.0   
- [7] R.utils_2.3.0           tools_3.2.4            
- [9] zlibbioc_1.16.0         biomaRt_2.26.1         
-[11] annotate_1.48.0         evaluate_0.8.3         
-[13] lattice_0.20-33         Matrix_1.2-5           
-[15] DESeq_1.22.1            rtracklayer_1.30.4     
-[17] genefilter_1.52.1       stringr_1.0.0          
-[19] hwriter_1.3.2           caTools_1.17.1         
-[21] gtools_3.5.0            aroma.light_3.0.0      
-[23] grid_3.2.4              survival_2.39-2        
-[25] XML_3.98-1.4            BiasedUrn_1.07         
-[27] gdata_2.17.0            latticeExtra_0.6-28    
-[29] geneplotter_1.48.0      lambda.r_1.1.7         
-[31] magrittr_1.5            splines_3.2.4          
-[33] matrixStats_0.50.2      xtable_1.8-2           
-[35] KernSmooth_2.23-15      stringi_1.0-1          
-[37] RCurl_1.95-4.8          R.oo_1.20.0            
+ [1] locfit_1.5-9.1            Rcpp_0.12.4              
+ [3] lattice_0.20-33           gtools_3.5.0             
+ [5] plyr_1.8.3                futile.options_1.0.0     
+ [7] acepack_1.3-3.3           aroma.light_3.0.0        
+ [9] DESeq_1.22.1              evaluate_0.9             
+[11] ggplot2_2.1.0             zlibbioc_1.16.0          
+[13] GenomicFeatures_1.22.13   annotate_1.48.0          
+[15] gdata_2.17.0              R.utils_2.3.0            
+[17] R.oo_1.20.0               rpart_4.1-10             
+[19] Matrix_1.2-5              splines_3.2.4            
+[21] foreign_0.8-66            geneplotter_1.48.0       
+[23] stringr_1.0.0             RCurl_1.95-4.8           
+[25] biomaRt_2.26.1            munsell_0.4.3            
+[27] rtracklayer_1.30.4        nnet_7.3-12              
+[29] gridExtra_2.2.1           Hmisc_3.17-3             
+[31] matrixStats_0.50.2        XML_3.98-1.4             
+[33] bitops_1.0-6              R.methodsS3_1.7.1        
+[35] grid_3.2.4                xtable_1.8-2             
+[37] gtable_0.2.0              BiasedUrn_1.07           
+[39] magrittr_1.5              formatR_1.3              
+[41] scales_0.4.0              KernSmooth_2.23-15       
+[43] stringi_1.0-1             hwriter_1.3.2            
+[45] genefilter_1.52.1         RcppArmadillo_0.6.700.3.0
+[47] latticeExtra_0.6-28       futile.logger_1.4.1      
+[49] Formula_1.2-1             lambda.r_1.1.7           
+[51] tools_3.2.4               DESeq2_1.10.1            
+[53] survival_2.39-2           colorspace_1.2-6         
+[55] cluster_2.0.4             caTools_1.17.1           
 </code></pre>
         </div>
       </div>
