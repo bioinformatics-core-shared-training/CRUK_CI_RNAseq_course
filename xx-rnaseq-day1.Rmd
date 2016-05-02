@@ -7,6 +7,10 @@ date: "11 - 12 May 2016"
 minutes: ?
 ---
 
+```{r, include=FALSE}
+source("tools/chunk-options.R")
+```
+
 ## Install packages (move this to a set-up section?)
 ```{r, eval = FALSE}
 source("http://bioconductor.org/biocLite.R")
@@ -27,10 +31,10 @@ http://monashbioinformaticsplatform.github.io/RNAseq-DE-analysis-with-R/99-RNAse
 Data files downloaded from:  
 ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE60nnn/GSE60450/suppl/GSE60450_Lactation-GenewiseCounts.txt.gz
 http://bioinf.wehi.edu.au/software/MSigDB/mouse_c2_v5.rdata
-http://bioinf.wehi.edu.au/software/MSigDB/mouse_H_v5.rdata 
+http://bioinf.wehi.edu.au/software/MSigDB/mouse_H_v5.rdata
 
 Data files for Day 1:  
-targets.txt 
+targets.txt
 GSE60450_Lactation-GenewiseCounts.txt  
 mouse_c2_v5.rdata  
 mouse_H_v5.rdata
@@ -316,8 +320,9 @@ legend("bottomleft", legend=levels(group), pch=points, col=colors, ncol=2,cex=0.
 The distance between each pair of samples in the MDS plot is calculated as the leading fold change, defined as the root-mean-square of the largest 500 log2-fold changes between that pair of samples. Replicate samples from the same group cluster together in the plot, while samples from different groups form separate clusters. This indicates that the differences between groups are larger than those within groups, i.e., differential expression is greater than the variance and can be detected. In the MDS plot, the distance between basal samples on the left and luminal cells on the right is about 6 units, corresponding to a leading fold change of about 64-fold (2^6 = 64) between basal and luminal. The expression differences between virgin, pregnant and lactating are greater for luminal cells than for basal.
 
 Notes
-• The MDS plot can be simply generated with `plotMDS(y)`. The additional code is purely for aesthetics, to improve the visualization of the groups.
-• Clustering in the MDS plot can be used to motivate changes to the design matrix in light of potential batch effects. For example, imagine that the first replicate of each group was prepared at a separate time from the second replicate. If the MDS plot showed separation of samples by time, it might be worthwhile including time in the down stream analysis to account for the time-based effect.
+
+* The MDS plot can be simply generated with `plotMDS(y)`. The additional code is purely for aesthetics, to improve the visualization of the groups.
+* Clustering in the MDS plot can be used to motivate changes to the design matrix in light of potential batch effects. For example, imagine that the first replicate of each group was prepared at a separate time from the second replicate. If the MDS plot showed separation of samples by time, it might be worthwhile including time in the down stream analysis to account for the time-based effect.
 
 `plotMDS` plots the first two dimensions as a default, however you can plot higher dimensions using the `dim` argument.
 
@@ -740,9 +745,10 @@ topGO(go_length, n=10)
 
 
 Notes
-• Users can specify the domain of the enriched GO terms in topGO. For instance, topGO(go,ontology="BP") lists the top set of most enriched GO terms that are related to a biological process. This avoids other domains that are not of interest.
-• The goana function uses the NCBI RefSeq annotation. Therefore, the Entrez Gene identifier (ID) should be supplied for each gene as the row names of the fit object.
-• Users should set species according to the organism being studied.
+
+* Users can specify the domain of the enriched GO terms in topGO. For instance, topGO(go,ontology="BP") lists the top set of most enriched GO terms that are related to a biological process. This avoids other domains that are not of interest.
+* The goana function uses the NCBI RefSeq annotation. Therefore, the Entrez Gene identifier (ID) should be supplied for each gene as the row names of the fit object.
+* Users should set species according to the organism being studied.
 
 ### CAMERA gene set testing using the Broad's curated gene sets
 
@@ -825,10 +831,11 @@ Each row corresponds to a single gene set. The NGenes column gives the number of
 <span style="color:blue">Exercise: (1) test whether the wnt signalling pathways tend to be differentially expressed between luminal pregnant vs lactating (the second contrast) (2) Look for gene sets containing "MYC" in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.</span>
 
 Notes
-• A common application of ROAST is to use a set of DE genes that was defined from an analysis of an independent data set. ROAST can then determine whether similar changes are observed in the contrast of interest for the current data set.
-• Even for GO-defined gene sets, goana and ROAST have different behaviours. In goana, the significance of differential expression for a GO term is determined relative to other DE genes that are not annotated with that term. In ROAST, only differential expression for the genes in the set are relevant to the significance of that set and its corresponding term. goana depends on a significance cutoff to choose DE genes, whereas ROAST does not require a cutoff and evaluates all genes in the set.
-• ROAST estimates p-values by simulation, so the results may change slightly between runs. More precise p-values can be obtained by increasing the number of rotations, albeit at the cost of increased computational time.
-• The smallest p-value that can be reported is 1/(2 · nrot + 1) where nrot is the number of rotations. This lower bound can be decreased by increasing nrot.
+
+* A common application of ROAST is to use a set of DE genes that was defined from an analysis of an independent data set. ROAST can then determine whether similar changes are observed in the contrast of interest for the current data set.
+* Even for GO-defined gene sets, goana and ROAST have different behaviours. In goana, the significance of differential expression for a GO term is determined relative to other DE genes that are not annotated with that term. In ROAST, only differential expression for the genes in the set are relevant to the significance of that set and its corresponding term. goana depends on a significance cutoff to choose DE genes, whereas ROAST does not require a cutoff and evaluates all genes in the set.
+* ROAST estimates p-values by simulation, so the results may change slightly between runs. More precise p-values can be obtained by increasing the number of rotations, albeit at the cost of increased computational time.
+* The smallest p-value that can be reported is 1/(2 · nrot + 1) where nrot is the number of rotations. This lower bound can be decreased by increasing nrot.
 
 ### Visualising gene set tests: Barcode and enrichment plots
 

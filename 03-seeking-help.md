@@ -1,6 +1,6 @@
 ---
 layout: page
-title: R for reproducible scientific analysis
+title: R for RNAseq analysis
 subtitle: Seeking help
 minutes: 15
 ---
@@ -111,11 +111,11 @@ sessionInfo()
 
 ~~~{.output}
 R version 3.2.4 (2016-03-10)
-Platform: x86_64-apple-darwin15.3.0 (64-bit)
-Running under: OS X 10.11.3 (El Capitan)
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+Running under: OS X 10.11.4 (El Capitan)
 
 locale:
-[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+[1] en_AU.UTF-8/en_AU.UTF-8/en_AU.UTF-8/C/en_AU.UTF-8/en_AU.UTF-8
 
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  base     
@@ -134,9 +134,9 @@ have loaded. This can be useful for others to help reproduce and debug
 your issue.
 
 > ## Challenge 1 {.challenge}
-> 
+>
 > Look at the help for the `c` function. What kind of vector do you
-> expect you will create if you evaluate the following: 
+> expect you will create if you evaluate the following:
 > 
 > ~~~{.r}
 > c(1, 2, 3)
@@ -145,10 +145,10 @@ your issue.
 > ~~~
 
 > ## Challenge 2 {.challenge}
-> 
-> Look at the help for the `paste` function. You'll need to use this later. 
+>
+> Look at the help for the `paste` function. You'll need to use this later.
 > What is the difference between the `sep` and `collapse` arguments?
-> 
+>
 
 > ## Challenge 3 {.challenge}
 > Use help to find a function (and its associated parameters) that you could
@@ -176,9 +176,9 @@ your issue.
 >
 
 > ## Solution to Challenge 2 {.challenge}
-> 
-> Look at the help for the `paste` function. You'll need to use this later. 
-> 
+>
+> Look at the help for the `paste` function. You'll need to use this later.
+>
 > 
 > ~~~{.r}
 > help("paste")

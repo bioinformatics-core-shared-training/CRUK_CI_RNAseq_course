@@ -1,6 +1,6 @@
 ---
 layout: page
-title: R for reproducible scientific analysis
+title: R for RNAseq analysis
 subtitle: Exploring Data Frames
 minutes: 45
 ---
@@ -182,7 +182,7 @@ cats[-4,]
 
 ~~~
 
-Notice the comma with nothing after it to indicate we want to drop the entire fourth row. 
+Notice the comma with nothing after it to indicate we want to drop the entire fourth row.
 Alternatively, we can drop all rows with `NA` values:
 
 
@@ -208,7 +208,7 @@ In either case, we need to reassign our variable to persist the changes:
 cats <- na.omit(cats)
 ~~~
 
-> ## Discussion 1 {.challenge} 
+> ## Discussion 1 {.challenge}
 > What do you think
 > ```
 > cats$weight[4]
@@ -275,7 +275,7 @@ cats
 > - last name
 > - lucky number
 >
-> Then use `rbind` to add an entry for the people sitting beside you. 
+> Then use `rbind` to add an entry for the people sitting beside you.
 > Finally, use `cbind` to add a column with each person's answer to the question, "Is it time for coffee break?"
 >
 
@@ -490,7 +490,7 @@ into a script file so we can come back to it later.
 
 > ## Challenge 3 {.challenge}
 >
-> Read the output of `str(gapminder)` again; 
+> Read the output of `str(gapminder)` again;
 > this time, use what you've learned about factors, lists and vectors,
 > as well as the output of functions like `colnames` and `dim`
 > to explain what everything that `str` prints out for gapminder means.
@@ -512,5 +512,18 @@ into a script file so we can come back to it later.
 > df <- rbind(df, list('Marie', 'Curie', 238) )
 > df <- cbind(df, c(TRUE,TRUE))
 > names(df)[4] <- 'coffeetime'
+> ~~~
+>
+
+> ## Solution to Challenge 2 {.challenge}
+> The contents of `script/load-gapminder.R`:
+> 
+> ~~~{.r}
+> gapminder <- read.csv(file = "data/gapminder-FiveYearData.csv")
+> ~~~
+> To run the script and load the data into the `gapminder` variable:
+> 
+> ~~~{.r}
+> source(file = "scripts/load-gapminder.R")
 > ~~~
 >

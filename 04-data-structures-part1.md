@@ -1,6 +1,6 @@
 ---
 layout: page
-title: R for reproducible scientific analysis
+title: R for RNAseq analysis
 subtitle: Data structures
 minutes: 90
 ---
@@ -560,8 +560,6 @@ str(cats$coat)
  Factor w/ 3 levels "black","calico",..: 2 1 3
 
 ~~~
-
-## Factors
 
 Another important data structure is called a *factor*. Factors usually look like character data, but are typically used to represent categorical information. For example, let's make a vector of strings labeling cat colorations for all the cats in our study:
 
