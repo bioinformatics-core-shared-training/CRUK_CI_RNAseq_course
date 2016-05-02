@@ -744,17 +744,6 @@ Notes
 • The goana function uses the NCBI RefSeq annotation. Therefore, the Entrez Gene identifier (ID) should be supplied for each gene as the row names of the fit object.
 • Users should set species according to the organism being studied.
 
-### Kegg pathway analysis with kegga
-
-The `kegga` function in *limma* offers KEGG pathway analysis in a similar way to `goana`. There are many species that have associated KEGG pathways, see  [http://www.kegg.jp/kegg/catalog/org_list.html](http://www.kegg.jp/kegg/catalog/org_list.html) for details. `kegga` requires an internet connection to run.
-
-```{r}
-kegg <- kegga(fit.cont, coef="B.PregVsLac", species.KEGG="mmu")
-topKEGG(kegg)
-```
-
-<span style="color:blue">Exercise: Run `kegga` with gene length information (this will only work if you are using the latest version of R with the latest version of limma as there was a bug in the code.)</span>
-
 ### CAMERA gene set testing using the Broad's curated gene sets
 
 Other databases of gene sets that are available come from the Broad Institute's Molecular Signatures Database ([MSigDB](http://software.broadinstitute.org/gsea/msigdb)). CAMERA is good option for testing a very large number of gene sets such as the MSigDB sets, as it is very fast. CAMERA is known as a competitive gene set test, however it has the advantage that it can take into account inter-gene correlation within each gene set. It also works seemlessly with a `voom` object, taking into account the mean-variance relationship in RNA-Seq data.
