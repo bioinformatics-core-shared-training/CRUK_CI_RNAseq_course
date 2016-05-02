@@ -82,10 +82,29 @@ year gdpPercap.lifeExp gdpPercap.pop  pop.lifeExp
 
 ~~~{.r}
 library(tidyr)
+~~~
+
+
+
+~~~{.error}
+Error in library(tidyr): there is no package called 'tidyr'
+
+~~~
+
+
+
+~~~{.r}
 tidy.cors <- cors %>% gather(
   variables, correlation,
   gdpPercap.lifeExp, gdpPercap.pop,
   pop.lifeExp)
+~~~
+
+
+
+~~~{.error}
+Error in function_list[[k]](value): could not find function "gather"
+
 ~~~
 ## ... a subtle art ...
 ```
