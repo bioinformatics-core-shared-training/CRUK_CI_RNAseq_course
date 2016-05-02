@@ -545,7 +545,11 @@ colors &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="kw
 <span class="kw">legend</span>(<span class="st">&quot;bottomleft&quot;</span>, <span class="dt">legend=</span><span class="kw">levels</span>(group), <span class="dt">pch=</span>points, <span class="dt">col=</span>colors, <span class="dt">ncol=</span><span class="dv">2</span>,<span class="dt">cex=</span><span class="fl">0.7</span>)</code></pre>
 <p><img src="fig/unnamed-chunk-22-1.png" title="plot of chunk unnamed-chunk-22" alt="plot of chunk unnamed-chunk-22" style="display: block; margin: auto;" /></p>
 <p>The distance between each pair of samples in the MDS plot is calculated as the leading fold change, defined as the root-mean-square of the largest 500 log2-fold changes between that pair of samples. Replicate samples from the same group cluster together in the plot, while samples from different groups form separate clusters. This indicates that the differences between groups are larger than those within groups, i.e., differential expression is greater than the variance and can be detected. In the MDS plot, the distance between basal samples on the left and luminal cells on the right is about 6 units, corresponding to a leading fold change of about 64-fold (2^6 = 64) between basal and luminal. The expression differences between virgin, pregnant and lactating are greater for luminal cells than for basal.</p>
-<p>Notes • The MDS plot can be simply generated with <code>plotMDS(y)</code>. The additional code is purely for aesthetics, to improve the visualization of the groups. • Clustering in the MDS plot can be used to motivate changes to the design matrix in light of potential batch effects. For example, imagine that the first replicate of each group was prepared at a separate time from the second replicate. If the MDS plot showed separation of samples by time, it might be worthwhile including time in the down stream analysis to account for the time-based effect.</p>
+<p>Notes</p>
+<ul>
+<li>The MDS plot can be simply generated with <code>plotMDS(y)</code>. The additional code is purely for aesthetics, to improve the visualization of the groups.</li>
+<li>Clustering in the MDS plot can be used to motivate changes to the design matrix in light of potential batch effects. For example, imagine that the first replicate of each group was prepared at a separate time from the second replicate. If the MDS plot showed separation of samples by time, it might be worthwhile including time in the down stream analysis to account for the time-based effect.</li>
+</ul>
 <p><code>plotMDS</code> plots the first two dimensions as a default, however you can plot higher dimensions using the <code>dim</code> argument.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMDS</span>(y,<span class="dt">dim=</span><span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">4</span>),<span class="dt">col=</span>colors[group], <span class="dt">pch=</span>points[group])
 <span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend=</span><span class="kw">levels</span>(group), <span class="dt">pch=</span>points, <span class="dt">col=</span>colors, <span class="dt">ncol=</span><span class="dv">2</span>,<span class="dt">cex=</span><span class="fl">0.8</span>)</code></pre>
@@ -1170,7 +1174,12 @@ GO:0005840 1.720275e-30 1.0000000
 GO:0044391 2.402151e-28 1.0000000
 GO:0006364 5.785544e-28 1.0000000
 </code></pre>
-<p>Notes • Users can specify the domain of the enriched GO terms in topGO. For instance, topGO(go,ontology=“BP”) lists the top set of most enriched GO terms that are related to a biological process. This avoids other domains that are not of interest. • The goana function uses the NCBI RefSeq annotation. Therefore, the Entrez Gene identifier (ID) should be supplied for each gene as the row names of the fit object. • Users should set species according to the organism being studied.</p>
+<p>Notes</p>
+<ul>
+<li>Users can specify the domain of the enriched GO terms in topGO. For instance, topGO(go,ontology=“BP”) lists the top set of most enriched GO terms that are related to a biological process. This avoids other domains that are not of interest.</li>
+<li>The goana function uses the NCBI RefSeq annotation. Therefore, the Entrez Gene identifier (ID) should be supplied for each gene as the row names of the fit object.</li>
+<li>Users should set species according to the organism being studied.</li>
+</ul>
 <h3 id="kegg-pathway-analysis-with-kegga">Kegg pathway analysis with kegga</h3>
 <p>The <code>kegga</code> function in <em>limma</em> offers KEGG pathway analysis in a similar way to <code>goana</code>. There are many species that have associated KEGG pathways, see <a href="http://www.kegg.jp/kegg/catalog/org_list.html" class="uri">http://www.kegg.jp/kegg/catalog/org_list.html</a> for details. <code>kegga</code> requires an internet connection to run.</p>
 <pre class="sourceCode r"><code class="sourceCode r">kegg &lt;-<span class="st"> </span><span class="kw">kegga</span>(fit.cont, <span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>, <span class="dt">species.KEGG=</span><span class="st">&quot;mmu&quot;</span>)
@@ -1343,8 +1352,8 @@ PID_WNT_NONCANONICAL_PATHWAY            31 0.4516129 0.09677419      Down
 LABBE_WNT3A_TARGETS_UP                 104 0.2307692 0.49038462        Up
 WILLERT_WNT_SIGNALING                   22 0.2272727 0.54545455        Up
 SANSOM_WNT_PATHWAY_REQUIRE_MYC          53 0.1886792 0.45283019        Up
-PID_WNT_CANONICAL_PATHWAY               19 0.4736842 0.21052632      Down
 REACTOME_SIGNALING_BY_WNT               62 0.1290323 0.50000000        Up
+PID_WNT_CANONICAL_PATHWAY               19 0.4736842 0.21052632      Down
 BIOCARTA_WNT_PATHWAY                    24 0.2500000 0.33333333        Up
 ST_WNT_BETA_CATENIN_PATHWAY             32 0.3125000 0.34375000        Up
 KEGG_WNT_SIGNALING_PATHWAY             131 0.3740458 0.25190840      Down
@@ -1354,42 +1363,48 @@ LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN     90 0.2555556 0.40000000        Up
 ST_WNT_CA2_CYCLIC_GMP_PATHWAY           14 0.2857143 0.35714286        Up
 LABBE_WNT3A_TARGETS_DN                  65 0.2615385 0.27692308        Up
 WNT_SIGNALING                           75 0.3600000 0.30666667      Down
-                                    PValue        FDR PValue.Mixed
-PID_WNT_NONCANONICAL_PATHWAY        0.0001 0.00075000       0.0008
-LABBE_WNT3A_TARGETS_UP              0.0002 0.00112500       0.0005
-WILLERT_WNT_SIGNALING               0.0008 0.00375000       0.0004
-SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0018 0.00656250       0.0002
-PID_WNT_CANONICAL_PATHWAY           0.0171 0.04812500       0.0001
-REACTOME_SIGNALING_BY_WNT           0.0193 0.04812500       0.0044
-BIOCARTA_WNT_PATHWAY                0.0366 0.07832143       0.0002
-ST_WNT_BETA_CATENIN_PATHWAY         0.0525 0.08557500       0.0001
-KEGG_WNT_SIGNALING_PATHWAY          0.0540 0.08557500       0.0001
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0571 0.08557500       0.0001
-PID_WNT_SIGNALING_PATHWAY           0.0994 0.13547727       0.0001
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.1604 0.20043750       0.0001
-ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.2566 0.29601923       0.0003
-LABBE_WNT3A_TARGETS_DN              0.5040 0.53994643       0.0001
-WNT_SIGNALING                       0.8848 0.88480000       0.0002
+                                    PValue       FDR PValue.Mixed
+PID_WNT_NONCANONICAL_PATHWAY        0.0001 0.0007500       0.0003
+LABBE_WNT3A_TARGETS_UP              0.0004 0.0026250       0.0004
+WILLERT_WNT_SIGNALING               0.0011 0.0052500       0.0004
+SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0025 0.0091875       0.0001
+REACTOME_SIGNALING_BY_WNT           0.0163 0.0458750       0.0024
+PID_WNT_CANONICAL_PATHWAY           0.0184 0.0458750       0.0007
+BIOCARTA_WNT_PATHWAY                0.0454 0.0834750       0.0003
+ST_WNT_BETA_CATENIN_PATHWAY         0.0489 0.0834750       0.0001
+KEGG_WNT_SIGNALING_PATHWAY          0.0524 0.0834750       0.0001
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0557 0.0834750       0.0001
+PID_WNT_SIGNALING_PATHWAY           0.0879 0.1197955       0.0003
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.1579 0.1973125       0.0001
+ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.2585 0.2982115       0.0006
+LABBE_WNT3A_TARGETS_DN              0.5135 0.5501250       0.0004
+WNT_SIGNALING                       0.8836 0.8836000       0.0003
                                        FDR.Mixed
-PID_WNT_NONCANONICAL_PATHWAY        0.0008035714
-LABBE_WNT3A_TARGETS_UP              0.0005192308
+PID_WNT_NONCANONICAL_PATHWAY        0.0004166667
+LABBE_WNT3A_TARGETS_UP              0.0004375000
 WILLERT_WNT_SIGNALING               0.0004375000
-SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0002250000
-PID_WNT_CANONICAL_PATHWAY           0.0001071429
-REACTOME_SIGNALING_BY_WNT           0.0044000000
-BIOCARTA_WNT_PATHWAY                0.0002250000
-ST_WNT_BETA_CATENIN_PATHWAY         0.0001071429
-KEGG_WNT_SIGNALING_PATHWAY          0.0001071429
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0001071429
-PID_WNT_SIGNALING_PATHWAY           0.0001071429
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.0001071429
-ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.0003409091
-LABBE_WNT3A_TARGETS_DN              0.0001071429
-WNT_SIGNALING                       0.0002250000
+SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0001500000
+REACTOME_SIGNALING_BY_WNT           0.0024000000
+PID_WNT_CANONICAL_PATHWAY           0.0007000000
+BIOCARTA_WNT_PATHWAY                0.0004166667
+ST_WNT_BETA_CATENIN_PATHWAY         0.0001500000
+KEGG_WNT_SIGNALING_PATHWAY          0.0001500000
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0001500000
+PID_WNT_SIGNALING_PATHWAY           0.0004166667
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.0001500000
+ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.0006346154
+LABBE_WNT3A_TARGETS_DN              0.0004375000
+WNT_SIGNALING                       0.0004166667
 </code></pre>
 <p>Each row corresponds to a single gene set. The NGenes column gives the number of genes in each set. The PropDown and PropUp columns contain the proportions of genes in the set that are down- and up-regulated, respectively, with absolute fold changes greater than √ 2. The net direction of change is determined from the significance of changes in each direction, and is shown in the Direction column. The PValue provides evidence for whether the majority of genes in the set are DE in the specified direction, whereas the PValue.Mixed tests for differential expression in any direction. FDRs are computed from the corresponding p-values across all sets.</p>
 <p><span style="color:blue">Exercise: (1) test whether the wnt signalling pathways tend to be differentially expressed between luminal pregnant vs lactating (the second contrast) (2) Look for gene sets containing “MYC” in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.</span></p>
-<p>Notes • A common application of ROAST is to use a set of DE genes that was defined from an analysis of an independent data set. ROAST can then determine whether similar changes are observed in the contrast of interest for the current data set. • Even for GO-defined gene sets, goana and ROAST have different behaviours. In goana, the significance of differential expression for a GO term is determined relative to other DE genes that are not annotated with that term. In ROAST, only differential expression for the genes in the set are relevant to the significance of that set and its corresponding term. goana depends on a significance cutoff to choose DE genes, whereas ROAST does not require a cutoff and evaluates all genes in the set. • ROAST estimates p-values by simulation, so the results may change slightly between runs. More precise p-values can be obtained by increasing the number of rotations, albeit at the cost of increased computational time. • The smallest p-value that can be reported is 1/(2 · nrot + 1) where nrot is the number of rotations. This lower bound can be decreased by increasing nrot.</p>
+<p>Notes</p>
+<ul>
+<li>A common application of ROAST is to use a set of DE genes that was defined from an analysis of an independent data set. ROAST can then determine whether similar changes are observed in the contrast of interest for the current data set.</li>
+<li>Even for GO-defined gene sets, goana and ROAST have different behaviours. In goana, the significance of differential expression for a GO term is determined relative to other DE genes that are not annotated with that term. In ROAST, only differential expression for the genes in the set are relevant to the significance of that set and its corresponding term. goana depends on a significance cutoff to choose DE genes, whereas ROAST does not require a cutoff and evaluates all genes in the set.</li>
+<li>ROAST estimates p-values by simulation, so the results may change slightly between runs. More precise p-values can be obtained by increasing the number of rotations, albeit at the cost of increased computational time.</li>
+<li>The smallest p-value that can be reported is 1/(2 · nrot + 1) where nrot is the number of rotations. This lower bound can be decreased by increasing nrot.</li>
+</ul>
 <h3 id="visualising-gene-set-tests-barcode-and-enrichment-plots">Visualising gene set tests: Barcode and enrichment plots</h3>
 <p>A barcode plot can be produced with the <code>barcodeplot</code> function to visualize the results for any particular set. To display a barcodeplot, we need to decide what statistics to use, usually we choose either logFC or t-statistics for the comparison of interest. We also need to make sure we give the statistics in the correct order, such that subsetting the statistics vector will give the genes for the gene set we’re interested in. The best way to do this is to work with the fit object directly. The <code>coefficients</code> slot contains the logFCs and the <code>t</code> slot contains the t-statistics.</p>
 <p>Let’s have a look at the top MYC related pathway in the ROAST test that you did in the exercise, “MENSSEN_MYC_TARGETS”.</p>
