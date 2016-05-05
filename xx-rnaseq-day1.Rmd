@@ -2,9 +2,9 @@
 layout: page
 title: "COMBINE RNA-seq workshop"
 subtitle:
-author: ' Belinda Phipson, Anna Trigos, Maria Doyle '
+author: ' Belinda Phipson, Anna Trigos, Matt Ritchie, Maria Doyle '
 date: "11 - 12 May 2016"
-minutes: ?
+bibliography: ref.bib
 ---
 
 ```{r, include=FALSE}
@@ -25,7 +25,7 @@ biocLite("Rsubread")
 ## Resources and data files
 
 This material has been created using the following resources:  
-http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf  
+http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf [@Lun2016]  
 http://monashbioinformaticsplatform.github.io/RNAseq-DE-analysis-with-R/99-RNAseq_DE_analysis_with_R.html  
 
 Data files downloaded from:  
@@ -38,6 +38,8 @@ targets.txt
 GSE60450_Lactation-GenewiseCounts.txt  
 mouse_c2_v5.rdata  
 mouse_H_v5.rdata
+
+Data files available from: https://figshare.com/s/1d788fd384d33e913a2a  
 
 Packages used:
 limma,
@@ -71,24 +73,25 @@ First, let's load all the packages we will need to analyse the data.
 library(edgeR)
 library(limma)
 library(EDASeq)
+library(Glimma)
 library(gplots)
 library(org.Mm.eg.db)
 library(RColorBrewer)
-library(Glimma)
 ```
 
 
 ### Mouse mammary gland dataset
 
-The data for this tutorial comes from a Nature Cell Biology paper, [*EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival*](http://www.ncbi.nlm.nih.gov/pubmed/25730472). Both the raw data (sequence reads) and processed data (counts) can be downloaded from Gene Expression Omnibus database (GEO) under accession number [GSE60450](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60450).
+The data for this tutorial comes from a Nature Cell Biology paper, [*EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival*](http://www.ncbi.nlm.nih.gov/pubmed/25730472) [@Fu2015]. Both the raw data (sequence reads) and processed data (counts) can be downloaded from Gene Expression Omnibus database (GEO) under accession number [GSE60450](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60450).
 
 This study examines the expression profiles of basal stem-cell enriched cells (B) and committed luminal cells (L) in the mammary gland of virgin, pregnant and lactating mice. Six groups are present, with one for each combination of cell type and mouse status. Each group contains two biological replicates.
-
-We will first use the counts file as a starting point for our analysis. This data has already been aligned to the mouse genome. The command line tool featureCounts was used to count reads mapped to human genes from Refseq annotation (see the [paper](http://www.ncbi.nlm.nih.gov/pubmed/25730472) for details).
+We will first use the counts file as a starting point for our analysis. This data has already been aligned to the mouse genome. The command line tool featureCounts [@Liao2014] was used to count reads mapped to human genes from Refseq annotation (see the [paper](http://www.ncbi.nlm.nih.gov/pubmed/25730472) for details).
 
 ### Reading in the data
 
-Download and read in the data. Make sure to change the path to the directory where you have saved the data.
+*Set up an RStudio project specifying the directory where you have saved the directory*. 
+
+Download and read in the data. 
 
 ```{r}
 # Read the data into R
@@ -104,7 +107,7 @@ head(seqdata)
 dim(seqdata)
 ```
 
-The `seqdata` object contains information about genes (one gene per row), the first column has the Entrez gene id, the second has the gene length and the remaining columns contain information about the number of reads aligning to the gene in each experimental sample. There are two replicates for each cell type and timepoint (detailed sample info can be found in file "GSE60450_series_matrix.txt" from the [GEO website](http://www.ncbi.nlm.nih.gov/pubmed/25730472)). The targets file contains the basic information about the samples that we will need for the analysis today.
+The `seqdata` object contains information about genes (one gene per row), the first column has the Entrez gene id, the second has the gene length and the remaining columns contain information about the number of reads aligning to the gene in each experimental sample. There are two replicates for each cell type and timepoint (detailed sample info can be found in file "GSE60450_series_matrix.txt" from the [GEO website](http://www.ncbi.nlm.nih.gov/pubmed/25730472)). The targets file contains basic information about the samples that we will need for the analysis today.
 
 ```{r}
 targets
@@ -164,7 +167,7 @@ Genes with very low counts across all libraries provide little evidence for diff
 
 There are a few ways to filter out lowly expressed genes. When there are biological replicates in each group, in this case we have a sample size of 2 in each group, we favour filtering on a minimum counts per million threshold present in at least 2 samples. Two represents the smallest sample size for each group in our experiment. In this dataset, we choose to retain genes if they are expressed at a counts-per-million (CPM) above 0.5 in at least two samples.
 
-We'll use the `cpm` function from the *edgeR* library to generate the CPM values and then filter. Note that by converting to CPMs we are normalising for the different sequencing depths for each sample.
+We'll use the `cpm` function from the *edgeR* library [@robinson2010edgeR] to generate the CPM values and then filter. Note that by converting to CPMs we are normalising for the different sequencing depths for each sample.
 
 ```{r}
 # Obtain CPMs
@@ -188,7 +191,7 @@ counts.keep <- countdata[keep,]
 summary(keep)
 ```
 
-A CPM of 0.5 is used as it corresponds to a count of 10–15 for the library sizes in this data set. If the count is any smaller, it is considered to be very low, indicating that the associated gene is not expressed in that sample. A requirement for expression in two or more libraries is used as each group contains two replicates. This ensures that a gene will be retained if it is only expressed in one group. Smaller CPM thresholds are usually appropriate for larger libraries. As a general rule, a good threshold can be chosen by identifying the CPM that corresponds to a count of 10, which in this case is about 0.5. You should filter with CPMs rather than filtering on the counts directly, as the latter does not account for differences in library sizes between samples.
+A CPM of 0.5 is used as it corresponds to a count of 10-15 for the library sizes in this data set. If the count is any smaller, it is considered to be very low, indicating that the associated gene is not expressed in that sample. A requirement for expression in two or more libraries is used as each group contains two replicates. This ensures that a gene will be retained if it is only expressed in one group. Smaller CPM thresholds are usually appropriate for larger libraries. As a general rule, a good threshold can be chosen by identifying the CPM that corresponds to a count of 10, which in this case is about 0.5. You should filter with CPMs rather than filtering on the counts directly, as the latter does not account for differences in library sizes between samples.
 
 ```{r}
 # Let's have a look and see whether our threshold of 0.5 does indeed correspond to a count of about 10-15
@@ -223,6 +226,7 @@ Now that we have got rid of the lowly expressed genes and have our counts stored
 ### Library sizes and distribution plots
 
 First, we can check how many reads we have for each sample in the `y`.
+
 ```{r}
 y$samples$lib.size
 ```
@@ -251,7 +255,7 @@ title("Boxplots of logCPMs (unnormalised)")
 
 From the boxplots we see that overall the density distributions of raw log-intensities are not identical but still not very different. If a sample is really far above or below the blue horizontal line we may need to investigate that sample further.
 
-Another kind of QC plot that is helpful in checking for dodgy samples is a relative log expression (RLE) plot from the *EDASeq* package. It shows boxplots of gene-level read counts of each sample relative to a reference sample, which is defined as the median across the samples.
+Another kind of QC plot that is helpful in checking for dodgy samples is a relative log expression (RLE) plot from the *EDASeq* package [@Risso2011]. It shows boxplots of gene-level read counts of each sample relative to a reference sample, which is defined as the median across the samples.
 
 ```{r}
 # You need to give plotRLE a matrix of counts
@@ -338,6 +342,15 @@ pca <- prcomp(logcounts)
 plot(pca$sdev)
 ```
 
+Another alternative is to generate an interactive MDS plot using the *Glimma* package. This allows the user to interactively explore the different dimensions.
+
+```{r}
+labels = paste(targets$SampleName, targets$CellType, targets$Status)
+glMDSPlot(y, labels=labels, groups=group)
+```
+
+*Glimma* was created to make interactive versions of some of the popular plots from the *limma* package. At present it can be used to obtain MDS plots and mean-difference (MD) plots, which will be covered later. The output of `glMDSPlot` is an html page that shows the MDS plot on the left, and the amount of variation explained by each dimension in a barplot on the right. The user can hover over points to find out sample information, and switch between successive dimensions in the MDS plot by clicking on the bars in the barplot. The default MDS plots shows dimensions 1 and 2.
+
 ### Hierarchical clustering with heatmaps
 
 An alternative to `plotMDS` for examining relationships between samples is using hierarchical clustering. Heatmaps are a nice visualisation to examine hierarchical clustering of your samples. We can do this using the `heatmap.2` function from the *gplots* package. In this example `heatmap.2` calculates a matrix of euclidean distances from the logCPM (`logcounts` object) for the 500 most variable genes.
@@ -378,14 +391,14 @@ dev.off()
 
 ## Normalisation for composition bias
 
-TMM normalization is performed to eliminate composition biases between libraries. This generates a set of normalization factors, where the product of these factors and the library sizes defines the effective library size. The `calcNormFactors` function calculates the normalization factors between libraries. TMM normalisation (and most scaling normalisation methods) scale relative to one sample.
+TMM normalization is performed to eliminate composition biases between libraries [@robinson2010tmm]. This generates a set of normalization factors, where the product of these factors and the library sizes defines the effective library size. The `calcNormFactors` function calculates the normalization factors between libraries. TMM normalisation (and most scaling normalisation methods) scale relative to one sample.
 
 ```{r}
 # Apply normalisation to DGEList object
 y <- calcNormFactors(y)
 ```
 
-This will add the normalisation factors to the `DGEList` object. Take a look at the normalisation factors for these samples.
+This will update the normalisation factors in the `DGEList` object (their default values are 1). Take a look at the normalisation factors for these samples.
 
 ```{r}
 y$samples
@@ -403,6 +416,7 @@ plotMD(logcounts,column = 11)
 abline(h=0,col="grey")
 ```
 
+The mean-difference plots show average expression (mean: x-axis) against log-fold-changes (difference: y-axis).
 Because our `DGEList` object contains the normalisation factors, if we redo these plots using `y`, we should see the composition bias problem has been solved.
 
 ```{r}
@@ -417,7 +431,7 @@ abline(h=0,col="grey")
 
 ## Diffential expression with limma-voom
 
-Now that we are happy that we have normalised the data and that the quality looks good, we can continue to testing for differentially expressed genes. There are a number of packages to analyse RNA-Seq data. The *limma* package (since version 3.16.0) offers the `voom` function, which transforms the read counts into logCPMs while taking into account the mean-variance relationship in the data. After vooming, users can apply a linear model to the voom transformed data to test for differentially expressed genes, using standard *limma* commands.
+Now that we are happy that we have normalised the data and that the quality looks good, we can continue to testing for differentially expressed genes. There are a number of packages to analyse RNA-Seq data. The *limma* package [@Ritchie2015] (since version 3.16.0) offers the `voom` function, which transforms the read counts into logCPMs while taking into account the mean-variance relationship in the data [@Law2014]. After vooming, users can apply a linear model to the voom transformed data to test for differentially expressed genes, using standard *limma* commands.
 
 ### Create the design matrix
 
@@ -440,7 +454,7 @@ Each column of the design matrix tells us which samples correspond to each group
 
 ### Voom transform the data
 
-Once we have our design matrix ready to go, we can perform our voom transformation. Voom will automatically adjust the library sizes using the `norm.factors` already calculated. The voom transformation uses the experiment design matrix, and produces an `EList` object. We can add `plot=TRUE` to generate a plot of the mean-variance trend. This plot can also tell us if there are any genes that look really variable in our data.
+Once we have our design matrix ready to go, we can perform our voom transformation. Voom will automatically adjust the library sizes using the `norm.factors` already calculated. The voom transformation uses the experiment design matrix, and produces an `EList` object. We can add `plot=TRUE` to generate a plot of the mean-variance trend. This plot can also tell us if there are any genes that look really variable in our data, and if we've filtered the low counts adequately..
 
 ```{r}
 par(mfrow=c(1,1))
@@ -452,7 +466,7 @@ Take a look at what is in the voom object.
 
 ```{r}
 v
-# What are the slots in v?
+# What is contained in this object?
 names(v)
 ```
 
@@ -474,14 +488,14 @@ Compare these box plots to the box plots we generated before performing the norm
 
 ### Testing for differential expression
 
-Now that we have the voom transformed data we can use *limma* to test for differential expression. First we fit a linear model for each gene using the `lmFit` function in *limma*. `lmFit` needs the voom object and the design matrix that we have already specified.
+Now that we have the voom transformed data we can use *limma* to test for differential expression. First we fit a linear model for each gene using the `lmFit` function in *limma*. `lmFit` needs the voom object and the design matrix that we have already specified, which is stored within the voom object.
 
 ```{r}
 # Fit the linear model
-fit <- lmFit(v,design)
+fit <- lmFit(v)
 ```
 
-`lmFit` estimates group means according to the design matrix, as well as gene-wise variances. There are a number of slots in the `fit` object, most of which are specific to the statistical testing, and we won't be discussing these in detail today.
+`lmFit` estimates group means according to the design matrix, as well as gene-wise variances. There are a number of items stored in the `fit` object, most of which are specific to the statistical testing, and we won't be discussing these in detail today. 
 
 Since we are interested in differences between groups, we need to specify which comparisons we want to test. The comparison of interest can be specified using the `makeContrasts` function. Here, we are interested in knowing which genes are differentially expressed between the pregnant and lactating group in the basal cells. This is done by defining the null hypothesis as basal.pregnant - basal.lactate = 0 for each gene. Note that the group names must exactly match the column names of the design matrix.
 
@@ -556,7 +570,7 @@ Let's double check that the `ENTREZID` column matches exactly to our `fit.cont` 
 table(ann$ENTREZID==rownames(fit.cont))
 ```
 
-We can slot in the annotation information into the `genes` slot of `fit.cont`. (Please note that if the `select` function returns a 1:many mapping then you can't just append the annotation to the fit object.)
+We can slot in the annotation information into the `genes` slot of `fit.cont`. (Please note that if the `select` function returns a 1:many mapping then you can't just append the annotation to the fit object. An alternative way to get annotation will be discussed tomorrow during the analysis of the second dataset.)
 
 ```{r}
 fit.cont$genes <- ann
@@ -574,7 +588,7 @@ To get the full table (i.e. the information for all genes, not just the top 10) 
 limma.res <- topTable(fit.cont,coef="B.PregVsLac",sort.by="p",n="Inf")
 ```
 
-We can save the results table using the `write.csv` function, which writes the results out to a csv file, which you can open in excel. You can also use this csv file as input to *Degust*.
+We can save the results table using the `write.csv` function, which writes the results out to a csv file, which you can open in excel. You can also use this csv file as input to *Degust*. Make sure to save this table as we will be using it in the *Degust* section of the workshop.
 
 ```{r}
 write.csv(limma.res,file="B.PregVsLacResults.csv",row.names=FALSE)
@@ -589,16 +603,15 @@ Let's do a few plots to make sure everything looks good and that we haven't made
 ```{r}
 # We want to highlight the significant genes. We can get this from decideTests.
 par(mfrow=c(1,2))
-# Just a comment that another package has a plotMA function, so I have to specify that I want to use limma's plotMA function using package:::function syntax
-limma:::plotMA(fit.cont,coef=1,status=summa.fit[,"B.PregVsLac"])
+plotMD(fit.cont,coef=1,status=summa.fit[,"B.PregVsLac"])
 
 # For the volcano plot we have to specify how many of the top genes to hightlight.
 # We can also specify that we want to plot the gene symbol for the highlighted genes.
-# let's highlight the top 100 most De genes
+# let's highlight the top 100 most DE genes
 volcanoplot(fit.cont,coef=1,highlight=100,names=fit.cont$genes$SYMBOL)
 ```
 
-<span style="color:blue">Exercise: Look at the MAplot and volcano plot for the second comparison, `L.PregVsLac`. CHange the number of highlighted genes to 200 in the volcano plot.</span>
+<span style="color:blue">Exercise: Look at the MD plot and volcano plot for the second comparison, `L.PregVsLac`. Change the number of highlighted genes to 200 in the volcano plot.</span>
 
 Before following up on the DE genes with further lab work, it is recommended to have a look at the expression levels of the individual samples for the genes of interest. We can quickly look at grouped expression using `stripchart`. We can use the normalised log expression values in the voom object (`v$E`).
 
@@ -616,9 +629,21 @@ Notice anything interesting about the expression of this gene?
 
 <span style="color:blue">Exercise: Take the top gene from the L.PregVsLactate comparison and make a stripchart of grouped expression as above. (Don't forget to change the title of the plot.)</span>
 
+An interactive version of the volcano plot above that includes the raw per sample values in a separate panel is possible via the `glMDPlot` function in the *Glimma* package. This function was written to make interactive mean-difference plots by default (as we will see later) but can be re-configured to give a volcano plot by selecting the columns of interest from an unsorted top table of differential expression results.
+
+```{r}
+topt = topTable(fit.cont,coef=1,number=Inf,sort.by="none")
+
+glMDPlot(topt, xval="logFC", yval="B", counts=y$counts, anno=fit.cont$genes, groups=group, samples=labels, 
+         status=summa.fit, id.column="ENTREZID", search.by="SYMBOL", 
+         display.columns=c("ENTREZID", "SYMBOL", "GENENAME"), html="volcano")
+```
+
+This function creates an html page with a volcano plot on the left and a plot showing the log-CPM per sample for a selected gene on the right. A search bar is available to allow gene IDs (gene Symbols in this case) to be searched.
+
 ### Testing relative to a threshold (TREAT)
 
-When there is a lot of differential expression, sometimes we may want to cut-off on a fold change threshold as well as a p-value threshold so that we follow up on the most biologically significant genes. However, it is not recommended to simply rank by p-value and then discard genes with small logFC's, as this has been shown to increase the false discovery rate. In other words, you are not controlling the false discovery rate at 5\% anymore. There is a function called `treat` in the *limma* package that performs this style of analysis correctly. `treat` will simply take our `fit.cont` object, as well as a user-specified log fold change cut-off, and recalculate the moderated t-statistics and p-values with the new information about logFC.
+When there is a lot of differential expression, sometimes we may want to cut-off on a fold change threshold as well as a p-value threshold so that we follow up on the most biologically significant genes. However, it is not recommended to simply rank by p-value and then discard genes with small logFC's, as this has been shown to increase the false discovery rate. In other words, you are not controlling the false discovery rate at 5\% anymore. There is a function called `treat` in the *limma* package that performs this style of analysis correctly [@McCarthy2009]. `treat` will simply take our `fit.cont` object, as well as a user-specified log fold change cut-off, and recalculate the moderated t-statistics and p-values with the new information about logFC.
 
 ```{r}
 # Let's decide that we are only interested in genes that have a absolute logFC of 1.
@@ -629,12 +654,19 @@ fit.treat <- treat(fit.cont,lfc=1)
 res.treat <- decideTests(fit.treat)
 summary(res.treat)
 topTable(fit.treat,coef=1,sort.by="p")
-## Notice that much fewer genes are highlighted in the MAplot
-limma:::plotMA(fit.treat,coef=1,status=res.treat[,"B.PregVsLac"])
+# Notice that much fewer genes are highlighted in the MAplot
+lplotMD(fit.treat,coef=1,status=res.treat[,"B.PregVsLac"])
 abline(h=0,col="grey")
 ```
 
 <span style="color:blue">Exercise: Change the cut-off so that we are interested in genes that change at least 50\% on the fold change scale.</span> <span style="color:red">(HINT: what is the corresponding logFC value of 50\% fold change? Assume basal.pregnant is 50\% higher than basal.lactate)</span>
+
+An interactive version of the mean-difference plots is possible via the `glMDPlot` function in the *Glimma* package.
+
+```{r}
+glMDPlot(fit.treat, counts=y$counts, anno=fit.cont$genes, groups=group, samples=labels, 
+         status=res.treat, id.column="ENTREZID", search.by="SYMBOL", display.columns=c("ENTREZID", "SYMBOL", "GENENAME"))
+```
 
 ## Degust analysis
 
@@ -752,7 +784,7 @@ Notes
 
 ### CAMERA gene set testing using the Broad's curated gene sets
 
-Other databases of gene sets that are available come from the Broad Institute's Molecular Signatures Database ([MSigDB](http://software.broadinstitute.org/gsea/msigdb)). CAMERA is good option for testing a very large number of gene sets such as the MSigDB sets, as it is very fast. CAMERA is known as a competitive gene set test, however it has the advantage that it can take into account inter-gene correlation within each gene set. It also works seemlessly with a `voom` object, taking into account the mean-variance relationship in RNA-Seq data.
+Other databases of gene sets that are available come from the Broad Institute's Molecular Signatures Database ([MSigDB](http://software.broadinstitute.org/gsea/msigdb)). CAMERA is good option for testing a very large number of gene sets such as the MSigDB sets, as it is very fast. CAMERA is known as a competitive gene set test, however it has the advantage that it can take into account inter-gene correlation within each gene set [@wu2012camera]. It also works seemlessly with a `voom` object, taking into account the mean-variance relationship in RNA-Seq data.
 
 Here we will be using the C2 gene sets for mouse, available as .rdata files from the WEHI bioinformatics page [http://bioinf.wehi.edu.au/software/MSigDB/index.html](http://bioinf.wehi.edu.au/software/MSigDB/index.html). The C2 gene sets contain 4725 curated gene sets collected from a variety of places: BioCarta, KEGG, Pathway Interaction Database, Reactome as well as some published studies.It doesn't include GO terms.
 
@@ -801,7 +833,7 @@ write.csv(gst.camera,file="gst_BPregVsLac.csv")
 
 ### ROAST gene set testing
 
-ROAST is an example of a self-contained gene set test. It asks the question, "Do the genes in my set tend to be differentially expressed between my conditions of interest?". ROAST doesn't care about what the other genes in the experiment are doing, which is different to `camera`, `goana` and `kegga`. ROAST is a good option for when you're interested in a specific set, or a few sets. It is not really used to test thousands of sets at one time.
+ROAST is an example of a self-contained gene set test [@wu2010roast]. It asks the question, "Do the genes in my set tend to be differentially expressed between my conditions of interest?". ROAST doesn't care about what the other genes in the experiment are doing, which is different to `camera` and `goana`. ROAST is a good option for when you're interested in a specific set, or a few sets. It is not really used to test thousands of sets at one time.
 
 Let's have a look at the top 10 genes differentially expressed in the basal pregant vs lactating group.
 
@@ -826,7 +858,7 @@ wnt.rst <- roast(v,index=c2.ind[wnt],design=design,contrast=cont.matrix[,1],nrot
 wnt.rst
 ```
 
-Each row corresponds to a single gene set. The NGenes column gives the number of genes in each set. The PropDown and PropUp columns contain the proportions of genes in the set that are down- and up-regulated, respectively, with absolute fold changes greater than √ 2. The net direction of change is determined from the significance of changes in each direction, and is shown in the Direction column. The PValue provides evidence for whether the majority of genes in the set are DE in the specified direction, whereas the PValue.Mixed tests for differential expression in any direction. FDRs are computed from the corresponding p-values across all sets.
+Each row corresponds to a single gene set. The NGenes column gives the number of genes in each set. The PropDown and PropUp columns contain the proportions of genes in the set that are down- and up-regulated, respectively, with absolute fold changes greater than 2. The net direction of change is determined from the significance of changes in each direction, and is shown in the Direction column. The PValue provides evidence for whether the majority of genes in the set are DE in the specified direction, whereas the PValue.Mixed tests for differential expression in any direction. FDRs are computed from the corresponding p-values across all sets.
 
 <span style="color:blue">Exercise: (1) test whether the wnt signalling pathways tend to be differentially expressed between luminal pregnant vs lactating (the second contrast) (2) Look for gene sets containing "MYC" in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.</span>
 
@@ -835,7 +867,7 @@ Notes
 * A common application of ROAST is to use a set of DE genes that was defined from an analysis of an independent data set. ROAST can then determine whether similar changes are observed in the contrast of interest for the current data set.
 * Even for GO-defined gene sets, goana and ROAST have different behaviours. In goana, the significance of differential expression for a GO term is determined relative to other DE genes that are not annotated with that term. In ROAST, only differential expression for the genes in the set are relevant to the significance of that set and its corresponding term. goana depends on a significance cutoff to choose DE genes, whereas ROAST does not require a cutoff and evaluates all genes in the set.
 * ROAST estimates p-values by simulation, so the results may change slightly between runs. More precise p-values can be obtained by increasing the number of rotations, albeit at the cost of increased computational time.
-* The smallest p-value that can be reported is 1/(2 · nrot + 1) where nrot is the number of rotations. This lower bound can be decreased by increasing nrot.
+* The smallest p-value that can be reported is 1/(2nrot + 1) where nrot is the number of rotations. This lower bound can be decreased by increasing nrot.
 
 ### Visualising gene set tests: Barcode and enrichment plots
 
@@ -849,7 +881,7 @@ names(fit.cont)
 head(fit.cont$coefficients)
 head(fit.cont$t)
 
-par(mfrow=c(1,2))
+par(mfrow=c(2,1))
 # barcode plot with logFCs
 barcodeplot(fit.cont$coeff[,1], index=c2.ind[["MENSSEN_MYC_TARGETS"]], main="MENSSEN_MYC_TARGETS")
 # barcode plot using t-statistics
@@ -861,7 +893,10 @@ Here, genes are represented by bars and are ranked from left to right by decreas
 <span style="color:blue">Exercise: (1) Produce a barcodeplot for luminal pregnant vs lactating for this gene set. Does the pattern of enrichment look as strong? (2) Choose one of the Wnt signalling pathways and produce a barcode plot for both comparisons.(3) You can put two gene sets on one plot, for example a set that is up-regulated and one that is down-regulated, by adding a gene set to the `index2` argument. Produce a barcodeplot with two sets of your choosing.</span>
 
 # Record package and version info with sessionInfo()
+
 The session information describes the versions of R and of the packages that were used in the analysis. This is useful for record-keeping purposes, and ensures that an analysis can be reproduced even when the software is updated over time.
 ```{r}
 sessionInfo()
 ```
+
+# References
