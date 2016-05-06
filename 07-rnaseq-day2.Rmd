@@ -1,13 +1,19 @@
 ---
-title: "COMBINE RNA-seq workshop Day 2"
-author: ' Belinda Phipson, Maria Doyle '
+layout: page
+title: "RNA-seq analysis in R"
+subtitle: "Alignment and feature counting"
+author: "Belinda Phipson, Maria Doyle, Harriet Dashnow"
 date: "11-12 May 2016"
-output: html_document
 bibliography: ref.bib
+minutes: 60
 ---
 
+```{r, include=FALSE}
+source("tools/chunk-options.R")
+```
+
 This material has been created using the following sources:  
-http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf [@Lun2016] 
+http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf [@Lun2016]
 http://bioinf.wehi.edu.au/RNAseqCaseStudy/
 
 Packages used:  
@@ -16,9 +22,10 @@ Rsubread
 Data files needed:   
 Mouse chromosome 1 Rsubread index files (~400MB).  
 Targets2.txt   
-The 12 fastq.gz files for the mouse dataset. 
+The 12 fastq.gz files for the mouse dataset.
 
-Data files: https://figshare.com/s/f5d63d8c265a05618137
+Data files: [https://figshare.com/s/f5d63d8c265a05618137](https://figshare.com/s/f5d63d8c265a05618137)
+You should download these files and place them in your `/data` directory.
 
 GEO entry for the dataset:  
 http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60450
@@ -41,18 +48,20 @@ First, let's load the Rsubread package into R.
 library(Rsubread)
 ```
 
-Let's load the targets file that describes our data, and which contains the filenames of the files that we wish to map.
+Early we put all the sequencing read data (.fastq.gz files) in the data directory.
+Now we need to find them in order to tell the Rsubread aligner which files to look at.
+We can search for all .fastq.gz files in the data directory using the `list.files` command.
 
 ```{r}
-targets <- read.delim("targets2.txt", stringsAsFactors=FALSE)
-targets
+fastq.files <- list.files(path = "./data", pattern = ".fastq.gz$", full.names = TRUE)
+fastq.files
 ```
 
-## Alignment 
+## Alignment
 
 ### Build the index
 
-Read sequences are stored in compressed (gzipped) FASTQ files. Before the differential expression analysis can proceed, these reads must be aligned to the mouse genome and counted into annotated genes. This can be achieved with functions in the Rsubread package. 
+Read sequences are stored in compressed (gzipped) FASTQ files. Before the differential expression analysis can proceed, these reads must be aligned to the mouse genome and counted into annotated genes. This can be achieved with functions in the Rsubread package.
 
 The first step in performing the alignment is to build an index. In order to build an index you need to have the fasta file (.fa), which can be downloaded from the UCSC genome browser. Here we are building the index just for chromosome 1. This may take several minutes to run. Building the full index using the whole mouse genome usually takes about 30 minutes to an hr on a server. We won't be building the index in the workshop due to time constraints, we have provided the index files for you. The command below assumes the chr1 genome information for mm10 is stored in the "chr1.fa" file.
 
@@ -70,18 +79,12 @@ dir()
 
 Now that we have generated our index, we can align our reads using the `align` command. There are often numerous mapping parameters that we can specify, but usually the default mapping parameters for the `align` function are fine. If we had paired end data, we would specify the second read file/s using the `readfile2` argument. Our mouse data comprises 100bp single end reads.
 
-We can specify the output files, or we can let `Rsubread` choose the output file names for us. The default output file name is the filename with ".subread.BAM" added at the end. Let's choose our own outfile names:
+We can specify the output files, or we can let `Rsubread` choose the output file names for us. The default output file name is the filename with ".subread.BAM" added at the end.
 
-```{r}
-# The sub command substitutes "fastq.gz" with "bam" in our filename
-out.files <- sub(".fastq.gz", ".bam", targets$SRAFileName)
-out.files
-```
-
-Now we can align our 12 fastq.gz files using the `align` command. 
+Now we can align our 12 fastq.gz files using the `align` command.
 
 ```{r,results="hide"}
-align(index="chr1_mm10",readfile1=targets$SRAFileName,output_file=out.files)
+align(index="data/chr1_mm10",readfile1=fastq.files)
 ```
 
 This will align each of the 12 samples one after the other. As we're only using a subset of 1000 reads per sample, aligning should just take a minute or so for each sample. To run the full samples from this dataset would take about 2 hours per sample. The BAM files are saved in the working directory.
@@ -94,22 +97,27 @@ args(align)
 
 In this example we have kept many of the default settings, which have been optimised to work well under a variety of situations. The default setting for `align` is that it only keeps reads that uniquely map to the reference genome. For testing differential expression of genes, this is what we want, as the reads are unambigously assigned to one place in the genome, allowing for easier interpretation of the results. Understanding all the different parameters you can change involves doing a lot of reading about the aligner that you are using, and can take a lot of time to understand! Today we won't be going into the details of the parameters you can change, but you can get more information from looking at the help:
 
-```{r}
+```{r, eval=FALSE}
 ?align
 ```
 
 We can get a summary of the proportion of reads that mapped to the reference genome using the `propmapped` function.
 
 ```{r}
-props <- propmapped(files=out.files)
+bam.files <- list.files(path = ".", pattern = ".bam$", full.names = TRUE)
+bam.files
+```
+
+```{r}
+props <- propmapped(files=bam.files)
 props
 ```
 
-Exercise: (1) Try aligning the fastq files allowing multi-mapping reads (set `unique = FALSE`), and allowing for up to 6 "best" locations to be reported (`nBestLocations = 6`). Specify the output file names (out.files.multi) by substituting ".fastq.gz" with ".multi.bam" so we don't overwrite our unique alignment bam files (2) Look at the proportion of reads mapped and see if we get any more reads mapping by specifying a less stringent criteria. 
+Exercise: (1) Try aligning the fastq files allowing multi-mapping reads (set `unique = FALSE`), and allowing for up to 6 "best" locations to be reported (`nBestLocations = 6`). Specify the output file names (bam.files.multi) by substituting ".fastq.gz" with ".multi.bam" so we don't overwrite our unique alignment bam files (2) Look at the proportion of reads mapped and see if we get any more reads mapping by specifying a less stringent criteria.
 
 ## Quality control
 
-We can have a look at the quality scores associated with each base that has been called by the sequencing machine using the `qualityScores` function in *Rsubread*. 
+We can have a look at the quality scores associated with each base that has been called by the sequencing machine using the `qualityScores` function in *Rsubread*.
 
 Let's first extract quality scores for 100 reads for the file "SRR1552450.fastq.gz".
 
@@ -139,12 +147,12 @@ Exercise: (1) Extract quality scores for SRR1552451.fastq.gz for 50 reads (2) Pl
 
 ## Counting
 
-Now that we have figured out where each read comes from in the genome, we need to summarise the information across genes or exons. The alignment produces a set of BAM files, where each file contains the read alignments for each library. In the BAM file, there is a chromosomal location for every read that mapped uniquely. The mapped reads can be counted across mouse genes by using the `featureCounts` function. `featureCounts` contains built-in annotation for mouse (mm9, mm10) and human (hg19) genome assemblies (NCBI refseq annotation). 
+Now that we have figured out where each read comes from in the genome, we need to summarise the information across genes or exons. The alignment produces a set of BAM files, where each file contains the read alignments for each library. In the BAM file, there is a chromosomal location for every read that mapped uniquely. The mapped reads can be counted across mouse genes by using the `featureCounts` function. `featureCounts` contains built-in annotation for mouse (mm9, mm10) and human (hg19) genome assemblies (NCBI refseq annotation).
 
 The code below uses the exon intervals defined in the NCBI refseq annotation of the mm10 genome. Reads that map to exons of genes are added together to obtain the count for each gene, with some care taken with reads that span exon-exon boundaries. `featureCounts` takes all the BAM files as input, and outputs an object which includes the count matrix, similar to the count matrix we have been working with on Day 1. Each sample is a separate column, each row is a gene.
 
 ```{r,results="hide"}
-fc <- featureCounts(out.files, annot.inbuilt="mm10")
+fc <- featureCounts(bam.files, annot.inbuilt="mm10")
 ```
 
 ```{r}
@@ -197,7 +205,7 @@ whether lower-case letters are present (+64 encoding) or absent (+33).
 * `featureCounts` requires gene annotation specifying the genomic start and end
 position of each exon of each gene. *Rsubread* contains built-in gene annotation
 for mouse and human. For other species, users will need to read in a data frame
-in GTF format to define the genes and exons. Users can also specify a custom annotation file in SAF format. See the Rsubread users guide for more information, or try `?featureCounts`, which has an example of what an SAF file should like like. 
+in GTF format to define the genes and exons. Users can also specify a custom annotation file in SAF format. See the Rsubread users guide for more information, or try `?featureCounts`, which has an example of what an SAF file should like like.
 
 # Package versions used
 
@@ -206,6 +214,3 @@ sessionInfo()
 ```
 
 # References
-
-
-
