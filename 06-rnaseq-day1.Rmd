@@ -1,10 +1,11 @@
 ---
 layout: page
-title: "COMBINE RNA-seq workshop"
-subtitle:
-author: ' Belinda Phipson, Anna Trigos, Matt Ritchie, Maria Doyle '
+title: "RNA-seq analysis in R"
+subtitle: "Differential expression analysis"
+author: "Belinda Phipson, Anna Trigos, Matt Ritchie, Maria Doyle, Harriet Dashnow"
 date: "11 - 12 May 2016"
 bibliography: ref.bib
+minutes: 300
 ---
 
 ```{r, include=FALSE}
@@ -28,7 +29,8 @@ GSE60450_Lactation-GenewiseCounts.txt
 mouse_c2_v5.rdata  
 mouse_H_v5.rdata
 
-Data files available from: https://figshare.com/s/1d788fd384d33e913a2a  
+Data files available from: [https://figshare.com/s/1d788fd384d33e913a2a](https://figshare.com/s/1d788fd384d33e913a2a)
+You should download these files and place them in your `/data` directory.
 
 Packages used:
 limma,
@@ -78,9 +80,8 @@ We will first use the counts file as a starting point for our analysis. This dat
 
 ### Reading in the data
 
-*Set up an RStudio project specifying the directory where you have saved the data*. 
-
-Download and read in the data. 
+*Set up an RStudio project specifying the directory where you have saved the data*.
+Download and read in the data.
 
 ```{r}
 # Read the data into R
@@ -333,7 +334,7 @@ plot(pca$sdev)
 
 Another alternative is to generate an interactive MDS plot using the *Glimma* package. This allows the user to interactively explore the different dimensions.
 
-```{r}
+```{r, results="hide"}
 labels = paste(targets$SampleName, targets$CellType, targets$Status)
 glMDSPlot(y, labels=labels, groups=group)
 ```
@@ -484,7 +485,7 @@ Now that we have the voom transformed data we can use *limma* to test for differ
 fit <- lmFit(v)
 ```
 
-`lmFit` estimates group means according to the design matrix, as well as gene-wise variances. There are a number of items stored in the `fit` object, most of which are specific to the statistical testing, and we won't be discussing these in detail today. 
+`lmFit` estimates group means according to the design matrix, as well as gene-wise variances. There are a number of items stored in the `fit` object, most of which are specific to the statistical testing, and we won't be discussing these in detail today.
 
 Since we are interested in differences between groups, we need to specify which comparisons we want to test. The comparison of interest can be specified using the `makeContrasts` function. Here, we are interested in knowing which genes are differentially expressed between the pregnant and lactating group in the basal cells. This is done by defining the null hypothesis as basal.pregnant - basal.lactate = 0 for each gene. Note that the group names must exactly match the column names of the design matrix.
 
@@ -620,11 +621,11 @@ Notice anything interesting about the expression of this gene?
 
 An interactive version of the volcano plot above that includes the raw per sample values in a separate panel is possible via the `glMDPlot` function in the *Glimma* package. This function was written to make interactive mean-difference plots by default (as we will see later) but can be re-configured to give a volcano plot by selecting the columns of interest from an unsorted top table of differential expression results.
 
-```{r}
+```{r, results="hide"}
 topt = topTable(fit.cont,coef=1,number=Inf,sort.by="none")
 
-glMDPlot(topt, xval="logFC", yval="B", counts=y$counts, anno=fit.cont$genes, groups=group, samples=labels, 
-         status=summa.fit, id.column="ENTREZID", search.by="SYMBOL", 
+glMDPlot(topt, xval="logFC", yval="B", counts=y$counts, anno=fit.cont$genes, groups=group, samples=labels,
+         status=summa.fit, id.column="ENTREZID", search.by="SYMBOL",
          display.columns=c("ENTREZID", "SYMBOL", "GENENAME"), html="volcano")
 ```
 
@@ -644,7 +645,7 @@ res.treat <- decideTests(fit.treat)
 summary(res.treat)
 topTable(fit.treat,coef=1,sort.by="p")
 # Notice that much fewer genes are highlighted in the MAplot
-lplotMD(fit.treat,coef=1,status=res.treat[,"B.PregVsLac"])
+plotMD(fit.treat,coef=1,status=res.treat[,"B.PregVsLac"])
 abline(h=0,col="grey")
 ```
 
@@ -653,7 +654,7 @@ abline(h=0,col="grey")
 An interactive version of the mean-difference plots is possible via the `glMDPlot` function in the *Glimma* package.
 
 ```{r}
-glMDPlot(fit.treat, counts=y$counts, anno=fit.cont$genes, groups=group, samples=labels, 
+glMDPlot(fit.treat, counts=y$counts, anno=fit.cont$genes, groups=group, samples=labels,
          status=res.treat, id.column="ENTREZID", search.by="SYMBOL", display.columns=c("ENTREZID", "SYMBOL", "GENENAME"))
 ```
 
