@@ -299,7 +299,7 @@ topTable(fit[ps,],coef=3)
 
 ```{r}
 par(mfrow=c(1,2))
-limma:::plotMA(fit,coef=3,status=results[,"UVsT"])
+plotMD(fit,coef=3,status=results[,"UVsT"])
 
 volcanoplot(fit,coef=3,highlight=100,names=fit$genes$symbol)
 ```
