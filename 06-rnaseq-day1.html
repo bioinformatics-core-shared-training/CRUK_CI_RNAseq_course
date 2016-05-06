@@ -1310,12 +1310,12 @@ wnt &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="st">
 <pre class="sourceCode r"><code class="sourceCode r">wnt.rst &lt;-<span class="st"> </span><span class="kw">roast</span>(v,<span class="dt">index=</span>c2.ind[wnt],<span class="dt">design=</span>design,<span class="dt">contrast=</span>cont.matrix[,<span class="dv">1</span>],<span class="dt">nrot=</span><span class="dv">9999</span>)
 wnt.rst</code></pre>
 <pre class="output"><code>                                    NGenes  PropDown     PropUp Direction
-PID_WNT_NONCANONICAL_PATHWAY            31 0.4516129 0.09677419      Down
 LABBE_WNT3A_TARGETS_UP                 104 0.2307692 0.49038462        Up
+PID_WNT_NONCANONICAL_PATHWAY            31 0.4516129 0.09677419      Down
 WILLERT_WNT_SIGNALING                   22 0.2272727 0.54545455        Up
 SANSOM_WNT_PATHWAY_REQUIRE_MYC          53 0.1886792 0.45283019        Up
-REACTOME_SIGNALING_BY_WNT               62 0.1290323 0.50000000        Up
 PID_WNT_CANONICAL_PATHWAY               19 0.4736842 0.21052632      Down
+REACTOME_SIGNALING_BY_WNT               62 0.1290323 0.50000000        Up
 BIOCARTA_WNT_PATHWAY                    24 0.2500000 0.33333333        Up
 KEGG_WNT_SIGNALING_PATHWAY             131 0.3740458 0.25190840      Down
 ST_WNT_BETA_CATENIN_PATHWAY             32 0.3125000 0.34375000        Up
@@ -1326,37 +1326,37 @@ ST_WNT_CA2_CYCLIC_GMP_PATHWAY           14 0.2857143 0.35714286        Up
 LABBE_WNT3A_TARGETS_DN                  65 0.2615385 0.27692308        Up
 WNT_SIGNALING                           75 0.3600000 0.30666667      Down
                                     PValue        FDR PValue.Mixed
-PID_WNT_NONCANONICAL_PATHWAY        0.0001 0.00075000       0.0007
-LABBE_WNT3A_TARGETS_UP              0.0002 0.00112500       0.0006
-WILLERT_WNT_SIGNALING               0.0005 0.00225000       0.0003
-SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0026 0.00956250       0.0001
-REACTOME_SIGNALING_BY_WNT           0.0151 0.03862500       0.0028
-PID_WNT_CANONICAL_PATHWAY           0.0155 0.03862500       0.0004
-BIOCARTA_WNT_PATHWAY                0.0435 0.08358333       0.0003
-KEGG_WNT_SIGNALING_PATHWAY          0.0500 0.08358333       0.0001
-ST_WNT_BETA_CATENIN_PATHWAY         0.0502 0.08358333       0.0002
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0601 0.09007500       0.0001
-PID_WNT_SIGNALING_PATHWAY           0.0942 0.12838636       0.0002
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.1585 0.19806250       0.0001
-ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.2627 0.30305769       0.0004
-LABBE_WNT3A_TARGETS_DN              0.5098 0.54616071       0.0001
-WNT_SIGNALING                       0.8844 0.88440000       0.0001
+LABBE_WNT3A_TARGETS_UP              0.0001 0.00037500       0.0002
+PID_WNT_NONCANONICAL_PATHWAY        0.0001 0.00037500       0.0003
+WILLERT_WNT_SIGNALING               0.0004 0.00175000       0.0004
+SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0024 0.00881250       0.0002
+PID_WNT_CANONICAL_PATHWAY           0.0156 0.03962500       0.0002
+REACTOME_SIGNALING_BY_WNT           0.0159 0.03962500       0.0036
+BIOCARTA_WNT_PATHWAY                0.0429 0.08341667       0.0003
+KEGG_WNT_SIGNALING_PATHWAY          0.0500 0.08341667       0.0001
+ST_WNT_BETA_CATENIN_PATHWAY         0.0501 0.08341667       0.0001
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0635 0.09517500       0.0001
+PID_WNT_SIGNALING_PATHWAY           0.0939 0.12797727       0.0001
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.1676 0.20943750       0.0001
+ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.2550 0.29417308       0.0006
+LABBE_WNT3A_TARGETS_DN              0.5027 0.53855357       0.0001
+WNT_SIGNALING                       0.8826 0.88260000       0.0001
                                        FDR.Mixed
-PID_WNT_NONCANONICAL_PATHWAY        0.0007000000
-LABBE_WNT3A_TARGETS_UP              0.0006346154
-WILLERT_WNT_SIGNALING               0.0003750000
-SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0001250000
-REACTOME_SIGNALING_BY_WNT           0.0028000000
-PID_WNT_CANONICAL_PATHWAY           0.0004375000
-BIOCARTA_WNT_PATHWAY                0.0003750000
-KEGG_WNT_SIGNALING_PATHWAY          0.0001250000
-ST_WNT_BETA_CATENIN_PATHWAY         0.0002812500
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0001250000
-PID_WNT_SIGNALING_PATHWAY           0.0002812500
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.0001250000
-ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.0004375000
-LABBE_WNT3A_TARGETS_DN              0.0001250000
-WNT_SIGNALING                       0.0001250000
+LABBE_WNT3A_TARGETS_UP              0.0002250000
+PID_WNT_NONCANONICAL_PATHWAY        0.0003125000
+WILLERT_WNT_SIGNALING               0.0004038462
+SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0002250000
+PID_WNT_CANONICAL_PATHWAY           0.0002250000
+REACTOME_SIGNALING_BY_WNT           0.0036000000
+BIOCARTA_WNT_PATHWAY                0.0003125000
+KEGG_WNT_SIGNALING_PATHWAY          0.0001071429
+ST_WNT_BETA_CATENIN_PATHWAY         0.0001071429
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0001071429
+PID_WNT_SIGNALING_PATHWAY           0.0001071429
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.0001071429
+ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.0006000000
+LABBE_WNT3A_TARGETS_DN              0.0001071429
+WNT_SIGNALING                       0.0001071429
 </code></pre>
 <p>Each row corresponds to a single gene set. The NGenes column gives the number of genes in each set. The PropDown and PropUp columns contain the proportions of genes in the set that are down- and up-regulated, respectively, with absolute fold changes greater than 2. The net direction of change is determined from the significance of changes in each direction, and is shown in the Direction column. The PValue provides evidence for whether the majority of genes in the set are DE in the specified direction, whereas the PValue.Mixed tests for differential expression in any direction. FDRs are computed from the corresponding p-values across all sets.</p>
 <p><span style="color:blue">Exercise: (1) test whether the wnt signalling pathways tend to be differentially expressed between luminal pregnant vs lactating (the second contrast) (2) Look for gene sets containing “MYC” in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.</span></p>
