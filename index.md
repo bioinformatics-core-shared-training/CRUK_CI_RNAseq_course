@@ -28,11 +28,9 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 
 ### RNAseq
 
-- [RNAseq Day1](06-rnaseq-day1.html)
-- [RNAseq Day2](07-rnaseq-day2.html)
+- [Differential expression](06-rnaseq-day1.html)
+- [Alignment and feature counting](07-rnaseq-day2.html)
 
-- Differential expression
-- Alignment and feature counting
 - Gene set testing
 - Applying RNAseq
 
