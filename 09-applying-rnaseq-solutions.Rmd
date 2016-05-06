@@ -9,6 +9,10 @@ minutes: 15
 
 **Author: Belinda Phipson**
 
+```{r, include=FALSE}
+source("tools/chunk-options.R")
+```
+
 ## Data files needed
 
 * counts_Drosophila.txt
