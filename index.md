@@ -26,12 +26,10 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 - [Data frames and reading in data](04-data-structures-part2.html)
 - [Subsetting data](05-data-subsetting.html)
 
-### RNAseq
+### RNAseq anlaysis in R
 
-- [Differential expression](06-rnaseq-day1.html)
+- [Differential expression and gene set testing](06-rnaseq-day1.html)
 - [Alignment and feature counting](07-rnaseq-day2.html)
-
-- Gene set testing
-- Applying RNAseq
+- [Applying RNAseq](08-applying-rnaseq.html) ([solutions](09-applying-rnaseq-solutions.html))
 
 ## Other Resources
