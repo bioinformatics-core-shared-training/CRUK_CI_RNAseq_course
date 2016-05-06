@@ -52,6 +52,7 @@ preview : $(DST_ALL)
 	    --template=_layouts/page \
 	    --filter=tools/filters/blockquote2div.py \
 	    --filter=tools/filters/id4glossary.py \
+		--filter=pandoc-citeproc \
 	    $(INCLUDES) \
 	    -o $@ $<
 
