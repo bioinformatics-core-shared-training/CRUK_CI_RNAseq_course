@@ -8,6 +8,8 @@ bibliography: ref.bib
 minutes: 300
 ---
 
+**Authors: Belinda Phipson, Anna Trigos, Matt Ritchie, Maria Doyle, Harriet Dashnow**
+
 ```{r, include=FALSE}
 source("tools/chunk-options.R")
 ```
