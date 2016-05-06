@@ -34,7 +34,7 @@ The raw reads were downloaded from SRA from the link given in GEO for the datase
 
 ## Downloading genome files
 
-We have provided the index files for chromosome 1 for the mouse genome build mm10 for this workshop in order to save time on building the index. However, full genome fasta files for a number of different genomes are available to download from the UCSC genome browser, see http://hgdownload.soe.ucsc.edu/downloads.html; from NCBI: http://www.ncbi.nlm.nih.gov/genome; or from ENSEMBLE: http://asia.ensembl.org/info/data/ftp/index.html.
+We have provided the index files for chromosome 1 for the mouse genome build mm10 for this workshop in order to save time on building the index. However, full genome fasta files for a number of different genomes are available to download from the UCSC genome browser, see http://hgdownload.soe.ucsc.edu/downloads.html; from NCBI: http://www.ncbi.nlm.nih.gov/genome; or from ENSEMBL: http://asia.ensembl.org/info/data/ftp/index.html.
 
 ## Introduction and data import
 
@@ -48,7 +48,7 @@ First, let's load the Rsubread package into R.
 library(Rsubread)
 ```
 
-Early we put all the sequencing read data (.fastq.gz files) in the data directory.
+Earlier we put all the sequencing read data (.fastq.gz files) in the data directory.
 Now we need to find them in order to tell the Rsubread aligner which files to look at.
 We can search for all .fastq.gz files in the data directory using the `list.files` command.
 
@@ -87,7 +87,7 @@ Now we can align our 12 fastq.gz files using the `align` command.
 align(index="data/chr1_mm10",readfile1=fastq.files)
 ```
 
-This will align each of the 12 samples one after the other. As we're only using a subset of 1000 reads per sample, aligning should just take a minute or so for each sample. To run the full samples from this dataset would take about 2 hours per sample. The BAM files are saved in the working directory.
+This will align each of the 12 samples one after the other. As we're only using a subset of 1000 reads per sample, aligning should just take a minute or so for each sample. To run the full samples from this dataset would take several hours per sample. The BAM files are saved in the working directory.
 
 To see how many parameters you can change try the `args` function:
 
@@ -143,7 +143,7 @@ actg <- atgcContent(filename="SRR1552450.fastq.gz")
 actg
 ```
 
-Exercise: (1) Extract quality scores for SRR1552451.fastq.gz for 50 reads (2) Plot a boxplot of the quality scores for SRR1552451.fastq.gz. (3) Get the nucleotide percentages for SRR1552450.fastq.gz.
+Exercise: (1) Extract quality scores for SRR1552451.fastq.gz for 50 reads (2) Plot a boxplot of the quality scores for SRR1552451.fastq.gz. (3) Get the nucleotide percentages for SRR1552451.fastq.gz.
 
 ## Counting
 
