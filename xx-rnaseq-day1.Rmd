@@ -11,17 +11,6 @@ bibliography: ref.bib
 source("tools/chunk-options.R")
 ```
 
-## Install packages (move this to a set-up section?)
-```{r, eval = FALSE}
-source("http://bioconductor.org/biocLite.R")
-biocLite(c("limma", "edgeR", "gplots", "org.Mm.eg.db", "EDASeq", "RColorBrewer"))
-
-# Install Glimma from source - version for Mac OS X 10.9 (Mavericks)
-install.packages("https://www.bioconductor.org/packages/devel/bioc/bin/macosx/mavericks/contrib/3.3/Glimma_0.99.5.tgz", repos = NULL, type="source")
-# Install Rsubread (not required for this lesson, but for a later one)
-biocLite("Rsubread")
-```
-
 ## Resources and data files
 
 This material has been created using the following resources:  
@@ -33,8 +22,8 @@ ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE60nnn/GSE60450/suppl/GSE60450_Lactation
 http://bioinf.wehi.edu.au/software/MSigDB/mouse_c2_v5.rdata
 http://bioinf.wehi.edu.au/software/MSigDB/mouse_H_v5.rdata
 
-Data files for Day 1:  
-targets.txt
+Data files:  
+targets.txt  
 GSE60450_Lactation-GenewiseCounts.txt  
 mouse_c2_v5.rdata  
 mouse_H_v5.rdata
@@ -50,7 +39,7 @@ EDASeq,
 RColorBrewer,
 Glimma
 
-## Overview of Day 1
+## Overview
 
 * Reading in table of counts
 * Filtering lowly expressed genes
@@ -85,11 +74,11 @@ library(RColorBrewer)
 The data for this tutorial comes from a Nature Cell Biology paper, [*EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival*](http://www.ncbi.nlm.nih.gov/pubmed/25730472) [@Fu2015]. Both the raw data (sequence reads) and processed data (counts) can be downloaded from Gene Expression Omnibus database (GEO) under accession number [GSE60450](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60450).
 
 This study examines the expression profiles of basal stem-cell enriched cells (B) and committed luminal cells (L) in the mammary gland of virgin, pregnant and lactating mice. Six groups are present, with one for each combination of cell type and mouse status. Each group contains two biological replicates.
-We will first use the counts file as a starting point for our analysis. This data has already been aligned to the mouse genome. The command line tool featureCounts [@Liao2014] was used to count reads mapped to human genes from Refseq annotation (see the [paper](http://www.ncbi.nlm.nih.gov/pubmed/25730472) for details).
+We will first use the counts file as a starting point for our analysis. This data has already been aligned to the mouse genome. The command line tool featureCounts [@Liao2014] was used to count reads mapped to mouse genes from Refseq annotation (see the [paper](http://www.ncbi.nlm.nih.gov/pubmed/25730472) for details).
 
 ### Reading in the data
 
-*Set up an RStudio project specifying the directory where you have saved the directory*. 
+*Set up an RStudio project specifying the directory where you have saved the data*. 
 
 Download and read in the data. 
 
@@ -107,7 +96,7 @@ head(seqdata)
 dim(seqdata)
 ```
 
-The `seqdata` object contains information about genes (one gene per row), the first column has the Entrez gene id, the second has the gene length and the remaining columns contain information about the number of reads aligning to the gene in each experimental sample. There are two replicates for each cell type and timepoint (detailed sample info can be found in file "GSE60450_series_matrix.txt" from the [GEO website](http://www.ncbi.nlm.nih.gov/pubmed/25730472)). The targets file contains basic information about the samples that we will need for the analysis today.
+The `seqdata` object contains information about genes (one gene per row), the first column has the Entrez gene id, the second has the gene length and the remaining columns contain information about the number of reads aligning to the gene in each experimental sample. There are two replicates for each cell type and timepoint (detailed sample info can be found in file "GSE60450_series_matrix.txt" from the [GEO website](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60450)). The targets file contains basic information about the samples that we will need for the analysis today.
 
 ```{r}
 targets
@@ -357,7 +346,7 @@ An alternative to `plotMDS` for examining relationships between samples is using
 
 The *RColorBrewer* package has nicer colour schemes, accessed using the `brewer.pal` function. "RdYlBu" is a common choice, and "Spectral" is also nice.
 
-Note:The `png` function will create a png file where to save the plots created straight after, and will close this file when `dev.off()` is called. To see your plots interactively, simply omit those two lines.
+Note:The `png` function will create a png file to save the plots created straight after, and will close this file when `dev.off()` is called. To see your plots interactively, simply omit those two lines.
 
 Let's select data for the 500 most variable genes and plot the heatmap
 
@@ -429,7 +418,7 @@ abline(h=0,col="grey")
 
 <span style="color:blue">Exercise: Plot the biased and unbiased MD plots side by side for the same sample to see the before and after TMM normalisation effect.</span>
 
-## Diffential expression with limma-voom
+## Differential expression with limma-voom
 
 Now that we are happy that we have normalised the data and that the quality looks good, we can continue to testing for differentially expressed genes. There are a number of packages to analyse RNA-Seq data. The *limma* package [@Ritchie2015] (since version 3.16.0) offers the `voom` function, which transforms the read counts into logCPMs while taking into account the mean-variance relationship in the data [@Law2014]. After vooming, users can apply a linear model to the voom transformed data to test for differentially expressed genes, using standard *limma* commands.
 
@@ -437,7 +426,7 @@ Now that we are happy that we have normalised the data and that the quality look
 
 First we need to create a design matrix for the groups (see the excellent [limma user guide](https://bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf) for more information on design matrices). There are many different ways to set up your design matrix, and it is dictated by what comparisons you would like to test. We will follow the set-up from pg 43 of the limma vignette ("Interaction models: 2X2 factorial designs").
 
-In this analysis let's assume that we will be testing differences in status in the different cell types separately. For example, we want to know which genes are differentially expressed between virgin and pregnant in basal cells only. We have already coded our `group` variable for our final MDSplot, which was a concatenation of cell type and status. Coding the cell type and status in this way allows us to be flexible in specifying which comparisons we are interested in.
+In this analysis let's assume that we will be testing differences in status in the different cell types separately. For example, we want to know which genes are differentially expressed between pregnant and lactating in basal cells only. We have already coded our `group` variable for our final MDSplot, which was a concatenation of cell type and status. Coding the cell type and status in this way allows us to be flexible in specifying which comparisons we are interested in.
 
 ```{r}
 # Look at group variable again
