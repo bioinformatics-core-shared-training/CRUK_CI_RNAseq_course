@@ -665,6 +665,8 @@ glMDPlot(fit.treat, counts=y$counts, anno=fit.cont$genes, groups=group, samples=
 * Load in the results from the limma-voom analysis using the Degust GUI
 * Visualise the plots and results
 
+[Degust instructions](degust.pdf) (pdf)
+
 ## Generating heatmaps for DE genes
 
 For visualisation purposes, we can make heatmaps of the most differentially expressed genes.
