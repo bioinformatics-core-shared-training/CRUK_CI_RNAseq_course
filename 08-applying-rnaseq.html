@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="generator" content="pandoc">
+    <title>RNA-seq analysis in R</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-theme.css" />
+    <link rel="stylesheet" type="text/css" href="css/swc.css" />
+    <link rel="alternate" type="application/rss+xml" title="Software Carpentry Blog" href="http://software-carpentry.org/feed.xml"/>
+    <meta charset="UTF-8" />
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body class="lesson">
+    <div class="container card">
+      
+      <article>
+      <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+                    <a href="index.html"><h1 class="title">RNA-seq analysis in R</h1></a>
+          <h2 class="subtitle">Analysis of Pasilla Knock-down Experiment in Drosophila</h2>
+          <p><strong>Author: Belinda Phipson</strong></p>
+<h2 id="data-files-needed">Data files needed</h2>
+<ul>
+<li>counts_Drosophila.txt</li>
+<li>targets.txt</li>
+</ul>
+<p>Available from <a href="https://figshare.com/s/f5d63d8c265a05618137" class="uri">https://figshare.com/s/f5d63d8c265a05618137</a></p>
+<h2 id="libraries-needed">Libraries needed</h2>
+<ul>
+<li>limma</li>
+<li>edgeR</li>
+<li>org.Dm.eg.db (annotation for Drosophila)</li>
+<li>EDASeq</li>
+<li>gplots</li>
+<li>RColorBrewer</li>
+</ul>
+<p><strong>If you have your own dataset, make sure you have a counts matrix and the sample information. You can look for the annotation package for the species you’re studying on the Bioconductor website.</strong> <a href="http://bioconductor.org/packages/3.3/BiocViews.html#___AnnotationData" class="uri">http://bioconductor.org/packages/3.3/BiocViews.html#___AnnotationData</a> (Search for “org.” to see the organism packages)</p>
+<h2 id="introduction">Introduction</h2>
+<p>The RNA-Seq data we will be analysing today comes from this published paper:</p>
+<p>Brooks, A.N., Yang, L., Duff, M.O., Hansen, K.D., Park, J.W., Dudoit, S., Brenner, S.E. and Graveley, B.R. (2011) Conservation of an rna regulatory map between drosophila and mammals. Genome Research, 21(2), 193-202.<br />http://www.ncbi.nlm.nih.gov/pubmed/20921232</p>
+<p>This is a publicly available dataset, deposited in the Short Read Archive. The RNA-sequence data are available from GEO under accession nos. GSM461176-GSM461181. The authors combined RNAi and RNASeq to identify exons regulated by Pasilla, the Drosophila melanogaster ortholog of mammalian NOVA1 and NOVA2. They showed that the RNA regulatory map of Pasilla and NOVA1/2 is highly conserved between insects and mammals. NOVA1 and NOVA2 are best known for being involved in alternative splicing. Cells from S2-DRSC, which is an embryonic cell line, were cultured and subjected to a treatment in order to knock-down Pasilla. The four untreated and three treated RNAi samples were used in the analysis. The treated samples had Pasilla knocked down by approximately 60% compared to the untreated samples. Some of the samples had undergone paired end sequencing while other samples were sequenced from one end only.</p>
+<p>The reads were aligned to the Drosophila reference genome, downloaded from Ensembl, using the tophat aligner. The reads were summarised at the gene-level using htseq-count, a function from the tool HTSeq (http://wwwhuber.embl.de/users/anders/HTSeq/doc/overview.html).</p>
+<p>For the purpose of today’s workshop, we will be analysing the gene level counts.</p>
+<h2 id="tasks">Tasks</h2>
+<ul>
+<li>Reading the data into R</li>
+<li>Read in targets file (if you have your own dataset, make a simple tab delimited file with sample information in excel to read into R)</li>
+<li>Filtering out lowly expressed genes</li>
+<li>Quality control
+<ul>
+<li>Check library sizes</li>
+<li>Check relative log expression plots (RLEplots)</li>
+<li>Check MDSplots</li>
+</ul></li>
+<li>Hierarchical clustering with heatmap.2</li>
+<li>Normalisation</li>
+<li>Testing for differential expression
+<ul>
+<li>Set up appropriate design matrix</li>
+<li>voom transform the data</li>
+<li>Fit linear model and get DE genes</li>
+<li>Add annotation (different from day 1 - we will show you how)</li>
+</ul></li>
+<li>Plots after DE
+<ul>
+<li>Check top gene that is DE between Treated and Untreated</li>
+<li>Check expression of <em>pasilla</em> (ensemble gene id: FBgn0261552)</li>
+<li>Mean-difference plot (plotMD)</li>
+<li>Volcano plot</li>
+</ul></li>
+<li>Testing relative to a threshold</li>
+<li><p>Gene set testing with goana</p></li>
+<li><p>Try some interactive plots from Glimma or save topTable output and try Degust.</p></li>
+</ul>
+<div class="references">
+
+</div>
+        </div>
+      </div>
+      </article>
+      
+    </div>
+    <!-- Javascript placed at the end of the document so the pages load faster -->
+    <script src="http://software-carpentry.org/v5/js/jquery-1.9.1.min.js"></script>
+    <script src="css/bootstrap/bootstrap-js/bootstrap.js"></script>
+    <script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
+  </body>
+</html>
