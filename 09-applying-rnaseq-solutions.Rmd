@@ -1,9 +1,17 @@
 ---
-title: "Analysis of Pasilla Knock-down Experiment in Drosophila"
+layout: page
+title: "RNA-seq analysis in R"
+subtitle: "Solutions: Analysis of Pasilla Knock-down Experiment in Drosophila"
 author: "Belinda Phipson"
-date: "11-12 May 2016"
-output: html_document
+date: "11 - 12 May 2016"
+minutes: 15
 ---
+
+**Author: Belinda Phipson**
+
+```{r, include=FALSE}
+source("tools/chunk-options.R")
+```
 
 ## Data files needed
 
@@ -47,7 +55,7 @@ end sequencing while other samples were sequenced from one end only.
 The reads were aligned to the Drosophila reference genome,
 downloaded from Ensembl, using the tophat aligner.
 The reads were summarised at the gene-level using
-htseq-count, a function from the tool HTSeq 
+htseq-count, a function from the tool HTSeq
 (http://wwwhuber.embl.de/users/anders/HTSeq/doc/overview.html).
 
 For the purpose of today's workshop, we will be analysing the gene level counts.
@@ -56,7 +64,7 @@ For the purpose of today's workshop, we will be analysing the gene level counts.
 
 First, let's load all the libraries we will need today.
 
-```{r}
+```{r, message = FALSE}
 library(limma)
 library(edgeR)
 library(EDASeq)
@@ -68,8 +76,8 @@ library(org.Dm.eg.db)
 Next, read in the data and targets file:
 
 ```{r}
-counts <- read.delim(file="../Data/counts_Drosophila.txt")
-targets <- read.delim(file="../Data/targets.txt")
+counts <- read.delim(file="data/counts_Drosophila.txt")
+targets <- read.delim(file="data/targets.txt")
 ```
 
 Check that the data has read in correctly
@@ -215,11 +223,11 @@ plotMD(y,column = 2)
 abline(h=0,col="grey")
 ```
 
-## Differential expression 
+## Differential expression
 
 ### Set up design matrix
 
-We want to test for differences between the treated and untreated samples. However, we know that the library preparation adds variability to the data, so we need to account for it in our model. We do this by modelling both Group and Library as variables in our design matrix. This is known as an additive model. 
+We want to test for differences between the treated and untreated samples. However, we know that the library preparation adds variability to the data, so we need to account for it in our model. We do this by modelling both Group and Library as variables in our design matrix. This is known as an additive model.
 
 ```{r}
 design <- model.matrix(~targets$Library + targets$Group)
@@ -331,7 +339,6 @@ abline(h=0,col="grey")
 ## Gene set testing with goana
 
 ```{r}
-go <- goana(fit, coef="UVsT",species = "Dm", geneid="gene_id") 
+go <- goana(fit, coef="UVsT",species = "Dm", geneid="gene_id")
 topGO(go, n=10)
 ```
-

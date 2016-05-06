@@ -1,14 +1,18 @@
 ---
-title: "Analysis of new dataset"
+layout: page
+title: "RNA-seq analysis in R"
+subtitle: "Analysis of Pasilla Knock-down Experiment in Drosophila"
 author: "Belinda Phipson"
-date: "11-12 May 2016"
-output: html_document
+date: "11 - 12 May 2016"
+minutes: 120
 ---
+
+**Author: Belinda Phipson**
 
 ## Data files needed
 
 * counts_Drosophila.txt
-* targets.txt 
+* targets.txt
 
 Available from [https://figshare.com/s/f5d63d8c265a05618137](https://figshare.com/s/f5d63d8c265a05618137)
 
@@ -52,7 +56,7 @@ end sequencing while other samples were sequenced from one end only.
 The reads were aligned to the Drosophila reference genome,
 downloaded from Ensembl, using the tophat aligner.
 The reads were summarised at the gene-level using
-htseq-count, a function from the tool HTSeq 
+htseq-count, a function from the tool HTSeq
 (http://wwwhuber.embl.de/users/anders/HTSeq/doc/overview.html).
 
 For the purpose of today's workshop, we will be analysing the gene level counts.
@@ -77,11 +81,8 @@ For the purpose of today's workshop, we will be analysing the gene level counts.
     + Check top gene that is DE between Treated and Untreated
     + Check expression of *pasilla* (ensemble gene id: FBgn0261552)
     + Mean-difference plot (plotMD)
-    + Volcano plot 
+    + Volcano plot
 * Testing relative to a threshold
 * Gene set testing with goana
 
 * Try some interactive plots from Glimma or save topTable output and try Degust.
-
-
-

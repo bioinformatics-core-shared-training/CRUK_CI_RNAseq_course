@@ -8,6 +8,8 @@ bibliography: ref.bib
 minutes: 300
 ---
 
+**Authors: Belinda Phipson, Anna Trigos, Matt Ritchie, Maria Doyle, Harriet Dashnow**
+
 ```{r, include=FALSE}
 source("tools/chunk-options.R")
 ```
@@ -662,6 +664,8 @@ glMDPlot(fit.treat, counts=y$counts, anno=fit.cont$genes, groups=group, samples=
 
 * Load in the results from the limma-voom analysis using the Degust GUI
 * Visualise the plots and results
+
+[Degust instructions](degust.pdf) (pdf)
 
 ## Generating heatmaps for DE genes
 
