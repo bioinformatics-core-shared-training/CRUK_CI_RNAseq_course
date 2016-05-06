@@ -1,0 +1,337 @@
+---
+title: "Analysis of Pasilla Knock-down Experiment in Drosophila"
+author: "Belinda Phipson"
+date: "11-12 May 2016"
+output: html_document
+---
+
+## Data files needed
+
+* counts_Drosophila.txt
+* targets.txt
+
+## Libraries needed
+
+* limma
+* edgeR
+* org.Dm.eg.db
+* EDASeq
+* gplots
+* RColorBrewer
+
+## Introduction
+
+The RNA-Seq data we will be analysing today come from this published paper:
+
+Brooks, A.N., Yang, L., Duff, M.O., Hansen, K.D., Park, J.W., Dudoit, S.,
+Brenner, S.E. and Graveley, B.R. (2011) Conservation of an rna regulatory
+map between drosophila and mammals. Genome Research, 21(2), 193-202.  
+http://www.ncbi.nlm.nih.gov/pubmed/20921232
+
+This is a publicly available dataset, deposited in the
+Short Read Archive.  The RNA-sequence data are available from GEO under accession nos. GSM461176-GSM461181.  The authors combined RNAi and RNASeq
+to identify exons regulated by Pasilla, the Drosophila
+melanogaster ortholog of mammalian NOVA1 and NOVA2.
+They showed that the RNA regulatory map of Pasilla and
+NOVA1/2 is highly conserved between insects and mammals.
+NOVA1 and NOVA2 are best known for being involved
+in alternative splicing. Cells from S2-DRSC, which is an
+embryonic cell line, were cultured and subjected to a treatment
+in order to knock-down Pasilla. The four untreated and
+three treated RNAi samples were used in the
+analysis. The treated samples had Pasilla knocked
+down by approximately 60% compared to the untreated
+samples. Some of the samples had undergone paired
+end sequencing while other samples were sequenced from one end only.
+
+The reads were aligned to the Drosophila reference genome,
+downloaded from Ensembl, using the tophat aligner.
+The reads were summarised at the gene-level using
+htseq-count, a function from the tool HTSeq 
+(http://wwwhuber.embl.de/users/anders/HTSeq/doc/overview.html).
+
+For the purpose of today's workshop, we will be analysing the gene level counts.
+
+## Reading data into R
+
+First, let's load all the libraries we will need today.
+
+```{r}
+library(limma)
+library(edgeR)
+library(EDASeq)
+library(gplots)
+library(RColorBrewer)
+library(org.Dm.eg.db)
+```
+
+Next, read in the data and targets file:
+
+```{r}
+counts <- read.delim(file="../Data/counts_Drosophila.txt")
+targets <- read.delim(file="../Data/targets.txt")
+```
+
+Check that the data has read in correctly
+
+```{r}
+head(counts)
+targets
+```
+
+## Filtering out lowly expressed genes
+
+Our main interest is in testing the treated versus untreated groups. To check how many samples we have in each group we can use the `table` command.
+
+```{r}
+table(targets$Group)
+```
+
+The minimum sample size is 3. Let's check the relationship between CPM and counts to see what CPM threshold we should be imposing. Recall we're looking for a CPM that corresponds to a count of roughly 10-15.
+
+```{r}
+mycpm <- cpm(counts)
+plot(counts[,1],mycpm[,1],xlim=c(0,20),ylim=c(0,5))
+abline(v=10,col=2)
+abline(h=2,col=4)
+```
+
+We can filter on a CPM of 2 or 3 in at least 3 samples.
+
+```{r}
+thresh <- mycpm > 2
+keep <- rowSums(thresh) >= 3
+table(keep)
+
+counts.keep <- counts[keep,]
+dim(counts.keep)
+```
+
+We are filtering out about half our genes.
+
+## Convert to DGEList object
+
+```{r}
+y <- DGEList(counts.keep)
+```
+
+## Quality control
+
+Let's do a number of quality control plots.
+
+First, check the library sizes:
+
+```{r}
+barplot(y$samples$lib.size)
+```
+
+Next check the distribution of the counts using an relative log expression plot:
+
+```{r}
+plotRLE(y$counts)
+```
+
+It's a bit hard to see what's going on so we can zoom in to the y axis
+
+```{r}
+plotRLE(y$counts,ylim=c(-1,1))
+```
+
+We can colour by our groups, or by the different library prep.
+
+```{r}
+par(mfrow=c(1,2))
+group.col <- c("red","blue")[targets$Group]
+plotRLE(y$counts,ylim=c(-1,1),col=group.col)
+lib.col <- c("light pink","light green")[targets$Library]
+plotRLE(y$counts,ylim=c(-1,1),col=lib.col)
+```
+
+Looks like some bias going on!
+
+Finally, let's check our MDS plots.
+
+```{r}
+par(mfrow=c(1,1))
+plotMDS(y)
+```
+
+```{r}
+par(mfrow=c(1,2))
+plotMDS(y,col=group.col)
+legend("topright",legend=levels(targets$Group),fill=c("red","blue"))
+plotMDS(y,col=lib.col)
+legend("topleft",legend=levels(targets$Library),fill=c("light pink","light green"))
+```
+
+## Hierarchical clustering with heatmap.2
+
+First we need a matrix of log counts:
+
+```{r}
+logcounts <- cpm(y,log=TRUE)
+```
+
+Get variances for genes:
+
+```{r}
+var_genes <- apply(logcounts, 1, var)
+```
+
+Get top 500 most variable
+
+```{r}
+select_var <- names(sort(var_genes, decreasing=TRUE))[1:500]
+```
+
+```{r}
+highly_variable_lcpm <- logcounts[select_var,]
+dim(highly_variable_lcpm)
+```
+
+```{r}
+mypalette <- brewer.pal(11,"RdYlBu")
+morecols <- colorRampPalette(mypalette)
+# Plot the heatmap
+heatmap.2(highly_variable_lcpm,col=rev(morecols(50)),trace="none", main="Top 500 most variable genes across samples",ColSideColors=group.col,scale="row",margins=c(10,5))
+
+heatmap.2(highly_variable_lcpm,col=rev(morecols(50)),trace="none", main="Top 500 most variable genes across samples",ColSideColors=lib.col,scale="row",margins=c(10,5))
+```
+
+## Normalisation
+
+Let's do TMM normalisation
+
+```{r}
+y <- calcNormFactors(y)
+y$samples
+```
+
+```{r}
+par(mfrow=c(1,2))
+plotMD(logcounts,column=2)
+abline(h=0,col="grey")
+plotMD(y,column = 2)
+abline(h=0,col="grey")
+```
+
+## Differential expression 
+
+### Set up design matrix
+
+We want to test for differences between the treated and untreated samples. However, we know that the library preparation adds variability to the data, so we need to account for it in our model. We do this by modelling both Group and Library as variables in our design matrix. This is known as an additive model. 
+
+```{r}
+design <- model.matrix(~targets$Library + targets$Group)
+design
+colnames(design) <- c("Int","SEvsPE","UVsT")
+```
+
+### Voom transform the data
+
+```{r}
+par(mfrow=c(1,1))
+v <- voom(y,design,plot=TRUE)
+```
+
+```{r}
+par(mfrow=c(1,2))
+boxplot(logcounts)
+abline(h=median(logcounts),col=4)
+boxplot(v$E)
+abline(h=median(v$E),col=4)
+```
+
+### Test for differential expression
+
+```{r}
+fit <- lmFit(v,design)
+fit <- eBayes(fit)
+results <- decideTests(fit)
+summary(results)
+```
+
+```{r}
+topTable(fit,coef=3,sort.by="p")
+```
+
+### Add annotation from org.Dm.eg.db
+
+The rownames of the fit object are the ensemble gene ids. The `select` function doesn't work in this case, but there is a less elegant way to get around it, using the `toTable` command.
+
+```{r}
+# Let's see what we can get in table format from org.Dm.eg.db
+ls("package:org.Dm.eg.db")
+# Get ensemble annotation
+ens <- toTable(org.Dm.egENSEMBL)
+head(ens)
+symbol <- toTable(org.Dm.egSYMBOL)
+genename <- toTable(org.Dm.egGENENAME)
+
+# We can use the merge command to merge two dataframes
+ann1 <- merge(ens,symbol,by="gene_id")
+head(ann1)
+# Add genename table to ann1
+ann2 <- merge(ann1,genename,by="gene_id")
+head(ann2)
+```
+
+Now we need to match up between `rownames(fit)` and the ensemble gene id in `ann2`.
+
+```{r}
+m <- match(rownames(fit),ann2$ensembl_id)
+table(is.na(m))
+fit$genes <- ann2[m,]
+```
+
+```{r}
+topTable(fit,coef=3,sort.by="p")
+```
+
+Let's check the expression of pasilla.
+
+```{r}
+ps <- grep("pasilla",fit$genes$gene_name)
+topTable(fit[ps,],coef=3)
+```
+
+## Plots after testing for DE
+
+```{r}
+par(mfrow=c(1,2))
+limma:::plotMA(fit,coef=3,status=results[,"UVsT"])
+
+volcanoplot(fit,coef=3,highlight=100,names=fit$genes$symbol)
+```
+
+```{r}
+stripchart(v$E["FBgn0025111",]~targets$Group)
+```
+
+```{r}
+# Check expression of Pasilla
+stripchart(v$E["FBgn0261552",]~targets$Group)
+```
+
+
+## Testing relative to a threshold
+
+```{r}
+fit.treat <- treat(fit,lfc=1)
+res.treat <- decideTests(fit.treat)
+summary(res.treat)
+topTreat(fit.treat,coef=3)
+```
+
+```{r}
+plotMD(fit.treat,coef=3,status=res.treat[,"UVsT"])
+abline(h=0,col="grey")
+```
+
+## Gene set testing with goana
+
+```{r}
+go <- goana(fit, coef="UVsT",species = "Dm", geneid="gene_id") 
+topGO(go, n=10)
+```
+
