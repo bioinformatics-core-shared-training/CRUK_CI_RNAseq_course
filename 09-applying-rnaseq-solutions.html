@@ -57,7 +57,7 @@
 </code></pre>
 <p>Next, read in the data and targets file:</p>
 <pre class="sourceCode r"><code class="sourceCode r">counts &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="dt">file=</span><span class="st">&quot;data/counts_Drosophila.txt&quot;</span>)
-targets &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="dt">file=</span><span class="st">&quot;data/targets.txt&quot;</span>)</code></pre>
+targets &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="dt">file=</span><span class="st">&quot;data/targets_drosophila.txt&quot;</span>)</code></pre>
 <p>Check that the data has read in correctly</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(counts)</code></pre>
 <pre class="output"><code>            SRR031714.bam SRR031716.bam SRR031724.bam SRR031726.bam
@@ -76,24 +76,21 @@ FBgn0037217            15            15            17
 FBgn0037218           695           767           793
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">targets</code></pre>
-<pre class="output"><code>                            FileName SampleName CellType   Status
-1  MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1    MCL1.DG    basal   virgin
-2  MCL1.DH_BC2CTUACXX_CAGATC_L002_R1    MCL1.DH    basal   virgin
-3  MCL1.DI_BC2CTUACXX_ACAGTG_L002_R1    MCL1.DI    basal pregnant
-4  MCL1.DJ_BC2CTUACXX_CGATGT_L002_R1    MCL1.DJ    basal pregnant
-5  MCL1.DK_BC2CTUACXX_TTAGGC_L002_R1    MCL1.DK    basal  lactate
-6  MCL1.DL_BC2CTUACXX_ATCACG_L002_R1    MCL1.DL    basal  lactate
-7  MCL1.LA_BC2CTUACXX_GATCAG_L001_R1    MCL1.LA  luminal   virgin
-8  MCL1.LB_BC2CTUACXX_TGACCA_L001_R1    MCL1.LB  luminal   virgin
-9  MCL1.LC_BC2CTUACXX_GCCAAT_L001_R1    MCL1.LC  luminal pregnant
-10 MCL1.LD_BC2CTUACXX_GGCTAC_L001_R1    MCL1.LD  luminal pregnant
-11 MCL1.LE_BC2CTUACXX_TAGCTT_L001_R1    MCL1.LE  luminal  lactate
-12 MCL1.LF_BC2CTUACXX_CTTGTA_L001_R1    MCL1.LF  luminal  lactate
+<pre class="output"><code>  SampleName     Group Library
+1  SRR031714 Untreated      PE
+2  SRR031716 Untreated      PE
+3  SRR031724   Treated      PE
+4  SRR031726   Treated      PE
+5  SRR031708 Untreated      SE
+6  SRR031718   Treated      SE
+7  SRR031728 Untreated      SE
 </code></pre>
 <h2 id="filtering-out-lowly-expressed-genes">Filtering out lowly expressed genes</h2>
 <p>Our main interest is in testing the treated versus untreated groups. To check how many samples we have in each group we can use the <code>table</code> command.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(targets$Group)</code></pre>
-<pre class="output"><code>&lt; table of extent 0 &gt;
+<pre class="output"><code>
+  Treated Untreated 
+        3         4 
 </code></pre>
 <p>The minimum sample size is 3. Let’s check the relationship between CPM and counts to see what CPM threshold we should be imposing. Recall we’re looking for a CPM that corresponds to a count of roughly 10-15.</p>
 <pre class="sourceCode r"><code class="sourceCode r">mycpm &lt;-<span class="st"> </span><span class="kw">cpm</span>(counts)
@@ -141,14 +138,10 @@ lib.col &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st"
 <p><img src="fig/unnamed-chunk-13-1.png" title="plot of chunk unnamed-chunk-13" alt="plot of chunk unnamed-chunk-13" style="display: block; margin: auto;" /></p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
 <span class="kw">plotMDS</span>(y,<span class="dt">col=</span>group.col)
-<span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>,<span class="dt">legend=</span><span class="kw">levels</span>(targets$Group),<span class="dt">fill=</span><span class="kw">c</span>(<span class="st">&quot;red&quot;</span>,<span class="st">&quot;blue&quot;</span>))</code></pre>
-<pre class="error"><code>Error in legend(&quot;topright&quot;, legend = levels(targets$Group), fill = c(&quot;red&quot;, : &#39;legend&#39; is of length 0
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMDS</span>(y,<span class="dt">col=</span>lib.col)</code></pre>
+<span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>,<span class="dt">legend=</span><span class="kw">levels</span>(targets$Group),<span class="dt">fill=</span><span class="kw">c</span>(<span class="st">&quot;red&quot;</span>,<span class="st">&quot;blue&quot;</span>))
+<span class="kw">plotMDS</span>(y,<span class="dt">col=</span>lib.col)
+<span class="kw">legend</span>(<span class="st">&quot;topleft&quot;</span>,<span class="dt">legend=</span><span class="kw">levels</span>(targets$Library),<span class="dt">fill=</span><span class="kw">c</span>(<span class="st">&quot;light pink&quot;</span>,<span class="st">&quot;light green&quot;</span>))</code></pre>
 <p><img src="fig/unnamed-chunk-14-1.png" title="plot of chunk unnamed-chunk-14" alt="plot of chunk unnamed-chunk-14" style="display: block; margin: auto;" /></p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">legend</span>(<span class="st">&quot;topleft&quot;</span>,<span class="dt">legend=</span><span class="kw">levels</span>(targets$Library),<span class="dt">fill=</span><span class="kw">c</span>(<span class="st">&quot;light pink&quot;</span>,<span class="st">&quot;light green&quot;</span>))</code></pre>
-<pre class="error"><code>Error in legend(&quot;topleft&quot;, legend = levels(targets$Library), fill = c(&quot;light pink&quot;, : &#39;legend&#39; is of length 0
-</code></pre>
 <h2 id="hierarchical-clustering-with-heatmap.2">Hierarchical clustering with heatmap.2</h2>
 <p>First we need a matrix of log counts:</p>
 <pre class="sourceCode r"><code class="sourceCode r">logcounts &lt;-<span class="st"> </span><span class="kw">cpm</span>(y,<span class="dt">log=</span><span class="ot">TRUE</span>)</code></pre>
@@ -164,11 +157,9 @@ lib.col &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st"
 morecols &lt;-<span class="st"> </span><span class="kw">colorRampPalette</span>(mypalette)
 <span class="co"># Plot the heatmap</span>
 <span class="kw">heatmap.2</span>(highly_variable_lcpm,<span class="dt">col=</span><span class="kw">rev</span>(<span class="kw">morecols</span>(<span class="dv">50</span>)),<span class="dt">trace=</span><span class="st">&quot;none&quot;</span>, <span class="dt">main=</span><span class="st">&quot;Top 500 most variable genes across samples&quot;</span>,<span class="dt">ColSideColors=</span>group.col,<span class="dt">scale=</span><span class="st">&quot;row&quot;</span>,<span class="dt">margins=</span><span class="kw">c</span>(<span class="dv">10</span>,<span class="dv">5</span>))</code></pre>
-<pre class="error"><code>Error in heatmap.2(highly_variable_lcpm, col = rev(morecols(50)), trace = &quot;none&quot;, : &#39;ColSideColors&#39; must be a character vector of length ncol(x)
-</code></pre>
+<p><img src="fig/unnamed-chunk-19-1.png" title="plot of chunk unnamed-chunk-19" alt="plot of chunk unnamed-chunk-19" style="display: block; margin: auto;" /></p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">heatmap.2</span>(highly_variable_lcpm,<span class="dt">col=</span><span class="kw">rev</span>(<span class="kw">morecols</span>(<span class="dv">50</span>)),<span class="dt">trace=</span><span class="st">&quot;none&quot;</span>, <span class="dt">main=</span><span class="st">&quot;Top 500 most variable genes across samples&quot;</span>,<span class="dt">ColSideColors=</span>lib.col,<span class="dt">scale=</span><span class="st">&quot;row&quot;</span>,<span class="dt">margins=</span><span class="kw">c</span>(<span class="dv">10</span>,<span class="dv">5</span>))</code></pre>
-<pre class="error"><code>Error in heatmap.2(highly_variable_lcpm, col = rev(morecols(50)), trace = &quot;none&quot;, : &#39;ColSideColors&#39; must be a character vector of length ncol(x)
-</code></pre>
+<p><img src="fig/unnamed-chunk-19-2.png" title="plot of chunk unnamed-chunk-19" alt="plot of chunk unnamed-chunk-19" style="display: block; margin: auto;" /></p>
 <h2 id="normalisation">Normalisation</h2>
 <p>Let’s do TMM normalisation</p>
 <pre class="sourceCode r"><code class="sourceCode r">y &lt;-<span class="st"> </span><span class="kw">calcNormFactors</span>(y)
@@ -191,51 +182,69 @@ SRR031728.bam     1  4031608    1.0106328
 <h2 id="differential-expression">Differential expression</h2>
 <h3 id="set-up-design-matrix">Set up design matrix</h3>
 <p>We want to test for differences between the treated and untreated samples. However, we know that the library preparation adds variability to the data, so we need to account for it in our model. We do this by modelling both Group and Library as variables in our design matrix. This is known as an additive model.</p>
-<pre class="sourceCode r"><code class="sourceCode r">design &lt;-<span class="st"> </span><span class="kw">model.matrix</span>(~targets$Library +<span class="st"> </span>targets$Group)</code></pre>
-<pre class="error"><code>Error in model.frame.default(object, data, xlev = xlev): invalid type (NULL) for variable &#39;targets$Library&#39;
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">design</code></pre>
-<pre class="output"><code>standardGeneric for &quot;design&quot; defined from package &quot;BiocGenerics&quot;
+<pre class="sourceCode r"><code class="sourceCode r">design &lt;-<span class="st"> </span><span class="kw">model.matrix</span>(~targets$Library +<span class="st"> </span>targets$Group)
+design</code></pre>
+<pre class="output"><code>  (Intercept) targets$LibrarySE targets$GroupUntreated
+1           1                 0                      1
+2           1                 0                      1
+3           1                 0                      0
+4           1                 0                      0
+5           1                 1                      1
+6           1                 1                      0
+7           1                 1                      1
+attr(,&quot;assign&quot;)
+[1] 0 1 2
+attr(,&quot;contrasts&quot;)
+attr(,&quot;contrasts&quot;)$`targets$Library`
+[1] &quot;contr.treatment&quot;
 
-function (object, ...) 
-standardGeneric(&quot;design&quot;)
-&lt;environment: 0x7ffdeb1a8188&gt;
-Methods may be defined for arguments: object
-Use  showMethods(&quot;design&quot;)  for currently available ones.
+attr(,&quot;contrasts&quot;)$`targets$Group`
+[1] &quot;contr.treatment&quot;
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">colnames</span>(design) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Int&quot;</span>,<span class="st">&quot;SEvsPE&quot;</span>,<span class="st">&quot;UVsT&quot;</span>)</code></pre>
-<pre class="error"><code>Error in `colnames&lt;-`(`*tmp*`, value = c(&quot;Int&quot;, &quot;SEvsPE&quot;, &quot;UVsT&quot;)): attempt to set &#39;colnames&#39; on an object with less than two dimensions
-</code></pre>
 <h3 id="voom-transform-the-data">Voom transform the data</h3>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))
 v &lt;-<span class="st"> </span><span class="kw">voom</span>(y,design,<span class="dt">plot=</span><span class="ot">TRUE</span>)</code></pre>
-<pre class="error"><code>Error in as.vector(x, mode): cannot coerce type &#39;closure&#39; to vector of type &#39;any&#39;
-</code></pre>
+<p><img src="fig/unnamed-chunk-23-1.png" title="plot of chunk unnamed-chunk-23" alt="plot of chunk unnamed-chunk-23" style="display: block; margin: auto;" /></p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
 <span class="kw">boxplot</span>(logcounts)
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="kw">median</span>(logcounts),<span class="dt">col=</span><span class="dv">4</span>)
-<span class="kw">boxplot</span>(v$E)</code></pre>
-<pre class="error"><code>Error in boxplot(v$E): object &#39;v&#39; not found
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">abline</span>(<span class="dt">h=</span><span class="kw">median</span>(v$E),<span class="dt">col=</span><span class="dv">4</span>)</code></pre>
-<pre class="error"><code>Error in median(v$E): object &#39;v&#39; not found
-</code></pre>
+<span class="kw">boxplot</span>(v$E)
+<span class="kw">abline</span>(<span class="dt">h=</span><span class="kw">median</span>(v$E),<span class="dt">col=</span><span class="dv">4</span>)</code></pre>
 <p><img src="fig/unnamed-chunk-24-1.png" title="plot of chunk unnamed-chunk-24" alt="plot of chunk unnamed-chunk-24" style="display: block; margin: auto;" /></p>
 <h3 id="test-for-differential-expression">Test for differential expression</h3>
-<pre class="sourceCode r"><code class="sourceCode r">fit &lt;-<span class="st"> </span><span class="kw">lmFit</span>(v,design)</code></pre>
-<pre class="error"><code>Error in is(object, &quot;list&quot;): object &#39;v&#39; not found
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">fit &lt;-<span class="st"> </span><span class="kw">eBayes</span>(fit)</code></pre>
-<pre class="error"><code>Error in ebayes(fit = fit, proportion = proportion, stdev.coef.lim = stdev.coef.lim, : object &#39;fit&#39; not found
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">results &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit)</code></pre>
-<pre class="error"><code>Error in is(object, &quot;MArrayLM&quot;): object &#39;fit&#39; not found
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(results)</code></pre>
-<pre class="error"><code>Error in summary(results): object &#39;results&#39; not found
+<pre class="sourceCode r"><code class="sourceCode r">fit &lt;-<span class="st"> </span><span class="kw">lmFit</span>(v,design)
+fit &lt;-<span class="st"> </span><span class="kw">eBayes</span>(fit)
+results &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit)
+<span class="kw">summary</span>(results)</code></pre>
+<pre class="output"><code>    Int SEvsPE UVsT
+-1    4    125  440
+0    66   7142 6641
+1  7454    257  443
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre>
-<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit&#39; not found
+<pre class="output"><code>                logFC   AveExpr         t      P.Value    adj.P.Val
+FBgn0025111 -2.863110  6.253448 -31.24326 9.756044e-13 4.734428e-09
+FBgn0003360  3.089242  7.778378  30.57062 1.258487e-12 4.734428e-09
+FBgn0026562  2.422219 11.359837  24.25592 1.868075e-11 4.685133e-08
+FBgn0029167  2.247086  7.825170  21.77945 6.509505e-11 1.224438e-07
+FBgn0035085  2.677008  5.180607  18.97509 3.188148e-10 4.797524e-07
+FBgn0039155  4.272254  4.800907  17.42222 8.476440e-10 1.062946e-06
+FBgn0040091  1.559497  6.245766  15.43293 3.363833e-09 3.615639e-06
+FBgn0023479  1.576335  7.768886  15.06473 4.419245e-09 3.877495e-06
+FBgn0029896  2.312097  4.881577  15.00033 4.638152e-09 3.877495e-06
+FBgn0027279  1.180272  7.760889  14.37303 7.503535e-09 5.645660e-06
+                   B
+FBgn0025111 19.04663
+FBgn0003360 19.04370
+FBgn0026562 16.57869
+FBgn0029167 15.57725
+FBgn0035085 13.66077
+FBgn0039155 12.15024
+FBgn0040091 11.72125
+FBgn0023479 11.43434
+FBgn0029896 11.25267
+FBgn0027279 10.89435
 </code></pre>
 <h3 id="add-annotation-from-org.dm.eg.db">Add annotation from org.Dm.eg.db</h3>
 <p>The rownames of the fit object are the ensemble gene ids. The <code>select</code> function doesn’t work in this case, but there is a less elegant way to get around it, using the <code>toTable</code> command.</p>
@@ -309,65 +318,139 @@ ann2 &lt;-<span class="st"> </span><span class="kw">merge</span>(ann1,genename,<
 6 CG42852 gene product from transcript CG42852-RA
 </code></pre>
 <p>Now we need to match up between <code>rownames(fit)</code> and the ensemble gene id in <code>ann2</code>.</p>
-<pre class="sourceCode r"><code class="sourceCode r">m &lt;-<span class="st"> </span><span class="kw">match</span>(<span class="kw">rownames</span>(fit),ann2$ensembl_id)</code></pre>
-<pre class="error"><code>Error in rownames(fit): object &#39;fit&#39; not found
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(<span class="kw">is.na</span>(m))</code></pre>
-<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;m&#39; not found
+<pre class="sourceCode r"><code class="sourceCode r">m &lt;-<span class="st"> </span><span class="kw">match</span>(<span class="kw">rownames</span>(fit),ann2$ensembl_id)
+<span class="kw">table</span>(<span class="kw">is.na</span>(m))</code></pre>
+<pre class="output"><code>
+FALSE  TRUE 
+ 6986   538 
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">fit$genes &lt;-<span class="st"> </span>ann2[m,]</code></pre>
-<pre class="error"><code>Error in `[.data.frame`(ann2, m, ): object &#39;m&#39; not found
-</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre>
-<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit&#39; not found
+<pre class="output"><code>            gene_id  ensembl_id      symbol
+FBgn0025111   32008 FBgn0025111        Ant2
+FBgn0003360   32007 FBgn0003360        sesB
+FBgn0026562   43230 FBgn0026562 BM-40-SPARC
+FBgn0029167   39529 FBgn0029167         Hml
+FBgn0035085   37991 FBgn0035085      CG3770
+FBgn0039155   42865 FBgn0039155        Kal1
+FBgn0040091   37590 FBgn0040091     Ugt58Fa
+FBgn0023479   39048 FBgn0023479     Tequila
+FBgn0029896   31612 FBgn0029896      CG3168
+FBgn0027279   33137 FBgn0027279   l(1)G0196
+                                                gene_name     logFC
+FBgn0025111              Adenine nucleotide translocase 2 -2.863110
+FBgn0003360                            stress-sensitive B  3.089242
+FBgn0026562 CG6378 gene product from transcript CG6378-RA  2.422219
+FBgn0029167                                    Hemolectin  2.247086
+FBgn0035085 CG3770 gene product from transcript CG3770-RA  2.677008
+FBgn0039155                  Kallmann syndrome 1 ortholog  4.272254
+FBgn0040091 CG4414 gene product from transcript CG4414-RB  1.559497
+FBgn0023479 CG4821 gene product from transcript CG4821-RG  1.576335
+FBgn0029896 CG3168 gene product from transcript CG3168-RG  2.312097
+FBgn0027279                              lethal (1) G0196  1.180272
+              AveExpr         t      P.Value    adj.P.Val        B
+FBgn0025111  6.253448 -31.24326 9.756044e-13 4.734428e-09 19.04663
+FBgn0003360  7.778378  30.57062 1.258487e-12 4.734428e-09 19.04370
+FBgn0026562 11.359837  24.25592 1.868075e-11 4.685133e-08 16.57869
+FBgn0029167  7.825170  21.77945 6.509505e-11 1.224438e-07 15.57725
+FBgn0035085  5.180607  18.97509 3.188148e-10 4.797524e-07 13.66077
+FBgn0039155  4.800907  17.42222 8.476440e-10 1.062946e-06 12.15024
+FBgn0040091  6.245766  15.43293 3.363833e-09 3.615639e-06 11.72125
+FBgn0023479  7.768886  15.06473 4.419245e-09 3.877495e-06 11.43434
+FBgn0029896  4.881577  15.00033 4.638152e-09 3.877495e-06 11.25267
+FBgn0027279  7.760889  14.37303 7.503535e-09 5.645660e-06 10.89435
 </code></pre>
 <p>Let’s check the expression of pasilla.</p>
-<pre class="sourceCode r"><code class="sourceCode r">ps &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="st">&quot;pasilla&quot;</span>,fit$genes$gene_name)</code></pre>
-<pre class="error"><code>Error in grep(&quot;pasilla&quot;, fit$genes$gene_name): object &#39;fit&#39; not found
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit[ps,],<span class="dt">coef=</span><span class="dv">3</span>)</code></pre>
-<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit&#39; not found
+<pre class="sourceCode r"><code class="sourceCode r">ps &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="st">&quot;pasilla&quot;</span>,fit$genes$gene_name)
+<span class="kw">topTable</span>(fit[ps,],<span class="dt">coef=</span><span class="dv">3</span>)</code></pre>
+<pre class="output"><code>            gene_id  ensembl_id symbol gene_name    logFC  AveExpr       t
+FBgn0261552   44258 FBgn0261552     ps   pasilla 1.845368 8.344996 11.5651
+                P.Value   adj.P.Val        B
+FBgn0261552 8.37355e-08 8.37355e-08 8.425095
 </code></pre>
 <h2 id="plots-after-testing-for-de">Plots after testing for DE</h2>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
-<span class="kw">plotMD</span>(fit,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">status=</span>results[,<span class="st">&quot;UVsT&quot;</span>])</code></pre>
-<pre class="error"><code>Error in plotMD(fit, coef = 3, status = results[, &quot;UVsT&quot;]): object &#39;fit&#39; not found
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">volcanoplot</span>(fit,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">highlight=</span><span class="dv">100</span>,<span class="dt">names=</span>fit$genes$symbol)</code></pre>
-<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit&#39; not found
-</code></pre>
+<span class="kw">plotMD</span>(fit,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">status=</span>results[,<span class="st">&quot;UVsT&quot;</span>])
+
+<span class="kw">volcanoplot</span>(fit,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">highlight=</span><span class="dv">100</span>,<span class="dt">names=</span>fit$genes$symbol)</code></pre>
+<p><img src="fig/unnamed-chunk-31-1.png" title="plot of chunk unnamed-chunk-31" alt="plot of chunk unnamed-chunk-31" style="display: block; margin: auto;" /></p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">stripchart</span>(v$E[<span class="st">&quot;FBgn0025111&quot;</span>,]~targets$Group)</code></pre>
-<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;v&#39; not found
-</code></pre>
+<p><img src="fig/unnamed-chunk-32-1.png" title="plot of chunk unnamed-chunk-32" alt="plot of chunk unnamed-chunk-32" style="display: block; margin: auto;" /></p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Check expression of Pasilla</span>
 <span class="kw">stripchart</span>(v$E[<span class="st">&quot;FBgn0261552&quot;</span>,]~targets$Group)</code></pre>
-<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;v&#39; not found
-</code></pre>
+<p><img src="fig/unnamed-chunk-33-1.png" title="plot of chunk unnamed-chunk-33" alt="plot of chunk unnamed-chunk-33" style="display: block; margin: auto;" /></p>
 <h2 id="testing-relative-to-a-threshold">Testing relative to a threshold</h2>
-<pre class="sourceCode r"><code class="sourceCode r">fit.treat &lt;-<span class="st"> </span><span class="kw">treat</span>(fit,<span class="dt">lfc=</span><span class="dv">1</span>)</code></pre>
-<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit&#39; not found
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">res.treat &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit.treat)</code></pre>
-<pre class="error"><code>Error in is(object, &quot;MArrayLM&quot;): object &#39;fit.treat&#39; not found
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(res.treat)</code></pre>
-<pre class="error"><code>Error in summary(res.treat): object &#39;res.treat&#39; not found
+<pre class="sourceCode r"><code class="sourceCode r">fit.treat &lt;-<span class="st"> </span><span class="kw">treat</span>(fit,<span class="dt">lfc=</span><span class="dv">1</span>)
+res.treat &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit.treat)
+<span class="kw">summary</span>(res.treat)</code></pre>
+<pre class="output"><code>    Int SEvsPE UVsT
+-1    2     13   10
+0   350   7510 7496
+1  7172      1   18
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTreat</span>(fit.treat,<span class="dt">coef=</span><span class="dv">3</span>)</code></pre>
-<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit.treat&#39; not found
+<pre class="output"><code>            gene_id  ensembl_id      symbol
+FBgn0003360   32007 FBgn0003360        sesB
+FBgn0025111   32008 FBgn0025111        Ant2
+FBgn0026562   43230 FBgn0026562 BM-40-SPARC
+FBgn0039155   42865 FBgn0039155        Kal1
+FBgn0029167   39529 FBgn0029167         Hml
+FBgn0035085   37991 FBgn0035085      CG3770
+FBgn0034736   37572 FBgn0034736      CG6018
+FBgn0000071   40831 FBgn0000071         Ama
+FBgn0029896   31612 FBgn0029896      CG3168
+FBgn0039827   43689 FBgn0039827      CG1544
+                                                gene_name     logFC
+FBgn0003360                            stress-sensitive B  3.089242
+FBgn0025111              Adenine nucleotide translocase 2 -2.863110
+FBgn0026562 CG6378 gene product from transcript CG6378-RA  2.422219
+FBgn0039155                  Kallmann syndrome 1 ortholog  4.272254
+FBgn0029167                                    Hemolectin  2.247086
+FBgn0035085 CG3770 gene product from transcript CG3770-RA  2.677008
+FBgn0034736 CG6018 gene product from transcript CG6018-RA  3.407306
+FBgn0000071                                       Amalgam -2.572434
+FBgn0029896 CG3168 gene product from transcript CG3168-RG  2.312097
+FBgn0039827 CG1544 gene product from transcript CG1544-RA  3.925533
+              AveExpr          t      P.Value    adj.P.Val
+FBgn0003360  7.778378  20.674784 5.940461e-11 2.711163e-07
+FBgn0025111  6.253448 -20.330911 7.206708e-11 2.711163e-07
+FBgn0026562 11.359837  14.241997 4.158446e-09 1.042938e-05
+FBgn0039155  4.800907  13.344224 8.653631e-09 1.627748e-05
+FBgn0029167  7.825170  12.087142 2.578989e-08 3.880863e-05
+FBgn0035085  5.180607  11.886920 3.099362e-08 3.886600e-05
+FBgn0034736  3.372966   8.780952 7.931358e-07 8.094637e-04
+FBgn0000071  4.209333  -8.710932 8.606738e-07 8.094637e-04
+FBgn0029896  4.881577   8.512571 1.091548e-06 8.898178e-04
+FBgn0039827  3.204658   8.449359 1.182639e-06 8.898178e-04
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMD</span>(fit.treat,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">status=</span>res.treat[,<span class="st">&quot;UVsT&quot;</span>])</code></pre>
-<pre class="error"><code>Error in plotMD(fit.treat, coef = 3, status = res.treat[, &quot;UVsT&quot;]): object &#39;fit.treat&#39; not found
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre>
-<pre class="error"><code>Error in int_abline(a = a, b = b, h = h, v = v, untf = untf, ...): plot.new has not been called yet
-</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMD</span>(fit.treat,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">status=</span>res.treat[,<span class="st">&quot;UVsT&quot;</span>])
+<span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre>
+<p><img src="fig/unnamed-chunk-35-1.png" title="plot of chunk unnamed-chunk-35" alt="plot of chunk unnamed-chunk-35" style="display: block; margin: auto;" /></p>
 <h2 id="gene-set-testing-with-goana">Gene set testing with goana</h2>
-<pre class="sourceCode r"><code class="sourceCode r">go &lt;-<span class="st"> </span><span class="kw">goana</span>(fit, <span class="dt">coef=</span><span class="st">&quot;UVsT&quot;</span>,<span class="dt">species =</span> <span class="st">&quot;Dm&quot;</span>, <span class="dt">geneid=</span><span class="st">&quot;gene_id&quot;</span>)</code></pre>
-<pre class="error"><code>Error in goana(fit, coef = &quot;UVsT&quot;, species = &quot;Dm&quot;, geneid = &quot;gene_id&quot;): object &#39;fit&#39; not found
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topGO</span>(go, <span class="dt">n=</span><span class="dv">10</span>)</code></pre>
-<pre class="error"><code>Error in is.data.frame(results): object &#39;go&#39; not found
+<pre class="sourceCode r"><code class="sourceCode r">go &lt;-<span class="st"> </span><span class="kw">goana</span>(fit, <span class="dt">coef=</span><span class="st">&quot;UVsT&quot;</span>,<span class="dt">species =</span> <span class="st">&quot;Dm&quot;</span>, <span class="dt">geneid=</span><span class="st">&quot;gene_id&quot;</span>)
+<span class="kw">topGO</span>(go, <span class="dt">n=</span><span class="dv">10</span>)</code></pre>
+<pre class="output"><code>                                                     Term Ont   N Up Down
+GO:0044421                      extracellular region part  CC 148 22   27
+GO:0044724 single-organism carbohydrate catabolic process  BP  23  2   10
+GO:0005576                           extracellular region  CC 263 35   38
+GO:0019991                      septate junction assembly  BP  25  0   10
+GO:0016052                 carbohydrate catabolic process  BP  25  2   10
+GO:0005886                                plasma membrane  CC 494 36   56
+GO:0071944                                 cell periphery  CC 572 42   62
+GO:0008509       anion transmembrane transporter activity  MF  94 18   11
+GO:0001676        long-chain fatty acid metabolic process  BP   4  4    0
+GO:0007043                    cell-cell junction assembly  BP  32  0   10
+                   P.Up       P.Down
+GO:0044421 4.171979e-05 2.013830e-07
+GO:0044724 3.926743e-01 3.550348e-07
+GO:0005576 3.099608e-06 4.062592e-07
+GO:0019991 1.000000e+00 9.081054e-07
+GO:0016052 4.341755e-01 9.081054e-07
+GO:0005886 9.561659e-02 2.769739e-06
+GO:0071944 6.918321e-02 3.448867e-06
+GO:0008509 6.247719e-06 2.711234e-02
+GO:0001676 1.150056e-05 1.000000e+00
+GO:0007043 1.000000e+00 1.217519e-05
 </code></pre>
 <div class="references">
 
