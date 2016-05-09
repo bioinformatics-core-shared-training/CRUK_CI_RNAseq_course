@@ -12,6 +12,7 @@ minutes: 60
 
 ```{r, include=FALSE}
 source("tools/chunk-options.R")
+opts_chunk$set(fig.path = "fig-07/")
 ```
 
 This material has been created using the following sources:  

@@ -12,6 +12,7 @@ minutes: 300
 
 ```{r, include=FALSE}
 source("tools/chunk-options.R")
+opts_chunk$set(fig.path = "fig-06/")
 ```
 
 ## Resources and data files

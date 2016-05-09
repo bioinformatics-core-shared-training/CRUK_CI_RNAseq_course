@@ -208,7 +208,7 @@ Completed successfully. Quality scores for 100 reads (equally spaced in the file
 </code></pre>
 <p>A quality score of 30 corresponds to a 1 in 1000 chance of an incorrect base call. (A quality score of 10 is a 1 in 10 chance of an incorrect base call.) To look at the overall distribution of quality scores across the 100 reads, we can look at a boxplot</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">boxplot</span>(qs)</code></pre>
-<p><img src="fig/unnamed-chunk-12-1.png" title="plot of chunk unnamed-chunk-12" alt="plot of chunk unnamed-chunk-12" style="display: block; margin: auto;" /></p>
+<p><img src="fig-07/unnamed-chunk-12-1.png" title="plot of chunk unnamed-chunk-12" alt="plot of chunk unnamed-chunk-12" style="display: block; margin: auto;" /></p>
 <p>We can get the percentages of A, T, G and C in a fastq file by using the <code>atgcContent</code> function. This can sometimes highlight if there’s a strong GC bias, for example.</p>
 <pre class="sourceCode r"><code class="sourceCode r">actg &lt;-<span class="st"> </span><span class="kw">atgcContent</span>(<span class="dt">filename=</span><span class="st">&quot;SRR1552450.fastq.gz&quot;</span>)
 actg</code></pre>

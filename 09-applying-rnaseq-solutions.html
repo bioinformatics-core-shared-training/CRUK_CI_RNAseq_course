@@ -28,8 +28,9 @@
 <h2 id="data-files-needed">Data files needed</h2>
 <ul>
 <li>counts_Drosophila.txt</li>
-<li>targets.txt</li>
+<li>targetsD.txt</li>
 </ul>
+<p>Available from <a href="https://figshare.com/s/f5d63d8c265a05618137" class="uri">https://figshare.com/s/f5d63d8c265a05618137</a> (you will already have downloaded it with the rest of the Day 2 data)</p>
 <h2 id="libraries-needed">Libraries needed</h2>
 <ul>
 <li>limma</li>
@@ -57,7 +58,7 @@
 </code></pre>
 <p>Next, read in the data and targets file:</p>
 <pre class="sourceCode r"><code class="sourceCode r">counts &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="dt">file=</span><span class="st">&quot;data/counts_Drosophila.txt&quot;</span>)
-targets &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="dt">file=</span><span class="st">&quot;data/targets_drosophila.txt&quot;</span>)</code></pre>
+targets &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="dt">file=</span><span class="st">&quot;data/targetsD.txt&quot;</span>)</code></pre>
 <p>Check that the data has read in correctly</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(counts)</code></pre>
 <pre class="output"><code>            SRR031714.bam SRR031716.bam SRR031724.bam SRR031726.bam
@@ -97,7 +98,7 @@ FBgn0037218           695           767           793
 <span class="kw">plot</span>(counts[,<span class="dv">1</span>],mycpm[,<span class="dv">1</span>],<span class="dt">xlim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">20</span>),<span class="dt">ylim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">5</span>))
 <span class="kw">abline</span>(<span class="dt">v=</span><span class="dv">10</span>,<span class="dt">col=</span><span class="dv">2</span>)
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">2</span>,<span class="dt">col=</span><span class="dv">4</span>)</code></pre>
-<p><img src="fig/unnamed-chunk-6-1.png" title="plot of chunk unnamed-chunk-6" alt="plot of chunk unnamed-chunk-6" style="display: block; margin: auto;" /></p>
+<p><img src="fig-09/unnamed-chunk-6-1.png" title="plot of chunk unnamed-chunk-6" alt="plot of chunk unnamed-chunk-6" style="display: block; margin: auto;" /></p>
 <p>We can filter on a CPM of 2 or 3 in at least 3 samples.</p>
 <pre class="sourceCode r"><code class="sourceCode r">thresh &lt;-<span class="st"> </span>mycpm &gt;<span class="st"> </span><span class="dv">2</span>
 keep &lt;-<span class="st"> </span><span class="kw">rowSums</span>(thresh) &gt;=<span class="st"> </span><span class="dv">3</span>
@@ -117,31 +118,31 @@ FALSE  TRUE
 <p>Let’s do a number of quality control plots.</p>
 <p>First, check the library sizes:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">barplot</span>(y$samples$lib.size)</code></pre>
-<p><img src="fig/unnamed-chunk-9-1.png" title="plot of chunk unnamed-chunk-9" alt="plot of chunk unnamed-chunk-9" style="display: block; margin: auto;" /></p>
+<p><img src="fig-09/unnamed-chunk-9-1.png" title="plot of chunk unnamed-chunk-9" alt="plot of chunk unnamed-chunk-9" style="display: block; margin: auto;" /></p>
 <p>Next check the distribution of the counts using an relative log expression plot:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotRLE</span>(y$counts)</code></pre>
-<p><img src="fig/unnamed-chunk-10-1.png" title="plot of chunk unnamed-chunk-10" alt="plot of chunk unnamed-chunk-10" style="display: block; margin: auto;" /></p>
+<p><img src="fig-09/unnamed-chunk-10-1.png" title="plot of chunk unnamed-chunk-10" alt="plot of chunk unnamed-chunk-10" style="display: block; margin: auto;" /></p>
 <p>It’s a bit hard to see what’s going on so we can zoom in to the y axis</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotRLE</span>(y$counts,<span class="dt">ylim=</span><span class="kw">c</span>(-<span class="dv">1</span>,<span class="dv">1</span>))</code></pre>
-<p><img src="fig/unnamed-chunk-11-1.png" title="plot of chunk unnamed-chunk-11" alt="plot of chunk unnamed-chunk-11" style="display: block; margin: auto;" /></p>
+<p><img src="fig-09/unnamed-chunk-11-1.png" title="plot of chunk unnamed-chunk-11" alt="plot of chunk unnamed-chunk-11" style="display: block; margin: auto;" /></p>
 <p>We can colour by our groups, or by the different library prep.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
 group.col &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;red&quot;</span>,<span class="st">&quot;blue&quot;</span>)[targets$Group]
 <span class="kw">plotRLE</span>(y$counts,<span class="dt">ylim=</span><span class="kw">c</span>(-<span class="dv">1</span>,<span class="dv">1</span>),<span class="dt">col=</span>group.col)
 lib.col &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;light pink&quot;</span>,<span class="st">&quot;light green&quot;</span>)[targets$Library]
 <span class="kw">plotRLE</span>(y$counts,<span class="dt">ylim=</span><span class="kw">c</span>(-<span class="dv">1</span>,<span class="dv">1</span>),<span class="dt">col=</span>lib.col)</code></pre>
-<p><img src="fig/unnamed-chunk-12-1.png" title="plot of chunk unnamed-chunk-12" alt="plot of chunk unnamed-chunk-12" style="display: block; margin: auto;" /></p>
+<p><img src="fig-09/unnamed-chunk-12-1.png" title="plot of chunk unnamed-chunk-12" alt="plot of chunk unnamed-chunk-12" style="display: block; margin: auto;" /></p>
 <p>Looks like some bias going on!</p>
 <p>Finally, let’s check our MDS plots.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))
 <span class="kw">plotMDS</span>(y)</code></pre>
-<p><img src="fig/unnamed-chunk-13-1.png" title="plot of chunk unnamed-chunk-13" alt="plot of chunk unnamed-chunk-13" style="display: block; margin: auto;" /></p>
+<p><img src="fig-09/unnamed-chunk-13-1.png" title="plot of chunk unnamed-chunk-13" alt="plot of chunk unnamed-chunk-13" style="display: block; margin: auto;" /></p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
 <span class="kw">plotMDS</span>(y,<span class="dt">col=</span>group.col)
 <span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>,<span class="dt">legend=</span><span class="kw">levels</span>(targets$Group),<span class="dt">fill=</span><span class="kw">c</span>(<span class="st">&quot;red&quot;</span>,<span class="st">&quot;blue&quot;</span>))
 <span class="kw">plotMDS</span>(y,<span class="dt">col=</span>lib.col)
 <span class="kw">legend</span>(<span class="st">&quot;topleft&quot;</span>,<span class="dt">legend=</span><span class="kw">levels</span>(targets$Library),<span class="dt">fill=</span><span class="kw">c</span>(<span class="st">&quot;light pink&quot;</span>,<span class="st">&quot;light green&quot;</span>))</code></pre>
-<p><img src="fig/unnamed-chunk-14-1.png" title="plot of chunk unnamed-chunk-14" alt="plot of chunk unnamed-chunk-14" style="display: block; margin: auto;" /></p>
+<p><img src="fig-09/unnamed-chunk-14-1.png" title="plot of chunk unnamed-chunk-14" alt="plot of chunk unnamed-chunk-14" style="display: block; margin: auto;" /></p>
 <h2 id="hierarchical-clustering-with-heatmap.2">Hierarchical clustering with heatmap.2</h2>
 <p>First we need a matrix of log counts:</p>
 <pre class="sourceCode r"><code class="sourceCode r">logcounts &lt;-<span class="st"> </span><span class="kw">cpm</span>(y,<span class="dt">log=</span><span class="ot">TRUE</span>)</code></pre>
@@ -157,9 +158,9 @@ lib.col &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st"
 morecols &lt;-<span class="st"> </span><span class="kw">colorRampPalette</span>(mypalette)
 <span class="co"># Plot the heatmap</span>
 <span class="kw">heatmap.2</span>(highly_variable_lcpm,<span class="dt">col=</span><span class="kw">rev</span>(<span class="kw">morecols</span>(<span class="dv">50</span>)),<span class="dt">trace=</span><span class="st">&quot;none&quot;</span>, <span class="dt">main=</span><span class="st">&quot;Top 500 most variable genes across samples&quot;</span>,<span class="dt">ColSideColors=</span>group.col,<span class="dt">scale=</span><span class="st">&quot;row&quot;</span>,<span class="dt">margins=</span><span class="kw">c</span>(<span class="dv">10</span>,<span class="dv">5</span>))</code></pre>
-<p><img src="fig/unnamed-chunk-19-1.png" title="plot of chunk unnamed-chunk-19" alt="plot of chunk unnamed-chunk-19" style="display: block; margin: auto;" /></p>
+<p><img src="fig-09/unnamed-chunk-19-1.png" title="plot of chunk unnamed-chunk-19" alt="plot of chunk unnamed-chunk-19" style="display: block; margin: auto;" /></p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">heatmap.2</span>(highly_variable_lcpm,<span class="dt">col=</span><span class="kw">rev</span>(<span class="kw">morecols</span>(<span class="dv">50</span>)),<span class="dt">trace=</span><span class="st">&quot;none&quot;</span>, <span class="dt">main=</span><span class="st">&quot;Top 500 most variable genes across samples&quot;</span>,<span class="dt">ColSideColors=</span>lib.col,<span class="dt">scale=</span><span class="st">&quot;row&quot;</span>,<span class="dt">margins=</span><span class="kw">c</span>(<span class="dv">10</span>,<span class="dv">5</span>))</code></pre>
-<p><img src="fig/unnamed-chunk-19-2.png" title="plot of chunk unnamed-chunk-19" alt="plot of chunk unnamed-chunk-19" style="display: block; margin: auto;" /></p>
+<p><img src="fig-09/unnamed-chunk-19-2.png" title="plot of chunk unnamed-chunk-19" alt="plot of chunk unnamed-chunk-19" style="display: block; margin: auto;" /></p>
 <h2 id="normalisation">Normalisation</h2>
 <p>Let’s do TMM normalisation</p>
 <pre class="sourceCode r"><code class="sourceCode r">y &lt;-<span class="st"> </span><span class="kw">calcNormFactors</span>(y)
@@ -178,7 +179,7 @@ SRR031728.bam     1  4031608    1.0106328
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)
 <span class="kw">plotMD</span>(y,<span class="dt">column =</span> <span class="dv">2</span>)
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre>
-<p><img src="fig/unnamed-chunk-21-1.png" title="plot of chunk unnamed-chunk-21" alt="plot of chunk unnamed-chunk-21" style="display: block; margin: auto;" /></p>
+<p><img src="fig-09/unnamed-chunk-21-1.png" title="plot of chunk unnamed-chunk-21" alt="plot of chunk unnamed-chunk-21" style="display: block; margin: auto;" /></p>
 <h2 id="differential-expression">Differential expression</h2>
 <h3 id="set-up-design-matrix">Set up design matrix</h3>
 <p>We want to test for differences between the treated and untreated samples. However, we know that the library preparation adds variability to the data, so we need to account for it in our model. We do this by modelling both Group and Library as variables in our design matrix. This is known as an additive model.</p>
@@ -205,13 +206,13 @@ attr(,&quot;contrasts&quot;)$`targets$Group`
 <h3 id="voom-transform-the-data">Voom transform the data</h3>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))
 v &lt;-<span class="st"> </span><span class="kw">voom</span>(y,design,<span class="dt">plot=</span><span class="ot">TRUE</span>)</code></pre>
-<p><img src="fig/unnamed-chunk-23-1.png" title="plot of chunk unnamed-chunk-23" alt="plot of chunk unnamed-chunk-23" style="display: block; margin: auto;" /></p>
+<p><img src="fig-09/unnamed-chunk-23-1.png" title="plot of chunk unnamed-chunk-23" alt="plot of chunk unnamed-chunk-23" style="display: block; margin: auto;" /></p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
 <span class="kw">boxplot</span>(logcounts)
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="kw">median</span>(logcounts),<span class="dt">col=</span><span class="dv">4</span>)
 <span class="kw">boxplot</span>(v$E)
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="kw">median</span>(v$E),<span class="dt">col=</span><span class="dv">4</span>)</code></pre>
-<p><img src="fig/unnamed-chunk-24-1.png" title="plot of chunk unnamed-chunk-24" alt="plot of chunk unnamed-chunk-24" style="display: block; margin: auto;" /></p>
+<p><img src="fig-09/unnamed-chunk-24-1.png" title="plot of chunk unnamed-chunk-24" alt="plot of chunk unnamed-chunk-24" style="display: block; margin: auto;" /></p>
 <h3 id="test-for-differential-expression">Test for differential expression</h3>
 <pre class="sourceCode r"><code class="sourceCode r">fit &lt;-<span class="st"> </span><span class="kw">lmFit</span>(v,design)
 fit &lt;-<span class="st"> </span><span class="kw">eBayes</span>(fit)
@@ -373,12 +374,12 @@ FBgn0261552 8.37355e-08 8.37355e-08 8.425095
 <span class="kw">plotMD</span>(fit,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">status=</span>results[,<span class="st">&quot;UVsT&quot;</span>])
 
 <span class="kw">volcanoplot</span>(fit,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">highlight=</span><span class="dv">100</span>,<span class="dt">names=</span>fit$genes$symbol)</code></pre>
-<p><img src="fig/unnamed-chunk-31-1.png" title="plot of chunk unnamed-chunk-31" alt="plot of chunk unnamed-chunk-31" style="display: block; margin: auto;" /></p>
+<p><img src="fig-09/unnamed-chunk-31-1.png" title="plot of chunk unnamed-chunk-31" alt="plot of chunk unnamed-chunk-31" style="display: block; margin: auto;" /></p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">stripchart</span>(v$E[<span class="st">&quot;FBgn0025111&quot;</span>,]~targets$Group)</code></pre>
-<p><img src="fig/unnamed-chunk-32-1.png" title="plot of chunk unnamed-chunk-32" alt="plot of chunk unnamed-chunk-32" style="display: block; margin: auto;" /></p>
+<p><img src="fig-09/unnamed-chunk-32-1.png" title="plot of chunk unnamed-chunk-32" alt="plot of chunk unnamed-chunk-32" style="display: block; margin: auto;" /></p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Check expression of Pasilla</span>
 <span class="kw">stripchart</span>(v$E[<span class="st">&quot;FBgn0261552&quot;</span>,]~targets$Group)</code></pre>
-<p><img src="fig/unnamed-chunk-33-1.png" title="plot of chunk unnamed-chunk-33" alt="plot of chunk unnamed-chunk-33" style="display: block; margin: auto;" /></p>
+<p><img src="fig-09/unnamed-chunk-33-1.png" title="plot of chunk unnamed-chunk-33" alt="plot of chunk unnamed-chunk-33" style="display: block; margin: auto;" /></p>
 <h2 id="testing-relative-to-a-threshold">Testing relative to a threshold</h2>
 <pre class="sourceCode r"><code class="sourceCode r">fit.treat &lt;-<span class="st"> </span><span class="kw">treat</span>(fit,<span class="dt">lfc=</span><span class="dv">1</span>)
 res.treat &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit.treat)
@@ -425,7 +426,7 @@ FBgn0039827  3.204658   8.449359 1.182639e-06 8.898178e-04
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMD</span>(fit.treat,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">status=</span>res.treat[,<span class="st">&quot;UVsT&quot;</span>])
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre>
-<p><img src="fig/unnamed-chunk-35-1.png" title="plot of chunk unnamed-chunk-35" alt="plot of chunk unnamed-chunk-35" style="display: block; margin: auto;" /></p>
+<p><img src="fig-09/unnamed-chunk-35-1.png" title="plot of chunk unnamed-chunk-35" alt="plot of chunk unnamed-chunk-35" style="display: block; margin: auto;" /></p>
 <h2 id="gene-set-testing-with-goana">Gene set testing with goana</h2>
 <pre class="sourceCode r"><code class="sourceCode r">go &lt;-<span class="st"> </span><span class="kw">goana</span>(fit, <span class="dt">coef=</span><span class="st">&quot;UVsT&quot;</span>,<span class="dt">species =</span> <span class="st">&quot;Dm&quot;</span>, <span class="dt">geneid=</span><span class="st">&quot;gene_id&quot;</span>)
 <span class="kw">topGO</span>(go, <span class="dt">n=</span><span class="dv">10</span>)</code></pre>
