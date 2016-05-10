@@ -16,6 +16,8 @@ minutes: 90
 
 One of R's most powerful features is its ability to deal with tabular data - like what you might already have in a spreadsheet or a CSV. Let's start by making a toy dataset in your `data/` directory, called `feline-data.csv`:
 
+Use your text editor to create this file:
+
 
 ~~~{.r}
 coat,weight,likes_string
@@ -25,12 +27,6 @@ tabby,3.2,TRUE
 ~~~
 
 
-~~~{.r}
-cats.df <- data.frame(coat = c("calico", "black", "tabby"),
-                      weight = c(2.1, 5.0, 3.2),
-                      likes_string = c(TRUE, FALSE, TRUE))
-write.csv(cats.df, "data/feline-data.csv", row.names = FALSE)
-~~~
 
 We can load this into R via the following:
 
