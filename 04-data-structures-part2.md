@@ -283,7 +283,13 @@ cats
 > Finally, use `cbind` to add a column with each person's answer to the question, "Is it time for coffee break?"
 >
 
-So far, you've seen the basics of manipulating data.frames with our cat data; now, let's use those skills to digest a more realistic dataset. Lets read in the gapminder dataset that we downloaded previously:
+So far, you've seen the basics of manipulating data.frames with our cat data; now, let's use those skills to digest a more realistic dataset.
+
+Download the Gapminder data from [here](data/gapminder-FiveYearData.csv)
+and place file in your `/data` directory (make sure the file is named "gapminder-FiveYearData.csv").
+If you are interested, you can learn more about the Gapminder data [here](http://www.gapminder.org/).
+
+Lets read in the gapminder dataset:
 
 
 ~~~{.r}
