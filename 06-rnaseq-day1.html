@@ -61,485 +61,254 @@
 <p>The data for this tutorial comes from a Nature Cell Biology paper, <a href="http://www.ncbi.nlm.nih.gov/pubmed/25730472"><em>EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival</em></a> <span class="citation">(Fu et al. 2015)</span>. Both the raw data (sequence reads) and processed data (counts) can be downloaded from Gene Expression Omnibus database (GEO) under accession number <a href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60450">GSE60450</a>.</p>
 <p>This study examines the expression profiles of basal stem-cell enriched cells (B) and committed luminal cells (L) in the mammary gland of virgin, pregnant and lactating mice. Six groups are present, with one for each combination of cell type and mouse status. Each group contains two biological replicates. We will first use the counts file as a starting point for our analysis. This data has already been aligned to the mouse genome. The command line tool featureCounts <span class="citation">(Liao, Smyth, and Shi 2014)</span> was used to count reads mapped to mouse genes from Refseq annotation (see the <a href="http://www.ncbi.nlm.nih.gov/pubmed/25730472">paper</a> for details).</p>
 <h3 id="reading-in-the-data">Reading in the data</h3>
-<p><em>Set up an RStudio project specifying the directory where you have saved the data</em>. Download and read in the data.</p>
+<p><em>Set up an RStudio project specifying the directory where you have saved the <code>/data</code> directory</em>. Download and read in the data.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Read the data into R</span>
-seqdata &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/GSE60450_Lactation-GenewiseCounts.txt&quot;</span>, <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>)
-<span class="co"># Read the sample information into R</span>
+seqdata &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/GSE60450_Lactation-GenewiseCounts.txt&quot;</span>, <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>)</code></pre>
+<pre class="error"><code>Warning in file(file, &quot;rt&quot;): cannot open file &#39;data/GSE60450_Lactation-
+GenewiseCounts.txt&#39;: No such file or directory
+</code></pre>
+<pre class="error"><code>Error in file(file, &quot;rt&quot;): cannot open the connection
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Read the sample information into R</span>
 targets &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/targets.txt&quot;</span>)</code></pre>
+<pre class="error"><code>Warning in file(file, &quot;rt&quot;): cannot open file &#39;data/targets.txt&#39;: No such
+file or directory
+</code></pre>
+<pre class="error"><code>Error in file(file, &quot;rt&quot;): cannot open the connection
+</code></pre>
 <p>Let’s take a look at the data. You can use the <code>head</code> command to see the first 6 lines. The <code>dim</code> command will tell you how many rows and columns the data frame has.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(seqdata)</code></pre>
-<pre class="output"><code>  EntrezGeneID Length MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1
-1       497097   3634                               438
-2    100503874   3259                                 1
-3    100038431   1634                                 0
-4        19888   9747                                 1
-5        20671   3130                               106
-6        27395   4203                               309
-  MCL1.DH_BC2CTUACXX_CAGATC_L002_R1 MCL1.DI_BC2CTUACXX_ACAGTG_L002_R1
-1                               300                                65
-2                                 0                                 1
-3                                 0                                 0
-4                                 1                                 0
-5                               182                                82
-6                               234                               337
-  MCL1.DJ_BC2CTUACXX_CGATGT_L002_R1 MCL1.DK_BC2CTUACXX_TTAGGC_L002_R1
-1                               237                               354
-2                                 1                                 0
-3                                 0                                 0
-4                                 0                                 0
-5                               105                                43
-6                               300                               290
-  MCL1.DL_BC2CTUACXX_ATCACG_L002_R1 MCL1.LA_BC2CTUACXX_GATCAG_L001_R1
-1                               287                                 0
-2                                 4                                 0
-3                                 0                                 0
-4                                 0                                10
-5                                82                                16
-6                               270                               560
-  MCL1.LB_BC2CTUACXX_TGACCA_L001_R1 MCL1.LC_BC2CTUACXX_GCCAAT_L001_R1
-1                                 0                                 0
-2                                 0                                 0
-3                                 0                                 0
-4                                 3                                10
-5                                25                                18
-6                               464                               489
-  MCL1.LD_BC2CTUACXX_GGCTAC_L001_R1 MCL1.LE_BC2CTUACXX_TAGCTT_L001_R1
-1                                 0                                 0
-2                                 0                                 0
-3                                 0                                 0
-4                                 2                                 0
-5                                 8                                 3
-6                               328                               307
-  MCL1.LF_BC2CTUACXX_CTTGTA_L001_R1
-1                                 0
-2                                 0
-3                                 0
-4                                 0
-5                                10
-6                               342
+<pre class="error"><code>Error in head(seqdata): object &#39;seqdata&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(seqdata)</code></pre>
-<pre class="output"><code>[1] 27179    14
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;seqdata&#39; not found
 </code></pre>
 <p>The <code>seqdata</code> object contains information about genes (one gene per row), the first column has the Entrez gene id, the second has the gene length and the remaining columns contain information about the number of reads aligning to the gene in each experimental sample. There are two replicates for each cell type and timepoint (detailed sample info can be found in file “GSE60450_series_matrix.txt” from the <a href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60450">GEO website</a>). The targets file contains basic information about the samples that we will need for the analysis today.</p>
 <pre class="sourceCode r"><code class="sourceCode r">targets</code></pre>
-<pre class="output"><code>                            FileName SampleName CellType   Status
-1  MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1    MCL1.DG    basal   virgin
-2  MCL1.DH_BC2CTUACXX_CAGATC_L002_R1    MCL1.DH    basal   virgin
-3  MCL1.DI_BC2CTUACXX_ACAGTG_L002_R1    MCL1.DI    basal pregnant
-4  MCL1.DJ_BC2CTUACXX_CGATGT_L002_R1    MCL1.DJ    basal pregnant
-5  MCL1.DK_BC2CTUACXX_TTAGGC_L002_R1    MCL1.DK    basal  lactate
-6  MCL1.DL_BC2CTUACXX_ATCACG_L002_R1    MCL1.DL    basal  lactate
-7  MCL1.LA_BC2CTUACXX_GATCAG_L001_R1    MCL1.LA  luminal   virgin
-8  MCL1.LB_BC2CTUACXX_TGACCA_L001_R1    MCL1.LB  luminal   virgin
-9  MCL1.LC_BC2CTUACXX_GCCAAT_L001_R1    MCL1.LC  luminal pregnant
-10 MCL1.LD_BC2CTUACXX_GGCTAC_L001_R1    MCL1.LD  luminal pregnant
-11 MCL1.LE_BC2CTUACXX_TAGCTT_L001_R1    MCL1.LE  luminal  lactate
-12 MCL1.LF_BC2CTUACXX_CTTGTA_L001_R1    MCL1.LF  luminal  lactate
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;targets&#39; not found
 </code></pre>
 <p>We will be manipulating and reformating the counts matrix into a suitable format for downstream analysis. The first two columns in the <code>seqdata</code> dataframe contain annotation information. We need to make a new matrix containing only the counts, but we can store the gene identifiers (the <code>EntrezGeneID</code> column) as rownames. We will add more annotation information about each gene later on in the workshop.</p>
 <h3 id="format-the-data">Format the data</h3>
 <p>Let’s create a new data object, <code>countdata</code>, that contains only the counts for the 12 samples.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Remove first two columns from seqdata</span>
-countdata &lt;-<span class="st"> </span>seqdata[,-(<span class="dv">1</span>:<span class="dv">2</span>)]
-<span class="co"># Look at the output</span>
+countdata &lt;-<span class="st"> </span>seqdata[,-(<span class="dv">1</span>:<span class="dv">2</span>)]</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;seqdata&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Look at the output</span>
 <span class="kw">head</span>(countdata)</code></pre>
-<pre class="output"><code>  MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1 MCL1.DH_BC2CTUACXX_CAGATC_L002_R1
-1                               438                               300
-2                                 1                                 0
-3                                 0                                 0
-4                                 1                                 1
-5                               106                               182
-6                               309                               234
-  MCL1.DI_BC2CTUACXX_ACAGTG_L002_R1 MCL1.DJ_BC2CTUACXX_CGATGT_L002_R1
-1                                65                               237
-2                                 1                                 1
-3                                 0                                 0
-4                                 0                                 0
-5                                82                               105
-6                               337                               300
-  MCL1.DK_BC2CTUACXX_TTAGGC_L002_R1 MCL1.DL_BC2CTUACXX_ATCACG_L002_R1
-1                               354                               287
-2                                 0                                 4
-3                                 0                                 0
-4                                 0                                 0
-5                                43                                82
-6                               290                               270
-  MCL1.LA_BC2CTUACXX_GATCAG_L001_R1 MCL1.LB_BC2CTUACXX_TGACCA_L001_R1
-1                                 0                                 0
-2                                 0                                 0
-3                                 0                                 0
-4                                10                                 3
-5                                16                                25
-6                               560                               464
-  MCL1.LC_BC2CTUACXX_GCCAAT_L001_R1 MCL1.LD_BC2CTUACXX_GGCTAC_L001_R1
-1                                 0                                 0
-2                                 0                                 0
-3                                 0                                 0
-4                                10                                 2
-5                                18                                 8
-6                               489                               328
-  MCL1.LE_BC2CTUACXX_TAGCTT_L001_R1 MCL1.LF_BC2CTUACXX_CTTGTA_L001_R1
-1                                 0                                 0
-2                                 0                                 0
-3                                 0                                 0
-4                                 0                                 0
-5                                 3                                10
-6                               307                               342
+<pre class="error"><code>Error in head(countdata): object &#39;countdata&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Store EntrezGeneID as rownames</span>
 <span class="kw">rownames</span>(countdata) &lt;-<span class="st"> </span>seqdata[,<span class="dv">1</span>]</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;seqdata&#39; not found
+</code></pre>
 <p>Take a look at the output</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(countdata)</code></pre>
-<pre class="output"><code>          MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1
-497097                                  438
-100503874                                 1
-100038431                                 0
-19888                                     1
-20671                                   106
-27395                                   309
-          MCL1.DH_BC2CTUACXX_CAGATC_L002_R1
-497097                                  300
-100503874                                 0
-100038431                                 0
-19888                                     1
-20671                                   182
-27395                                   234
-          MCL1.DI_BC2CTUACXX_ACAGTG_L002_R1
-497097                                   65
-100503874                                 1
-100038431                                 0
-19888                                     0
-20671                                    82
-27395                                   337
-          MCL1.DJ_BC2CTUACXX_CGATGT_L002_R1
-497097                                  237
-100503874                                 1
-100038431                                 0
-19888                                     0
-20671                                   105
-27395                                   300
-          MCL1.DK_BC2CTUACXX_TTAGGC_L002_R1
-497097                                  354
-100503874                                 0
-100038431                                 0
-19888                                     0
-20671                                    43
-27395                                   290
-          MCL1.DL_BC2CTUACXX_ATCACG_L002_R1
-497097                                  287
-100503874                                 4
-100038431                                 0
-19888                                     0
-20671                                    82
-27395                                   270
-          MCL1.LA_BC2CTUACXX_GATCAG_L001_R1
-497097                                    0
-100503874                                 0
-100038431                                 0
-19888                                    10
-20671                                    16
-27395                                   560
-          MCL1.LB_BC2CTUACXX_TGACCA_L001_R1
-497097                                    0
-100503874                                 0
-100038431                                 0
-19888                                     3
-20671                                    25
-27395                                   464
-          MCL1.LC_BC2CTUACXX_GCCAAT_L001_R1
-497097                                    0
-100503874                                 0
-100038431                                 0
-19888                                    10
-20671                                    18
-27395                                   489
-          MCL1.LD_BC2CTUACXX_GGCTAC_L001_R1
-497097                                    0
-100503874                                 0
-100038431                                 0
-19888                                     2
-20671                                     8
-27395                                   328
-          MCL1.LE_BC2CTUACXX_TAGCTT_L001_R1
-497097                                    0
-100503874                                 0
-100038431                                 0
-19888                                     0
-20671                                     3
-27395                                   307
-          MCL1.LF_BC2CTUACXX_CTTGTA_L001_R1
-497097                                    0
-100503874                                 0
-100038431                                 0
-19888                                     0
-20671                                    10
-27395                                   342
+<pre class="error"><code>Error in head(countdata): object &#39;countdata&#39; not found
 </code></pre>
 <p>Now take a look at the column names</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">colnames</span>(countdata)</code></pre>
-<pre class="output"><code> [1] &quot;MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1&quot;
- [2] &quot;MCL1.DH_BC2CTUACXX_CAGATC_L002_R1&quot;
- [3] &quot;MCL1.DI_BC2CTUACXX_ACAGTG_L002_R1&quot;
- [4] &quot;MCL1.DJ_BC2CTUACXX_CGATGT_L002_R1&quot;
- [5] &quot;MCL1.DK_BC2CTUACXX_TTAGGC_L002_R1&quot;
- [6] &quot;MCL1.DL_BC2CTUACXX_ATCACG_L002_R1&quot;
- [7] &quot;MCL1.LA_BC2CTUACXX_GATCAG_L001_R1&quot;
- [8] &quot;MCL1.LB_BC2CTUACXX_TGACCA_L001_R1&quot;
- [9] &quot;MCL1.LC_BC2CTUACXX_GCCAAT_L001_R1&quot;
-[10] &quot;MCL1.LD_BC2CTUACXX_GGCTAC_L001_R1&quot;
-[11] &quot;MCL1.LE_BC2CTUACXX_TAGCTT_L001_R1&quot;
-[12] &quot;MCL1.LF_BC2CTUACXX_CTTGTA_L001_R1&quot;
+<pre class="error"><code>Error in colnames(countdata): object &#39;countdata&#39; not found
 </code></pre>
 <p>These are the sample names which are pretty long so we’ll shorten these to contain only the relevant information about each sample. We will use the <code>substr</code> command to extract the first 7 characters and use these as the colnames.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># using substr, you extract the characters starting at position 1 and stopping at position 7 of the colnames</span>
 <span class="kw">colnames</span>(countdata) &lt;-<span class="st"> </span><span class="kw">substr</span>(<span class="kw">colnames</span>(countdata),<span class="dt">start=</span><span class="dv">1</span>,<span class="dt">stop=</span><span class="dv">7</span>)</code></pre>
+<pre class="error"><code>Error in colnames(countdata): object &#39;countdata&#39; not found
+</code></pre>
 <p>Take a look at the output</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(countdata)</code></pre>
-<pre class="output"><code>          MCL1.DG MCL1.DH MCL1.DI MCL1.DJ MCL1.DK MCL1.DL MCL1.LA MCL1.LB
-497097        438     300      65     237     354     287       0       0
-100503874       1       0       1       1       0       4       0       0
-100038431       0       0       0       0       0       0       0       0
-19888           1       1       0       0       0       0      10       3
-20671         106     182      82     105      43      82      16      25
-27395         309     234     337     300     290     270     560     464
-          MCL1.LC MCL1.LD MCL1.LE MCL1.LF
-497097          0       0       0       0
-100503874       0       0       0       0
-100038431       0       0       0       0
-19888          10       2       0       0
-20671          18       8       3      10
-27395         489     328     307     342
+<pre class="error"><code>Error in head(countdata): object &#39;countdata&#39; not found
 </code></pre>
 <p>Note that the column names are now the same as <code>SampleName</code> in the <code>targets</code> file. This is good because it means our sample information in <code>targets</code> is in the same order as the columns in <code>countdata</code>.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(<span class="kw">colnames</span>(countdata)==targets$SampleName)</code></pre>
-<pre class="output"><code>
-TRUE 
-  12 
+<pre class="error"><code>Error in colnames(countdata): object &#39;countdata&#39; not found
 </code></pre>
 <h2 id="filtering-to-remove-lowly-expressed-genes">Filtering to remove lowly expressed genes</h2>
 <p>Genes with very low counts across all libraries provide little evidence for differential expression and they interfere with some of the statistical approximations that are used later in the pipeline. They also add to the multiple testing burden when estimating false discovery rates, reducing power to detect differentially expressed genes. These genes should be filtered out prior to further analysis.</p>
 <p>There are a few ways to filter out lowly expressed genes. When there are biological replicates in each group, in this case we have a sample size of 2 in each group, we favour filtering on a minimum counts per million threshold present in at least 2 samples. Two represents the smallest sample size for each group in our experiment. In this dataset, we choose to retain genes if they are expressed at a counts-per-million (CPM) above 0.5 in at least two samples.</p>
 <p>We’ll use the <code>cpm</code> function from the <em>edgeR</em> library <span class="citation">(<span class="citeproc-not-found" data-reference-id="robinson2010edgeR"><strong>???</strong></span>)</span> to generate the CPM values and then filter. Note that by converting to CPMs we are normalising for the different sequencing depths for each sample.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Obtain CPMs</span>
-myCPM &lt;-<span class="st"> </span><span class="kw">cpm</span>(countdata)
-<span class="co"># Have a look at the output</span>
+myCPM &lt;-<span class="st"> </span><span class="kw">cpm</span>(countdata)</code></pre>
+<pre class="error"><code>Error in cpm(countdata): object &#39;countdata&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Have a look at the output</span>
 <span class="kw">head</span>(myCPM)</code></pre>
-<pre class="output"><code>              MCL1.DG     MCL1.DH     MCL1.DI     MCL1.DJ   MCL1.DK
-497097    18.85684388 13.77543859  2.69700983 10.45648006 16.442685
-100503874  0.04305215  0.00000000  0.04149246  0.04412017  0.000000
-100038431  0.00000000  0.00000000  0.00000000  0.00000000  0.000000
-19888      0.04305215  0.04591813  0.00000000  0.00000000  0.000000
-20671      4.56352843  8.35709941  3.40238163  4.63261775  1.997275
-27395     13.30311589 10.74484210 13.98295863 13.23605071 13.469996
-             MCL1.DL    MCL1.LA    MCL1.LB    MCL1.LC     MCL1.LD
-497097    14.3389690  0.0000000  0.0000000  0.0000000  0.00000000
-100503874  0.1998463  0.0000000  0.0000000  0.0000000  0.00000000
-100038431  0.0000000  0.0000000  0.0000000  0.0000000  0.00000000
-19888      0.0000000  0.4903857  0.1381969  0.4496078  0.09095771
-20671      4.0968483  0.7846171  1.1516411  0.8092940  0.36383085
-27395     13.4896224 27.4615975 21.3744588 21.9858214 14.91706476
-             MCL1.LE    MCL1.LF
-497097     0.0000000  0.0000000
-100503874  0.0000000  0.0000000
-100038431  0.0000000  0.0000000
-19888      0.0000000  0.0000000
-20671      0.1213404  0.4055595
-27395     12.4171715 13.8701357
+<pre class="error"><code>Error in head(myCPM): object &#39;myCPM&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Which values in myCPM are greater than 0.5?</span>
-thresh &lt;-<span class="st"> </span>myCPM &gt;<span class="st"> </span><span class="fl">0.5</span>
-<span class="co"># This produces a logical matrix with TRUEs and FALSEs</span>
+thresh &lt;-<span class="st"> </span>myCPM &gt;<span class="st"> </span><span class="fl">0.5</span></code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;myCPM&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># This produces a logical matrix with TRUEs and FALSEs</span>
 <span class="kw">head</span>(thresh)</code></pre>
-<pre class="output"><code>          MCL1.DG MCL1.DH MCL1.DI MCL1.DJ MCL1.DK MCL1.DL MCL1.LA MCL1.LB
-497097       TRUE    TRUE    TRUE    TRUE    TRUE    TRUE   FALSE   FALSE
-100503874   FALSE   FALSE   FALSE   FALSE   FALSE   FALSE   FALSE   FALSE
-100038431   FALSE   FALSE   FALSE   FALSE   FALSE   FALSE   FALSE   FALSE
-19888       FALSE   FALSE   FALSE   FALSE   FALSE   FALSE   FALSE   FALSE
-20671        TRUE    TRUE    TRUE    TRUE    TRUE    TRUE    TRUE    TRUE
-27395        TRUE    TRUE    TRUE    TRUE    TRUE    TRUE    TRUE    TRUE
-          MCL1.LC MCL1.LD MCL1.LE MCL1.LF
-497097      FALSE   FALSE   FALSE   FALSE
-100503874   FALSE   FALSE   FALSE   FALSE
-100038431   FALSE   FALSE   FALSE   FALSE
-19888       FALSE   FALSE   FALSE   FALSE
-20671        TRUE   FALSE   FALSE   FALSE
-27395        TRUE    TRUE    TRUE    TRUE
+<pre class="error"><code>Error in head(thresh): object &#39;thresh&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Summary of how many TRUEs there are in each row</span>
 <span class="co"># There are 11433 genes that have TRUEs in all 12 samples.</span>
 <span class="kw">table</span>(<span class="kw">rowSums</span>(thresh))</code></pre>
-<pre class="output"><code>
-    0     1     2     3     4     5     6     7     8     9    10    11 
-10857   518   544   307   346   307   652   323   547   343   579   423 
-   12 
-11433 
+<pre class="error"><code>Error in is.data.frame(x): object &#39;thresh&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># we would like to keep genes that have at least 2 TRUES in each row of thresh</span>
-keep &lt;-<span class="st"> </span><span class="kw">rowSums</span>(thresh) &gt;=<span class="st"> </span><span class="dv">2</span>
-<span class="co"># Subset the rows of countdata to keep the more highly expressed genes</span>
-counts.keep &lt;-<span class="st"> </span>countdata[keep,]
-<span class="kw">summary</span>(keep)</code></pre>
-<pre class="output"><code>   Mode   FALSE    TRUE    NA&#39;s 
-logical   11375   15804       0 
+keep &lt;-<span class="st"> </span><span class="kw">rowSums</span>(thresh) &gt;=<span class="st"> </span><span class="dv">2</span></code></pre>
+<pre class="error"><code>Error in is.data.frame(x): object &#39;thresh&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Subset the rows of countdata to keep the more highly expressed genes</span>
+counts.keep &lt;-<span class="st"> </span>countdata[keep,]</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;countdata&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(keep)</code></pre>
+<pre class="error"><code>Error in summary(keep): object &#39;keep&#39; not found
 </code></pre>
 <p>A CPM of 0.5 is used as it corresponds to a count of 10-15 for the library sizes in this data set. If the count is any smaller, it is considered to be very low, indicating that the associated gene is not expressed in that sample. A requirement for expression in two or more libraries is used as each group contains two replicates. This ensures that a gene will be retained if it is only expressed in one group. Smaller CPM thresholds are usually appropriate for larger libraries. As a general rule, a good threshold can be chosen by identifying the CPM that corresponds to a count of 10, which in this case is about 0.5. You should filter with CPMs rather than filtering on the counts directly, as the latter does not account for differences in library sizes between samples.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s have a look and see whether our threshold of 0.5 does indeed correspond to a count of about 10-15</span>
 <span class="co"># We will look at the first sample</span>
 <span class="kw">plot</span>(myCPM[,<span class="dv">1</span>],countdata[,<span class="dv">1</span>])</code></pre>
-<p><img src="fig-06/unnamed-chunk-13-1.png" title="plot of chunk unnamed-chunk-13" alt="plot of chunk unnamed-chunk-13" style="display: block; margin: auto;" /></p>
+<pre class="error"><code>Error in plot(myCPM[, 1], countdata[, 1]): object &#39;myCPM&#39; not found
+</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let us limit the x and y-axis so we can actually look to see what is happening at the smaller counts</span>
-<span class="kw">plot</span>(myCPM[,<span class="dv">1</span>],countdata[,<span class="dv">1</span>],<span class="dt">ylim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">50</span>),<span class="dt">xlim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">3</span>))
-<span class="co"># Add a vertical line at 0.5 CPM</span>
+<span class="kw">plot</span>(myCPM[,<span class="dv">1</span>],countdata[,<span class="dv">1</span>],<span class="dt">ylim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">50</span>),<span class="dt">xlim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">3</span>))</code></pre>
+<pre class="error"><code>Error in plot(myCPM[, 1], countdata[, 1], ylim = c(0, 50), xlim = c(0, : object &#39;myCPM&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Add a vertical line at 0.5 CPM</span>
 <span class="kw">abline</span>(<span class="dt">v=</span><span class="fl">0.5</span>)</code></pre>
-<p><img src="fig-06/unnamed-chunk-13-2.png" title="plot of chunk unnamed-chunk-13" alt="plot of chunk unnamed-chunk-13" style="display: block; margin: auto;" /></p>
+<pre class="error"><code>Error in int_abline(a = a, b = b, h = h, v = v, untf = untf, ...): plot.new has not been called yet
+</code></pre>
 <p><span style="color:blue">Exercise: (1) Plot the counts-per-million versus counts for the second sample. (2) Add a vertical line at 0.5 and a horizontal line at 10. (3) Add the lines again, colouring them blue </span> <span style="color:red">HINT: use the <code>col</code> parameter.</span></p>
 <h2 id="convert-counts-to-dgelist-object">Convert counts to DGEList object</h2>
 <p>Next we’ll create a <code>DGEList</code> object. This is an object used by <em>edgeR</em> to store count data. It has a number of slots for storing various parameters about the data.</p>
-<pre class="sourceCode r"><code class="sourceCode r">y &lt;-<span class="st"> </span><span class="kw">DGEList</span>(counts.keep)
-<span class="co"># have a look at y</span>
+<pre class="sourceCode r"><code class="sourceCode r">y &lt;-<span class="st"> </span><span class="kw">DGEList</span>(counts.keep)</code></pre>
+<pre class="error"><code>Error in as.matrix(counts): object &#39;counts.keep&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># have a look at y</span>
 y</code></pre>
-<pre class="output"><code>An object of class &quot;DGEList&quot;
-$counts
-       MCL1.DG MCL1.DH MCL1.DI MCL1.DJ MCL1.DK MCL1.DL MCL1.LA MCL1.LB
-497097     438     300      65     237     354     287       0       0
-20671      106     182      82     105      43      82      16      25
-27395      309     234     337     300     290     270     560     464
-18777      652     515     948     935     928     791     826     862
-21399     1604    1495    1721    1317    1159    1066    1334    1258
-       MCL1.LC MCL1.LD MCL1.LE MCL1.LF
-497097       0       0       0       0
-20671       18       8       3      10
-27395      489     328     307     342
-18777      668     646     544     581
-21399     1068     926     508     500
-15799 more rows ...
-
-$samples
-        group lib.size norm.factors
-MCL1.DG     1 23218026            1
-MCL1.DH     1 21768136            1
-MCL1.DI     1 24091588            1
-MCL1.DJ     1 22656713            1
-MCL1.DK     1 21522033            1
-7 more rows ...
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;y&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># See what slots are stored in y</span>
 <span class="kw">names</span>(y)</code></pre>
-<pre class="output"><code>[1] &quot;counts&quot;  &quot;samples&quot;
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;y&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Library size information is stored in the samples slot</span>
 y$samples</code></pre>
-<pre class="output"><code>        group lib.size norm.factors
-MCL1.DG     1 23218026            1
-MCL1.DH     1 21768136            1
-MCL1.DI     1 24091588            1
-MCL1.DJ     1 22656713            1
-MCL1.DK     1 21522033            1
-MCL1.DL     1 20008326            1
-MCL1.LA     1 20384562            1
-MCL1.LB     1 21698793            1
-MCL1.LC     1 22235847            1
-MCL1.LD     1 21982745            1
-MCL1.LE     1 24719697            1
-MCL1.LF     1 24652963            1
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;y&#39; not found
 </code></pre>
 <h2 id="quality-control">Quality control</h2>
 <p>Now that we have got rid of the lowly expressed genes and have our counts stored in a <code>DGEList</code> object, we can look at a few different plots to check that the data is good quality, and that the samples are as we would expect.</p>
 <h3 id="library-sizes-and-distribution-plots">Library sizes and distribution plots</h3>
 <p>First, we can check how many reads we have for each sample in the <code>y</code>.</p>
 <pre class="sourceCode r"><code class="sourceCode r">y$samples$lib.size</code></pre>
-<pre class="output"><code> [1] 23218026 21768136 24091588 22656713 21522033 20008326 20384562
- [8] 21698793 22235847 21982745 24719697 24652963
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;y&#39; not found
 </code></pre>
 <p>We can also plot the library sizes as a barplot to see whether there are any major discrepanies between the samples more easily.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># The names argument tells the barplot to use the sample names on the x-axis</span>
 <span class="co"># The las argument rotates the axis names</span>
-<span class="kw">barplot</span>(y$samples$lib.size,<span class="dt">names=</span><span class="kw">colnames</span>(y),<span class="dt">las=</span><span class="dv">2</span>)
-<span class="co"># Add a title to the plot</span>
+<span class="kw">barplot</span>(y$samples$lib.size,<span class="dt">names=</span><span class="kw">colnames</span>(y),<span class="dt">las=</span><span class="dv">2</span>)</code></pre>
+<pre class="error"><code>Error in barplot(y$samples$lib.size, names = colnames(y), las = 2): object &#39;y&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Add a title to the plot</span>
 <span class="kw">title</span>(<span class="st">&quot;Barplot of library sizes&quot;</span>)</code></pre>
-<p><img src="fig-06/unnamed-chunk-16-1.png" title="plot of chunk unnamed-chunk-16" alt="plot of chunk unnamed-chunk-16" style="display: block; margin: auto;" /></p>
+<pre class="error"><code>Error in title(&quot;Barplot of library sizes&quot;): plot.new has not been called yet
+</code></pre>
 <p>Count data is not normally distributed, so if we want to examine the distributions of the raw counts we need to log the counts. Next we’ll use box plots to check the distribution of the read counts on the log2 scale. We can use the <code>cpm</code> function to get log2 counts per million, which are corrected for the different library sizes. The <code>cpm</code> function also adds a small offset to avoid taking log of zero.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Get log2 counts per million</span>
-logcounts &lt;-<span class="st"> </span><span class="kw">cpm</span>(y,<span class="dt">log=</span><span class="ot">TRUE</span>)
-<span class="co"># Check distributions of samples using boxplots</span>
-<span class="kw">boxplot</span>(logcounts, <span class="dt">xlab=</span><span class="st">&quot;&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;Log2 counts per million&quot;</span>,<span class="dt">las=</span><span class="dv">2</span>)
-<span class="co"># Let&#39;s add a blue horizontal line that corresponds to the median logCPM</span>
-<span class="kw">abline</span>(<span class="dt">h=</span><span class="kw">median</span>(logcounts),<span class="dt">col=</span><span class="st">&quot;blue&quot;</span>)
-<span class="kw">title</span>(<span class="st">&quot;Boxplots of logCPMs (unnormalised)&quot;</span>)</code></pre>
-<p><img src="fig-06/unnamed-chunk-17-1.png" title="plot of chunk unnamed-chunk-17" alt="plot of chunk unnamed-chunk-17" style="display: block; margin: auto;" /></p>
+logcounts &lt;-<span class="st"> </span><span class="kw">cpm</span>(y,<span class="dt">log=</span><span class="ot">TRUE</span>)</code></pre>
+<pre class="error"><code>Error in cpm(y, log = TRUE): object &#39;y&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Check distributions of samples using boxplots</span>
+<span class="kw">boxplot</span>(logcounts, <span class="dt">xlab=</span><span class="st">&quot;&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;Log2 counts per million&quot;</span>,<span class="dt">las=</span><span class="dv">2</span>)</code></pre>
+<pre class="error"><code>Error in boxplot(logcounts, xlab = &quot;&quot;, ylab = &quot;Log2 counts per million&quot;, : object &#39;logcounts&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s add a blue horizontal line that corresponds to the median logCPM</span>
+<span class="kw">abline</span>(<span class="dt">h=</span><span class="kw">median</span>(logcounts),<span class="dt">col=</span><span class="st">&quot;blue&quot;</span>)</code></pre>
+<pre class="error"><code>Error in median(logcounts): object &#39;logcounts&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">title</span>(<span class="st">&quot;Boxplots of logCPMs (unnormalised)&quot;</span>)</code></pre>
+<pre class="error"><code>Error in title(&quot;Boxplots of logCPMs (unnormalised)&quot;): plot.new has not been called yet
+</code></pre>
 <p>From the boxplots we see that overall the density distributions of raw log-intensities are not identical but still not very different. If a sample is really far above or below the blue horizontal line we may need to investigate that sample further.</p>
 <p>Another kind of QC plot that is helpful in checking for dodgy samples is a relative log expression (RLE) plot from the <em>EDASeq</em> package <span class="citation">(Risso et al. 2011)</span>. It shows boxplots of gene-level read counts of each sample relative to a reference sample, which is defined as the median across the samples.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># You need to give plotRLE a matrix of counts</span>
-<span class="kw">plotRLE</span>(y$counts,<span class="dt">las=</span><span class="dv">2</span>)
-<span class="kw">title</span>(<span class="st">&quot;RLE plot of unnormalised counts&quot;</span>)</code></pre>
-<p><img src="fig-06/unnamed-chunk-18-1.png" title="plot of chunk unnamed-chunk-18" alt="plot of chunk unnamed-chunk-18" style="display: block; margin: auto;" /></p>
+<span class="kw">plotRLE</span>(y$counts,<span class="dt">las=</span><span class="dv">2</span>)</code></pre>
+<pre class="error"><code>Error in plotRLE(y$counts, las = 2): object &#39;y&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">title</span>(<span class="st">&quot;RLE plot of unnormalised counts&quot;</span>)</code></pre>
+<pre class="error"><code>Error in title(&quot;RLE plot of unnormalised counts&quot;): plot.new has not been called yet
+</code></pre>
 <p>Ideally, the distributions should be centred around zero and be as tight as possible. It looks a bit different to the boxplot of the logcounts, but overall the patterns look the same. Which samples appear to be more variable/different than the rest?</p>
 <h3 id="multidimensional-scaling-plots">Multidimensional scaling plots</h3>
 <p>By far, one of the most important plots we make when we analyse RNA-Seq data are MDSplots. An MDSplot is a visualisation of a principle components analysis, which determines the greatest sources of variation in the data. A principle components analysis is an example of an unsupervised analysis, where we don’t need to specify the groups. If your experiment is well controlled and has worked well, what we hope to see is that the greatest sources of variation in the data are the treatments/groups we are interested in. It is also an incredibly useful tool for quality control and checking for outliers. We can use the <code>plotMDS</code> function to create the MDS plot.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMDS</span>(y)</code></pre>
-<p><img src="fig-06/unnamed-chunk-19-1.png" title="plot of chunk unnamed-chunk-19" alt="plot of chunk unnamed-chunk-19" style="display: block; margin: auto;" /></p>
+<pre class="error"><code>Error in plotMDS(y): object &#39;y&#39; not found
+</code></pre>
 <p>It is a bit difficult to see exactly what is going on with the default plot, although we do see samples grouping together in pairs. To make this plot more informative, we can colour the samples according to the grouping information. We can also change the labels, or instead of labels we can have points.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># We specify the option to let us plot two plots side-by-sde</span>
 <span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
 <span class="co"># Let&#39;s set up colour schemes for CellType</span>
 <span class="co"># How many cell types and in what order are they stored?</span>
 <span class="kw">levels</span>(targets$CellType)</code></pre>
-<pre class="output"><code>[1] &quot;basal&quot;   &quot;luminal&quot;
+<pre class="error"><code>Error in levels(targets$CellType): object &#39;targets&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">## Let&#39;s choose purple for basal and orange for luminal
-col.cell &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;purple&quot;</span>,<span class="st">&quot;orange&quot;</span>)[targets$CellType]
-col.cell</code></pre>
-<pre class="output"><code> [1] &quot;purple&quot; &quot;purple&quot; &quot;purple&quot; &quot;purple&quot; &quot;purple&quot; &quot;purple&quot; &quot;orange&quot;
- [8] &quot;orange&quot; &quot;orange&quot; &quot;orange&quot; &quot;orange&quot; &quot;orange&quot;
+col.cell &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;purple&quot;</span>,<span class="st">&quot;orange&quot;</span>)[targets$CellType]</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;targets&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">col.cell</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;col.cell&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Redo the MDS with cell type colouring</span>
-<span class="kw">plotMDS</span>(y,<span class="dt">col=</span>col.cell)
-<span class="co"># Let&#39;s add a legend to the plot so we know which colours correspond to which cell type</span>
-<span class="kw">legend</span>(<span class="st">&quot;bottomleft&quot;</span>,<span class="dt">fill=</span><span class="kw">c</span>(<span class="st">&quot;purple&quot;</span>,<span class="st">&quot;orange&quot;</span>),<span class="dt">legend=</span><span class="kw">levels</span>(targets$CellType))
-<span class="co"># Add a title</span>
-<span class="kw">title</span>(<span class="st">&quot;Cell type&quot;</span>)
-
-<span class="co"># Similarly for status</span>
+<span class="kw">plotMDS</span>(y,<span class="dt">col=</span>col.cell)</code></pre>
+<pre class="error"><code>Error in plotMDS(y, col = col.cell): object &#39;y&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s add a legend to the plot so we know which colours correspond to which cell type</span>
+<span class="kw">legend</span>(<span class="st">&quot;bottomleft&quot;</span>,<span class="dt">fill=</span><span class="kw">c</span>(<span class="st">&quot;purple&quot;</span>,<span class="st">&quot;orange&quot;</span>),<span class="dt">legend=</span><span class="kw">levels</span>(targets$CellType))</code></pre>
+<pre class="error"><code>Error in levels(targets$CellType): object &#39;targets&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Add a title</span>
+<span class="kw">title</span>(<span class="st">&quot;Cell type&quot;</span>)</code></pre>
+<pre class="error"><code>Error in title(&quot;Cell type&quot;): plot.new has not been called yet
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Similarly for status</span>
 <span class="kw">levels</span>(targets$Status)</code></pre>
-<pre class="output"><code>[1] &quot;lactate&quot;  &quot;pregnant&quot; &quot;virgin&quot;  
+<pre class="error"><code>Error in levels(targets$Status): object &#39;targets&#39; not found
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">col.status &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>,<span class="st">&quot;red&quot;</span>,<span class="st">&quot;dark green&quot;</span>)[targets$Status]
-col.status</code></pre>
-<pre class="output"><code> [1] &quot;dark green&quot; &quot;dark green&quot; &quot;red&quot;        &quot;red&quot;        &quot;blue&quot;      
- [6] &quot;blue&quot;       &quot;dark green&quot; &quot;dark green&quot; &quot;red&quot;        &quot;red&quot;       
-[11] &quot;blue&quot;       &quot;blue&quot;      
+<pre class="sourceCode r"><code class="sourceCode r">col.status &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>,<span class="st">&quot;red&quot;</span>,<span class="st">&quot;dark green&quot;</span>)[targets$Status]</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;targets&#39; not found
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMDS</span>(y,<span class="dt">col=</span>col.status)
-<span class="kw">legend</span>(<span class="st">&quot;bottomleft&quot;</span>,<span class="dt">fill=</span><span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>,<span class="st">&quot;red&quot;</span>,<span class="st">&quot;dark green&quot;</span>),<span class="dt">legend=</span><span class="kw">levels</span>(targets$Status),<span class="dt">cex=</span><span class="fl">0.8</span>)
-<span class="kw">title</span>(<span class="st">&quot;Status&quot;</span>)</code></pre>
-<p><img src="fig-06/unnamed-chunk-20-1.png" title="plot of chunk unnamed-chunk-20" alt="plot of chunk unnamed-chunk-20" style="display: block; margin: auto;" /></p>
+<pre class="sourceCode r"><code class="sourceCode r">col.status</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;col.status&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMDS</span>(y,<span class="dt">col=</span>col.status)</code></pre>
+<pre class="error"><code>Error in plotMDS(y, col = col.status): object &#39;y&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">legend</span>(<span class="st">&quot;bottomleft&quot;</span>,<span class="dt">fill=</span><span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>,<span class="st">&quot;red&quot;</span>,<span class="st">&quot;dark green&quot;</span>),<span class="dt">legend=</span><span class="kw">levels</span>(targets$Status),<span class="dt">cex=</span><span class="fl">0.8</span>)</code></pre>
+<pre class="error"><code>Error in levels(targets$Status): object &#39;targets&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">title</span>(<span class="st">&quot;Status&quot;</span>)</code></pre>
+<pre class="error"><code>Error in title(&quot;Status&quot;): plot.new has not been called yet
+</code></pre>
 <p>What is the greatest source of variation in the data (i.e. what does dimension 1 represent)? What is the second greatest source of variation in the data?</p>
 <p><span style="color:blue">Exercise: (1) Redo the plots choosing your own colours. (2) Change the plotting characters to symbols instead of the column names</span> <span style="color:red">HINT: use <code>pch</code> argument. Try <code>pch=16</code> and see what happens.</span></p>
 <p>Now let’s combine the two levels of information on the plot using different plotting characters for the cell type and different colours for the status.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s combine status and cell type info on one plot using plotting characters and colours</span>
 <span class="co"># Make a new group variable that joins together cell type and status with the paste command</span>
 <span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))
-group &lt;-<span class="st"> </span><span class="kw">factor</span>(<span class="kw">paste</span>(targets$CellType,targets$Status,<span class="dt">sep=</span><span class="st">&quot;.&quot;</span>))
-group</code></pre>
-<pre class="output"><code> [1] basal.virgin     basal.virgin     basal.pregnant   basal.pregnant  
- [5] basal.lactate    basal.lactate    luminal.virgin   luminal.virgin  
- [9] luminal.pregnant luminal.pregnant luminal.lactate  luminal.lactate 
-6 Levels: basal.lactate basal.pregnant basal.virgin ... luminal.virgin
+group &lt;-<span class="st"> </span><span class="kw">factor</span>(<span class="kw">paste</span>(targets$CellType,targets$Status,<span class="dt">sep=</span><span class="st">&quot;.&quot;</span>))</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;targets&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">group</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;group&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># the table function will tell us how many samples we have in each group</span>
 <span class="kw">table</span>(group)</code></pre>
-<pre class="output"><code>group
-   basal.lactate   basal.pregnant     basal.virgin  luminal.lactate 
-               2                2                2                2 
-luminal.pregnant   luminal.virgin 
-               2                2 
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;group&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">points &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">15</span>,<span class="dv">16</span>,<span class="dv">17</span>)
 colors &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>, <span class="st">&quot;darkgreen&quot;</span>, <span class="st">&quot;red&quot;</span>), <span class="dv">2</span>)
-<span class="kw">plotMDS</span>(y, <span class="dt">col=</span>colors[group], <span class="dt">pch=</span>points[group])
-<span class="kw">legend</span>(<span class="st">&quot;bottomleft&quot;</span>, <span class="dt">legend=</span><span class="kw">levels</span>(group), <span class="dt">pch=</span>points, <span class="dt">col=</span>colors, <span class="dt">ncol=</span><span class="dv">2</span>,<span class="dt">cex=</span><span class="fl">0.7</span>)</code></pre>
-<p><img src="fig-06/unnamed-chunk-21-1.png" title="plot of chunk unnamed-chunk-21" alt="plot of chunk unnamed-chunk-21" style="display: block; margin: auto;" /></p>
+<span class="kw">plotMDS</span>(y, <span class="dt">col=</span>colors[group], <span class="dt">pch=</span>points[group])</code></pre>
+<pre class="error"><code>Error in plotMDS(y, col = colors[group], pch = points[group]): object &#39;y&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">legend</span>(<span class="st">&quot;bottomleft&quot;</span>, <span class="dt">legend=</span><span class="kw">levels</span>(group), <span class="dt">pch=</span>points, <span class="dt">col=</span>colors, <span class="dt">ncol=</span><span class="dv">2</span>,<span class="dt">cex=</span><span class="fl">0.7</span>)</code></pre>
+<pre class="error"><code>Error in levels(group): object &#39;group&#39; not found
+</code></pre>
 <p>The distance between each pair of samples in the MDS plot is calculated as the leading fold change, defined as the root-mean-square of the largest 500 log2-fold changes between that pair of samples. Replicate samples from the same group cluster together in the plot, while samples from different groups form separate clusters. This indicates that the differences between groups are larger than those within groups, i.e., differential expression is greater than the variance and can be detected. In the MDS plot, the distance between basal samples on the left and luminal cells on the right is about 6 units, corresponding to a leading fold change of about 64-fold (2^6 = 64) between basal and luminal. The expression differences between virgin, pregnant and lactating are greater for luminal cells than for basal.</p>
 <p>Notes</p>
 <ul>
@@ -547,64 +316,69 @@ colors &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="kw
 <li>Clustering in the MDS plot can be used to motivate changes to the design matrix in light of potential batch effects. For example, imagine that the first replicate of each group was prepared at a separate time from the second replicate. If the MDS plot showed separation of samples by time, it might be worthwhile including time in the down stream analysis to account for the time-based effect.</li>
 </ul>
 <p><code>plotMDS</code> plots the first two dimensions as a default, however you can plot higher dimensions using the <code>dim</code> argument.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMDS</span>(y,<span class="dt">dim=</span><span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">4</span>),<span class="dt">col=</span>colors[group], <span class="dt">pch=</span>points[group])
-<span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend=</span><span class="kw">levels</span>(group), <span class="dt">pch=</span>points, <span class="dt">col=</span>colors, <span class="dt">ncol=</span><span class="dv">2</span>,<span class="dt">cex=</span><span class="fl">0.8</span>)</code></pre>
-<p><img src="fig-06/unnamed-chunk-22-1.png" title="plot of chunk unnamed-chunk-22" alt="plot of chunk unnamed-chunk-22" style="display: block; margin: auto;" /></p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMDS</span>(y,<span class="dt">dim=</span><span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">4</span>),<span class="dt">col=</span>colors[group], <span class="dt">pch=</span>points[group])</code></pre>
+<pre class="error"><code>Error in plotMDS(y, dim = c(3, 4), col = colors[group], pch = points[group]): object &#39;y&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend=</span><span class="kw">levels</span>(group), <span class="dt">pch=</span>points, <span class="dt">col=</span>colors, <span class="dt">ncol=</span><span class="dv">2</span>,<span class="dt">cex=</span><span class="fl">0.8</span>)</code></pre>
+<pre class="error"><code>Error in levels(group): object &#39;group&#39; not found
+</code></pre>
 <p>If we want to see how much variability is attributed to each principle component, we can use the <code>prcomp</code> function. <code>plotMDS</code> automatically takes logCPMs when you give it a DGEList object, however <code>prcomp</code> doesn’t, so you need to give <code>prcomp</code> the <code>logcounts</code> object. You can see that the first component captures the majority of the variation in the data.</p>
-<pre class="sourceCode r"><code class="sourceCode r">pca &lt;-<span class="st"> </span><span class="kw">prcomp</span>(logcounts)
-<span class="kw">plot</span>(pca$sdev)</code></pre>
-<p><img src="fig-06/unnamed-chunk-23-1.png" title="plot of chunk unnamed-chunk-23" alt="plot of chunk unnamed-chunk-23" style="display: block; margin: auto;" /></p>
+<pre class="sourceCode r"><code class="sourceCode r">pca &lt;-<span class="st"> </span><span class="kw">prcomp</span>(logcounts)</code></pre>
+<pre class="error"><code>Error in prcomp(logcounts): object &#39;logcounts&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(pca$sdev)</code></pre>
+<pre class="error"><code>Error in plot(pca$sdev): object &#39;pca&#39; not found
+</code></pre>
 <p>Another alternative is to generate an interactive MDS plot using the <em>Glimma</em> package. This allows the user to interactively explore the different dimensions.</p>
-<pre class="sourceCode r"><code class="sourceCode r">labels =<span class="st"> </span><span class="kw">paste</span>(targets$SampleName, targets$CellType, targets$Status)
-<span class="kw">glMDSPlot</span>(y, <span class="dt">labels=</span>labels, <span class="dt">groups=</span>group)</code></pre>
-<p><em>Glimma</em> was created to make interactive versions of some of the popular plots from the <em>limma</em> package. At present it can be used to obtain MDS plots and mean-difference (MD) plots, which will be covered later. The output of <code>glMDSPlot</code> is an html page that shows the MDS plot on the left, and the amount of variation explained by each dimension in a barplot on the right. The user can hover over points to find out sample information, and switch between successive dimensions in the MDS plot by clicking on the bars in the barplot. The default MDS plots shows dimensions 1 and 2.</p>
+<pre class="sourceCode r"><code class="sourceCode r">labels &lt;-<span class="st"> </span><span class="kw">paste</span>(targets$SampleName, targets$CellType, targets$Status)</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;targets&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">glMDSPlot</span>(y, <span class="dt">labels=</span>labels, <span class="dt">groups=</span>group, <span class="dt">folder=</span><span class="st">&quot;mds&quot;</span>)</code></pre>
+<pre class="error"><code>Error in glMDSPlot(y, labels = labels, groups = group, folder = &quot;mds&quot;): object &#39;y&#39; not found
+</code></pre>
+<p><em>Glimma</em> was created to make interactive versions of some of the popular plots from the <em>limma</em> package. At present it can be used to obtain MDS plots and mean-difference (MD) plots, which will be covered later. The output of <code>glMDSPlot</code> is an <a href="http://bphipson.github.io/RNAseq-R/demo/mds/MDS-Plot.html">html page</a> that shows the MDS plot on the left, and the amount of variation explained by each dimension in a barplot on the right. The user can hover over points to find out sample information, and switch between successive dimensions in the MDS plot by clicking on the bars in the barplot. The default MDS plots shows dimensions 1 and 2.</p>
 <h3 id="hierarchical-clustering-with-heatmaps">Hierarchical clustering with heatmaps</h3>
 <p>An alternative to <code>plotMDS</code> for examining relationships between samples is using hierarchical clustering. Heatmaps are a nice visualisation to examine hierarchical clustering of your samples. We can do this using the <code>heatmap.2</code> function from the <em>gplots</em> package. In this example <code>heatmap.2</code> calculates a matrix of euclidean distances from the logCPM (<code>logcounts</code> object) for the 500 most variable genes.</p>
 <p>The <em>RColorBrewer</em> package has nicer colour schemes, accessed using the <code>brewer.pal</code> function. “RdYlBu” is a common choice, and “Spectral” is also nice.</p>
 <p>Note:The <code>png</code> function will create a png file to save the plots created straight after, and will close this file when <code>dev.off()</code> is called. To see your plots interactively, simply omit those two lines.</p>
 <p>Let’s select data for the 500 most variable genes and plot the heatmap</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># We estimate the variance for each row in the logcounts matrix</span>
-var_genes &lt;-<span class="st"> </span><span class="kw">apply</span>(logcounts, <span class="dv">1</span>, var)
-<span class="kw">head</span>(var_genes)</code></pre>
-<pre class="output"><code>    497097      20671      27395      18777      21399      58175 
-27.4382296  3.3141188  0.1596456  0.1313426  0.3947091  6.2321017 
+var_genes &lt;-<span class="st"> </span><span class="kw">apply</span>(logcounts, <span class="dv">1</span>, var)</code></pre>
+<pre class="error"><code>Error in apply(logcounts, 1, var): object &#39;logcounts&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(var_genes)</code></pre>
+<pre class="error"><code>Error in head(var_genes): object &#39;var_genes&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Get the gene names for the top 500 most variable genes</span>
-select_var &lt;-<span class="st"> </span><span class="kw">names</span>(<span class="kw">sort</span>(var_genes, <span class="dt">decreasing=</span><span class="ot">TRUE</span>))[<span class="dv">1</span>:<span class="dv">500</span>]
-<span class="kw">head</span>(select_var)</code></pre>
-<pre class="output"><code>[1] &quot;16846&quot;  &quot;72902&quot;  &quot;56747&quot;  &quot;497097&quot; &quot;24117&quot;  &quot;109205&quot;
+select_var &lt;-<span class="st"> </span><span class="kw">names</span>(<span class="kw">sort</span>(var_genes, <span class="dt">decreasing=</span><span class="ot">TRUE</span>))[<span class="dv">1</span>:<span class="dv">500</span>]</code></pre>
+<pre class="error"><code>Error in sort(var_genes, decreasing = TRUE): object &#39;var_genes&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(select_var)</code></pre>
+<pre class="error"><code>Error in head(select_var): object &#39;select_var&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Subset logcounts matrix</span>
-highly_variable_lcpm &lt;-<span class="st"> </span>logcounts[select_var,]
-<span class="kw">dim</span>(highly_variable_lcpm)</code></pre>
-<pre class="output"><code>[1] 500  12
+highly_variable_lcpm &lt;-<span class="st"> </span>logcounts[select_var,]</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;logcounts&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(highly_variable_lcpm)</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;highly_variable_lcpm&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(highly_variable_lcpm)</code></pre>
-<pre class="output"><code>         MCL1.DG  MCL1.DH  MCL1.DI  MCL1.DJ  MCL1.DK  MCL1.DL   MCL1.LA
-16846  0.4290261 1.394877 4.025241 6.068229 5.923462 5.467369 -6.486175
-72902  1.4460253 2.569794 6.084854 5.183325 5.216547 4.629406 -6.486175
-56747  3.3347872 2.975754 5.071799 5.016300 5.599113 6.048402 -6.486175
-497097 4.2384664 3.785840 1.437863 3.388414 4.040841 3.843500 -6.486175
-24117  7.8373931 7.899107 8.634338 8.582153 6.703626 6.776308 -1.710778
-109205 5.5238723 5.717292 6.197664 6.203120 6.526628 6.529395 -6.486175
-          MCL1.LB   MCL1.LC     MCL1.LD   MCL1.LE   MCL1.LF
-16846  -4.1268214 -4.155152 -6.48617500 -6.486175 -6.486175
-72902  -6.4861750 -3.306148 -4.14190372 -6.486175 -6.486175
-56747  -6.4861750 -3.306148 -6.48617500 -4.276248 -4.273190
-497097 -6.4861750 -6.486175 -6.48617500 -6.486175 -6.486175
-24117  -0.7124885 -0.366455  0.01712352 -4.276248 -4.273190
-109205 -1.7975234 -2.388018 -3.29144547 -4.276248 -2.527764
+<pre class="error"><code>Error in head(highly_variable_lcpm): object &#39;highly_variable_lcpm&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">## Get some nicer colours
 mypalette &lt;-<span class="st"> </span><span class="kw">brewer.pal</span>(<span class="dv">11</span>,<span class="st">&quot;RdYlBu&quot;</span>)
 morecols &lt;-<span class="st"> </span><span class="kw">colorRampPalette</span>(mypalette)
 <span class="co"># Plot the heatmap</span>
 <span class="kw">heatmap.2</span>(highly_variable_lcpm,<span class="dt">col=</span><span class="kw">rev</span>(<span class="kw">morecols</span>(<span class="dv">50</span>)),<span class="dt">trace=</span><span class="st">&quot;none&quot;</span>, <span class="dt">main=</span><span class="st">&quot;Top 500 most variable genes across samples&quot;</span>,<span class="dt">ColSideColors=</span>col.cell,<span class="dt">scale=</span><span class="st">&quot;row&quot;</span>)</code></pre>
-<p><img src="fig-06/unnamed-chunk-25-1.png" title="plot of chunk unnamed-chunk-25" alt="plot of chunk unnamed-chunk-25" style="display: block; margin: auto;" /></p>
+<pre class="error"><code>Error in heatmap.2(highly_variable_lcpm, col = rev(morecols(50)), trace = &quot;none&quot;, : object &#39;highly_variable_lcpm&#39; not found
+</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Save the heatmap</span>
 <span class="kw">png</span>(<span class="dt">file=</span><span class="st">&quot;High_var_genes.heatmap.png&quot;</span>)
-<span class="kw">heatmap.2</span>(highly_variable_lcpm,<span class="dt">col=</span><span class="kw">rev</span>(<span class="kw">morecols</span>(<span class="dv">50</span>)),<span class="dt">trace=</span><span class="st">&quot;none&quot;</span>, <span class="dt">main=</span><span class="st">&quot;Top 500 most variable genes across samples&quot;</span>,<span class="dt">ColSideColors=</span>col.cell,<span class="dt">scale=</span><span class="st">&quot;row&quot;</span>)
-<span class="kw">dev.off</span>()</code></pre>
+<span class="kw">heatmap.2</span>(highly_variable_lcpm,<span class="dt">col=</span><span class="kw">rev</span>(<span class="kw">morecols</span>(<span class="dv">50</span>)),<span class="dt">trace=</span><span class="st">&quot;none&quot;</span>, <span class="dt">main=</span><span class="st">&quot;Top 500 most variable genes across samples&quot;</span>,<span class="dt">ColSideColors=</span>col.cell,<span class="dt">scale=</span><span class="st">&quot;row&quot;</span>)</code></pre>
+<pre class="error"><code>Error in heatmap.2(highly_variable_lcpm, col = rev(morecols(50)), trace = &quot;none&quot;, : object &#39;highly_variable_lcpm&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dev.off</span>()</code></pre>
 <pre class="output"><code>quartz_off_screen 
                 2 
 </code></pre>
@@ -614,37 +388,41 @@ morecols &lt;-<span class="st"> </span><span class="kw">colorRampPalette</span>(
 <p>TMM normalization is performed to eliminate composition biases between libraries <span class="citation">(Robinson and Oshlack 2010)</span>. This generates a set of normalization factors, where the product of these factors and the library sizes defines the effective library size. The <code>calcNormFactors</code> function calculates the normalization factors between libraries. TMM normalisation (and most scaling normalisation methods) scale relative to one sample.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Apply normalisation to DGEList object</span>
 y &lt;-<span class="st"> </span><span class="kw">calcNormFactors</span>(y)</code></pre>
+<pre class="error"><code>Error in calcNormFactors(y): object &#39;y&#39; not found
+</code></pre>
 <p>This will update the normalisation factors in the <code>DGEList</code> object (their default values are 1). Take a look at the normalisation factors for these samples.</p>
 <pre class="sourceCode r"><code class="sourceCode r">y$samples</code></pre>
-<pre class="output"><code>        group lib.size norm.factors
-MCL1.DG     1 23218026    1.2368993
-MCL1.DH     1 21768136    1.2139485
-MCL1.DI     1 24091588    1.1255640
-MCL1.DJ     1 22656713    1.0698261
-MCL1.DK     1 21522033    1.0359212
-MCL1.DL     1 20008326    1.0872153
-MCL1.LA     1 20384562    1.3684449
-MCL1.LB     1 21698793    1.3653200
-MCL1.LC     1 22235847    1.0047431
-MCL1.LD     1 21982745    0.9232822
-MCL1.LE     1 24719697    0.5291015
-MCL1.LF     1 24652963    0.5354877
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;y&#39; not found
 </code></pre>
 <p>The normalization factors multiply to unity across all libraries. A normalization factor below one indicates that the library size will be scaled down, as there is more suppression (i.e., composition bias) in that library relative to the other libraries. This is also equivalent to scaling the counts upwards in that sample. Conversely, a factor above one scales up the library size and is equivalent to downscaling the counts.</p>
 <p>The last two samples have much smaller normalisation factors, and MCL1.LA and MCL1.LB have the largest. If we plot mean difference plots using the <code>plotMD</code> function for these samples, we should be able to see the composition bias problem. We will use the <code>logcounts</code>, which have been normalised for library size, but not for composition bias.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
-<span class="kw">plotMD</span>(logcounts,<span class="dt">column =</span> <span class="dv">7</span>)
-<span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)
-<span class="kw">plotMD</span>(logcounts,<span class="dt">column =</span> <span class="dv">11</span>)
-<span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre>
-<p><img src="fig-06/unnamed-chunk-28-1.png" title="plot of chunk unnamed-chunk-28" alt="plot of chunk unnamed-chunk-28" style="display: block; margin: auto;" /></p>
+<span class="kw">plotMD</span>(logcounts,<span class="dt">column =</span> <span class="dv">7</span>)</code></pre>
+<pre class="error"><code>Error in plotMD(logcounts, column = 7): object &#39;logcounts&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre>
+<pre class="error"><code>Error in int_abline(a = a, b = b, h = h, v = v, untf = untf, ...): plot.new has not been called yet
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMD</span>(logcounts,<span class="dt">column =</span> <span class="dv">11</span>)</code></pre>
+<pre class="error"><code>Error in plotMD(logcounts, column = 11): object &#39;logcounts&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre>
+<pre class="error"><code>Error in int_abline(a = a, b = b, h = h, v = v, untf = untf, ...): plot.new has not been called yet
+</code></pre>
 <p>The mean-difference plots show average expression (mean: x-axis) against log-fold-changes (difference: y-axis). Because our <code>DGEList</code> object contains the normalisation factors, if we redo these plots using <code>y</code>, we should see the composition bias problem has been solved.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
-<span class="kw">plotMD</span>(y,<span class="dt">column =</span> <span class="dv">7</span>)
-<span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)
-<span class="kw">plotMD</span>(y,<span class="dt">column =</span> <span class="dv">11</span>)
-<span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre>
-<p><img src="fig-06/unnamed-chunk-29-1.png" title="plot of chunk unnamed-chunk-29" alt="plot of chunk unnamed-chunk-29" style="display: block; margin: auto;" /></p>
+<span class="kw">plotMD</span>(y,<span class="dt">column =</span> <span class="dv">7</span>)</code></pre>
+<pre class="error"><code>Error in plotMD(y, column = 7): object &#39;y&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre>
+<pre class="error"><code>Error in int_abline(a = a, b = b, h = h, v = v, untf = untf, ...): plot.new has not been called yet
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMD</span>(y,<span class="dt">column =</span> <span class="dv">11</span>)</code></pre>
+<pre class="error"><code>Error in plotMD(y, column = 11): object &#39;y&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre>
+<pre class="error"><code>Error in int_abline(a = a, b = b, h = h, v = v, untf = untf, ...): plot.new has not been called yet
+</code></pre>
 <p><span style="color:blue">Exercise: Plot the biased and unbiased MD plots side by side for the same sample to see the before and after TMM normalisation effect.</span></p>
 <h2 id="differential-expression-with-limma-voom">Differential expression with limma-voom</h2>
 <p>Now that we are happy that we have normalised the data and that the quality looks good, we can continue to testing for differentially expressed genes. There are a number of packages to analyse RNA-Seq data. The <em>limma</em> package <span class="citation">(Ritchie et al. 2015)</span> (since version 3.16.0) offers the <code>voom</code> function, which transforms the read counts into logCPMs while taking into account the mean-variance relationship in the data <span class="citation">(C. W. Law et al. 2014)</span>. After vooming, users can apply a linear model to the voom transformed data to test for differentially expressed genes, using standard <em>limma</em> commands.</p>
@@ -653,222 +431,110 @@ MCL1.LF     1 24652963    0.5354877
 <p>In this analysis let’s assume that we will be testing differences in status in the different cell types separately. For example, we want to know which genes are differentially expressed between pregnant and lactating in basal cells only. We have already coded our <code>group</code> variable for our final MDSplot, which was a concatenation of cell type and status. Coding the cell type and status in this way allows us to be flexible in specifying which comparisons we are interested in.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Look at group variable again</span>
 group</code></pre>
-<pre class="output"><code> [1] basal.virgin     basal.virgin     basal.pregnant   basal.pregnant  
- [5] basal.lactate    basal.lactate    luminal.virgin   luminal.virgin  
- [9] luminal.pregnant luminal.pregnant luminal.lactate  luminal.lactate 
-6 Levels: basal.lactate basal.pregnant basal.virgin ... luminal.virgin
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;group&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Specify a design matrix without an intercept term</span>
-design &lt;-<span class="st"> </span><span class="kw">model.matrix</span>(~<span class="st"> </span><span class="dv">0</span> +<span class="st"> </span>group)
-design</code></pre>
-<pre class="output"><code>   groupbasal.lactate groupbasal.pregnant groupbasal.virgin
-1                   0                   0                 1
-2                   0                   0                 1
-3                   0                   1                 0
-4                   0                   1                 0
-5                   1                   0                 0
-6                   1                   0                 0
-7                   0                   0                 0
-8                   0                   0                 0
-9                   0                   0                 0
-10                  0                   0                 0
-11                  0                   0                 0
-12                  0                   0                 0
-   groupluminal.lactate groupluminal.pregnant groupluminal.virgin
-1                     0                     0                   0
-2                     0                     0                   0
-3                     0                     0                   0
-4                     0                     0                   0
-5                     0                     0                   0
-6                     0                     0                   0
-7                     0                     0                   1
-8                     0                     0                   1
-9                     0                     1                   0
-10                    0                     1                   0
-11                    1                     0                   0
-12                    1                     0                   0
-attr(,&quot;assign&quot;)
-[1] 1 1 1 1 1 1
-attr(,&quot;contrasts&quot;)
-attr(,&quot;contrasts&quot;)$group
-[1] &quot;contr.treatment&quot;
+design &lt;-<span class="st"> </span><span class="kw">model.matrix</span>(~<span class="st"> </span><span class="dv">0</span> +<span class="st"> </span>group)</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;group&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">design</code></pre>
+<pre class="output"><code>standardGeneric for &quot;design&quot; defined from package &quot;BiocGenerics&quot;
+
+function (object, ...) 
+standardGeneric(&quot;design&quot;)
+&lt;environment: 0x7ff5f9ab3ed8&gt;
+Methods may be defined for arguments: object
+Use  showMethods(&quot;design&quot;)  for currently available ones.
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">## Make the column names of the design matrix a bit nicer
-<span class="kw">colnames</span>(design) &lt;-<span class="st"> </span><span class="kw">levels</span>(group)
-design</code></pre>
-<pre class="output"><code>   basal.lactate basal.pregnant basal.virgin luminal.lactate
-1              0              0            1               0
-2              0              0            1               0
-3              0              1            0               0
-4              0              1            0               0
-5              1              0            0               0
-6              1              0            0               0
-7              0              0            0               0
-8              0              0            0               0
-9              0              0            0               0
-10             0              0            0               0
-11             0              0            0               1
-12             0              0            0               1
-   luminal.pregnant luminal.virgin
-1                 0              0
-2                 0              0
-3                 0              0
-4                 0              0
-5                 0              0
-6                 0              0
-7                 0              1
-8                 0              1
-9                 1              0
-10                1              0
-11                0              0
-12                0              0
-attr(,&quot;assign&quot;)
-[1] 1 1 1 1 1 1
-attr(,&quot;contrasts&quot;)
-attr(,&quot;contrasts&quot;)$group
-[1] &quot;contr.treatment&quot;
+<span class="kw">colnames</span>(design) &lt;-<span class="st"> </span><span class="kw">levels</span>(group)</code></pre>
+<pre class="error"><code>Error in levels(group): object &#39;group&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">design</code></pre>
+<pre class="output"><code>standardGeneric for &quot;design&quot; defined from package &quot;BiocGenerics&quot;
+
+function (object, ...) 
+standardGeneric(&quot;design&quot;)
+&lt;environment: 0x7ff5f9ab3ed8&gt;
+Methods may be defined for arguments: object
+Use  showMethods(&quot;design&quot;)  for currently available ones.
 </code></pre>
 <p>Each column of the design matrix tells us which samples correspond to each group. The samples which come from basal cells from a lactating mouse correspond to columns 5 and 6 in the counts matrix, i.e. the samples which have 1s.</p>
 <h3 id="voom-transform-the-data">Voom transform the data</h3>
 <p>Once we have our design matrix ready to go, we can perform our voom transformation. Voom will automatically adjust the library sizes using the <code>norm.factors</code> already calculated. The voom transformation uses the experiment design matrix, and produces an <code>EList</code> object. We can add <code>plot=TRUE</code> to generate a plot of the mean-variance trend. This plot can also tell us if there are any genes that look really variable in our data, and if we’ve filtered the low counts adequately..</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))
 v &lt;-<span class="st"> </span><span class="kw">voom</span>(y,design,<span class="dt">plot =</span> <span class="ot">TRUE</span>)</code></pre>
-<p><img src="fig-06/unnamed-chunk-31-1.png" title="plot of chunk unnamed-chunk-31" alt="plot of chunk unnamed-chunk-31" style="display: block; margin: auto;" /></p>
+<pre class="error"><code>Error in is(counts, &quot;DGEList&quot;): object &#39;y&#39; not found
+</code></pre>
 <p>The voom normalised log2 counts can be found in v$E. Take a look at what is in the voom object.</p>
 <pre class="sourceCode r"><code class="sourceCode r">v</code></pre>
-<pre class="output"><code>An object of class &quot;EList&quot;
-$targets
-        group lib.size norm.factors
-MCL1.DG     1 28718360     1.236899
-MCL1.DH     1 26425396     1.213949
-MCL1.DI     1 27116624     1.125564
-MCL1.DJ     1 24238743     1.069826
-MCL1.DK     1 22295130     1.035921
-7 more rows ...
-
-$E
-        MCL1.DG  MCL1.DH  MCL1.DI  MCL1.DJ   MCL1.DK  MCL1.DL    MCL1.LA
-497097 3.932532 3.507368 1.272317 3.292541 3.9909851 3.724252 -5.8019424
-20671  1.890808 2.787899 1.605217 2.121856 0.9642868 1.923156 -0.7575483
-27395  3.429894 3.149591 3.637638 3.631978 3.7037376 3.636318  4.3286281
-18777  4.505933 4.285975 5.128398 5.270351 5.3801014 5.185279  4.8889286
-21399  5.804007 5.822559 5.988345 5.764344 5.7006304 5.615502  5.5801412
-          MCL1.LB    MCL1.LC   MCL1.LD   MCL1.LE    MCL1.LF
-497097 -5.8887821 -5.4816421 -5.343143 -4.709206 -4.7226146
-20671  -0.2163568 -0.2721888 -1.255680 -1.901851 -0.3302972
-27395   3.9707527  4.4535229  4.016606  4.555237  4.6973455
-18777   4.8635986  4.9031416  4.993363  5.379583  5.4610208
-21399   5.4087074  5.5797290  5.512504  5.280898  5.2446116
-15799 more rows ...
-
-$weights
-         [,1]     [,2]     [,3]     [,4]     [,5]     [,6]       [,7]
-[1,] 42.85032 40.59638 19.78119 18.11020 38.62541 37.98661  0.7907909
-[2,] 21.34610 19.99539 15.74020 14.40027 10.70068 10.49511  4.5401043
-[3,] 35.05544 33.04583 39.72941 36.82081 35.31518 34.70612 50.4586968
-[4,] 56.26175 53.86441 69.16366 66.65108 66.03797 65.46069 64.6692219
-[5,] 76.92857 75.98600 76.79528 75.45282 71.62644 71.16558 73.5980084
-           [,8]       [,9]      [,10]      [,11]      [,12]
-[1,]  0.7907909  0.7907909  0.7907909  0.7907909  0.7907909
-[2,]  4.7399033  3.4277768  3.2224692  2.1314506  2.1428929
-[3,] 52.1833006 45.7806579 43.1302387 38.6112610 38.8559918
-[4,] 66.0984998 60.0161723 57.3174922 54.0693981 54.3410792
-[5,] 74.5613544 70.1642210 68.1238307 50.8570652 51.1210163
-15799 more rows ...
-
-$design
-  basal.lactate basal.pregnant basal.virgin luminal.lactate
-1             0              0            1               0
-2             0              0            1               0
-3             0              1            0               0
-4             0              1            0               0
-5             1              0            0               0
-  luminal.pregnant luminal.virgin
-1                0              0
-2                0              0
-3                0              0
-4                0              0
-5                0              0
-7 more rows ...
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;v&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># What is contained in this object?</span>
 <span class="kw">names</span>(v)</code></pre>
-<pre class="output"><code>[1] &quot;targets&quot; &quot;E&quot;       &quot;weights&quot; &quot;design&quot; 
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;v&#39; not found
 </code></pre>
 <p><span style="color:blue">Exercise: (1) What is in the <code>targets</code> slot of <code>v</code> and what does it correspond to in <code>y</code>? (2) What are the dimensions of the <code>weights</code> slot in <code>v</code>?</span></p>
 <p>We can repeat the box plots for the normalised data to compare to before normalisation. The expression values in <code>v$E</code> are already log2 values so we don’t need to log-transform.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
-<span class="kw">boxplot</span>(logcounts, <span class="dt">xlab=</span><span class="st">&quot;&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;Log2 counts per million&quot;</span>,<span class="dt">las=</span><span class="dv">2</span>,<span class="dt">main=</span><span class="st">&quot;Unnormalised logCPM&quot;</span>)
-## Let&#39;s add a blue horizontal line that corresponds to the median logCPM
-<span class="kw">abline</span>(<span class="dt">h=</span><span class="kw">median</span>(logcounts),<span class="dt">col=</span><span class="st">&quot;blue&quot;</span>)
-<span class="kw">boxplot</span>(v$E, <span class="dt">xlab=</span><span class="st">&quot;&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;Log2 counts per million&quot;</span>,<span class="dt">las=</span><span class="dv">2</span>,<span class="dt">main=</span><span class="st">&quot;Voom transformed logCPM&quot;</span>)
-## Let&#39;s add a blue horizontal line that corresponds to the median logCPM
+<span class="kw">boxplot</span>(logcounts, <span class="dt">xlab=</span><span class="st">&quot;&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;Log2 counts per million&quot;</span>,<span class="dt">las=</span><span class="dv">2</span>,<span class="dt">main=</span><span class="st">&quot;Unnormalised logCPM&quot;</span>)</code></pre>
+<pre class="error"><code>Error in boxplot(logcounts, xlab = &quot;&quot;, ylab = &quot;Log2 counts per million&quot;, : object &#39;logcounts&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">## Let&#39;s add a blue horizontal line that corresponds to the median logCPM
+<span class="kw">abline</span>(<span class="dt">h=</span><span class="kw">median</span>(logcounts),<span class="dt">col=</span><span class="st">&quot;blue&quot;</span>)</code></pre>
+<pre class="error"><code>Error in median(logcounts): object &#39;logcounts&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">boxplot</span>(v$E, <span class="dt">xlab=</span><span class="st">&quot;&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;Log2 counts per million&quot;</span>,<span class="dt">las=</span><span class="dv">2</span>,<span class="dt">main=</span><span class="st">&quot;Voom transformed logCPM&quot;</span>)</code></pre>
+<pre class="error"><code>Error in boxplot(v$E, xlab = &quot;&quot;, ylab = &quot;Log2 counts per million&quot;, las = 2, : object &#39;v&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">## Let&#39;s add a blue horizontal line that corresponds to the median logCPM
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="kw">median</span>(v$E),<span class="dt">col=</span><span class="st">&quot;blue&quot;</span>)</code></pre>
-<p><img src="fig-06/unnamed-chunk-33-1.png" title="plot of chunk unnamed-chunk-33" alt="plot of chunk unnamed-chunk-33" style="display: block; margin: auto;" /></p>
+<pre class="error"><code>Error in median(v$E): object &#39;v&#39; not found
+</code></pre>
 <p>Compare these box plots to the box plots we generated before performing the normalisation. Can you see any differences?</p>
 <h3 id="testing-for-differential-expression">Testing for differential expression</h3>
 <p>Now that we have the voom transformed data we can use <em>limma</em> to test for differential expression. First we fit a linear model for each gene using the <code>lmFit</code> function in <em>limma</em>. <code>lmFit</code> needs the voom object and the design matrix that we have already specified, which is stored within the voom object.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Fit the linear model</span>
 fit &lt;-<span class="st"> </span><span class="kw">lmFit</span>(v)</code></pre>
+<pre class="error"><code>Error in is(object, &quot;list&quot;): object &#39;v&#39; not found
+</code></pre>
 <p><code>lmFit</code> estimates group means according to the design matrix, as well as gene-wise variances. There are a number of items stored in the <code>fit</code> object, most of which are specific to the statistical testing, and we won’t be discussing these in detail today.</p>
 <p>Since we are interested in differences between groups, we need to specify which comparisons we want to test. The comparison of interest can be specified using the <code>makeContrasts</code> function. Here, we are interested in knowing which genes are differentially expressed between the pregnant and lactating group in the basal cells. This is done by defining the null hypothesis as basal.pregnant - basal.lactate = 0 for each gene. Note that the group names must exactly match the column names of the design matrix.</p>
 <pre class="sourceCode r"><code class="sourceCode r">cont.matrix &lt;-<span class="st"> </span><span class="kw">makeContrasts</span>(<span class="dt">B.PregVsLac=</span>basal.pregnant -<span class="st"> </span>basal.lactate,<span class="dt">levels=</span>design)</code></pre>
+<pre class="error"><code>Error in if (levels[1] == &quot;(Intercept)&quot;) {: argument is of length zero
+</code></pre>
 <p>Take a look at the contrast matrix. The contrast matrix tells <em>limma</em> which columns of the design matrix we are interested in testing our comparison. Note that here we have specified only one comparison to test, but we can specify as many as we want in one go.</p>
 <pre class="sourceCode r"><code class="sourceCode r">cont.matrix</code></pre>
-<pre class="output"><code>                  Contrasts
-Levels             B.PregVsLac
-  basal.lactate             -1
-  basal.pregnant             1
-  basal.virgin               0
-  luminal.lactate            0
-  luminal.pregnant           0
-  luminal.virgin             0
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;cont.matrix&#39; not found
 </code></pre>
 <p>Now we can apply the contrasts matrix to the <code>fit</code> object to get the statistics and estimated parameters of our comparison that we are interested in. Here we call the <code>contrasts.fit</code> function in <em>limma</em>.</p>
 <pre class="sourceCode r"><code class="sourceCode r">fit.cont &lt;-<span class="st"> </span><span class="kw">contrasts.fit</span>(fit, cont.matrix)</code></pre>
+<pre class="error"><code>Error in NCOL(fit$coefficients): object &#39;fit&#39; not found
+</code></pre>
 <p>The final step is to call the <code>eBayes</code> function, which performs empirical Bayes shrinkage on the variances, and estimates moderated t-statistics and the associated p-values.</p>
 <pre class="sourceCode r"><code class="sourceCode r">fit.cont &lt;-<span class="st"> </span><span class="kw">eBayes</span>(fit.cont)</code></pre>
+<pre class="error"><code>Error in ebayes(fit = fit, proportion = proportion, stdev.coef.lim = stdev.coef.lim, : object &#39;fit.cont&#39; not found
+</code></pre>
 <p>Check the dimensions of the fit object</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(fit.cont)</code></pre>
-<pre class="output"><code>[1] 15804     1
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;fit.cont&#39; not found
 </code></pre>
 <p>We can use the <em>limma</em> <code>decideTests</code> function to generate a quick summary of DE genes for the contrasts.</p>
-<pre class="sourceCode r"><code class="sourceCode r">summa.fit &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit.cont)
-<span class="kw">summary</span>(summa.fit)</code></pre>
-<pre class="output"><code>   B.PregVsLac
--1        2635
-0        10464
-1         2705
+<pre class="sourceCode r"><code class="sourceCode r">summa.fit &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit.cont)</code></pre>
+<pre class="error"><code>Error in is(object, &quot;MArrayLM&quot;): object &#39;fit.cont&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(summa.fit)</code></pre>
+<pre class="error"><code>Error in summary(summa.fit): object &#39;summa.fit&#39; not found
 </code></pre>
 <p><span style="color:blue">Exercise: (1) Add another contrast to the contrasts matrix: <code>L.PregVLac = luminal.pregnant - luminal.lactate</code> and re-run the code above. You should have two comparisons in <code>fit.cont</code> now. (2) Check out the <code>vennDiagram</code> function</span> <span style="color:red">(HINT: type <code>?vennDiagram</code>)</span>. <span style="color:blue">Can you show the overlap of differentially expressed genes between the two comparisons? How many genes are commonly differentially expressed?</span></p>
 <p>The <em>limma</em> <code>topTable</code> function summarises the output in a table format. Significant DE genes for a particular comparison can be identified by selecting genes with a p-value smaller than a chosen cut-off value and/or a fold change greater than a chosen value in this table. By default the table will be sorted by the B statistic, which is the log-odds of differential expression. Usually the B statistic and p-value ranking will be the same, but this is not always the case. We will explicitly rank by p-value, which we can specify with the <code>sort.by</code> argument.</p>
 <p>The <code>topTable</code> command will always output the top 10 genes by default, even if they are not statistically significant. We can specify the coefficient we are interested in by the name we used in the contrast matrix (“B.PregVsLac”), or by the column number.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre>
-<pre class="output"><code>           logFC  AveExpr         t      P.Value    adj.P.Val        B
-24117   1.819943 2.975545  20.10780 1.063770e-10 1.016240e-06 14.96977
-381290 -2.143885 3.944066 -19.07495 1.982934e-10 1.016240e-06 14.39556
-78896   2.807548 3.036519  18.54773 2.758828e-10 1.016240e-06 14.07416
-226101 -2.329744 6.223525 -18.26861 3.297667e-10 1.016240e-06 13.85802
-16012  -2.896115 1.978449 -18.21525 3.413066e-10 1.016240e-06 13.46984
-231830  2.253400 4.760597  18.02627 3.858161e-10 1.016240e-06 13.67600
-16669  -2.312721 8.741892 -17.07937 7.264548e-10 1.640127e-06 13.17357
-55987  -1.515469 2.834512 -16.64333 9.829870e-10 1.718703e-06 12.88782
-231991 -2.598105 4.275930 -16.53634 1.059885e-09 1.718703e-06 12.66020
-14620   3.600094 3.525281  16.46627 1.113755e-09 1.718703e-06 12.54071
+<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit.cont&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">## This will give the same output
 <span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre>
-<pre class="output"><code>           logFC  AveExpr         t      P.Value    adj.P.Val        B
-24117   1.819943 2.975545  20.10780 1.063770e-10 1.016240e-06 14.96977
-381290 -2.143885 3.944066 -19.07495 1.982934e-10 1.016240e-06 14.39556
-78896   2.807548 3.036519  18.54773 2.758828e-10 1.016240e-06 14.07416
-226101 -2.329744 6.223525 -18.26861 3.297667e-10 1.016240e-06 13.85802
-16012  -2.896115 1.978449 -18.21525 3.413066e-10 1.016240e-06 13.46984
-231830  2.253400 4.760597  18.02627 3.858161e-10 1.016240e-06 13.67600
-16669  -2.312721 8.741892 -17.07937 7.264548e-10 1.640127e-06 13.17357
-55987  -1.515469 2.834512 -16.64333 9.829870e-10 1.718703e-06 12.88782
-231991 -2.598105 4.275930 -16.53634 1.059885e-09 1.718703e-06 12.66020
-14620   3.600094 3.525281  16.46627 1.113755e-09 1.718703e-06 12.54071
+<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit.cont&#39; not found
 </code></pre>
 <h3 id="adding-annotation-and-saving-the-results">Adding annotation and saving the results</h3>
 <p>We have a list of significantly differentially expressed genes, but the only annotation we can see is the Entrez Gene ID, which is not very informative. We would like to add some annotation information. There are a number of ways to do this. We will demonstrate how to do this using the <em>org.Mm.eg.db</em> package.</p>
@@ -883,134 +549,116 @@ Levels             B.PregVsLac
 </code></pre>
 <p>We definitely want gene symbols and perhaps the full gene name. Let’s build up our annotation information in a separate data frame using the <code>select</code> function.</p>
 <pre class="sourceCode r"><code class="sourceCode r">ann &lt;-<span class="st"> </span><span class="kw">select</span>(org.Mm.eg.db,<span class="dt">keys=</span><span class="kw">rownames</span>(fit.cont),<span class="dt">columns=</span><span class="kw">c</span>(<span class="st">&quot;ENTREZID&quot;</span>,<span class="st">&quot;SYMBOL&quot;</span>,<span class="st">&quot;GENENAME&quot;</span>))</code></pre>
-<pre class="output"><code>&#39;select()&#39; returned 1:1 mapping between keys and columns
+<pre class="error"><code>Error in rownames(fit.cont): object &#39;fit.cont&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Have a look at the annotation</span>
 <span class="kw">head</span>(ann)</code></pre>
-<pre class="output"><code>  ENTREZID SYMBOL                                             GENENAME
-1   497097   Xkr4 X Kell blood group precursor related family member 4
-2    20671  Sox17                SRY (sex determining region Y)-box 17
-3    27395 Mrpl15                  mitochondrial ribosomal protein L15
-4    18777 Lypla1                                  lysophospholipase 1
-5    21399  Tcea1            transcription elongation factor A (SII) 1
-6    58175  Rgs20                  regulator of G-protein signaling 20
+<pre class="error"><code>Error in head(ann): object &#39;ann&#39; not found
 </code></pre>
 <p>Let’s double check that the <code>ENTREZID</code> column matches exactly to our <code>fit.cont</code> rownames.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(ann$ENTREZID==<span class="kw">rownames</span>(fit.cont))</code></pre>
-<pre class="output"><code>
- TRUE 
-15804 
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;ann&#39; not found
 </code></pre>
 <p>We can slot in the annotation information into the <code>genes</code> slot of <code>fit.cont</code>. (Please note that if the <code>select</code> function returns a 1:many mapping then you can’t just append the annotation to the fit object. An alternative way to get annotation will be discussed tomorrow during the analysis of the second dataset.)</p>
 <pre class="sourceCode r"><code class="sourceCode r">fit.cont$genes &lt;-<span class="st"> </span>ann</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;ann&#39; not found
+</code></pre>
 <p>Now when we run the <code>topTable</code> command, the annotation information should be included in the output.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre>
-<pre class="output"><code>       ENTREZID        SYMBOL                                     GENENAME
-24117     24117          Wif1                      Wnt inhibitory factor 1
-381290   381290        Atp2b4 ATPase, Ca++ transporting, plasma membrane 4
-78896     78896 1500015O10Rik                   RIKEN cDNA 1500015O10 gene
-226101   226101          Myof                                    myoferlin
-16012     16012        Igfbp6 insulin-like growth factor binding protein 6
-231830   231830       Micall2                                 MICAL-like 2
-16669     16669         Krt19                                   keratin 19
-55987     55987         Cpxm2            carboxypeptidase X 2 (M14 family)
-231991   231991         Creb5    cAMP responsive element binding protein 5
-14620     14620          Gjb3                 gap junction protein, beta 3
-           logFC  AveExpr         t      P.Value    adj.P.Val        B
-24117   1.819943 2.975545  20.10780 1.063770e-10 1.016240e-06 14.96977
-381290 -2.143885 3.944066 -19.07495 1.982934e-10 1.016240e-06 14.39556
-78896   2.807548 3.036519  18.54773 2.758828e-10 1.016240e-06 14.07416
-226101 -2.329744 6.223525 -18.26861 3.297667e-10 1.016240e-06 13.85802
-16012  -2.896115 1.978449 -18.21525 3.413066e-10 1.016240e-06 13.46984
-231830  2.253400 4.760597  18.02627 3.858161e-10 1.016240e-06 13.67600
-16669  -2.312721 8.741892 -17.07937 7.264548e-10 1.640127e-06 13.17357
-55987  -1.515469 2.834512 -16.64333 9.829870e-10 1.718703e-06 12.88782
-231991 -2.598105 4.275930 -16.53634 1.059885e-09 1.718703e-06 12.66020
-14620   3.600094 3.525281  16.46627 1.113755e-09 1.718703e-06 12.54071
+<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit.cont&#39; not found
 </code></pre>
 <p>To get the full table (i.e. the information for all genes, not just the top 10) we can specify <code>n=&quot;Inf&quot;</code>.</p>
 <pre class="sourceCode r"><code class="sourceCode r">limma.res &lt;-<span class="st"> </span><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>,<span class="dt">n=</span><span class="st">&quot;Inf&quot;</span>)</code></pre>
+<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit.cont&#39; not found
+</code></pre>
 <p>We can save the results table using the <code>write.csv</code> function, which writes the results out to a csv file, which you can open in excel. You can also use this csv file as input to <em>Degust</em>. Make sure to save this table as we will be using it in the <em>Degust</em> section of the workshop.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">write.csv</span>(limma.res,<span class="dt">file=</span><span class="st">&quot;B.PregVsLacResults.csv&quot;</span>,<span class="dt">row.names=</span><span class="ot">FALSE</span>)</code></pre>
+<pre class="error"><code>Error in is.data.frame(x): object &#39;limma.res&#39; not found
+</code></pre>
 <p><strong>A note about deciding how many genes are significant</strong>: In order to decide which genes are differentially expressed, we usually take a cut-off of 0.05 on the adjusted p-value, NOT the raw p-value. This is because we are testing more than 15000 genes, and the chances of finding differentially expressed genes is very high when you do that many tests. Hence we need to control the false discovery rate, which is the adjusted p-value column in the results table. What this means is that if 100 genes are significant at a 5% false discovery rate, we are willing to accept that 5 will be false positives. Note that the <code>decideTests</code> function displays significant genes at 5% FDR.</p>
 <h3 id="plots-after-testing-for-de">Plots after testing for DE</h3>
 <p>Let’s do a few plots to make sure everything looks good and that we haven’t made a mistake in the analysis. Genome-wide plots that are useful for checking are MAplots (or MDplots) and volcano plots. There are functions in limma for plotting these with <code>fit.cont</code> as input.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># We want to highlight the significant genes. We can get this from decideTests.</span>
 <span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
-<span class="kw">plotMD</span>(fit.cont,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">status=</span>summa.fit[,<span class="st">&quot;B.PregVsLac&quot;</span>])
-
-<span class="co"># For the volcano plot we have to specify how many of the top genes to hightlight.</span>
+<span class="kw">plotMD</span>(fit.cont,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">status=</span>summa.fit[,<span class="st">&quot;B.PregVsLac&quot;</span>])</code></pre>
+<pre class="error"><code>Error in plotMD(fit.cont, coef = 1, status = summa.fit[, &quot;B.PregVsLac&quot;]): object &#39;fit.cont&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># For the volcano plot we have to specify how many of the top genes to hightlight.</span>
 <span class="co"># We can also specify that we want to plot the gene symbol for the highlighted genes.</span>
 <span class="co"># let&#39;s highlight the top 100 most DE genes</span>
 <span class="kw">volcanoplot</span>(fit.cont,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">highlight=</span><span class="dv">100</span>,<span class="dt">names=</span>fit.cont$genes$SYMBOL)</code></pre>
-<p><img src="fig-06/unnamed-chunk-49-1.png" title="plot of chunk unnamed-chunk-49" alt="plot of chunk unnamed-chunk-49" style="display: block; margin: auto;" /></p>
+<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit.cont&#39; not found
+</code></pre>
 <p><span style="color:blue">Exercise: Look at the MD plot and volcano plot for the second comparison, <code>L.PregVsLac</code>. Change the number of highlighted genes to 200 in the volcano plot.</span></p>
 <p>Before following up on the DE genes with further lab work, it is recommended to have a look at the expression levels of the individual samples for the genes of interest. We can quickly look at grouped expression using <code>stripchart</code>. We can use the normalised log expression values in the voom object (<code>v$E</code>).</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s look at the first gene in the topTable, Wif1, which has a rowname 24117</span>
 <span class="kw">stripchart</span>(v$E[<span class="st">&quot;24117&quot;</span>,]~group)</code></pre>
-<p><img src="fig-06/unnamed-chunk-50-1.png" title="plot of chunk unnamed-chunk-50" alt="plot of chunk unnamed-chunk-50" style="display: block; margin: auto;" /></p>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;v&#39; not found
+</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># This plot is ugly, let&#39;s make it better</span>
 <span class="kw">stripchart</span>(v$E[<span class="st">&quot;24117&quot;</span>,]~group,<span class="dt">vertical=</span><span class="ot">TRUE</span>,<span class="dt">las=</span><span class="dv">2</span>,<span class="dt">cex.axis=</span><span class="fl">0.8</span>,<span class="dt">pch=</span><span class="dv">16</span>,<span class="dt">col=</span><span class="dv">1</span>:<span class="dv">6</span>,<span class="dt">method=</span><span class="st">&quot;jitter&quot;</span>)</code></pre>
-<p><img src="fig-06/unnamed-chunk-50-2.png" title="plot of chunk unnamed-chunk-50" alt="plot of chunk unnamed-chunk-50" style="display: block; margin: auto;" /></p>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;v&#39; not found
+</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s use nicer colours</span>
 nice.col &lt;-<span class="st"> </span><span class="kw">brewer.pal</span>(<span class="dv">6</span>,<span class="dt">name=</span><span class="st">&quot;Dark2&quot;</span>)
 <span class="kw">stripchart</span>(v$E[<span class="st">&quot;24117&quot;</span>,]~group,<span class="dt">vertical=</span><span class="ot">TRUE</span>,<span class="dt">las=</span><span class="dv">2</span>,<span class="dt">cex.axis=</span><span class="fl">0.8</span>,<span class="dt">pch=</span><span class="dv">16</span>,<span class="dt">cex=</span><span class="fl">1.3</span>,<span class="dt">col=</span>nice.col,<span class="dt">method=</span><span class="st">&quot;jitter&quot;</span>,<span class="dt">ylab=</span><span class="st">&quot;Normalised log2 expression&quot;</span>,<span class="dt">main=</span><span class="st">&quot;Wif1&quot;</span>)</code></pre>
-<p><img src="fig-06/unnamed-chunk-50-3.png" title="plot of chunk unnamed-chunk-50" alt="plot of chunk unnamed-chunk-50" style="display: block; margin: auto;" /></p>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;v&#39; not found
+</code></pre>
 <p>Notice anything interesting about the expression of this gene?</p>
 <p><span style="color:blue">Exercise: Take the top gene from the L.PregVsLactate comparison and make a stripchart of grouped expression as above. (Don’t forget to change the title of the plot.)</span></p>
 <p>An interactive version of the volcano plot above that includes the raw per sample values in a separate panel is possible via the <code>glMDPlot</code> function in the <em>Glimma</em> package. This function was written to make interactive mean-difference plots by default (as we will see later) but can be re-configured to give a volcano plot by selecting the columns of interest from an unsorted top table of differential expression results.</p>
-<pre class="sourceCode r"><code class="sourceCode r">topt =<span class="st"> </span><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">number=</span><span class="ot">Inf</span>,<span class="dt">sort.by=</span><span class="st">&quot;none&quot;</span>)
-
-<span class="kw">glMDPlot</span>(topt, <span class="dt">xval=</span><span class="st">&quot;logFC&quot;</span>, <span class="dt">yval=</span><span class="st">&quot;B&quot;</span>, <span class="dt">counts=</span>y$counts, <span class="dt">anno=</span>fit.cont$genes, <span class="dt">groups=</span>group, <span class="dt">samples=</span>labels,
-         <span class="dt">status=</span>summa.fit, <span class="dt">id.column=</span><span class="st">&quot;ENTREZID&quot;</span>, <span class="dt">search.by=</span><span class="st">&quot;SYMBOL&quot;</span>,
-         <span class="dt">display.columns=</span><span class="kw">c</span>(<span class="st">&quot;ENTREZID&quot;</span>, <span class="st">&quot;SYMBOL&quot;</span>, <span class="st">&quot;GENENAME&quot;</span>), <span class="dt">html=</span><span class="st">&quot;volcano&quot;</span>)</code></pre>
-<p>This function creates an html page with a volcano plot on the left and a plot showing the log-CPM per sample for a selected gene on the right. A search bar is available to allow gene IDs (gene Symbols in this case) to be searched.</p>
+<pre class="sourceCode r"><code class="sourceCode r">group2 &lt;-<span class="st"> </span>group</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;group&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">levels</span>(group2) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;basal.lactate&quot;</span>,<span class="st">&quot;basal.preg&quot;</span>,<span class="st">&quot;basal.virgin&quot;</span>,<span class="st">&quot;lum.lactate&quot;</span>, <span class="st">&quot;lum.preg&quot;</span>, <span class="st">&quot;lum.virgin&quot;</span>)</code></pre>
+<pre class="error"><code>Error in levels(group2) &lt;- c(&quot;basal.lactate&quot;, &quot;basal.preg&quot;, &quot;basal.virgin&quot;, : object &#39;group2&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">topt &lt;-<span class="st"> </span><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">number=</span><span class="ot">Inf</span>,<span class="dt">sort.by=</span><span class="st">&quot;none&quot;</span>)</code></pre>
+<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit.cont&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">glMDPlot</span>(topt, <span class="dt">xval=</span><span class="st">&quot;logFC&quot;</span>, <span class="dt">yval=</span><span class="st">&quot;B&quot;</span>, <span class="dt">counts=</span>y$counts, <span class="dt">anno=</span>fit.cont$genes, <span class="dt">groups=</span>group2, <span class="dt">samples=</span>labels,
+<span class="dt">status=</span>summa.fit[,<span class="st">&quot;B.PregVsLac&quot;</span>], <span class="dt">id.column=</span><span class="st">&quot;ENTREZID&quot;</span>, <span class="dt">search.by=</span><span class="st">&quot;SYMBOL&quot;</span>,
+<span class="dt">display.columns=</span><span class="kw">c</span>(<span class="st">&quot;ENTREZID&quot;</span>, <span class="st">&quot;SYMBOL&quot;</span>, <span class="st">&quot;GENENAME&quot;</span>),
+<span class="dt">html=</span><span class="st">&quot;volcano&quot;</span>, <span class="dt">folder=</span><span class="st">&quot;volcano&quot;</span>, <span class="dt">main=</span><span class="st">&quot;B.PregVsLac&quot;</span>)</code></pre>
+<pre class="error"><code>Error in glMDPlot(topt, xval = &quot;logFC&quot;, yval = &quot;B&quot;, counts = y$counts, : object &#39;topt&#39; not found
+</code></pre>
+<p>This function creates an <a href="http://bphipson.github.io/RNAseq-R/demo/volcano/volcano.html">html page</a> with a volcano plot on the left and a plot showing the log-CPM per sample for a selected gene on the right. A search bar is available to allow gene IDs (gene Symbols in this case) to be searched.</p>
 <h3 id="testing-relative-to-a-threshold-treat">Testing relative to a threshold (TREAT)</h3>
 <p>When there is a lot of differential expression, sometimes we may want to cut-off on a fold change threshold as well as a p-value threshold so that we follow up on the most biologically significant genes. However, it is not recommended to simply rank by p-value and then discard genes with small logFC’s, as this has been shown to increase the false discovery rate. In other words, you are not controlling the false discovery rate at 5% anymore. There is a function called <code>treat</code> in the <em>limma</em> package that performs this style of analysis correctly <span class="citation">(McCarthy and Smyth 2009)</span>. <code>treat</code> will simply take our <code>fit.cont</code> object, as well as a user-specified log fold change cut-off, and recalculate the moderated t-statistics and p-values with the new information about logFC.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s decide that we are only interested in genes that have a absolute logFC of 1.</span>
 <span class="co"># This corresponds to a fold change of 2, or 0.5 (i.e. double or half).</span>
 <span class="co"># We can perform a treat analysis which ranks our genes according to p-value AND logFC.</span>
 <span class="co"># This is easy to do after our analysis, we just give the treat function the fit.cont object and specify our cut-off.</span>
-fit.treat &lt;-<span class="st"> </span><span class="kw">treat</span>(fit.cont,<span class="dt">lfc=</span><span class="dv">1</span>)
-res.treat &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit.treat)
-<span class="kw">summary</span>(res.treat)</code></pre>
-<pre class="output"><code>   B.PregVsLac
--1          53
-0        15677
-1           74
+fit.treat &lt;-<span class="st"> </span><span class="kw">treat</span>(fit.cont,<span class="dt">lfc=</span><span class="dv">1</span>)</code></pre>
+<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit.cont&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">res.treat &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit.treat)</code></pre>
+<pre class="error"><code>Error in is(object, &quot;MArrayLM&quot;): object &#39;fit.treat&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(res.treat)</code></pre>
+<pre class="error"><code>Error in summary(res.treat): object &#39;res.treat&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit.treat,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre>
-<pre class="output"><code>       ENTREZID        SYMBOL                                     GENENAME
-211577   211577        Mrgprf                    MAS-related GPR, member F
-78896     78896 1500015O10Rik                   RIKEN cDNA 1500015O10 gene
-16012     16012        Igfbp6 insulin-like growth factor binding protein 6
-21953     21953         Tnni2                 troponin I, skeletal, fast 2
-14620     14620          Gjb3                 gap junction protein, beta 3
-12992     12992       Csn1s2b                       casein alpha s2-like B
-270150   270150       Ccdc153            coiled-coil domain containing 153
-226101   226101          Myof                                    myoferlin
-381290   381290        Atp2b4 ATPase, Ca++ transporting, plasma membrane 4
-231991   231991         Creb5    cAMP responsive element binding protein 5
-           logFC    AveExpr         t      P.Value    adj.P.Val
-211577 -5.146268 -0.9368335 -13.18562 7.329299e-09 6.669358e-05
-78896   2.807548  3.0365195  11.94135 2.234154e-08 6.669358e-05
-16012  -2.896115  1.9784488 -11.92570 2.267536e-08 6.669358e-05
-21953  -5.827889  0.3020716 -11.93183 2.295775e-08 6.669358e-05
-14620   3.600094  3.5252805  11.89242 2.342636e-08 6.669358e-05
-12992  -6.070143  3.5629500 -11.83199 2.532027e-08 6.669358e-05
-270150 -3.211148 -1.3408388 -10.67393 7.828123e-08 1.767367e-04
-226101 -2.329744  6.2235246 -10.42714 1.012983e-07 2.001148e-04
-381290 -2.143885  3.9440659 -10.17758 1.322118e-07 2.050763e-04
-231991 -2.598105  4.2759295 -10.17157 1.330809e-07 2.050763e-04
+<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit.treat&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Notice that much fewer genes are highlighted in the MAplot</span>
-<span class="kw">plotMD</span>(fit.treat,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">status=</span>res.treat[,<span class="st">&quot;B.PregVsLac&quot;</span>])
-<span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre>
-<p><img src="fig-06/unnamed-chunk-52-1.png" title="plot of chunk unnamed-chunk-52" alt="plot of chunk unnamed-chunk-52" style="display: block; margin: auto;" /></p>
+<span class="kw">plotMD</span>(fit.treat,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">status=</span>res.treat[,<span class="st">&quot;B.PregVsLac&quot;</span>])</code></pre>
+<pre class="error"><code>Error in plotMD(fit.treat, coef = 1, status = res.treat[, &quot;B.PregVsLac&quot;]): object &#39;fit.treat&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre>
+<pre class="error"><code>Error in int_abline(a = a, b = b, h = h, v = v, untf = untf, ...): plot.new has not been called yet
+</code></pre>
 <p><span style="color:blue">Exercise: Change the cut-off so that we are interested in genes that change at least 50% on the fold change scale.</span> <span style="color:red">(HINT: what is the corresponding logFC value of 50% fold change? Assume basal.pregnant is 50% higher than basal.lactate)</span></p>
 <p>An interactive version of the mean-difference plots is possible via the <code>glMDPlot</code> function in the <em>Glimma</em> package.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">glMDPlot</span>(fit.treat, <span class="dt">counts=</span>y$counts, <span class="dt">anno=</span>fit.cont$genes, <span class="dt">groups=</span>group, <span class="dt">samples=</span>labels,
-         <span class="dt">status=</span>res.treat, <span class="dt">id.column=</span><span class="st">&quot;ENTREZID&quot;</span>, <span class="dt">search.by=</span><span class="st">&quot;SYMBOL&quot;</span>, <span class="dt">display.columns=</span><span class="kw">c</span>(<span class="st">&quot;ENTREZID&quot;</span>, <span class="st">&quot;SYMBOL&quot;</span>, <span class="st">&quot;GENENAME&quot;</span>))</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">glMDPlot</span>(fit.treat, <span class="dt">counts=</span>y$counts, <span class="dt">anno=</span>fit.cont$genes, <span class="dt">groups=</span>group2, <span class="dt">samples=</span>labels,
+<span class="dt">status=</span>res.treat[,<span class="st">&quot;B.PregVsLac&quot;</span>], <span class="dt">id.column=</span><span class="st">&quot;ENTREZID&quot;</span>,
+<span class="dt">search.by=</span><span class="st">&quot;SYMBOL&quot;</span>, <span class="dt">display.columns=</span><span class="kw">c</span>(<span class="st">&quot;ENTREZID&quot;</span>, <span class="st">&quot;SYMBOL&quot;</span>,
+<span class="st">&quot;GENENAME&quot;</span>), <span class="dt">folder=</span><span class="st">&quot;md&quot;</span>, <span class="dt">main=</span><span class="st">&quot;B.PregVsLac&quot;</span>)</code></pre>
+<pre class="error"><code>Error in glMDPlot(fit.treat, counts = y$counts, anno = fit.cont$genes, : object &#39;fit.treat&#39; not found
+</code></pre>
+<p>As for the volcano plot example above, this function creates an <a href="http://bphipson.github.io/RNAseq-R/demo/md/MD-Plot.html">html page</a> that allows the user to search for their favourite gene.</p>
+<p><strong>We need to save a few data objects to use for the gene set testing section for Day 2 so we don’t have to rerun everything</strong></p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># save(fit.cont,seqdata,v,design,cont.matrix,file=&quot;day1objects.Rdata&quot;)</span></code></pre>
 <h2 id="degust-analysis">Degust analysis</h2>
 <ul>
 <li>Load in the results from the limma-voom analysis using the Degust GUI</li>
@@ -1019,170 +667,100 @@ res.treat &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit.
 <p><a href="degust.pdf">Degust instructions</a> (pdf)</p>
 <h2 id="generating-heatmaps-for-de-genes">Generating heatmaps for DE genes</h2>
 <p>For visualisation purposes, we can make heatmaps of the most differentially expressed genes. First we’ll select out the significant genes, the genes below a specified adj.P.value. In this case we’ll use 0.01</p>
-<pre class="sourceCode r"><code class="sourceCode r">limma.res.pval &lt;-<span class="st"> </span><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">n=</span><span class="st">&quot;Inf&quot;</span>,<span class="dt">p.val=</span><span class="fl">0.01</span>)
-<span class="kw">head</span>(limma.res.pval)</code></pre>
-<pre class="output"><code>       ENTREZID        SYMBOL                                     GENENAME
-24117     24117          Wif1                      Wnt inhibitory factor 1
-381290   381290        Atp2b4 ATPase, Ca++ transporting, plasma membrane 4
-78896     78896 1500015O10Rik                   RIKEN cDNA 1500015O10 gene
-226101   226101          Myof                                    myoferlin
-231830   231830       Micall2                                 MICAL-like 2
-16012     16012        Igfbp6 insulin-like growth factor binding protein 6
-           logFC  AveExpr         t      P.Value   adj.P.Val        B
-24117   1.819943 2.975545  20.10780 1.063770e-10 1.01624e-06 14.96977
-381290 -2.143885 3.944066 -19.07495 1.982934e-10 1.01624e-06 14.39556
-78896   2.807548 3.036519  18.54773 2.758828e-10 1.01624e-06 14.07416
-226101 -2.329744 6.223525 -18.26861 3.297667e-10 1.01624e-06 13.85802
-231830  2.253400 4.760597  18.02627 3.858161e-10 1.01624e-06 13.67600
-16012  -2.896115 1.978449 -18.21525 3.413066e-10 1.01624e-06 13.46984
+<pre class="sourceCode r"><code class="sourceCode r">limma.res.pval &lt;-<span class="st"> </span><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">n=</span><span class="st">&quot;Inf&quot;</span>,<span class="dt">p.val=</span><span class="fl">0.01</span>)</code></pre>
+<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit.cont&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(limma.res.pval)</code></pre>
+<pre class="error"><code>Error in head(limma.res.pval): object &#39;limma.res.pval&#39; not found
 </code></pre>
 <p>Check the dimensions to see how many genes this is</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(limma.res.pval)</code></pre>
-<pre class="output"><code>[1] 2995    9
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;limma.res.pval&#39; not found
 </code></pre>
 <p>Next to select the 50 genes that show the greatest upregulation and the 50 that show the greatest downregulation we first order by logFC</p>
-<pre class="sourceCode r"><code class="sourceCode r">o &lt;-<span class="st"> </span><span class="kw">order</span>(limma.res.pval$logFC,<span class="dt">decreasing =</span> <span class="ot">TRUE</span>)
-lfc.ordered &lt;-<span class="st"> </span>limma.res.pval[o, ]
-<span class="kw">head</span>(lfc.ordered)</code></pre>
-<pre class="output"><code>       ENTREZID        SYMBOL
-140474   140474          Muc4
-16071     16071          Igkc
-71874     71874 2310007B03Rik
-110935   110935      Atp6v1b1
-12740     12740         Cldn4
-21819     21819            Tg
-                                               GENENAME    logFC
-140474                                          mucin 4 6.750028
-16071                     immunoglobulin kappa constant 6.135350
-71874                        RIKEN cDNA 2310007B03 gene 5.508106
-110935 ATPase, H+ transporting, lysosomal V1 subunit B1 5.321891
-12740                                         claudin 4 5.314006
-21819                                     thyroglobulin 5.161936
-           AveExpr         t      P.Value    adj.P.Val          B
-140474  3.25865053  7.997310 3.469640e-06 1.724895e-04  2.3542780
-16071  -2.82839252  6.446714 2.987382e-05 5.784228e-04  0.9954374
-71874   0.09860856  6.509362 2.722168e-05 5.486552e-04  0.7810291
-110935  2.37082498  4.256052 1.083861e-03 6.680428e-03 -1.2219096
-12740   7.40935097 11.726812 5.478716e-08 1.597802e-05  8.4734704
-21819  -2.85209902  5.062078 2.678370e-04 2.484651e-03 -0.4861841
+<pre class="sourceCode r"><code class="sourceCode r">o &lt;-<span class="st"> </span><span class="kw">order</span>(limma.res.pval$logFC,<span class="dt">decreasing =</span> <span class="ot">TRUE</span>)</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;limma.res.pval&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">lfc.ordered &lt;-<span class="st"> </span>limma.res.pval[o, ]</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;limma.res.pval&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(lfc.ordered)</code></pre>
+<pre class="error"><code>Error in head(lfc.ordered): object &#39;lfc.ordered&#39; not found
 </code></pre>
 <p>Then we can select the 50 most upregulated genes using the head function. Head selects the top genes and as we’ve ordered by logFC these will be the genes with the highest logFC.</p>
-<pre class="sourceCode r"><code class="sourceCode r">up50 &lt;-<span class="st"> </span><span class="kw">head</span>(lfc.ordered, <span class="dv">50</span>)
-<span class="kw">dim</span>(up50)</code></pre>
-<pre class="output"><code>[1] 50  9
+<pre class="sourceCode r"><code class="sourceCode r">up50 &lt;-<span class="st"> </span><span class="kw">head</span>(lfc.ordered, <span class="dv">50</span>)</code></pre>
+<pre class="error"><code>Error in head(lfc.ordered, 50): object &#39;lfc.ordered&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(up50)</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;up50&#39; not found
 </code></pre>
 <p>To create the heatmap we need to get the normalised log counts from the <code>voom</code> object <code>v</code> for these up50 genes</p>
-<pre class="sourceCode r"><code class="sourceCode r">mu50 &lt;-<span class="st"> </span><span class="kw">match</span>(<span class="kw">rownames</span>(up50), <span class="kw">rownames</span>(v))
-up50.counts.voom &lt;-<span class="st"> </span>v$E[mu50, ]
-<span class="kw">rownames</span>(up50.counts.voom) &lt;-<span class="st"> </span>up50$SYMBOL</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">mu50 &lt;-<span class="st"> </span><span class="kw">match</span>(<span class="kw">rownames</span>(up50), <span class="kw">rownames</span>(v))</code></pre>
+<pre class="error"><code>Error in rownames(up50): object &#39;up50&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">up50.counts.voom &lt;-<span class="st"> </span>v$E[mu50, ]</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;v&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rownames</span>(up50.counts.voom) &lt;-<span class="st"> </span>up50$SYMBOL</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;up50&#39; not found
+</code></pre>
 <p>Then create a heatmap of the normalised counts for these 50 genes. We’ll use the heatmap.2 library and the blue-red colour palette</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">heatmap.2</span>(up50.counts.voom, <span class="dt">Rowv =</span> F, <span class="dt">Colv =</span> F, <span class="dt">trace=</span><span class="st">&quot;none&quot;</span>, <span class="dt">ColSideColors=</span>nice.col[group],<span class="dt">col=</span><span class="kw">bluered</span>(<span class="dv">100</span>),<span class="dt">labCol=</span>group,<span class="dt">margins=</span><span class="kw">c</span>(<span class="dv">8</span>,<span class="dv">7</span>))</code></pre>
-<pre class="error"><code>Warning in heatmap.2(up50.counts.voom, Rowv = F, Colv = F, trace =
-&quot;none&quot;, : Discrepancy: Rowv is FALSE, while dendrogram is `both&#39;. Omitting
-row dendogram.
+<pre class="error"><code>Error in heatmap.2(up50.counts.voom, Rowv = F, Colv = F, trace = &quot;none&quot;, : object &#39;up50.counts.voom&#39; not found
 </code></pre>
-<pre class="error"><code>Warning in heatmap.2(up50.counts.voom, Rowv = F, Colv = F, trace =
-&quot;none&quot;, : Discrepancy: Colv is FALSE, while dendrogram is `column&#39;.
-Omitting column dendogram.
-</code></pre>
-<p><img src="fig-06/unnamed-chunk-59-1.png" title="plot of chunk unnamed-chunk-59" alt="plot of chunk unnamed-chunk-59" style="display: block; margin: auto;" /></p>
 <p>Now do the same to create a heatmap for the 50 most downregulated genes. We can select the 50 genes that show the greatest downregulation by using the <code>tail</code> function. <code>tail</code> selects the bottom genes and as we’ve ordered by logFC these will be the genes with the lowest logFC.</p>
 <pre class="sourceCode r"><code class="sourceCode r">down50 &lt;-<span class="st"> </span><span class="kw">tail</span>(lfc.ordered, <span class="dv">50</span>)</code></pre>
+<pre class="error"><code>Error in tail(lfc.ordered, 50): object &#39;lfc.ordered&#39; not found
+</code></pre>
 <p>Get the normalised log counts for the samples for these genes</p>
-<pre class="sourceCode r"><code class="sourceCode r">md50 &lt;-<span class="st"> </span><span class="kw">match</span>(<span class="kw">rownames</span>(down50), <span class="kw">rownames</span>(v))
-down50.counts.voom &lt;-<span class="st"> </span>v$E[md50, ]
-<span class="kw">rownames</span>(down50.counts.voom) &lt;-<span class="st"> </span>down50$SYMBOL</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">md50 &lt;-<span class="st"> </span><span class="kw">match</span>(<span class="kw">rownames</span>(down50), <span class="kw">rownames</span>(v))</code></pre>
+<pre class="error"><code>Error in rownames(down50): object &#39;down50&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">down50.counts.voom &lt;-<span class="st"> </span>v$E[md50, ]</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;v&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rownames</span>(down50.counts.voom) &lt;-<span class="st"> </span>down50$SYMBOL</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;down50&#39; not found
+</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">heatmap.2</span>(down50.counts.voom, <span class="dt">Rowv =</span> F, <span class="dt">Colv =</span> F, <span class="dt">trace=</span><span class="st">&quot;none&quot;</span>, <span class="dt">ColSideColors=</span>nice.col[group], <span class="dt">col=</span><span class="kw">bluered</span>(<span class="dv">100</span>),<span class="dt">labCol=</span>group,<span class="dt">margins=</span><span class="kw">c</span>(<span class="dv">8</span>,<span class="dv">7</span>))</code></pre>
-<pre class="error"><code>Warning in heatmap.2(down50.counts.voom, Rowv = F, Colv = F, trace =
-&quot;none&quot;, : Discrepancy: Rowv is FALSE, while dendrogram is `both&#39;. Omitting
-row dendogram.
+<pre class="error"><code>Error in heatmap.2(down50.counts.voom, Rowv = F, Colv = F, trace = &quot;none&quot;, : object &#39;down50.counts.voom&#39; not found
 </code></pre>
-<pre class="error"><code>Warning in heatmap.2(down50.counts.voom, Rowv = F, Colv = F, trace =
-&quot;none&quot;, : Discrepancy: Colv is FALSE, while dendrogram is `column&#39;.
-Omitting column dendogram.
-</code></pre>
-<p><img src="fig-06/unnamed-chunk-62-1.png" title="plot of chunk unnamed-chunk-62" alt="plot of chunk unnamed-chunk-62" style="display: block; margin: auto;" /></p>
 <p><span style="color:blue">Exercise: Redo the heatmap, combining the 50 up- and 50 down-regulated genes.</span> <span style="color:red">(Hint: use <code>rbind</code> to combine the two data matrices.)</span></p>
 <h2 id="gene-set-testing">Gene Set Testing</h2>
 <p>Sometimes there is quite a long list of differentially expressed genes to interpret after a differential expression analysis, and it is usually infeasible to go through the list one gene at a time trying to understand it’s biological function. A common downstream procedure is gene set testing, which aims to understand which pathways/gene networks the differentially expressed genes are implicated in.</p>
 <p>There are a number of different ways to go about testing for enrichment of biological pathways, and the test you choose usually depends on the question you’re asking. There are two kinds of tests: self-contained and competitive gene set tests. Self-contained tests, which include the <code>ROAST</code> procedure, ask the question “Are the genes in the set/pathway differentially expressed as a whole?” Competitive gene set tests, like <code>goana</code> and <code>camera</code> ask the question whether the differentially expressed genes tend to be over-represented in the gene set, compared to all the other genes in the experiment. These different questions use different statistical methodology.</p>
+<p><strong>Load in the saved data from the previous day</strong></p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load(&quot;day1objects.Rdata&quot;)</span></code></pre>
 <h3 id="gene-ontology-testing-with-goana">Gene ontology testing with goana</h3>
 <p>First, we will perform a gene ontology (GO) enrichment analysis using the <code>goana</code> function in <em>limma</em>. There are approximately 20,000 GO terms, and they are split into three categories: BP (biological process), MF (molecular function) and CC (cellular component). <code>goana</code> uses annotation from the appropriate Bioconductor package and can be used for any of the five species specified (Hs, Mm, Rn, Dm or Pt). <code>goana</code> has an advantage over other methods, such as DAVID, in that there is the option to take into account the gene length bias inherent in RNA-Seq data.</p>
 <p>Suppose we want to identify GO terms that are over-represented in the basal lactating group compared to the basal pregnancy group. This can be achieved by applying the goana function to the differential expression results of that comparison. <code>goana</code> takes the <code>fit.cont</code> object, the coefficient of interest and the species. The top set of most enriched GO terms can be viewed with the topGO function.</p>
-<pre class="sourceCode r"><code class="sourceCode r">go &lt;-<span class="st"> </span><span class="kw">goana</span>(fit.cont, <span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">species =</span> <span class="st">&quot;Mm&quot;</span>)
-<span class="kw">topGO</span>(go, <span class="dt">n=</span><span class="dv">10</span>)</code></pre>
-<pre class="output"><code>                                           Term Ont    N  Up Down
-GO:0044822                  poly(A) RNA binding  MF 1089 403  112
-GO:0003723                          RNA binding  MF 1408 473  155
-GO:0030529            ribonucleoprotein complex  CC  625 246   46
-GO:0022613 ribonucleoprotein complex biogenesis  BP  309 145   22
-GO:0022626                   cytosolic ribosome  CC   85  66    1
-GO:0042254                  ribosome biogenesis  BP  202 110    7
-GO:0003676                 nucleic acid binding  MF 2810 705  425
-GO:1901363        heterocyclic compound binding  MF 4310 965  682
-GO:0006364                      rRNA processing  BP  142  80    2
-GO:0005730                            nucleolus  CC  671 225   94
-                   P.Up    P.Down
-GO:0044822 1.023184e-60 1.0000000
-GO:0003723 5.314314e-57 1.0000000
-GO:0030529 1.088768e-41 1.0000000
-GO:0022613 1.302828e-34 1.0000000
-GO:0022626 1.749135e-34 0.9999999
-GO:0042254 7.486654e-34 1.0000000
-GO:0003676 2.429937e-33 0.9999405
-GO:1901363 5.748009e-27 0.9998453
-GO:0006364 2.837929e-26 1.0000000
-GO:0005730 2.860724e-26 0.9951386
+<pre class="sourceCode r"><code class="sourceCode r">go &lt;-<span class="st"> </span><span class="kw">goana</span>(fit.cont, <span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">species =</span> <span class="st">&quot;Mm&quot;</span>)</code></pre>
+<pre class="error"><code>Error in goana(fit.cont, coef = &quot;B.PregVsLac&quot;, species = &quot;Mm&quot;): object &#39;fit.cont&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topGO</span>(go, <span class="dt">n=</span><span class="dv">10</span>)</code></pre>
+<pre class="error"><code>Error in is.data.frame(results): object &#39;go&#39; not found
 </code></pre>
 <p>The row names of the output are the universal identifiers of the GO terms, with one term per row. The Term column gives the names of the GO terms. These terms cover three domains - biological process (BP), cellular component (CC) and molecular function (MF), as shown in the Ont column. The N column represents the total number of genes that are annotated with each GO term. The Up and Down columns represent the number of differentially expressed genes that overlap with the genes in the GO term. The P.Up and P.Down columns contain the p-values for over-representation of the GO term across the set of up- and down-regulated genes, respectively. The output table is sorted by the minimum of P.Up and P.Down by default.</p>
 <p>An additional refinement is to supply <code>goana</code> with the gene lengths using the <code>covariate</code> argument. In the original data matrix that we loaded into R, there is a column called “Length”.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">colnames</span>(seqdata)</code></pre>
-<pre class="output"><code> [1] &quot;EntrezGeneID&quot;                     
- [2] &quot;Length&quot;                           
- [3] &quot;MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1&quot;
- [4] &quot;MCL1.DH_BC2CTUACXX_CAGATC_L002_R1&quot;
- [5] &quot;MCL1.DI_BC2CTUACXX_ACAGTG_L002_R1&quot;
- [6] &quot;MCL1.DJ_BC2CTUACXX_CGATGT_L002_R1&quot;
- [7] &quot;MCL1.DK_BC2CTUACXX_TTAGGC_L002_R1&quot;
- [8] &quot;MCL1.DL_BC2CTUACXX_ATCACG_L002_R1&quot;
- [9] &quot;MCL1.LA_BC2CTUACXX_GATCAG_L001_R1&quot;
-[10] &quot;MCL1.LB_BC2CTUACXX_TGACCA_L001_R1&quot;
-[11] &quot;MCL1.LC_BC2CTUACXX_GCCAAT_L001_R1&quot;
-[12] &quot;MCL1.LD_BC2CTUACXX_GGCTAC_L001_R1&quot;
-[13] &quot;MCL1.LE_BC2CTUACXX_TAGCTT_L001_R1&quot;
-[14] &quot;MCL1.LF_BC2CTUACXX_CTTGTA_L001_R1&quot;
+<pre class="error"><code>Error in colnames(seqdata): object &#39;seqdata&#39; not found
 </code></pre>
 <p>In order to get the gene lengths for every gene in <code>fit.cont</code>, we can use the <code>match</code> command. Note that the gene length supplied needs to be in the correct order.</p>
-<pre class="sourceCode r"><code class="sourceCode r">m &lt;-<span class="st"> </span><span class="kw">match</span>(<span class="kw">rownames</span>(fit.cont),seqdata$EntrezGeneID)
-gene_length &lt;-<span class="st"> </span>seqdata$Length[m]
-<span class="kw">head</span>(gene_length)</code></pre>
-<pre class="output"><code>[1] 3634 3130 4203 2433 2847 2241
+<pre class="sourceCode r"><code class="sourceCode r">m &lt;-<span class="st"> </span><span class="kw">match</span>(<span class="kw">rownames</span>(fit.cont),seqdata$EntrezGeneID)</code></pre>
+<pre class="error"><code>Error in rownames(fit.cont): object &#39;fit.cont&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">gene_length &lt;-<span class="st"> </span>seqdata$Length[m]</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;seqdata&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(gene_length)</code></pre>
+<pre class="error"><code>Error in head(gene_length): object &#39;gene_length&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Rerun goana with gene length information</span>
-go_length &lt;-<span class="st"> </span><span class="kw">goana</span>(fit.cont,<span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">species=</span><span class="st">&quot;Mm&quot;</span>,<span class="dt">covariate=</span>gene_length)
-<span class="kw">topGO</span>(go_length, <span class="dt">n=</span><span class="dv">10</span>)</code></pre>
-<pre class="output"><code>                                           Term Ont    N  Up Down
-GO:0044822                  poly(A) RNA binding  MF 1089 403  112
-GO:0003723                          RNA binding  MF 1408 473  155
-GO:0030529            ribonucleoprotein complex  CC  625 246   46
-GO:0022626                   cytosolic ribosome  CC   85  66    1
-GO:0042254                  ribosome biogenesis  BP  202 110    7
-GO:0022613 ribonucleoprotein complex biogenesis  BP  309 145   22
-GO:0003676                 nucleic acid binding  MF 2810 705  425
-GO:0005840                             ribosome  CC  195  97    5
-GO:0044391                    ribosomal subunit  CC  138  76    2
-GO:0006364                      rRNA processing  BP  142  80    2
-                   P.Up    P.Down
-GO:0044822 2.274027e-61 1.0000000
-GO:0003723 3.716227e-58 1.0000000
-GO:0030529 2.644116e-45 1.0000000
-GO:0022626 1.780504e-38 0.9999992
-GO:0042254 4.456874e-36 1.0000000
-GO:0022613 4.912403e-36 0.9999999
-GO:0003676 6.406921e-32 0.9999852
-GO:0005840 1.720275e-30 1.0000000
-GO:0044391 2.402151e-28 1.0000000
-GO:0006364 5.785544e-28 1.0000000
+go_length &lt;-<span class="st"> </span><span class="kw">goana</span>(fit.cont,<span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">species=</span><span class="st">&quot;Mm&quot;</span>,<span class="dt">covariate=</span>gene_length)</code></pre>
+<pre class="error"><code>Error in goana(fit.cont, coef = &quot;B.PregVsLac&quot;, species = &quot;Mm&quot;, covariate = gene_length): object &#39;fit.cont&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topGO</span>(go_length, <span class="dt">n=</span><span class="dv">10</span>)</code></pre>
+<pre class="error"><code>Error in is.data.frame(results): object &#39;go_length&#39; not found
 </code></pre>
 <p>Notes</p>
 <ul>
@@ -1195,168 +773,65 @@ GO:0006364 5.785544e-28 1.0000000
 <p>Here we will be using the C2 gene sets for mouse, available as .rdata files from the WEHI bioinformatics page <a href="http://bioinf.wehi.edu.au/software/MSigDB/index.html" class="uri">http://bioinf.wehi.edu.au/software/MSigDB/index.html</a>. The C2 gene sets contain 4725 curated gene sets collected from a variety of places: BioCarta, KEGG, Pathway Interaction Database, Reactome as well as some published studies.It doesn’t include GO terms.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Load in the mouse c2 gene sets</span>
 <span class="co"># The R object is called Mm.c2</span>
-<span class="kw">load</span>(<span class="st">&quot;data/mouse_c2_v5.rdata&quot;</span>)
-<span class="co"># Have a look at the first few gene sets</span>
+<span class="kw">load</span>(<span class="st">&quot;data/mouse_c2_v5.rdata&quot;</span>)</code></pre>
+<pre class="error"><code>Warning in readChar(con, 5L, useBytes = TRUE): cannot open compressed file
+&#39;data/mouse_c2_v5.rdata&#39;, probable reason &#39;No such file or directory&#39;
+</code></pre>
+<pre class="error"><code>Error in readChar(con, 5L, useBytes = TRUE): cannot open the connection
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Have a look at the first few gene sets</span>
 <span class="kw">names</span>(Mm.c2)[<span class="dv">1</span>:<span class="dv">5</span>]</code></pre>
-<pre class="output"><code>[1] &quot;KEGG_GLYCOLYSIS_GLUCONEOGENESIS&quot;              
-[2] &quot;KEGG_CITRATE_CYCLE_TCA_CYCLE&quot;                 
-[3] &quot;KEGG_PENTOSE_PHOSPHATE_PATHWAY&quot;               
-[4] &quot;KEGG_PENTOSE_AND_GLUCURONATE_INTERCONVERSIONS&quot;
-[5] &quot;KEGG_FRUCTOSE_AND_MANNOSE_METABOLISM&quot;         
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;Mm.c2&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Number of gene sets in C2</span>
 <span class="kw">length</span>(Mm.c2)</code></pre>
-<pre class="output"><code>[1] 4725
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;Mm.c2&#39; not found
 </code></pre>
 <p>The gene identifiers are Entrez Gene ID, which is the same as the rownames of our voom object. We need to map the Entrez gene ids between the list of gene sets and our voom object. We can do this using the <code>ids2indices</code> function.</p>
 <pre class="sourceCode r"><code class="sourceCode r">c2.ind &lt;-<span class="st"> </span><span class="kw">ids2indices</span>(Mm.c2, <span class="kw">rownames</span>(v))</code></pre>
+<pre class="error"><code>Error in ids2indices(Mm.c2, rownames(v)): object &#39;Mm.c2&#39; not found
+</code></pre>
 <p>CAMERA takes as input the voom object <code>v</code>, the indexed list of gene sets <code>c2.ind</code>, the design matrix, the contrast being tested, as well as some other arguments. By default, CAMERA can estimate the correlation for each gene set separately. However, in practise, it works well to set a small inter-gene correlation of about 0.05 using the <code>inter.gene.cor</code> argument.</p>
 <pre class="sourceCode r"><code class="sourceCode r">gst.camera &lt;-<span class="st"> </span><span class="kw">camera</span>(v,<span class="dt">index=</span>c2.ind,<span class="dt">design=</span>design,<span class="dt">contrast =</span> cont.matrix[,<span class="dv">1</span>],<span class="dt">inter.gene.cor=</span><span class="fl">0.05</span>)</code></pre>
+<pre class="error"><code>Error in camera(v, index = c2.ind, design = design, contrast = cont.matrix[, : object &#39;v&#39; not found
+</code></pre>
 <p>CAMERA outputs a dataframe of the resulting statistics, with each row denoting a different gene set. The output is ordered by p-value so that the most significant should be at the top. Let’s look at the top 5 gene sets:</p>
 <pre class="sourceCode r"><code class="sourceCode r">gst.camera[<span class="dv">1</span>:<span class="dv">5</span>,]</code></pre>
-<pre class="output"><code>                                                                           NGenes
-REACTOME_PEPTIDE_CHAIN_ELONGATION                                              81
-KEGG_RIBOSOME                                                                  83
-REACTOME_3_UTR_MEDIATED_TRANSLATIONAL_REGULATION                              102
-REACTOME_FORMATION_OF_THE_TERNARY_COMPLEX_AND_SUBSEQUENTLY_THE_43S_COMPLEX     48
-REACTOME_SRP_DEPENDENT_COTRANSLATIONAL_PROTEIN_TARGETING_TO_MEMBRANE          108
-                                                                           Correlation
-REACTOME_PEPTIDE_CHAIN_ELONGATION                                                 0.05
-KEGG_RIBOSOME                                                                     0.05
-REACTOME_3_UTR_MEDIATED_TRANSLATIONAL_REGULATION                                  0.05
-REACTOME_FORMATION_OF_THE_TERNARY_COMPLEX_AND_SUBSEQUENTLY_THE_43S_COMPLEX        0.05
-REACTOME_SRP_DEPENDENT_COTRANSLATIONAL_PROTEIN_TARGETING_TO_MEMBRANE              0.05
-                                                                           Direction
-REACTOME_PEPTIDE_CHAIN_ELONGATION                                                 Up
-KEGG_RIBOSOME                                                                     Up
-REACTOME_3_UTR_MEDIATED_TRANSLATIONAL_REGULATION                                  Up
-REACTOME_FORMATION_OF_THE_TERNARY_COMPLEX_AND_SUBSEQUENTLY_THE_43S_COMPLEX        Up
-REACTOME_SRP_DEPENDENT_COTRANSLATIONAL_PROTEIN_TARGETING_TO_MEMBRANE              Up
-                                                                                 PValue
-REACTOME_PEPTIDE_CHAIN_ELONGATION                                          3.711614e-10
-KEGG_RIBOSOME                                                              4.242401e-10
-REACTOME_3_UTR_MEDIATED_TRANSLATIONAL_REGULATION                           1.484636e-09
-REACTOME_FORMATION_OF_THE_TERNARY_COMPLEX_AND_SUBSEQUENTLY_THE_43S_COMPLEX 1.477539e-08
-REACTOME_SRP_DEPENDENT_COTRANSLATIONAL_PROTEIN_TARGETING_TO_MEMBRANE       1.716413e-08
-                                                                                    FDR
-REACTOME_PEPTIDE_CHAIN_ELONGATION                                          1.001631e-06
-KEGG_RIBOSOME                                                              1.001631e-06
-REACTOME_3_UTR_MEDIATED_TRANSLATIONAL_REGULATION                           2.336816e-06
-REACTOME_FORMATION_OF_THE_TERNARY_COMPLEX_AND_SUBSEQUENTLY_THE_43S_COMPLEX 1.620981e-05
-REACTOME_SRP_DEPENDENT_COTRANSLATIONAL_PROTEIN_TARGETING_TO_MEMBRANE       1.620981e-05
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;gst.camera&#39; not found
 </code></pre>
 <p>The total number of significant gene sets at 5% FDR is</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(gst.camera$FDR &lt;<span class="st"> </span><span class="fl">0.05</span>)</code></pre>
-<pre class="output"><code>
-FALSE  TRUE 
- 4593   129 
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;gst.camera&#39; not found
 </code></pre>
 <p>You can write out the camera results to a csv file to open in excel.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">write.csv</span>(gst.camera,<span class="dt">file=</span><span class="st">&quot;gst_BPregVsLac.csv&quot;</span>)</code></pre>
+<pre class="error"><code>Error in is.data.frame(x): object &#39;gst.camera&#39; not found
+</code></pre>
 <p><span style="color:blue">Exercise: (1) Run <code>camera</code> on the second contrast in the contrast matrix. (2) Run <code>camera</code> on a different set of MSigDB gene sets, the hallmark datasets, <code>mouse_H_v5.rdata</code>. You will need to load in the hallmark gene sets.</span></p>
 <h3 id="roast-gene-set-testing">ROAST gene set testing</h3>
 <p>ROAST is an example of a self-contained gene set test <span class="citation">(D. Wu et al. 2010)</span>. It asks the question, “Do the genes in my set tend to be differentially expressed between my conditions of interest?”. ROAST doesn’t care about what the other genes in the experiment are doing, which is different to <code>camera</code> and <code>goana</code>. ROAST is a good option for when you’re interested in a specific set, or a few sets. It is not really used to test thousands of sets at one time.</p>
 <p>Let’s have a look at the top 10 genes differentially expressed in the basal pregant vs lactating group.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre>
-<pre class="output"><code>       ENTREZID        SYMBOL                                     GENENAME
-24117     24117          Wif1                      Wnt inhibitory factor 1
-381290   381290        Atp2b4 ATPase, Ca++ transporting, plasma membrane 4
-78896     78896 1500015O10Rik                   RIKEN cDNA 1500015O10 gene
-226101   226101          Myof                                    myoferlin
-16012     16012        Igfbp6 insulin-like growth factor binding protein 6
-231830   231830       Micall2                                 MICAL-like 2
-16669     16669         Krt19                                   keratin 19
-55987     55987         Cpxm2            carboxypeptidase X 2 (M14 family)
-231991   231991         Creb5    cAMP responsive element binding protein 5
-14620     14620          Gjb3                 gap junction protein, beta 3
-           logFC  AveExpr         t      P.Value    adj.P.Val        B
-24117   1.819943 2.975545  20.10780 1.063770e-10 1.016240e-06 14.96977
-381290 -2.143885 3.944066 -19.07495 1.982934e-10 1.016240e-06 14.39556
-78896   2.807548 3.036519  18.54773 2.758828e-10 1.016240e-06 14.07416
-226101 -2.329744 6.223525 -18.26861 3.297667e-10 1.016240e-06 13.85802
-16012  -2.896115 1.978449 -18.21525 3.413066e-10 1.016240e-06 13.46984
-231830  2.253400 4.760597  18.02627 3.858161e-10 1.016240e-06 13.67600
-16669  -2.312721 8.741892 -17.07937 7.264548e-10 1.640127e-06 13.17357
-55987  -1.515469 2.834512 -16.64333 9.829870e-10 1.718703e-06 12.88782
-231991 -2.598105 4.275930 -16.53634 1.059885e-09 1.718703e-06 12.66020
-14620   3.600094 3.525281  16.46627 1.113755e-09 1.718703e-06 12.54071
+<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit.cont&#39; not found
 </code></pre>
 <p>The top gene is Wnt inhibitory factor 1. Let’s see if there are any WNT signalling pathways in MsigDB C2 collection. We can do this with the <code>grep</code> command on the names of the gene sets.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">grep</span>(<span class="st">&quot;WNT&quot;</span>,<span class="kw">names</span>(c2.ind))</code></pre>
-<pre class="output"><code> [1]  106  402  405  421  441  467  504  513  666 2642 3403 3671 3672 3675
-[15] 3676
+<pre class="error"><code>Error in grep(&quot;WNT&quot;, names(c2.ind)): object &#39;c2.ind&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s save these so that we can subset c2.ind to test all gene sets with WNT in the name</span>
-wnt &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="st">&quot;WNT&quot;</span>,<span class="kw">names</span>(c2.ind))
-<span class="co"># What are these pathways called?</span>
+wnt &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="st">&quot;WNT&quot;</span>,<span class="kw">names</span>(c2.ind))</code></pre>
+<pre class="error"><code>Error in grep(&quot;WNT&quot;, names(c2.ind)): object &#39;c2.ind&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># What are these pathways called?</span>
 <span class="kw">names</span>(c2.ind)[wnt]</code></pre>
-<pre class="output"><code> [1] &quot;KEGG_WNT_SIGNALING_PATHWAY&quot;         
- [2] &quot;BIOCARTA_WNT_PATHWAY&quot;               
- [3] &quot;ST_WNT_CA2_CYCLIC_GMP_PATHWAY&quot;      
- [4] &quot;WNT_SIGNALING&quot;                      
- [5] &quot;ST_WNT_BETA_CATENIN_PATHWAY&quot;        
- [6] &quot;PID_WNT_NONCANONICAL_PATHWAY&quot;       
- [7] &quot;PID_WNT_SIGNALING_PATHWAY&quot;          
- [8] &quot;PID_WNT_CANONICAL_PATHWAY&quot;          
- [9] &quot;REACTOME_SIGNALING_BY_WNT&quot;          
-[10] &quot;WILLERT_WNT_SIGNALING&quot;              
-[11] &quot;SANSOM_WNT_PATHWAY_REQUIRE_MYC&quot;     
-[12] &quot;LABBE_WNT3A_TARGETS_UP&quot;             
-[13] &quot;LABBE_WNT3A_TARGETS_DN&quot;             
-[14] &quot;LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP&quot;
-[15] &quot;LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN&quot;
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;c2.ind&#39; not found
 </code></pre>
 <p>Let’s use ROAST to see if these WNT related gene sets tend to be differentially expressed. Note that the syntax for <code>camera</code> and <code>roast</code> is almost identical.</p>
-<pre class="sourceCode r"><code class="sourceCode r">wnt.rst &lt;-<span class="st"> </span><span class="kw">roast</span>(v,<span class="dt">index=</span>c2.ind[wnt],<span class="dt">design=</span>design,<span class="dt">contrast=</span>cont.matrix[,<span class="dv">1</span>],<span class="dt">nrot=</span><span class="dv">9999</span>)
-wnt.rst</code></pre>
-<pre class="output"><code>                                    NGenes  PropDown     PropUp Direction
-PID_WNT_NONCANONICAL_PATHWAY            31 0.4516129 0.09677419      Down
-LABBE_WNT3A_TARGETS_UP                 104 0.2307692 0.49038462        Up
-WILLERT_WNT_SIGNALING                   22 0.2272727 0.54545455        Up
-SANSOM_WNT_PATHWAY_REQUIRE_MYC          53 0.1886792 0.45283019        Up
-PID_WNT_CANONICAL_PATHWAY               19 0.4736842 0.21052632      Down
-REACTOME_SIGNALING_BY_WNT               62 0.1290323 0.50000000        Up
-BIOCARTA_WNT_PATHWAY                    24 0.2500000 0.33333333        Up
-ST_WNT_BETA_CATENIN_PATHWAY             32 0.3125000 0.34375000        Up
-KEGG_WNT_SIGNALING_PATHWAY             131 0.3740458 0.25190840      Down
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP    100 0.3400000 0.38000000        Up
-PID_WNT_SIGNALING_PATHWAY               23 0.3043478 0.30434783        Up
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN     90 0.2555556 0.40000000        Up
-ST_WNT_CA2_CYCLIC_GMP_PATHWAY           14 0.2857143 0.35714286        Up
-LABBE_WNT3A_TARGETS_DN                  65 0.2615385 0.27692308        Up
-WNT_SIGNALING                           75 0.3600000 0.30666667      Down
-                                    PValue        FDR PValue.Mixed
-PID_WNT_NONCANONICAL_PATHWAY        0.0002 0.00187500       0.0005
-LABBE_WNT3A_TARGETS_UP              0.0003 0.00187500       0.0008
-WILLERT_WNT_SIGNALING               0.0007 0.00325000       0.0002
-SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0024 0.00881250       0.0001
-PID_WNT_CANONICAL_PATHWAY           0.0136 0.03737500       0.0004
-REACTOME_SIGNALING_BY_WNT           0.0150 0.03737500       0.0036
-BIOCARTA_WNT_PATHWAY                0.0411 0.08484375       0.0001
-ST_WNT_BETA_CATENIN_PATHWAY         0.0453 0.08484375       0.0001
-KEGG_WNT_SIGNALING_PATHWAY          0.0530 0.08825000       0.0001
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0596 0.08932500       0.0001
-PID_WNT_SIGNALING_PATHWAY           0.0922 0.12565909       0.0002
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.1564 0.19543750       0.0001
-ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.2590 0.29878846       0.0004
-LABBE_WNT3A_TARGETS_DN              0.5037 0.53962500       0.0002
-WNT_SIGNALING                       0.8819 0.88190000       0.0001
-                                       FDR.Mixed
-PID_WNT_NONCANONICAL_PATHWAY        0.0005192308
-LABBE_WNT3A_TARGETS_UP              0.0008035714
-WILLERT_WNT_SIGNALING               0.0002250000
-SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0001071429
-PID_WNT_CANONICAL_PATHWAY           0.0004375000
-REACTOME_SIGNALING_BY_WNT           0.0036000000
-BIOCARTA_WNT_PATHWAY                0.0001071429
-ST_WNT_BETA_CATENIN_PATHWAY         0.0001071429
-KEGG_WNT_SIGNALING_PATHWAY          0.0001071429
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0001071429
-PID_WNT_SIGNALING_PATHWAY           0.0002250000
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.0001071429
-ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.0004375000
-LABBE_WNT3A_TARGETS_DN              0.0002250000
-WNT_SIGNALING                       0.0001071429
+<pre class="sourceCode r"><code class="sourceCode r">wnt.rst &lt;-<span class="st"> </span><span class="kw">roast</span>(v,<span class="dt">index=</span>c2.ind[wnt],<span class="dt">design=</span>design,<span class="dt">contrast=</span>cont.matrix[,<span class="dv">1</span>],<span class="dt">nrot=</span><span class="dv">9999</span>)</code></pre>
+<pre class="error"><code>Error in roast(v, index = c2.ind[wnt], design = design, contrast = cont.matrix[, : object &#39;v&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">wnt.rst</code></pre>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;wnt.rst&#39; not found
 </code></pre>
 <p>Each row corresponds to a single gene set. The NGenes column gives the number of genes in each set. The PropDown and PropUp columns contain the proportions of genes in the set that are down- and up-regulated, respectively, with absolute fold changes greater than 2. The net direction of change is determined from the significance of changes in each direction, and is shown in the Direction column. The PValue provides evidence for whether the majority of genes in the set are DE in the specified direction, whereas the PValue.Mixed tests for differential expression in any direction. FDRs are computed from the corresponding p-values across all sets.</p>
 <p><span style="color:blue">Exercise: (1) test whether the wnt signalling pathways tend to be differentially expressed between luminal pregnant vs lactating (the second contrast) (2) Look for gene sets containing “MYC” in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.</span></p>
@@ -1372,41 +847,23 @@ WNT_SIGNALING                       0.0001071429
 <p>Let’s have a look at the top MYC related pathway in the ROAST test that you did in the exercise, “MENSSEN_MYC_TARGETS”.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Have a look at the logFCs and t-statistics in fit.cont</span>
 <span class="kw">names</span>(fit.cont)</code></pre>
-<pre class="output"><code> [1] &quot;coefficients&quot;     &quot;stdev.unscaled&quot;   &quot;sigma&quot;           
- [4] &quot;df.residual&quot;      &quot;cov.coefficients&quot; &quot;rank&quot;            
- [7] &quot;Amean&quot;            &quot;method&quot;           &quot;design&quot;          
-[10] &quot;contrasts&quot;        &quot;df.prior&quot;         &quot;s2.prior&quot;        
-[13] &quot;var.prior&quot;        &quot;proportion&quot;       &quot;s2.post&quot;         
-[16] &quot;t&quot;                &quot;df.total&quot;         &quot;p.value&quot;         
-[19] &quot;lods&quot;             &quot;F&quot;                &quot;F.p.value&quot;       
-[22] &quot;genes&quot;           
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;fit.cont&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(fit.cont$coefficients)</code></pre>
-<pre class="output"><code>        Contrasts
-         B.PregVsLac
-  497097 -1.62084708
-  20671   0.41298109
-  27395  -0.03540567
-  18777  -0.08505647
-  21399   0.21912852
-  58175   1.49852621
+<pre class="error"><code>Error in head(fit.cont$coefficients): object &#39;fit.cont&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(fit.cont$t)</code></pre>
-<pre class="output"><code>        Contrasts
-         B.PregVsLac
-  497097  -4.0541969
-  20671    1.0030050
-  27395   -0.1936036
-  18777   -0.7975228
-  21399    2.1866392
-  58175    1.5788218
+<pre class="error"><code>Error in head(fit.cont$t): object &#39;fit.cont&#39; not found
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">1</span>))
 <span class="co"># barcode plot with logFCs</span>
-<span class="kw">barcodeplot</span>(fit.cont$coeff[,<span class="dv">1</span>], <span class="dt">index=</span>c2.ind[[<span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>]], <span class="dt">main=</span><span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>)
-<span class="co"># barcode plot using t-statistics</span>
+<span class="kw">barcodeplot</span>(fit.cont$coeff[,<span class="dv">1</span>], <span class="dt">index=</span>c2.ind[[<span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>]], <span class="dt">main=</span><span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>)</code></pre>
+<pre class="error"><code>Error in is.vector(statistics, mode = &quot;numeric&quot;): object &#39;fit.cont&#39; not found
+</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># barcode plot using t-statistics</span>
 <span class="kw">barcodeplot</span>(fit.cont$t[,<span class="dv">1</span>], <span class="dt">index=</span>c2.ind[[<span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>]], <span class="dt">main=</span><span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>)</code></pre>
-<p><img src="fig-06/unnamed-chunk-75-1.png" title="plot of chunk unnamed-chunk-75" alt="plot of chunk unnamed-chunk-75" style="display: block; margin: auto;" /></p>
+<pre class="error"><code>Error in is.vector(statistics, mode = &quot;numeric&quot;): object &#39;fit.cont&#39; not found
+</code></pre>
 <p>Here, genes are represented by bars and are ranked from left to right by decreasing log-fold change or t-statistic. This forms the barcode-like pattern. The line above the barcode shows the relative local enrichment of the vertical bars in each part of the plot. The barcodeplot shows that the genes in this gene set tend to be up-regulated between pregnant and lactating in basal cells.</p>
 <p><span style="color:blue">Exercise: (1) Produce a barcodeplot for luminal pregnant vs lactating for this gene set. Does the pattern of enrichment look as strong? (2) Choose one of the Wnt signalling pathways and produce a barcode plot for both comparisons.(3) You can put two gene sets on one plot, for example a set that is up-regulated and one that is down-regulated, by adding a gene set to the <code>index2</code> argument. Produce a barcodeplot with two sets of your choosing.</span></p>
 <h1 id="record-package-and-version-info-with-sessioninfo">Record package and version info with sessionInfo()</h1>
@@ -1424,19 +881,18 @@ attached base packages:
 [8] datasets  base     
 
 other attached packages:
- [1] GO.db_3.2.2                RColorBrewer_1.1-2        
- [3] org.Mm.eg.db_3.2.3         RSQLite_1.0.0             
- [5] DBI_0.4                    AnnotationDbi_1.32.3      
- [7] gplots_3.0.1               Glimma_0.99.5             
- [9] EDASeq_2.4.1               ShortRead_1.28.0          
-[11] GenomicAlignments_1.6.3    SummarizedExperiment_1.0.2
-[13] Rsamtools_1.22.0           GenomicRanges_1.22.4      
-[15] GenomeInfoDb_1.6.3         Biostrings_2.38.4         
-[17] XVector_0.10.0             IRanges_2.4.8             
-[19] S4Vectors_0.8.11           BiocParallel_1.4.3        
-[21] Biobase_2.30.0             BiocGenerics_0.16.1       
-[23] edgeR_3.12.1               limma_3.26.9              
-[25] knitr_1.12.3              
+ [1] RColorBrewer_1.1-2         org.Mm.eg.db_3.2.3        
+ [3] RSQLite_1.0.0              DBI_0.4                   
+ [5] AnnotationDbi_1.32.3       gplots_3.0.1              
+ [7] Glimma_0.99.5              EDASeq_2.4.1              
+ [9] ShortRead_1.28.0           GenomicAlignments_1.6.3   
+[11] SummarizedExperiment_1.0.2 Rsamtools_1.22.0          
+[13] GenomicRanges_1.22.4       GenomeInfoDb_1.6.3        
+[15] Biostrings_2.38.4          XVector_0.10.0            
+[17] IRanges_2.4.8              S4Vectors_0.8.11          
+[19] BiocParallel_1.4.3         Biobase_2.30.0            
+[21] BiocGenerics_0.16.1        edgeR_3.12.1              
+[23] limma_3.26.9               knitr_1.12.3              
 
 loaded via a namespace (and not attached):
  [1] locfit_1.5-9.1            Rcpp_0.12.4              
@@ -1458,16 +914,16 @@ loaded via a namespace (and not attached):
 [33] matrixStats_0.50.2        XML_3.98-1.4             
 [35] bitops_1.0-6              R.methodsS3_1.7.1        
 [37] grid_3.2.4                xtable_1.8-2             
-[39] gtable_0.2.0              BiasedUrn_1.07           
-[41] magrittr_1.5              formatR_1.3              
-[43] scales_0.4.0              KernSmooth_2.23-15       
-[45] stringi_1.0-1             hwriter_1.3.2            
-[47] genefilter_1.52.1         RcppArmadillo_0.6.700.3.0
-[49] latticeExtra_0.6-28       futile.logger_1.4.1      
-[51] Formula_1.2-1             lambda.r_1.1.7           
-[53] tools_3.2.4               DESeq2_1.10.1            
-[55] survival_2.39-3           colorspace_1.2-6         
-[57] cluster_2.0.4             caTools_1.17.1           
+[39] gtable_0.2.0              magrittr_1.5             
+[41] formatR_1.3               scales_0.4.0             
+[43] KernSmooth_2.23-15        stringi_1.0-1            
+[45] hwriter_1.3.2             genefilter_1.52.1        
+[47] RcppArmadillo_0.6.700.3.0 latticeExtra_0.6-28      
+[49] futile.logger_1.4.1       Formula_1.2-1            
+[51] lambda.r_1.1.7            tools_3.2.4              
+[53] DESeq2_1.10.1             survival_2.39-3          
+[55] colorspace_1.2-6          cluster_2.0.4            
+[57] caTools_1.17.1           
 </code></pre>
 <div class="references">
 <h1 id="references" class="unnumbered">References</h1>
