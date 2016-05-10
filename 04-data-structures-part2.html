@@ -37,13 +37,13 @@
 </section>
 <p>At this point, you’ve see it all - in the last lesson, we toured all the basic data types and data structures in R. Everything you do will be a manipulation of those tools. But a whole lot of the time, the star of the show is going to be the data.frame - that table that we started with that information from a CSV gets dumped into when we load it. In this lesson, we’ll learn a few more things about working with data.frame.</p>
 <p>We learned last time that the columns in a data.frame were vectors, so that our data are consistent in type throughout the column. As such, if we want to add a new column, we need to start by making a new vector:</p>
-<pre class="sourceCode r"><code class="sourceCode r">newCol &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">12</span>)
-cats</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">cats</code></pre>
 <pre class="output"><code>    coat weight likes_string
 1 calico    2.1         TRUE
 2  black    5.0        FALSE
 3  tabby    3.2         TRUE
 </code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">newCol &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">12</span>)</code></pre>
 <p>We can then add this as a column via:</p>
 <pre class="sourceCode r"><code class="sourceCode r">cats &lt;-<span class="st"> </span><span class="kw">cbind</span>(cats,  newCol)</code></pre>
 <pre class="error"><code>Error in data.frame(..., check.names = FALSE): arguments imply differing number of rows: 3, 4

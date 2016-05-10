@@ -21,7 +21,6 @@ We learned last time that the columns in a data.frame were vectors, so that our 
 
 
 ~~~{.r}
-newCol <- c(2,3,5,12)
 cats
 ~~~
 
@@ -33,6 +32,11 @@ cats
 2  black    5.0        FALSE
 3  tabby    3.2         TRUE
 
+~~~
+
+
+~~~{.r}
+newCol <- c(2,3,5,12)
 ~~~
 
 We can then add this as a column via:

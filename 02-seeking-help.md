@@ -145,12 +145,6 @@ your issue.
 > ~~~
 
 > ## Challenge 2 {.challenge}
->
-> Look at the help for the `paste` function. You'll need to use this later.
-> What is the difference between the `sep` and `collapse` arguments?
->
-
-> ## Challenge 3 {.challenge}
 > Use help to find a function (and its associated parameters) that you could
 > use to load data from a csv file in which columns are delimited with "\t"
 > (tab) and the decimal point is a "." (period). This check for decimal
@@ -173,15 +167,4 @@ your issue.
 > same type. In the first case, the elements are numeric, in the
 > second, they are characters, and in the third they are characters:
 > the numeric values "coerced" to be characters.
->
-
-> ## Solution to Challenge 2 {.challenge}
->
-> Look at the help for the `paste` function. You'll need to use this later.
->
-> 
-> ~~~{.r}
-> help("paste")
-> ?paste
-> ~~~
 >
