@@ -25,6 +25,12 @@ tabby,3.2,TRUE
 ~~~
 
 
+~~~{.r}
+cats.df <- data.frame(coat = c("calico", "black", "tabby"),
+                      weight = c(2.1, 5.0, 3.2),
+                      likes_string = c(TRUE, FALSE, TRUE))
+write.csv(cats.df, "data/feline-data.csv", row.names = FALSE)
+~~~
 
 We can load this into R via the following:
 

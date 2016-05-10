@@ -41,6 +41,10 @@
 calico,<span class="fl">2.1</span>,<span class="ot">TRUE</span>
 black,<span class="fl">5.0</span>,<span class="ot">FALSE</span>
 tabby,<span class="fl">3.2</span>,<span class="ot">TRUE</span></code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">cats.df &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">coat =</span> <span class="kw">c</span>(<span class="st">&quot;calico&quot;</span>, <span class="st">&quot;black&quot;</span>, <span class="st">&quot;tabby&quot;</span>),
+                      <span class="dt">weight =</span> <span class="kw">c</span>(<span class="fl">2.1</span>, <span class="fl">5.0</span>, <span class="fl">3.2</span>),
+                      <span class="dt">likes_string =</span> <span class="kw">c</span>(<span class="ot">TRUE</span>, <span class="ot">FALSE</span>, <span class="ot">TRUE</span>))
+<span class="kw">write.csv</span>(cats.df, <span class="st">&quot;data/feline-data.csv&quot;</span>, <span class="dt">row.names =</span> <span class="ot">FALSE</span>)</code></pre>
 <p>We can load this into R via the following:</p>
 <pre class="sourceCode r"><code class="sourceCode r">cats &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="dt">file =</span> <span class="st">&quot;data/feline-data.csv&quot;</span>)
 cats</code></pre>
