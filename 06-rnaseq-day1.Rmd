@@ -669,6 +669,13 @@ search.by="SYMBOL", display.columns=c("ENTREZID", "SYMBOL",
 As for the volcano plot example above, this function creates an [html page](http://bphipson.github.io/RNAseq-R/demo/md/MD-Plot.html) that allows the user to search for their
 favourite gene.
 
+**We need to save a few data objects to use for the gene set testing section for Day 2 so we don't have to rerun everything**
+
+```{r}
+# save(fit.cont,seqdata,v,design,cont.matrix,file="day1objects.Rdata")
+```
+
+
 ## Degust analysis
 
 * Load in the results from the limma-voom analysis using the Degust GUI
@@ -747,6 +754,13 @@ heatmap.2(down50.counts.voom, Rowv = F, Colv = F, trace="none", ColSideColors=ni
 Sometimes there is quite a long list of differentially expressed genes to interpret after a differential expression analysis, and it is usually infeasible to go through the list one gene at a time trying to understand it's biological function. A common downstream procedure is gene set testing, which aims to understand which pathways/gene networks the differentially expressed genes are implicated in.
 
 There are a number of different ways to go about testing for enrichment of biological pathways, and the test you choose usually depends on the question you're asking. There are two kinds of tests: self-contained and competitive gene set tests. Self-contained tests, which include the `ROAST` procedure, ask the question "Are the genes in the set/pathway differentially expressed as a whole?" Competitive gene set tests, like `goana` and `camera` ask the question whether the differentially expressed genes tend to be over-represented in the gene set, compared to all the other genes in the experiment. These different questions use different statistical methodology.
+
+**Load in the saved data from the previous day**
+
+```{r}
+# load("day1objects.Rdata")
+```
+
 
 ### Gene ontology testing with goana
 
