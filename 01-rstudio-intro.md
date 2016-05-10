@@ -2,7 +2,7 @@
 layout: page
 title: R for RNAseq analysis
 subtitle: Project management with RStudio
-minutes: 30
+minutes: 20
 ---
 
 
@@ -127,166 +127,6 @@ prompt.
 > currently writing.
 >
 
-## Vectorization
-
-R is *vectorized*, meaning that
-variables and functions can have vectors as values. For example
-
-
-~~~{.r}
-1:5
-~~~
-
-
-
-~~~{.output}
-[1] 1 2 3 4 5
-
-~~~
-
-
-
-~~~{.r}
-2^(1:5)
-~~~
-
-
-
-~~~{.output}
-[1]  2  4  8 16 32
-
-~~~
-
-
-
-~~~{.r}
-x <- 1:5
-2^x
-~~~
-
-
-
-~~~{.output}
-[1]  2  4  8 16 32
-
-~~~
-
-This is incredibly powerful; we will discuss this further in an
-upcoming lesson.
-
-
-## Managing your environment
-
-There are a few useful commands you can use to interact with the R session.
-
-`ls` will list all of the variables and functions stored in the global environment
-(your working R session):
-
-
-~~~{.r}
-ls()
-~~~
-
-
-
-~~~{.output}
-[1] "hook_error" "hook_in"    "hook_out"   "x"         
-
-~~~
-
-> ## Tip: hidden objects {.callout}
->
-> Just like in the shell, `ls` will hide any variables or functions starting
-> with a "." by default. To list all objects, type `ls(all.names=TRUE)`
-> instead
->
-
-Note here that we didn't given any arguments to `ls`, but we still
-needed to give the parentheses to tell R to call the function.
-
-If we type `ls` by itself, R will print out the source code for that function!
-
-
-~~~{.r}
-ls
-~~~
-
-
-
-~~~{.output}
-function (name, pos = -1L, envir = as.environment(pos), all.names = FALSE, 
-    pattern, sorted = TRUE) 
-{
-    if (!missing(name)) {
-        pos <- tryCatch(name, error = function(e) e)
-        if (inherits(pos, "error")) {
-            name <- substitute(name)
-            if (!is.character(name)) 
-                name <- deparse(name)
-            warning(gettextf("%s converted to character string", 
-                sQuote(name)), domain = NA)
-            pos <- name
-        }
-    }
-    all.names <- .Internal(ls(envir, all.names, sorted))
-    if (!missing(pattern)) {
-        if ((ll <- length(grep("[", pattern, fixed = TRUE))) && 
-            ll != length(grep("]", pattern, fixed = TRUE))) {
-            if (pattern == "[") {
-                pattern <- "\\["
-                warning("replaced regular expression pattern '[' by  '\\\\['")
-            }
-            else if (length(grep("[^\\\\]\\[<-", pattern))) {
-                pattern <- sub("\\[<-", "\\\\\\[<-", pattern)
-                warning("replaced '[<-' by '\\\\[<-' in regular expression pattern")
-            }
-        }
-        grep(pattern, all.names, value = TRUE)
-    }
-    else all.names
-}
-<bytecode: 0x7f8b1154cf10>
-<environment: namespace:base>
-
-~~~
-
-You can use `rm` to delete objects you no longer need:
-
-
-~~~{.r}
-rm(x)
-~~~
-
-If you have lots of things in your environment and want to delete all of them,
-you can pass the results of `ls` to the `rm` function:
-
-
-~~~{.r}
-rm(list = ls())
-~~~
-
-In this case we've combined the two. Just like the order of operations, anything
-inside the innermost parentheses is evaluated first, and so on.
-
-In this case we've specified that the results of `ls` should be used for the
-`list` argument in `rm`. When assigning values to arguments by name, you *must*
-use the `=` operator!!
-
-If instead we use `<-`, there will be unintended side effects, or you may just
-get an error message:
-
-
-~~~{.r}
-rm(list <- ls())
-~~~
-
-
-
-~~~{.error}
-Error in rm(list <- ls()): ... must contain names or character strings
-
-~~~
-
 > ## Tip: Warnings vs. Errors {.callout}
 >
 > Pay attention when R does something unexpected! Errors, like above,
@@ -314,6 +154,16 @@ network). R and RStudio have functionality for managing packages:
 * You can remove a package with `remove.packages("packagename")`
 * You can make a package available for use with `library(packagename)`
 
+For this workshop we will also be using packages from
+These can all be obtained from Bioconductor, except for Glimma (see below).
+
+Open RStudio and run the following commands to install packages from [Bioconductor](https://www.bioconductor.org/). These are installed slightly differently. For example, to install the package `limma`:
+
+
+~~~{.r}
+source("http://bioconductor.org/biocLite.R")
+biocLite("limma")
+~~~
 
 ## RStudio project management
 
@@ -363,8 +213,7 @@ project.
 > 2. Click "New Directory".
 > 3. Click "Empty Project".
 > 4. Type in the name of the directory to store your project, e.g. "my_project".
-> 5. Make sure that the checkbox for "Create a git repository" is selected.
-> 6. Click the "Create Project" button.
+> 5. Click the "Create Project" button.
 >
 
 Now when we start R in this project directory, or open this project with RStudio,
@@ -455,20 +304,19 @@ one to store the analysis scripts.
 
 Now we have a good directory structure we will now place/save the data file in the `data/` directory.
 
-> ## Challenge 1 {.challenge}
-> Download the gapminder data from [here](https://raw.githubusercontent.com/resbaz/r-novice-gapminder-files/master/data/gapminder-FiveYearData.csv).
+Download the RNAseq data for this workshop.
+
+- Day 1: [https://figshare.com/s/1d788fd384d33e913a2a](https://figshare.com/s/1d788fd384d33e913a2a)
+- Day 2: [https://figshare.com/s/f5d63d8c265a05618137](https://figshare.com/s/f5d63d8c265a05618137)
+
+> ## Challenge {.challenge}
 >
-> 1. Download the file (CTRL + S, right mouse click -> "Save as", or File -> "Save page as")
-> 2. Make sure it's saved under the name `gapminder-FiveYearData.csv`
-> 3. Save the file in the `data/` folder within your project.
+> 1. Create a `/data` directory. In the bottom right panel select the "Files" tab,
+then "New Folder", then type "data" and click "OK".
+> 2. Download the RNAseq data using the links above (if you find the internet is slow, you can just download Day 1 for now).
+> 3. Click "Download all" (this will download a zip file).
+> 4. Unzip the file (usually double clicking on it will do the trick).
+> 5. Move all the files inside into the `data/` folder within your project.
 >
 > We will load and inspect these data later.
-
-> ## Challenge 2 {.challenge}
-> It is useful to get some general idea about the dataset, directly from the
-> command line, before loading it into R. Understanding the dataset better
-> will come handy when making decisions on how to load it in R. Use command-line
-> shell to answer the following questions:
-> 1. What is the size of the file?
-> 2. How many rows of data does it contain?
-> 3. What are the data types of values stored in this file?
+>

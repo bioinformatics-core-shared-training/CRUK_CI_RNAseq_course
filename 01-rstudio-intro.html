@@ -95,80 +95,6 @@
 <p>Cancelling a command isn’t just useful for killing incomplete commands: you can also use it to tell R to stop running code (for example if its taking much longer than you expect), or to get rid of the code you’re currently writing.</p>
 </div>
 </aside>
-<h2 id="vectorization">Vectorization</h2>
-<p>R is <em>vectorized</em>, meaning that variables and functions can have vectors as values. For example</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span>:<span class="dv">5</span></code></pre>
-<pre class="output"><code>[1] 1 2 3 4 5
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">2</span>^(<span class="dv">1</span>:<span class="dv">5</span>)</code></pre>
-<pre class="output"><code>[1]  2  4  8 16 32
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span><span class="dv">1</span>:<span class="dv">5</span>
-<span class="dv">2</span>^x</code></pre>
-<pre class="output"><code>[1]  2  4  8 16 32
-</code></pre>
-<p>This is incredibly powerful; we will discuss this further in an upcoming lesson.</p>
-<h2 id="managing-your-environment">Managing your environment</h2>
-<p>There are a few useful commands you can use to interact with the R session.</p>
-<p><code>ls</code> will list all of the variables and functions stored in the global environment (your working R session):</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ls</span>()</code></pre>
-<pre class="output"><code>[1] &quot;hook_error&quot; &quot;hook_in&quot;    &quot;hook_out&quot;   &quot;x&quot;         
-</code></pre>
-<aside class="callout panel panel-info">
-<div class="panel-heading">
-<h2 id="tip-hidden-objects"><span class="glyphicon glyphicon-pushpin"></span>Tip: hidden objects</h2>
-</div>
-<div class="panel-body">
-<p>Just like in the shell, <code>ls</code> will hide any variables or functions starting with a “.” by default. To list all objects, type <code>ls(all.names=TRUE)</code> instead</p>
-</div>
-</aside>
-<p>Note here that we didn’t given any arguments to <code>ls</code>, but we still needed to give the parentheses to tell R to call the function.</p>
-<p>If we type <code>ls</code> by itself, R will print out the source code for that function!</p>
-<pre class="sourceCode r"><code class="sourceCode r">ls</code></pre>
-<pre class="output"><code>function (name, pos = -1L, envir = as.environment(pos), all.names = FALSE, 
-    pattern, sorted = TRUE) 
-{
-    if (!missing(name)) {
-        pos &lt;- tryCatch(name, error = function(e) e)
-        if (inherits(pos, &quot;error&quot;)) {
-            name &lt;- substitute(name)
-            if (!is.character(name)) 
-                name &lt;- deparse(name)
-            warning(gettextf(&quot;%s converted to character string&quot;, 
-                sQuote(name)), domain = NA)
-            pos &lt;- name
-        }
-    }
-    all.names &lt;- .Internal(ls(envir, all.names, sorted))
-    if (!missing(pattern)) {
-        if ((ll &lt;- length(grep(&quot;[&quot;, pattern, fixed = TRUE))) &amp;&amp; 
-            ll != length(grep(&quot;]&quot;, pattern, fixed = TRUE))) {
-            if (pattern == &quot;[&quot;) {
-                pattern &lt;- &quot;\\[&quot;
-                warning(&quot;replaced regular expression pattern &#39;[&#39; by  &#39;\\\\[&#39;&quot;)
-            }
-            else if (length(grep(&quot;[^\\\\]\\[&lt;-&quot;, pattern))) {
-                pattern &lt;- sub(&quot;\\[&lt;-&quot;, &quot;\\\\\\[&lt;-&quot;, pattern)
-                warning(&quot;replaced &#39;[&lt;-&#39; by &#39;\\\\[&lt;-&#39; in regular expression pattern&quot;)
-            }
-        }
-        grep(pattern, all.names, value = TRUE)
-    }
-    else all.names
-}
-&lt;bytecode: 0x7f8b1154cf10&gt;
-&lt;environment: namespace:base&gt;
-</code></pre>
-<p>You can use <code>rm</code> to delete objects you no longer need:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rm</span>(x)</code></pre>
-<p>If you have lots of things in your environment and want to delete all of them, you can pass the results of <code>ls</code> to the <code>rm</code> function:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rm</span>(<span class="dt">list =</span> <span class="kw">ls</span>())</code></pre>
-<p>In this case we’ve combined the two. Just like the order of operations, anything inside the innermost parentheses is evaluated first, and so on.</p>
-<p>In this case we’ve specified that the results of <code>ls</code> should be used for the <code>list</code> argument in <code>rm</code>. When assigning values to arguments by name, you <em>must</em> use the <code>=</code> operator!!</p>
-<p>If instead we use <code>&lt;-</code>, there will be unintended side effects, or you may just get an error message:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rm</span>(list &lt;-<span class="st"> </span><span class="kw">ls</span>())</code></pre>
-<pre class="error"><code>Error in rm(list &lt;- ls()): ... must contain names or character strings
-</code></pre>
 <aside class="callout panel panel-info">
 <div class="panel-heading">
 <h2 id="tip-warnings-vs.errors"><span class="glyphicon glyphicon-pushpin"></span>Tip: Warnings vs. Errors</h2>
@@ -187,6 +113,10 @@
 <li>You can remove a package with <code>remove.packages(&quot;packagename&quot;)</code></li>
 <li>You can make a package available for use with <code>library(packagename)</code></li>
 </ul>
+<p>For this workshop we will also be using packages from These can all be obtained from Bioconductor, except for Glimma (see below).</p>
+<p>Open RStudio and run the following commands to install packages from <a href="https://www.bioconductor.org/">Bioconductor</a>. These are installed slightly differently. For example, to install the package <code>limma</code>:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">source</span>(<span class="st">&quot;http://bioconductor.org/biocLite.R&quot;</span>)
+<span class="kw">biocLite</span>(<span class="st">&quot;limma&quot;</span>)</code></pre>
 <h2 id="rstudio-project-management">RStudio project management</h2>
 <p>The scientific process is naturally incremental, and many projects start life as random notes, some code, then a manuscript, and eventually everything is a bit mixed together.</p>
 <blockquote class="twitter-tweet">
@@ -228,7 +158,6 @@ Managing your projects in a reproducible fashion doesn’t just make your scienc
 <li>Click “New Directory”.</li>
 <li>Click “Empty Project”.</li>
 <li>Type in the name of the directory to store your project, e.g. “my_project”.</li>
-<li>Make sure that the checkbox for “Create a git repository” is selected.</li>
 <li>Click the “Create Project” button.</li>
 </ol>
 </div>
@@ -274,26 +203,24 @@ Managing your projects in a reproducible fashion doesn’t just make your scienc
 </aside>
 <h2 id="save-the-data-in-the-data-directory">Save the data in the data directory</h2>
 <p>Now we have a good directory structure we will now place/save the data file in the <code>data/</code> directory.</p>
+<p>Download the RNAseq data for this workshop.</p>
+<ul>
+<li>Day 1: <a href="https://figshare.com/s/1d788fd384d33e913a2a" class="uri">https://figshare.com/s/1d788fd384d33e913a2a</a></li>
+<li>Day 2: <a href="https://figshare.com/s/f5d63d8c265a05618137" class="uri">https://figshare.com/s/f5d63d8c265a05618137</a></li>
+</ul>
 <section class="challenge panel panel-success">
 <div class="panel-heading">
-<h2 id="challenge-1"><span class="glyphicon glyphicon-pencil"></span>Challenge 1</h2>
+<h2 id="challenge"><span class="glyphicon glyphicon-pencil"></span>Challenge</h2>
 </div>
 <div class="panel-body">
-<p>Download the gapminder data from <a href="https://raw.githubusercontent.com/resbaz/r-novice-gapminder-files/master/data/gapminder-FiveYearData.csv">here</a>.</p>
 <ol style="list-style-type: decimal">
-<li>Download the file (CTRL + S, right mouse click -&gt; “Save as”, or File -&gt; “Save page as”)</li>
-<li>Make sure it’s saved under the name <code>gapminder-FiveYearData.csv</code></li>
-<li>Save the file in the <code>data/</code> folder within your project.</li>
+<li>Create a <code>/data</code> directory. In the bottom right panel select the “Files” tab, then “New Folder”, then type “data” and click “OK”.</li>
+<li>Download the RNAseq data using the links above (if you find the internet is slow, you can just download Day 1 for now).</li>
+<li>Click “Download all” (this will download a zip file).</li>
+<li>Unzip the file (usually double clicking on it will do the trick).</li>
+<li>Move all the files inside into the <code>data/</code> folder within your project.</li>
 </ol>
 <p>We will load and inspect these data later.</p>
-</div>
-</section>
-<section class="challenge panel panel-success">
-<div class="panel-heading">
-<h2 id="challenge-2"><span class="glyphicon glyphicon-pencil"></span>Challenge 2</h2>
-</div>
-<div class="panel-body">
-<p>It is useful to get some general idea about the dataset, directly from the command line, before loading it into R. Understanding the dataset better will come handy when making decisions on how to load it in R. Use command-line shell to answer the following questions: 1. What is the size of the file? 2. How many rows of data does it contain? 3. What are the data types of values stored in this file?</p>
 </div>
 </section>
 <div class="references">

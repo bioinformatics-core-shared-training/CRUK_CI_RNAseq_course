@@ -16,6 +16,13 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 > lessons up to and including vectorisation.
 >
 
+## Data
+
+- Day 1: [https://figshare.com/s/1d788fd384d33e913a2a](https://figshare.com/s/1d788fd384d33e913a2a)
+- Day 2: [https://figshare.com/s/f5d63d8c265a05618137](https://figshare.com/s/f5d63d8c265a05618137)
+
+The Day 2 data is ~400MB, so we recommend you download this somewhere with a decent internet connection e.g. at home.
+
 ## Topics
 
 ### R for RNAseq
@@ -31,5 +38,3 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 - [Differential expression and gene set testing](06-rnaseq-day1.html)
 - [Alignment and feature counting](07-rnaseq-day2.html)
 - [Applying RNAseq](08-applying-rnaseq.html) ([solutions](09-applying-rnaseq-solutions.html))
-
-## Other Resources
