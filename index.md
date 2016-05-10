@@ -27,14 +27,17 @@ The Day 2 data is ~400MB, so we recommend you download this somewhere with a dec
 
 ### R for RNAseq
 
-- [Project management with RStudio](01-rstudio-intro.html)
-- [Seeking help](02-seeking-help.html)
-- [Data structures](03-data-structures-part1.html)
-- [Data frames and reading in data](04-data-structures-part2.html)
-- [Subsetting data](05-data-subsetting.html)
+Note, this topic is optional for those with substantial R programming experience.
+However, make sure you complete the challenges in topic 1 to ensure you have set up your RStudio environment correctly and have downloaded the data required for topics 6-8.
+
+1. [Project management with RStudio](01-rstudio-intro.html)
+2. [Seeking help](02-seeking-help.html)
+3. [Data structures](03-data-structures-part1.html)
+4. [Data frames and reading in data](04-data-structures-part2.html)
+5. [Subsetting data](05-data-subsetting.html)
 
 ### RNAseq anlaysis in R
 
-- [Differential expression and gene set testing](06-rnaseq-day1.html)
-- [Alignment and feature counting](07-rnaseq-day2.html)
-- [Applying RNAseq](08-applying-rnaseq.html) ([solutions](09-applying-rnaseq-solutions.html))
+6. [Differential expression and gene set testing](06-rnaseq-day1.html)
+7. [Alignment and feature counting](07-rnaseq-day2.html)
+8. [Applying RNAseq](08-applying-rnaseq.html)
