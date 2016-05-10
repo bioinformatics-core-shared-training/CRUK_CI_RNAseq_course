@@ -83,7 +83,7 @@ We will first use the counts file as a starting point for our analysis. This dat
 
 ### Reading in the data
 
-*Set up an RStudio project specifying the directory where you have saved the data*.
+*Set up an RStudio project specifying the directory where you have saved the `/data` directory*.
 Download and read in the data.
 
 ```{r}
@@ -337,12 +337,12 @@ plot(pca$sdev)
 
 Another alternative is to generate an interactive MDS plot using the *Glimma* package. This allows the user to interactively explore the different dimensions.
 
-```{r, results="hide"}
-labels = paste(targets$SampleName, targets$CellType, targets$Status)
-glMDSPlot(y, labels=labels, groups=group)
+```{r}
+labels <- paste(targets$SampleName, targets$CellType, targets$Status)
+glMDSPlot(y, labels=labels, groups=group, folder="mds")
 ```
 
-*Glimma* was created to make interactive versions of some of the popular plots from the *limma* package. At present it can be used to obtain MDS plots and mean-difference (MD) plots, which will be covered later. The output of `glMDSPlot` is an html page that shows the MDS plot on the left, and the amount of variation explained by each dimension in a barplot on the right. The user can hover over points to find out sample information, and switch between successive dimensions in the MDS plot by clicking on the bars in the barplot. The default MDS plots shows dimensions 1 and 2.
+*Glimma* was created to make interactive versions of some of the popular plots from the *limma* package. At present it can be used to obtain MDS plots and mean-difference (MD) plots, which will be covered later. The output of `glMDSPlot` is an [html page](http://bphipson.github.io/RNAseq-R/demo/mds/MDS-Plot.html) that shows the MDS plot on the left, and the amount of variation explained by each dimension in a barplot on the right. The user can hover over points to find out sample information, and switch between successive dimensions in the MDS plot by clicking on the bars in the barplot. The default MDS plots shows dimensions 1 and 2.
 
 ### Hierarchical clustering with heatmaps
 
@@ -624,15 +624,18 @@ Notice anything interesting about the expression of this gene?
 
 An interactive version of the volcano plot above that includes the raw per sample values in a separate panel is possible via the `glMDPlot` function in the *Glimma* package. This function was written to make interactive mean-difference plots by default (as we will see later) but can be re-configured to give a volcano plot by selecting the columns of interest from an unsorted top table of differential expression results.
 
-```{r, results="hide"}
-topt = topTable(fit.cont,coef=1,number=Inf,sort.by="none")
-
-glMDPlot(topt, xval="logFC", yval="B", counts=y$counts, anno=fit.cont$genes, groups=group, samples=labels,
-         status=summa.fit, id.column="ENTREZID", search.by="SYMBOL",
-         display.columns=c("ENTREZID", "SYMBOL", "GENENAME"), html="volcano")
+```{r}
+group2 <- group
+levels(group2) <- c("basal.lactate","basal.preg","basal.virgin","lum.lactate", "lum.preg", "lum.virgin")
+topt <- topTable(fit.cont,coef=1,number=Inf,sort.by="none")
+glMDPlot(topt, xval="logFC", yval="B", counts=y$counts, anno=fit.cont$genes, groups=group2, samples=labels,
+status=summa.fit[,"B.PregVsLac"], id.column="ENTREZID", search.by="SYMBOL",
+display.columns=c("ENTREZID", "SYMBOL", "GENENAME"),
+html="volcano", folder="volcano", main="B.PregVsLac")
 ```
 
-This function creates an html page with a volcano plot on the left and a plot showing the log-CPM per sample for a selected gene on the right. A search bar is available to allow gene IDs (gene Symbols in this case) to be searched.
+This function creates an [html page](http://bphipson.github.io/RNAseq-R/demo/volcano/volcano.html) with a volcano plot on the left and a plot showing the log-CPM per sample for a selected gene on the right. A search bar is available to allow gene IDs (gene Symbols in this case) to be searched.
+
 
 ### Testing relative to a threshold (TREAT)
 
@@ -657,9 +660,14 @@ abline(h=0,col="grey")
 An interactive version of the mean-difference plots is possible via the `glMDPlot` function in the *Glimma* package.
 
 ```{r}
-glMDPlot(fit.treat, counts=y$counts, anno=fit.cont$genes, groups=group, samples=labels,
-         status=res.treat, id.column="ENTREZID", search.by="SYMBOL", display.columns=c("ENTREZID", "SYMBOL", "GENENAME"))
+glMDPlot(fit.treat, counts=y$counts, anno=fit.cont$genes, groups=group2, samples=labels,
+status=res.treat[,"B.PregVsLac"], id.column="ENTREZID",
+search.by="SYMBOL", display.columns=c("ENTREZID", "SYMBOL",
+"GENENAME"), folder="md", main="B.PregVsLac")
 ```
+
+As for the volcano plot example above, this function creates an [html page](http://bphipson.github.io/RNAseq-R/demo/md/MD-Plot.html) that allows the user to search for their
+favourite gene.
 
 ## Degust analysis
 
