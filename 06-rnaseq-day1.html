@@ -840,7 +840,7 @@ Levels             B.PregVsLac
 0        10464
 1         2705
 </code></pre>
-<p><span style="color:blue">Exercise: (1) Add another contrast to the contrasts matrix: <code>L.PregVLac = luminal.pregnant - luminal.lactate</code> and re-run the code above. You should have two comparisons in <code>fit.cont</code> now. (2) Check out the <code>vennDiagram</code> function</span> <span style="color:red">(HINT: type <code>?vennDiagram</code>)</span>. <span style="color:blue">Can you show the overlap of differentially expressed genes between the two comparisons? How many genes are commonly differentially expressed?</span></p>
+<p><span style="color:blue">Exercise: (1) Add another contrast to the contrasts matrix: <code>L.PregVsLac = luminal.pregnant - luminal.lactate</code> and re-run the code above. You should have two comparisons in <code>fit.cont</code> now. (2) Check out the <code>vennDiagram</code> function</span> <span style="color:red">(HINT: type <code>?vennDiagram</code>)</span>. <span style="color:blue">Can you show the overlap of differentially expressed genes between the two comparisons? How many genes are commonly differentially expressed?</span></p>
 <p>The <em>limma</em> <code>topTable</code> function summarises the output in a table format. Significant DE genes for a particular comparison can be identified by selecting genes with a p-value smaller than a chosen cut-off value and/or a fold change greater than a chosen value in this table. By default the table will be sorted by the B statistic, which is the log-odds of differential expression. Usually the B statistic and p-value ranking will be the same, but this is not always the case. We will explicitly rank by p-value, which we can specify with the <code>sort.by</code> argument.</p>
 <p>The <code>topTable</code> command will always output the top 10 genes by default, even if they are not statistically significant. We can specify the coefficient we are interested in by the name we used in the contrast matrix (“B.PregVsLac”), or by the column number.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre>
@@ -1323,49 +1323,49 @@ LABBE_WNT3A_TARGETS_UP                 104 0.2307692 0.49038462        Up
 PID_WNT_NONCANONICAL_PATHWAY            31 0.4516129 0.09677419      Down
 WILLERT_WNT_SIGNALING                   22 0.2272727 0.54545455        Up
 SANSOM_WNT_PATHWAY_REQUIRE_MYC          53 0.1886792 0.45283019        Up
-PID_WNT_CANONICAL_PATHWAY               19 0.4736842 0.21052632      Down
 REACTOME_SIGNALING_BY_WNT               62 0.1290323 0.50000000        Up
+PID_WNT_CANONICAL_PATHWAY               19 0.4736842 0.21052632      Down
 BIOCARTA_WNT_PATHWAY                    24 0.2500000 0.33333333        Up
-KEGG_WNT_SIGNALING_PATHWAY             131 0.3740458 0.25190840      Down
 ST_WNT_BETA_CATENIN_PATHWAY             32 0.3125000 0.34375000        Up
+KEGG_WNT_SIGNALING_PATHWAY             131 0.3740458 0.25190840      Down
 LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP    100 0.3400000 0.38000000        Up
 PID_WNT_SIGNALING_PATHWAY               23 0.3043478 0.30434783        Up
 LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN     90 0.2555556 0.40000000        Up
 ST_WNT_CA2_CYCLIC_GMP_PATHWAY           14 0.2857143 0.35714286        Up
 LABBE_WNT3A_TARGETS_DN                  65 0.2615385 0.27692308        Up
 WNT_SIGNALING                           75 0.3600000 0.30666667      Down
-                                    PValue       FDR PValue.Mixed
-LABBE_WNT3A_TARGETS_UP              0.0002 0.0011250       0.0007
-PID_WNT_NONCANONICAL_PATHWAY        0.0002 0.0011250       0.0004
-WILLERT_WNT_SIGNALING               0.0004 0.0017500       0.0001
-SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0012 0.0043125       0.0001
-PID_WNT_CANONICAL_PATHWAY           0.0135 0.0403500       0.0002
-REACTOME_SIGNALING_BY_WNT           0.0177 0.0441250       0.0042
-BIOCARTA_WNT_PATHWAY                0.0404 0.0837500       0.0003
-KEGG_WNT_SIGNALING_PATHWAY          0.0503 0.0837500       0.0001
-ST_WNT_BETA_CATENIN_PATHWAY         0.0503 0.0837500       0.0002
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0607 0.0909750       0.0001
-PID_WNT_SIGNALING_PATHWAY           0.0973 0.1326136       0.0001
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.1709 0.2135625       0.0001
-ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.2654 0.3061731       0.0005
-LABBE_WNT3A_TARGETS_DN              0.5121 0.5486250       0.0004
-WNT_SIGNALING                       0.8858 0.8858000       0.0001
+                                    PValue        FDR PValue.Mixed
+LABBE_WNT3A_TARGETS_UP              0.0002 0.00112500       0.0007
+PID_WNT_NONCANONICAL_PATHWAY        0.0002 0.00112500       0.0004
+WILLERT_WNT_SIGNALING               0.0010 0.00475000       0.0006
+SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0020 0.00731250       0.0002
+REACTOME_SIGNALING_BY_WNT           0.0157 0.04062500       0.0021
+PID_WNT_CANONICAL_PATHWAY           0.0163 0.04062500       0.0004
+BIOCARTA_WNT_PATHWAY                0.0411 0.08796429       0.0002
+ST_WNT_BETA_CATENIN_PATHWAY         0.0493 0.08991667       0.0001
+KEGG_WNT_SIGNALING_PATHWAY          0.0540 0.08991667       0.0001
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0606 0.09082500       0.0002
+PID_WNT_SIGNALING_PATHWAY           0.0968 0.13193182       0.0002
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.1709 0.21356250       0.0001
+ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.2521 0.29082692       0.0003
+LABBE_WNT3A_TARGETS_DN              0.4954 0.53073214       0.0005
+WNT_SIGNALING                       0.8838 0.88380000       0.0001
                                        FDR.Mixed
 LABBE_WNT3A_TARGETS_UP              0.0007000000
-PID_WNT_NONCANONICAL_PATHWAY        0.0004375000
-WILLERT_WNT_SIGNALING               0.0001071429
-SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0001071429
-PID_WNT_CANONICAL_PATHWAY           0.0002500000
-REACTOME_SIGNALING_BY_WNT           0.0042000000
-BIOCARTA_WNT_PATHWAY                0.0003750000
-KEGG_WNT_SIGNALING_PATHWAY          0.0001071429
-ST_WNT_BETA_CATENIN_PATHWAY         0.0002500000
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0001071429
-PID_WNT_SIGNALING_PATHWAY           0.0001071429
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.0001071429
-ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.0005192308
-LABBE_WNT3A_TARGETS_DN              0.0004375000
-WNT_SIGNALING                       0.0001071429
+PID_WNT_NONCANONICAL_PATHWAY        0.0004772727
+WILLERT_WNT_SIGNALING               0.0006346154
+SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0002812500
+REACTOME_SIGNALING_BY_WNT           0.0021000000
+PID_WNT_CANONICAL_PATHWAY           0.0004772727
+BIOCARTA_WNT_PATHWAY                0.0002812500
+ST_WNT_BETA_CATENIN_PATHWAY         0.0001875000
+KEGG_WNT_SIGNALING_PATHWAY          0.0001875000
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0002812500
+PID_WNT_SIGNALING_PATHWAY           0.0002812500
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.0001875000
+ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.0004166667
+LABBE_WNT3A_TARGETS_DN              0.0005625000
+WNT_SIGNALING                       0.0001875000
 </code></pre>
 <p>Each row corresponds to a single gene set. The NGenes column gives the number of genes in each set. The PropDown and PropUp columns contain the proportions of genes in the set that are down- and up-regulated, respectively, with absolute fold changes greater than 2. The net direction of change is determined from the significance of changes in each direction, and is shown in the Direction column. The PValue provides evidence for whether the majority of genes in the set are DE in the specified direction, whereas the PValue.Mixed tests for differential expression in any direction. FDRs are computed from the corresponding p-values across all sets.</p>
 <p><span style="color:blue">Exercise: (1) test whether the wnt signalling pathways tend to be differentially expressed between luminal pregnant vs lactating (the second contrast) (2) Look for gene sets containing “MYC” in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.</span></p>
@@ -1436,7 +1436,7 @@ other attached packages:
  [1] GO.db_3.2.2                RColorBrewer_1.1-2        
  [3] org.Mm.eg.db_3.2.3         RSQLite_1.0.0             
  [5] DBI_0.4                    AnnotationDbi_1.32.3      
- [7] gplots_3.0.1               Glimma_0.99.5             
+ [7] gplots_3.0.1               Glimma_1.0.0              
  [9] EDASeq_2.4.1               ShortRead_1.28.0          
 [11] GenomicAlignments_1.6.3    SummarizedExperiment_1.0.2
 [13] Rsamtools_1.22.0           GenomicRanges_1.22.4      
