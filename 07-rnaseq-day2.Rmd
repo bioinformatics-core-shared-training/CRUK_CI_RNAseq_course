@@ -141,14 +141,7 @@ A quality score of 30 corresponds to a 1 in 1000 chance of an incorrect base cal
 boxplot(qs)
 ```
 
-We can get the percentages of A, T, G and C in a fastq file by using the `atgcContent` function. This can sometimes highlight if there's a strong GC bias, for example.
-
-```{r}
-actg <- atgcContent(filename="SRR1552450.fastq.gz")
-actg
-```
-
-Exercise: (1) Extract quality scores for SRR1552451.fastq.gz for 50 reads (2) Plot a boxplot of the quality scores for SRR1552451.fastq.gz. (3) Get the nucleotide percentages for SRR1552451.fastq.gz.
+Exercise: (1) Extract quality scores for SRR1552451.fastq.gz for 50 reads (2) Plot a boxplot of the quality scores for SRR1552451.fastq.gz.
 
 ## Counting
 

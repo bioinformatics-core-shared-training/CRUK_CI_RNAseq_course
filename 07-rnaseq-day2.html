@@ -38,7 +38,7 @@
 <p><em>Don’t forget to open a new project specifying the directory where you have saved all the data files for day 2</em></p>
 <p>First, let’s load the Rsubread package into R.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(Rsubread)</code></pre>
-<p>Earlier we put all the sequencing read data (.fastq.gz files) in the data directory. Now we need to find them in order to tell the Rsubread aligner which files to look at. We can search for all .fastq.gz files in the data directory using the <code>list.files</code> command.</p>
+<p>Earlier we put all the sequencing read data (.fastq.gz files) in the data directory. Now we need to find them in order to tell the Rsubread aligner which files to look at. We can search for all .fastq.gz files in the data directory using the <code>list.files</code> command. The pattern argument takes a regular expression. In this case we are using the <code>$</code> to mean the end of the string, so we will only get files that end in “.fastq.gz”</p>
 <pre class="sourceCode r"><code class="sourceCode r">fastq.files &lt;-<span class="st"> </span><span class="kw">list.files</span>(<span class="dt">path =</span> <span class="st">&quot;./data&quot;</span>, <span class="dt">pattern =</span> <span class="st">&quot;.fastq.gz$&quot;</span>, <span class="dt">full.names =</span> <span class="ot">TRUE</span>)
 fastq.files</code></pre>
 <pre class="output"><code> [1] &quot;./data/SRR1552444.fastq.gz&quot; &quot;./data/SRR1552445.fastq.gz&quot;
@@ -77,12 +77,20 @@ NULL
 <p>In this example we have kept many of the default settings, which have been optimised to work well under a variety of situations. The default setting for <code>align</code> is that it only keeps reads that uniquely map to the reference genome. For testing differential expression of genes, this is what we want, as the reads are unambigously assigned to one place in the genome, allowing for easier interpretation of the results. Understanding all the different parameters you can change involves doing a lot of reading about the aligner that you are using, and can take a lot of time to understand! Today we won’t be going into the details of the parameters you can change, but you can get more information from looking at the help:</p>
 <pre class="sourceCode r"><code class="sourceCode r">?align</code></pre>
 <p>We can get a summary of the proportion of reads that mapped to the reference genome using the <code>propmapped</code> function.</p>
-<pre class="sourceCode r"><code class="sourceCode r">bam.files &lt;-<span class="st"> </span><span class="kw">list.files</span>(<span class="dt">path =</span> <span class="st">&quot;.&quot;</span>, <span class="dt">pattern =</span> <span class="st">&quot;.bam$&quot;</span>, <span class="dt">full.names =</span> <span class="ot">TRUE</span>)
+<pre class="sourceCode r"><code class="sourceCode r">bam.files &lt;-<span class="st"> </span><span class="kw">list.files</span>(<span class="dt">path =</span> <span class="st">&quot;./data&quot;</span>, <span class="dt">pattern =</span> <span class="st">&quot;.BAM$&quot;</span>, <span class="dt">full.names =</span> <span class="ot">TRUE</span>)
 bam.files</code></pre>
-<pre class="output"><code> [1] &quot;./SRR1552444.bam&quot; &quot;./SRR1552445.bam&quot; &quot;./SRR1552446.bam&quot;
- [4] &quot;./SRR1552447.bam&quot; &quot;./SRR1552448.bam&quot; &quot;./SRR1552449.bam&quot;
- [7] &quot;./SRR1552450.bam&quot; &quot;./SRR1552451.bam&quot; &quot;./SRR1552452.bam&quot;
-[10] &quot;./SRR1552453.bam&quot; &quot;./SRR1552454.bam&quot; &quot;./SRR1552455.bam&quot;
+<pre class="output"><code> [1] &quot;./data/SRR1552444.fastq.gz.subread.BAM&quot;
+ [2] &quot;./data/SRR1552445.fastq.gz.subread.BAM&quot;
+ [3] &quot;./data/SRR1552446.fastq.gz.subread.BAM&quot;
+ [4] &quot;./data/SRR1552447.fastq.gz.subread.BAM&quot;
+ [5] &quot;./data/SRR1552448.fastq.gz.subread.BAM&quot;
+ [6] &quot;./data/SRR1552449.fastq.gz.subread.BAM&quot;
+ [7] &quot;./data/SRR1552450.fastq.gz.subread.BAM&quot;
+ [8] &quot;./data/SRR1552451.fastq.gz.subread.BAM&quot;
+ [9] &quot;./data/SRR1552452.fastq.gz.subread.BAM&quot;
+[10] &quot;./data/SRR1552453.fastq.gz.subread.BAM&quot;
+[11] &quot;./data/SRR1552454.fastq.gz.subread.BAM&quot;
+[12] &quot;./data/SRR1552455.fastq.gz.subread.BAM&quot;
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">props &lt;-<span class="st"> </span><span class="kw">propmapped</span>(<span class="dt">files=</span>bam.files)</code></pre>
 <pre class="output"><code>The input file is opened as a BAM file.
@@ -135,19 +143,19 @@ Your operation system does not allow a single process to open more then 400 file
 Finished. All records: 1000; all fragments: 1000; mapped fragments: 113; the mappability is 11.30%
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">props</code></pre>
-<pre class="output"><code>            Samples NumTotal NumMapped PropMapped
-1  ./SRR1552444.bam     1000       133      0.133
-2  ./SRR1552445.bam     1000       130      0.130
-3  ./SRR1552446.bam     1000       111      0.111
-4  ./SRR1552447.bam     1000       103      0.103
-5  ./SRR1552448.bam     1000        53      0.053
-6  ./SRR1552449.bam     1000        67      0.067
-7  ./SRR1552450.bam     1000       119      0.119
-8  ./SRR1552451.bam     1000       145      0.145
-9  ./SRR1552452.bam     1000       133      0.133
-10 ./SRR1552453.bam     1000       142      0.142
-11 ./SRR1552454.bam     1000       127      0.127
-12 ./SRR1552455.bam     1000       113      0.113
+<pre class="output"><code>                                  Samples NumTotal NumMapped PropMapped
+1  ./data/SRR1552444.fastq.gz.subread.BAM     1000       133      0.133
+2  ./data/SRR1552445.fastq.gz.subread.BAM     1000       130      0.130
+3  ./data/SRR1552446.fastq.gz.subread.BAM     1000       111      0.111
+4  ./data/SRR1552447.fastq.gz.subread.BAM     1000       103      0.103
+5  ./data/SRR1552448.fastq.gz.subread.BAM     1000        53      0.053
+6  ./data/SRR1552449.fastq.gz.subread.BAM     1000        67      0.067
+7  ./data/SRR1552450.fastq.gz.subread.BAM     1000       119      0.119
+8  ./data/SRR1552451.fastq.gz.subread.BAM     1000       145      0.145
+9  ./data/SRR1552452.fastq.gz.subread.BAM     1000       133      0.133
+10 ./data/SRR1552453.fastq.gz.subread.BAM     1000       142      0.142
+11 ./data/SRR1552454.fastq.gz.subread.BAM     1000       127      0.127
+12 ./data/SRR1552455.fastq.gz.subread.BAM     1000       113      0.113
 </code></pre>
 <p>Exercise: (1) Try aligning the fastq files allowing multi-mapping reads (set <code>unique = FALSE</code>), and allowing for up to 6 “best” locations to be reported (<code>nBestLocations = 6</code>). Specify the output file names (bam.files.multi) by substituting “.fastq.gz” with “.multi.bam” so we don’t overwrite our unique alignment bam files (2) Look at the proportion of reads mapped and see if we get any more reads mapping by specifying a less stringent criteria.</p>
 <h2 id="quality-control">Quality control</h2>
@@ -209,13 +217,7 @@ Completed successfully. Quality scores for 100 reads (equally spaced in the file
 <p>A quality score of 30 corresponds to a 1 in 1000 chance of an incorrect base call. (A quality score of 10 is a 1 in 10 chance of an incorrect base call.) To look at the overall distribution of quality scores across the 100 reads, we can look at a boxplot</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">boxplot</span>(qs)</code></pre>
 <p><img src="fig-07/unnamed-chunk-12-1.png" title="plot of chunk unnamed-chunk-12" alt="plot of chunk unnamed-chunk-12" style="display: block; margin: auto;" /></p>
-<p>We can get the percentages of A, T, G and C in a fastq file by using the <code>atgcContent</code> function. This can sometimes highlight if there’s a strong GC bias, for example.</p>
-<pre class="sourceCode r"><code class="sourceCode r">actg &lt;-<span class="st"> </span><span class="kw">atgcContent</span>(<span class="dt">filename=</span><span class="st">&quot;SRR1552450.fastq.gz&quot;</span>)
-actg</code></pre>
-<pre class="output"><code>     A      T G      C      N
-[1,] 0 0.0083 0 0.0167 1.1167
-</code></pre>
-<p>Exercise: (1) Extract quality scores for SRR1552451.fastq.gz for 50 reads (2) Plot a boxplot of the quality scores for SRR1552451.fastq.gz. (3) Get the nucleotide percentages for SRR1552451.fastq.gz.</p>
+<p>Exercise: (1) Extract quality scores for SRR1552451.fastq.gz for 50 reads (2) Plot a boxplot of the quality scores for SRR1552451.fastq.gz.</p>
 <h2 id="counting">Counting</h2>
 <p>Now that we have figured out where each read comes from in the genome, we need to summarise the information across genes or exons. The alignment produces a set of BAM files, where each file contains the read alignments for each library. In the BAM file, there is a chromosomal location for every read that mapped uniquely. The mapped reads can be counted across mouse genes by using the <code>featureCounts</code> function. <code>featureCounts</code> contains built-in annotation for mouse (mm9, mm10) and human (hg19) genome assemblies (NCBI refseq annotation).</p>
 <p>The code below uses the exon intervals defined in the NCBI refseq annotation of the mm10 genome. Reads that map to exons of genes are added together to obtain the count for each gene, with some care taken with reads that span exon-exon boundaries. <code>featureCounts</code> takes all the BAM files as input, and outputs an object which includes the count matrix, similar to the count matrix we have been working with on Day 1. Each sample is a separate column, each row is a gene.</p>
@@ -227,54 +229,150 @@ actg</code></pre>
 <p>The statistics of the read mapping can be seen with fc$stats. This reports the numbers of unassigned reads and the reasons why they are not assigned (eg. ambiguity, multi-mapping, secondary alignment, mapping quality, fragment length, chimera, read duplicate, non-junction and so on), in addition to the number of successfully assigned reads for each library. (We know the real reason why the majority of the reads aren’t mapping - they’re not from chr 1!)</p>
 <pre class="sourceCode r"><code class="sourceCode r">## Take a look at the featurecounts stats
 fc$stat</code></pre>
-<pre class="output"><code>                      Status ..SRR1552444.bam ..SRR1552445.bam
-1                   Assigned               48               45
-2       Unassigned_Ambiguity                0                1
-3    Unassigned_MultiMapping                0                0
-4      Unassigned_NoFeatures               85               84
-5        Unassigned_Unmapped              867              870
-6  Unassigned_MappingQuality                0                0
-7  Unassigned_FragmentLength                0                0
-8         Unassigned_Chimera                0                0
-9       Unassigned_Secondary                0                0
-10    Unassigned_Nonjunction                0                0
-11      Unassigned_Duplicate                0                0
-   ..SRR1552446.bam ..SRR1552447.bam ..SRR1552448.bam ..SRR1552449.bam
-1                34               34               13               20
-2                 0                0                1                0
-3                 0                0                0                0
-4                77               69               39               47
-5               889              897              947              933
-6                 0                0                0                0
-7                 0                0                0                0
-8                 0                0                0                0
-9                 0                0                0                0
-10                0                0                0                0
-11                0                0                0                0
-   ..SRR1552450.bam ..SRR1552451.bam ..SRR1552452.bam ..SRR1552453.bam
-1                50               69               50               52
-2                 1                0                2                1
-3                 0                0                0                0
-4                68               76               81               89
-5               881              855              867              858
-6                 0                0                0                0
-7                 0                0                0                0
-8                 0                0                0                0
-9                 0                0                0                0
-10                0                0                0                0
-11                0                0                0                0
-   ..SRR1552454.bam ..SRR1552455.bam
-1                54               42
-2                 0                0
-3                 0                0
-4                73               71
-5               873              887
-6                 0                0
-7                 0                0
-8                 0                0
-9                 0                0
-10                0                0
-11                0                0
+<pre class="output"><code>                      Status ..data.SRR1552444.fastq.gz.subread.BAM
+1                   Assigned                                     48
+2       Unassigned_Ambiguity                                      0
+3    Unassigned_MultiMapping                                      0
+4      Unassigned_NoFeatures                                     85
+5        Unassigned_Unmapped                                    867
+6  Unassigned_MappingQuality                                      0
+7  Unassigned_FragmentLength                                      0
+8         Unassigned_Chimera                                      0
+9       Unassigned_Secondary                                      0
+10    Unassigned_Nonjunction                                      0
+11      Unassigned_Duplicate                                      0
+   ..data.SRR1552445.fastq.gz.subread.BAM
+1                                      45
+2                                       1
+3                                       0
+4                                      84
+5                                     870
+6                                       0
+7                                       0
+8                                       0
+9                                       0
+10                                      0
+11                                      0
+   ..data.SRR1552446.fastq.gz.subread.BAM
+1                                      34
+2                                       0
+3                                       0
+4                                      77
+5                                     889
+6                                       0
+7                                       0
+8                                       0
+9                                       0
+10                                      0
+11                                      0
+   ..data.SRR1552447.fastq.gz.subread.BAM
+1                                      34
+2                                       0
+3                                       0
+4                                      69
+5                                     897
+6                                       0
+7                                       0
+8                                       0
+9                                       0
+10                                      0
+11                                      0
+   ..data.SRR1552448.fastq.gz.subread.BAM
+1                                      13
+2                                       1
+3                                       0
+4                                      39
+5                                     947
+6                                       0
+7                                       0
+8                                       0
+9                                       0
+10                                      0
+11                                      0
+   ..data.SRR1552449.fastq.gz.subread.BAM
+1                                      20
+2                                       0
+3                                       0
+4                                      47
+5                                     933
+6                                       0
+7                                       0
+8                                       0
+9                                       0
+10                                      0
+11                                      0
+   ..data.SRR1552450.fastq.gz.subread.BAM
+1                                      50
+2                                       1
+3                                       0
+4                                      68
+5                                     881
+6                                       0
+7                                       0
+8                                       0
+9                                       0
+10                                      0
+11                                      0
+   ..data.SRR1552451.fastq.gz.subread.BAM
+1                                      69
+2                                       0
+3                                       0
+4                                      76
+5                                     855
+6                                       0
+7                                       0
+8                                       0
+9                                       0
+10                                      0
+11                                      0
+   ..data.SRR1552452.fastq.gz.subread.BAM
+1                                      50
+2                                       2
+3                                       0
+4                                      81
+5                                     867
+6                                       0
+7                                       0
+8                                       0
+9                                       0
+10                                      0
+11                                      0
+   ..data.SRR1552453.fastq.gz.subread.BAM
+1                                      52
+2                                       1
+3                                       0
+4                                      89
+5                                     858
+6                                       0
+7                                       0
+8                                       0
+9                                       0
+10                                      0
+11                                      0
+   ..data.SRR1552454.fastq.gz.subread.BAM
+1                                      54
+2                                       0
+3                                       0
+4                                      73
+5                                     873
+6                                       0
+7                                       0
+8                                       0
+9                                       0
+10                                      0
+11                                      0
+   ..data.SRR1552455.fastq.gz.subread.BAM
+1                                      42
+2                                       0
+3                                       0
+4                                      71
+5                                     887
+6                                       0
+7                                       0
+8                                       0
+9                                       0
+10                                      0
+11                                      0
 </code></pre>
 <p>The counts for the samples are stored in fc$counts. Take a look at that.</p>
 <pre class="sourceCode r"><code class="sourceCode r">## Take a look at the dimensions to see the number of genes
@@ -283,34 +381,90 @@ fc$stat</code></pre>
 </code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">## Take a look at the first 6 lines
 <span class="kw">head</span>(fc$counts)</code></pre>
-<pre class="output"><code>          ..SRR1552444.bam ..SRR1552445.bam ..SRR1552446.bam
-497097                   0                0                0
-100503874                0                0                0
-100038431                0                0                0
-19888                    0                0                0
-20671                    0                0                0
-27395                    0                0                0
-          ..SRR1552447.bam ..SRR1552448.bam ..SRR1552449.bam
-497097                   0                0                0
-100503874                0                0                0
-100038431                0                0                0
-19888                    0                0                0
-20671                    0                0                0
-27395                    0                0                0
-          ..SRR1552450.bam ..SRR1552451.bam ..SRR1552452.bam
-497097                   0                0                0
-100503874                0                0                0
-100038431                0                0                0
-19888                    0                0                0
-20671                    0                0                0
-27395                    0                0                0
-          ..SRR1552453.bam ..SRR1552454.bam ..SRR1552455.bam
-497097                   0                0                0
-100503874                0                0                0
-100038431                0                0                0
-19888                    0                0                0
-20671                    0                0                0
-27395                    0                0                0
+<pre class="output"><code>          ..data.SRR1552444.fastq.gz.subread.BAM
+497097                                         0
+100503874                                      0
+100038431                                      0
+19888                                          0
+20671                                          0
+27395                                          0
+          ..data.SRR1552445.fastq.gz.subread.BAM
+497097                                         0
+100503874                                      0
+100038431                                      0
+19888                                          0
+20671                                          0
+27395                                          0
+          ..data.SRR1552446.fastq.gz.subread.BAM
+497097                                         0
+100503874                                      0
+100038431                                      0
+19888                                          0
+20671                                          0
+27395                                          0
+          ..data.SRR1552447.fastq.gz.subread.BAM
+497097                                         0
+100503874                                      0
+100038431                                      0
+19888                                          0
+20671                                          0
+27395                                          0
+          ..data.SRR1552448.fastq.gz.subread.BAM
+497097                                         0
+100503874                                      0
+100038431                                      0
+19888                                          0
+20671                                          0
+27395                                          0
+          ..data.SRR1552449.fastq.gz.subread.BAM
+497097                                         0
+100503874                                      0
+100038431                                      0
+19888                                          0
+20671                                          0
+27395                                          0
+          ..data.SRR1552450.fastq.gz.subread.BAM
+497097                                         0
+100503874                                      0
+100038431                                      0
+19888                                          0
+20671                                          0
+27395                                          0
+          ..data.SRR1552451.fastq.gz.subread.BAM
+497097                                         0
+100503874                                      0
+100038431                                      0
+19888                                          0
+20671                                          0
+27395                                          0
+          ..data.SRR1552452.fastq.gz.subread.BAM
+497097                                         0
+100503874                                      0
+100038431                                      0
+19888                                          0
+20671                                          0
+27395                                          0
+          ..data.SRR1552453.fastq.gz.subread.BAM
+497097                                         0
+100503874                                      0
+100038431                                      0
+19888                                          0
+20671                                          0
+27395                                          0
+          ..data.SRR1552454.fastq.gz.subread.BAM
+497097                                         0
+100503874                                      0
+100038431                                      0
+19888                                          0
+20671                                          0
+27395                                          0
+          ..data.SRR1552455.fastq.gz.subread.BAM
+497097                                         0
+100503874                                      0
+100038431                                      0
+19888                                          0
+20671                                          0
+27395                                          0
 </code></pre>
 <p>The row names of the fc$counts matrix represent the Entrez gene identifiers for each gene and the column names are the output filenames from calling the <code>align</code> function. The <code>annotation</code> slot shows the annotation information that <code>featureCounts</code> used to summarise reads over genes.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(fc$annotation)</code></pre>
