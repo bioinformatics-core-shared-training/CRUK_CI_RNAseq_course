@@ -527,7 +527,7 @@ summa.fit <- decideTests(fit.cont)
 summary(summa.fit)
 ```
 
-<span style="color:blue">Exercise: (1) Add another contrast to the contrasts matrix: `L.PregVLac = luminal.pregnant - luminal.lactate` and re-run the code above. You should have two comparisons in `fit.cont` now. (2) Check out the `vennDiagram` function</span> <span style="color:red">(HINT: type `?vennDiagram`)</span>. <span style="color:blue">Can you show the overlap of differentially expressed genes between the two comparisons? How many genes are commonly differentially expressed?</span>
+<span style="color:blue">Exercise: (1) Add another contrast to the contrasts matrix: `L.PregVsLac = luminal.pregnant - luminal.lactate` and re-run the code above. You should have two comparisons in `fit.cont` now. (2) Check out the `vennDiagram` function</span> <span style="color:red">(HINT: type `?vennDiagram`)</span>. <span style="color:blue">Can you show the overlap of differentially expressed genes between the two comparisons? How many genes are commonly differentially expressed?</span>
 
 The *limma* `topTable` function summarises the output in a table format. Significant DE genes for a particular comparison can be identified by selecting genes with a p-value smaller than a chosen cut-off value and/or a fold change greater than a chosen value in this table. By default the table will be sorted by the B statistic, which is the log-odds of differential expression. Usually the B statistic and p-value ranking will be the same, but this is not always the case. We will explicitly rank by p-value, which we can specify with the `sort.by` argument.
 
