@@ -40,4 +40,4 @@ However, make sure you complete the challenges in topic 1 to ensure you have set
 
 6. [Differential expression and gene set testing](06-rnaseq-day1.html)
 7. [Alignment and feature counting](07-rnaseq-day2.html)
-8. [Applying RNAseq](08-applying-rnaseq.html)
+8. [Applying RNAseq](08-applying-rnaseq.html) ([solutions](09-applying-rnaseq-solutions.html))
