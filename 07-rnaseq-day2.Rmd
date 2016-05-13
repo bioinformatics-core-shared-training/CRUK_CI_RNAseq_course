@@ -54,6 +54,8 @@ library(Rsubread)
 Earlier we put all the sequencing read data (.fastq.gz files) in the data directory.
 Now we need to find them in order to tell the Rsubread aligner which files to look at.
 We can search for all .fastq.gz files in the data directory using the `list.files` command.
+The pattern argument takes a regular expression.
+In this case we are using the `$` to mean the end of the string, so we will only get files that end in ".fastq.gz"
 
 ```{r}
 fastq.files <- list.files(path = "./data", pattern = ".fastq.gz$", full.names = TRUE)
@@ -107,7 +109,7 @@ In this example we have kept many of the default settings, which have been optim
 We can get a summary of the proportion of reads that mapped to the reference genome using the `propmapped` function.
 
 ```{r}
-bam.files <- list.files(path = ".", pattern = ".bam$", full.names = TRUE)
+bam.files <- list.files(path = "./data", pattern = ".BAM$", full.names = TRUE)
 bam.files
 ```
 
