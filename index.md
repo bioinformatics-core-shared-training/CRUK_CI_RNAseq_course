@@ -18,10 +18,8 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 
 ## Data
 
-- Day 1: [https://figshare.com/s/1d788fd384d33e913a2a](https://figshare.com/s/1d788fd384d33e913a2a)
-- Day 2: [https://figshare.com/s/f5d63d8c265a05618137](https://figshare.com/s/f5d63d8c265a05618137)
-
-The Day 2 data is ~400MB, so we recommend you download this somewhere with a decent internet connection e.g. at home.
+- Mouse mammary data (counts): [https://figshare.com/s/1d788fd384d33e913a2a](https://figshare.com/s/1d788fd384d33e913a2a)
+- Drosophila data (counts): [https://figshare.com/s/e08e71c42f118dbe8be6](https://figshare.com/s/e08e71c42f118dbe8be6)
 
 ## Topics
 
@@ -41,9 +39,11 @@ Introductory R materials:
 - [Data frames and reading in data](04-data-structures-part2.html)
 - [Subsetting data](05-data-subsetting.html)
 
-Additional RNAseq materials
+Additional RNAseq materials:
 
 - [Alignment and feature counting](07-rnaseq-day2.html)
+
+Data: Mouse mammary data (fastq files): [https://figshare.com/s/f5d63d8c265a05618137](https://figshare.com/s/f5d63d8c265a05618137)
 
 ### Additional resources
 
