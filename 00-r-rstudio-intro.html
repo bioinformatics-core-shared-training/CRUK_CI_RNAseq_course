@@ -163,86 +163,129 @@ Managing your projects in a reproducible fashion doesn’t just make your scienc
 </section>
 <h2 id="reading-data-into-r">Reading data into R</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Read the data into R</span>
-seqdata &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/GSE60450_Lactation-GenewiseCounts.txt&quot;</span>, <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>)
+<span class="co">#small_counts &lt;- read.delim(&quot;data/GSE60450_Lactation-GenewiseCounts.txt&quot;, stringsAsFactors = FALSE)</span>
 <span class="co"># Read the sample information into R</span>
-targets &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/targets.txt&quot;</span>)</code></pre></div>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(seqdata)</code></pre></div>
-<pre class="output"><code>  EntrezGeneID Length MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1
-1       497097   3634                               438
-2    100503874   3259                                 1
-3    100038431   1634                                 0
-4        19888   9747                                 1
-5        20671   3130                               106
-6        27395   4203                               309
-  MCL1.DH_BC2CTUACXX_CAGATC_L002_R1 MCL1.DI_BC2CTUACXX_ACAGTG_L002_R1
-1                               300                                65
-2                                 0                                 1
-3                                 0                                 0
-4                                 1                                 0
-5                               182                                82
-6                               234                               337
-  MCL1.DJ_BC2CTUACXX_CGATGT_L002_R1 MCL1.DK_BC2CTUACXX_TTAGGC_L002_R1
-1                               237                               354
-2                                 1                                 0
-3                                 0                                 0
-4                                 0                                 0
-5                               105                                43
-6                               300                               290
-  MCL1.DL_BC2CTUACXX_ATCACG_L002_R1 MCL1.LA_BC2CTUACXX_GATCAG_L001_R1
-1                               287                                 0
-2                                 4                                 0
-3                                 0                                 0
-4                                 0                                10
-5                                82                                16
-6                               270                               560
-  MCL1.LB_BC2CTUACXX_TGACCA_L001_R1 MCL1.LC_BC2CTUACXX_GCCAAT_L001_R1
-1                                 0                                 0
-2                                 0                                 0
-3                                 0                                 0
-4                                 3                                10
-5                                25                                18
-6                               464                               489
-  MCL1.LD_BC2CTUACXX_GGCTAC_L001_R1 MCL1.LE_BC2CTUACXX_TAGCTT_L001_R1
-1                                 0                                 0
-2                                 0                                 0
-3                                 0                                 0
-4                                 2                                 0
-5                                 8                                 3
-6                               328                               307
-  MCL1.LF_BC2CTUACXX_CTTGTA_L001_R1
-1                                 0
-2                                 0
-3                                 0
-4                                 0
-5                                10
-6                               342
+small_counts &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="st">&quot;data/small_counts.txt&quot;</span>,<span class="dt">header=</span><span class="ot">TRUE</span>)
+sampleinfo &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/SampleInfo.txt&quot;</span>)
+ResultsTable_small &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="st">&quot;data/ResultsTable_small.txt&quot;</span>,<span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>,<span class="dt">header=</span><span class="ot">TRUE</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(small_counts)</code></pre></div>
+<pre class="output"><code>        Sample_1 Sample_2 Sample_3 Sample_4
+Xkr4         438      300       65      237
+Sox17        106      182       82      105
+Mrpl15       309      234      337      300
+Lypla1       652      515      948      935
+Tcea1       1604     1495     1721     1317
+Rgs20          4        2       14        4
+Atp6v1h      769      752     1062      987
+Rb1cc1      1494     1412     1157      967
+Pcmtd1      1344     1242     1374     1593
+Rrs1        1691     1808     2127     1653
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(seqdata)</code></pre></div>
-<pre class="output"><code>[1] 27179    14
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(small_counts)</code></pre></div>
+<pre class="output"><code>[1] 10  4
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(ResultsTable_small)</code></pre></div>
+<pre class="output"><code>   ENTREZID        SYMBOL     logFC     AveExpr         t      P.Value
+1     24117          Wif1  1.819943  2.97554452  20.10780 1.063770e-10
+2    381290        Atp2b4 -2.143885  3.94406593 -19.07495 1.982934e-10
+3     78896 1500015O10Rik  2.807548  3.03651950  18.54773 2.758828e-10
+4    226101          Myof -2.329744  6.22352456 -18.26861 3.297667e-10
+5     16012        Igfbp6 -2.896115  1.97844876 -18.21525 3.413066e-10
+6    231830       Micall2  2.253400  4.76059697  18.02627 3.858161e-10
+7     16669         Krt19 -2.312721  8.74189184 -17.07937 7.264548e-10
+8     55987         Cpxm2 -1.515469  2.83451194 -16.64333 9.829870e-10
+9    231991         Creb5 -2.598105  4.27592952 -16.53634 1.059885e-09
+10    14620          Gjb3  3.600094  3.52528051  16.46627 1.113755e-09
+11   211577        Mrgprf -5.146268 -0.93683349 -16.36573 1.196263e-09
+12    20317      Serpinf1  1.710380  3.38883490  15.77280 1.838727e-09
+13    74747         Ddit4  2.180370  6.86479110  15.70145 1.938279e-09
+14   270150       Ccdc153 -3.211148 -1.34083882 -15.50126 2.249931e-09
+15    11636           Ak1  2.766745  4.30347462  15.27694 2.664640e-09
+16    20482          Skil  1.887561  8.49892507  14.65488 4.311334e-09
+17   194126        Mtmr11 -1.708973  2.50804119 -14.48746 4.922928e-09
+18    21953         Tnni2 -5.827889  0.30207159 -14.40327 5.265278e-09
+19    12992       Csn1s2b -6.070143  3.56295004 -14.16565 6.377604e-09
+20    17131         Smad7  1.972771  6.71751902  14.14348 6.493642e-09
+21    20564         Slit3 -1.331437  3.44179493 -13.88522 8.026279e-09
+22    16878           Lif  3.738933  6.68203417  13.73344 9.105708e-09
+23   170761         Pdzd3 -3.313648 -0.06019306 -13.62372 9.982985e-09
+24    73847       Fam110a  1.474671  6.84086068  13.62251 9.993185e-09
+25    12977          Csf1  2.835624  7.47759094  13.41902 1.187300e-08
+26    12654         Chil1  2.342914  5.57645724  13.21976 1.408760e-08
+27   545370         Hmcn1 -1.567424  3.10302591 -13.19053 1.444832e-08
+28    60599     Trp53inp1 -1.258671  6.11839605 -13.16241 1.480464e-08
+29   217166         Nr1d1  2.278879  6.26087761  13.12885 1.524242e-08
+30    67111          Naaa -2.538596  3.29074575 -13.04083 1.645823e-08
+31   232016       Ccdc129 -2.597044  5.00471484 -13.02266 1.672195e-08
+32    76123         Gpsm2 -2.171896  4.99093472 -12.76344 2.102397e-08
+33   329739       Fam102b -1.520291  4.18813047 -12.75357 2.120968e-08
+34    79362       Bhlhe41  1.788601  6.18368494  12.70504 2.214908e-08
+35    50786        Hs6st2  1.751340  0.53953600  12.43097 2.836919e-08
+36    18019        Nfatc2 -2.011808  5.79499693 -12.27561 3.271067e-08
+37    67971         Tppp3 -2.653398  4.90816305 -12.22845 3.416616e-08
+38   235542       Ppp2r3a -1.109156  6.50105941 -12.22041 3.442139e-08
+39    74134        Cyp2s1 -2.071469  1.40704575 -12.20154 3.502805e-08
+40    20677          Sox4  1.522405  7.46932835  12.13548 3.724389e-08
+      adj.P.Val
+1  1.016240e-06
+2  1.016240e-06
+3  1.016240e-06
+4  1.016240e-06
+5  1.016240e-06
+6  1.016240e-06
+7  1.640127e-06
+8  1.718703e-06
+9  1.718703e-06
+10 1.718703e-06
+11 1.718703e-06
+12 2.356351e-06
+13 2.356351e-06
+14 2.539851e-06
+15 2.807465e-06
+16 4.258521e-06
+17 4.576586e-06
+18 4.622914e-06
+19 5.131276e-06
+20 5.131276e-06
+21 6.040348e-06
+22 6.541210e-06
+23 6.580512e-06
+24 6.580512e-06
+25 7.505634e-06
+26 8.306595e-06
+27 8.306595e-06
+28 8.306595e-06
+29 8.306595e-06
+30 8.524957e-06
+31 8.524957e-06
+32 1.015751e-05
+33 1.015751e-05
+34 1.029541e-05
+35 1.280991e-05
+36 1.419445e-05
+37 1.419445e-05
+38 1.419445e-05
+39 1.419445e-05
+40 1.462109e-05
 </code></pre>
 <h2 id="working-with-data-frames">Working with Data Frames</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">seqdata_sample =<span class="st"> </span>seqdata[<span class="dv">1</span>:<span class="dv">4</span>, <span class="dv">1</span>:<span class="dv">4</span>]
-<span class="kw">print</span>(seqdata_sample)</code></pre></div>
-<pre class="output"><code>  EntrezGeneID Length MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1
-1       497097   3634                               438
-2    100503874   3259                                 1
-3    100038431   1634                                 0
-4        19888   9747                                 1
-  MCL1.DH_BC2CTUACXX_CAGATC_L002_R1
-1                               300
-2                                 0
-3                                 0
-4                                 1
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">small_counts_sample =<span class="st"> </span>small_counts[<span class="dv">1</span>:<span class="dv">4</span>, <span class="dv">1</span>:<span class="dv">4</span>]
+<span class="kw">print</span>(small_counts_sample)</code></pre></div>
+<pre class="output"><code>       Sample_1 Sample_2 Sample_3 Sample_4
+Xkr4        438      300       65      237
+Sox17       106      182       82      105
+Mrpl15      309      234      337      300
+Lypla1      652      515      948      935
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#names(seqdata_sample)[3:6] &lt;- c(&quot;sample1&quot;, &quot;sample2&quot;, &quot;sample3&quot;, &quot;sample4&quot;)</span>
-<span class="co">#print(seqdata_sample)</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#names(small_counts_sample)[3:6] &lt;- c(&quot;sample1&quot;, &quot;sample2&quot;, &quot;sample3&quot;, &quot;sample4&quot;)</span>
+<span class="co">#print(small_counts_sample)</span>
 
-<span class="kw">str</span>(seqdata_sample)</code></pre></div>
+<span class="kw">str</span>(small_counts_sample)</code></pre></div>
 <pre class="output"><code>&#39;data.frame&#39;:   4 obs. of  4 variables:
- $ EntrezGeneID                     : int  497097 100503874 100038431 19888
- $ Length                           : int  3634 3259 1634 9747
- $ MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1: int  438 1 0 1
- $ MCL1.DH_BC2CTUACXX_CAGATC_L002_R1: int  300 0 0 1
+ $ Sample_1: int  438 106 309 652
+ $ Sample_2: int  300 182 234 515
+ $ Sample_3: int  65 82 337 948
+ $ Sample_4: int  237 105 300 935
 </code></pre>
 <h2 id="data-types">Data types</h2>
 <p>There are 5 main types: doubles, integers, complex, logical and character.</p>
@@ -253,72 +296,72 @@ typeof(TRUE)
 typeof(&#39;banana&#39;)</code></pre>
 <p>Note the <code>L</code> suffix to insist that a number is an integer. No matter how complicated our analyses become, all data in R is interpreted as one of these basic data types.</p>
 <h2 id="factors">Factors</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">targets &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/targets.txt&quot;</span>)
-<span class="kw">print</span>(targets)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sampleinfo &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/sampleinfo.txt&quot;</span>)
+<span class="kw">print</span>(sampleinfo)</code></pre></div>
 <pre class="output"><code>                            FileName SampleName CellType   Status
-1  MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1    MCL1.DG    basal   virgin
+1  MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1    MCL1.DG  luminal   virgin
 2  MCL1.DH_BC2CTUACXX_CAGATC_L002_R1    MCL1.DH    basal   virgin
 3  MCL1.DI_BC2CTUACXX_ACAGTG_L002_R1    MCL1.DI    basal pregnant
 4  MCL1.DJ_BC2CTUACXX_CGATGT_L002_R1    MCL1.DJ    basal pregnant
 5  MCL1.DK_BC2CTUACXX_TTAGGC_L002_R1    MCL1.DK    basal  lactate
 6  MCL1.DL_BC2CTUACXX_ATCACG_L002_R1    MCL1.DL    basal  lactate
-7  MCL1.LA_BC2CTUACXX_GATCAG_L001_R1    MCL1.LA  luminal   virgin
+7  MCL1.LA_BC2CTUACXX_GATCAG_L001_R1    MCL1.LA    basal   virgin
 8  MCL1.LB_BC2CTUACXX_TGACCA_L001_R1    MCL1.LB  luminal   virgin
 9  MCL1.LC_BC2CTUACXX_GCCAAT_L001_R1    MCL1.LC  luminal pregnant
 10 MCL1.LD_BC2CTUACXX_GGCTAC_L001_R1    MCL1.LD  luminal pregnant
 11 MCL1.LE_BC2CTUACXX_TAGCTT_L001_R1    MCL1.LE  luminal  lactate
 12 MCL1.LF_BC2CTUACXX_CTTGTA_L001_R1    MCL1.LF  luminal  lactate
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">str</span>(targets)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">str</span>(sampleinfo)</code></pre></div>
 <pre class="output"><code>&#39;data.frame&#39;:   12 obs. of  4 variables:
  $ FileName  : Factor w/ 12 levels &quot;MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
  $ SampleName: Factor w/ 12 levels &quot;MCL1.DG&quot;,&quot;MCL1.DH&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
- $ CellType  : Factor w/ 2 levels &quot;basal&quot;,&quot;luminal&quot;: 1 1 1 1 1 1 2 2 2 2 ...
+ $ CellType  : Factor w/ 2 levels &quot;basal&quot;,&quot;luminal&quot;: 2 1 1 1 1 1 1 2 2 2 ...
  $ Status    : Factor w/ 3 levels &quot;lactate&quot;,&quot;pregnant&quot;,..: 3 3 2 2 1 1 3 3 2 2 ...
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">targets &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/targets.txt&quot;</span>, <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>)
-<span class="kw">str</span>(targets)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sampleinfo &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/sampleinfo.txt&quot;</span>, <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>)
+<span class="kw">str</span>(sampleinfo)</code></pre></div>
 <pre class="output"><code>&#39;data.frame&#39;:   12 obs. of  4 variables:
  $ FileName  : chr  &quot;MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1&quot; &quot;MCL1.DH_BC2CTUACXX_CAGATC_L002_R1&quot; &quot;MCL1.DI_BC2CTUACXX_ACAGTG_L002_R1&quot; &quot;MCL1.DJ_BC2CTUACXX_CGATGT_L002_R1&quot; ...
  $ SampleName: chr  &quot;MCL1.DG&quot; &quot;MCL1.DH&quot; &quot;MCL1.DI&quot; &quot;MCL1.DJ&quot; ...
- $ CellType  : chr  &quot;basal&quot; &quot;basal&quot; &quot;basal&quot; &quot;basal&quot; ...
+ $ CellType  : chr  &quot;luminal&quot; &quot;basal&quot; &quot;basal&quot; &quot;basal&quot; ...
  $ Status    : chr  &quot;virgin&quot; &quot;virgin&quot; &quot;pregnant&quot; &quot;pregnant&quot; ...
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">targets &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/targets.txt&quot;</span>)
-<span class="kw">str</span>(targets)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sampleinfo &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/sampleinfo.txt&quot;</span>)
+<span class="kw">str</span>(sampleinfo)</code></pre></div>
 <pre class="output"><code>&#39;data.frame&#39;:   12 obs. of  4 variables:
  $ FileName  : Factor w/ 12 levels &quot;MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
  $ SampleName: Factor w/ 12 levels &quot;MCL1.DG&quot;,&quot;MCL1.DH&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
- $ CellType  : Factor w/ 2 levels &quot;basal&quot;,&quot;luminal&quot;: 1 1 1 1 1 1 2 2 2 2 ...
+ $ CellType  : Factor w/ 2 levels &quot;basal&quot;,&quot;luminal&quot;: 2 1 1 1 1 1 1 2 2 2 ...
  $ Status    : Factor w/ 3 levels &quot;lactate&quot;,&quot;pregnant&quot;,..: 3 3 2 2 1 1 3 3 2 2 ...
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">targets$Status</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sampleinfo$Status</code></pre></div>
 <pre class="output"><code> [1] virgin   virgin   pregnant pregnant lactate  lactate  virgin  
  [8] virgin   pregnant pregnant lactate  lactate 
 Levels: lactate pregnant virgin
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">factor</span>(targets$Status, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="st">&quot;virgin&quot;</span>, <span class="st">&quot;pregnant&quot;</span>, <span class="st">&quot;lactate&quot;</span>), <span class="dt">ordered =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">factor</span>(sampleinfo$Status, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="st">&quot;virgin&quot;</span>, <span class="st">&quot;pregnant&quot;</span>, <span class="st">&quot;lactate&quot;</span>), <span class="dt">ordered =</span> <span class="ot">TRUE</span>)</code></pre></div>
 <pre class="output"><code> [1] virgin   virgin   pregnant pregnant lactate  lactate  virgin  
  [8] virgin   pregnant pregnant lactate  lactate 
 Levels: virgin &lt; pregnant &lt; lactate
 </code></pre>
 <h2 id="subsetting-using-logical-statements">Subsetting using logical statements</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">targets$CellType</code></pre></div>
-<pre class="output"><code> [1] basal   basal   basal   basal   basal   basal   luminal luminal
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sampleinfo$CellType</code></pre></div>
+<pre class="output"><code> [1] luminal basal   basal   basal   basal   basal   basal   luminal
  [9] luminal luminal luminal luminal
 Levels: basal luminal
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">targets$CellType ==<span class="st"> &quot;luminal&quot;</span></code></pre></div>
-<pre class="output"><code> [1] FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sampleinfo$CellType ==<span class="st"> &quot;luminal&quot;</span></code></pre></div>
+<pre class="output"><code> [1]  TRUE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE
 [12]  TRUE
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">targets$CellType[targets$CellType ==<span class="st"> &quot;luminal&quot;</span>]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sampleinfo$CellType[sampleinfo$CellType ==<span class="st"> &quot;luminal&quot;</span>]</code></pre></div>
 <pre class="output"><code>[1] luminal luminal luminal luminal luminal luminal
 Levels: basal luminal
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">targets[targets$CellType ==<span class="st"> &quot;luminal&quot;</span>,]</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sampleinfo[sampleinfo$CellType ==<span class="st"> &quot;luminal&quot;</span>,]</code></pre></div>
 <pre class="output"><code>                            FileName SampleName CellType   Status
-7  MCL1.LA_BC2CTUACXX_GATCAG_L001_R1    MCL1.LA  luminal   virgin
+1  MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1    MCL1.DG  luminal   virgin
 8  MCL1.LB_BC2CTUACXX_TGACCA_L001_R1    MCL1.LB  luminal   virgin
 9  MCL1.LC_BC2CTUACXX_GCCAAT_L001_R1    MCL1.LC  luminal pregnant
 10 MCL1.LD_BC2CTUACXX_GGCTAC_L001_R1    MCL1.LD  luminal pregnant
@@ -383,6 +426,8 @@ Levels: basal luminal
 <p>Source: <a href="http://www.statmethods.net/management/operators.html">Quick-R</a></p>
 </div>
 </aside>
+<h2 id="vectorisation">Vectorisation</h2>
+<p>Do an apply statement</p>
         </div>
       </div>
       </article>

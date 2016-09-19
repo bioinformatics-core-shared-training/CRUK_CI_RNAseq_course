@@ -60,6 +60,11 @@ http://www.ncbi.nlm.nih.gov/pubmed/20921232</p>
 <p>Next, read in the data and targets file:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">counts &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="dt">file=</span><span class="st">&quot;data/counts_Drosophila.txt&quot;</span>)
 targets &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="dt">file=</span><span class="st">&quot;data/targetsD.txt&quot;</span>)</code></pre></div>
+<pre class="error"><code>Warning in file(file, &quot;rt&quot;): cannot open file &#39;data/targetsD.txt&#39;: No such
+file or directory
+</code></pre>
+<pre class="error"><code>Error in file(file, &quot;rt&quot;): cannot open the connection
+</code></pre>
 <p>Check that the data has read in correctly</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(counts)</code></pre></div>
 <pre class="output"><code>            SRR031714.bam SRR031716.bam SRR031724.bam SRR031726.bam
@@ -78,21 +83,12 @@ FBgn0037217            15            15            17
 FBgn0037218           695           767           793
 </code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">targets</code></pre></div>
-<pre class="output"><code>  SampleName     Group Library
-1  SRR031714 Untreated      PE
-2  SRR031716 Untreated      PE
-3  SRR031724   Treated      PE
-4  SRR031726   Treated      PE
-5  SRR031708 Untreated      SE
-6  SRR031718   Treated      SE
-7  SRR031728 Untreated      SE
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;targets&#39; not found
 </code></pre>
 <h2 id="filtering-out-lowly-expressed-genes">Filtering out lowly expressed genes</h2>
 <p>Our main interest is in testing the treated versus untreated groups. To check how many samples we have in each group we can use the <code>table</code> command.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(targets$Group)</code></pre></div>
-<pre class="output"><code>
-  Treated Untreated 
-        3         4 
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;targets&#39; not found
 </code></pre>
 <p>The minimum sample size is 3. Let’s check the relationship between CPM and counts to see what CPM threshold we should be imposing. Recall we’re looking for a CPM that corresponds to a count of roughly 10-15.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mycpm &lt;-<span class="st"> </span><span class="kw">cpm</span>(counts)
@@ -128,22 +124,37 @@ FALSE  TRUE
 <p><img src="fig-09/unnamed-chunk-11-1.png" title="plot of chunk unnamed-chunk-11" alt="plot of chunk unnamed-chunk-11" style="display: block; margin: auto;" /></p>
 <p>We can colour by our groups, or by the different library prep.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
-group.col &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;red&quot;</span>,<span class="st">&quot;blue&quot;</span>)[targets$Group]
-<span class="kw">plotRLE</span>(y$counts,<span class="dt">ylim=</span><span class="kw">c</span>(-<span class="dv">1</span>,<span class="dv">1</span>),<span class="dt">col=</span>group.col)
-lib.col &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;light pink&quot;</span>,<span class="st">&quot;light green&quot;</span>)[targets$Library]
-<span class="kw">plotRLE</span>(y$counts,<span class="dt">ylim=</span><span class="kw">c</span>(-<span class="dv">1</span>,<span class="dv">1</span>),<span class="dt">col=</span>lib.col)</code></pre></div>
-<p><img src="fig-09/unnamed-chunk-12-1.png" title="plot of chunk unnamed-chunk-12" alt="plot of chunk unnamed-chunk-12" style="display: block; margin: auto;" /></p>
+group.col &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;red&quot;</span>,<span class="st">&quot;blue&quot;</span>)[targets$Group]</code></pre></div>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;targets&#39; not found
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotRLE</span>(y$counts,<span class="dt">ylim=</span><span class="kw">c</span>(-<span class="dv">1</span>,<span class="dv">1</span>),<span class="dt">col=</span>group.col)</code></pre></div>
+<pre class="error"><code>Error in boxplot.default(groups, ...): object &#39;group.col&#39; not found
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lib.col &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;light pink&quot;</span>,<span class="st">&quot;light green&quot;</span>)[targets$Library]</code></pre></div>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;targets&#39; not found
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotRLE</span>(y$counts,<span class="dt">ylim=</span><span class="kw">c</span>(-<span class="dv">1</span>,<span class="dv">1</span>),<span class="dt">col=</span>lib.col)</code></pre></div>
+<pre class="error"><code>Error in boxplot.default(groups, ...): object &#39;lib.col&#39; not found
+</code></pre>
 <p>Looks like some bias going on!</p>
 <p>Finally, let’s check our MDS plots.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))
 <span class="kw">plotMDS</span>(y)</code></pre></div>
 <p><img src="fig-09/unnamed-chunk-13-1.png" title="plot of chunk unnamed-chunk-13" alt="plot of chunk unnamed-chunk-13" style="display: block; margin: auto;" /></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
-<span class="kw">plotMDS</span>(y,<span class="dt">col=</span>group.col)
-<span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>,<span class="dt">legend=</span><span class="kw">levels</span>(targets$Group),<span class="dt">fill=</span><span class="kw">c</span>(<span class="st">&quot;red&quot;</span>,<span class="st">&quot;blue&quot;</span>))
-<span class="kw">plotMDS</span>(y,<span class="dt">col=</span>lib.col)
-<span class="kw">legend</span>(<span class="st">&quot;topleft&quot;</span>,<span class="dt">legend=</span><span class="kw">levels</span>(targets$Library),<span class="dt">fill=</span><span class="kw">c</span>(<span class="st">&quot;light pink&quot;</span>,<span class="st">&quot;light green&quot;</span>))</code></pre></div>
+<span class="kw">plotMDS</span>(y,<span class="dt">col=</span>group.col)</code></pre></div>
+<pre class="error"><code>Error in plot.xy(xy, type, ...): object &#39;group.col&#39; not found
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>,<span class="dt">legend=</span><span class="kw">levels</span>(targets$Group),<span class="dt">fill=</span><span class="kw">c</span>(<span class="st">&quot;red&quot;</span>,<span class="st">&quot;blue&quot;</span>))</code></pre></div>
+<pre class="error"><code>Error in levels(targets$Group): object &#39;targets&#39; not found
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMDS</span>(y,<span class="dt">col=</span>lib.col)</code></pre></div>
+<pre class="error"><code>Error in plot.xy(xy, type, ...): object &#39;lib.col&#39; not found
+</code></pre>
 <p><img src="fig-09/unnamed-chunk-14-1.png" title="plot of chunk unnamed-chunk-14" alt="plot of chunk unnamed-chunk-14" style="display: block; margin: auto;" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">legend</span>(<span class="st">&quot;topleft&quot;</span>,<span class="dt">legend=</span><span class="kw">levels</span>(targets$Library),<span class="dt">fill=</span><span class="kw">c</span>(<span class="st">&quot;light pink&quot;</span>,<span class="st">&quot;light green&quot;</span>))</code></pre></div>
+<pre class="error"><code>Error in levels(targets$Library): object &#39;targets&#39; not found
+</code></pre>
 <h2 id="hierarchical-clustering-with-heatmap.2">Hierarchical clustering with heatmap.2</h2>
 <p>First we need a matrix of log counts:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">logcounts &lt;-<span class="st"> </span><span class="kw">cpm</span>(y,<span class="dt">log=</span><span class="ot">TRUE</span>)</code></pre></div>
@@ -159,9 +170,11 @@ lib.col &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st"
 morecols &lt;-<span class="st"> </span><span class="kw">colorRampPalette</span>(mypalette)
 <span class="co"># Plot the heatmap</span>
 <span class="kw">heatmap.2</span>(highly_variable_lcpm,<span class="dt">col=</span><span class="kw">rev</span>(<span class="kw">morecols</span>(<span class="dv">50</span>)),<span class="dt">trace=</span><span class="st">&quot;none&quot;</span>, <span class="dt">main=</span><span class="st">&quot;Top 500 most variable genes across samples&quot;</span>,<span class="dt">ColSideColors=</span>group.col,<span class="dt">scale=</span><span class="st">&quot;row&quot;</span>,<span class="dt">margins=</span><span class="kw">c</span>(<span class="dv">10</span>,<span class="dv">5</span>))</code></pre></div>
-<p><img src="fig-09/unnamed-chunk-19-1.png" title="plot of chunk unnamed-chunk-19" alt="plot of chunk unnamed-chunk-19" style="display: block; margin: auto;" /></p>
+<pre class="error"><code>Error in heatmap.2(highly_variable_lcpm, col = rev(morecols(50)), trace = &quot;none&quot;, : object &#39;group.col&#39; not found
+</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">heatmap.2</span>(highly_variable_lcpm,<span class="dt">col=</span><span class="kw">rev</span>(<span class="kw">morecols</span>(<span class="dv">50</span>)),<span class="dt">trace=</span><span class="st">&quot;none&quot;</span>, <span class="dt">main=</span><span class="st">&quot;Top 500 most variable genes across samples&quot;</span>,<span class="dt">ColSideColors=</span>lib.col,<span class="dt">scale=</span><span class="st">&quot;row&quot;</span>,<span class="dt">margins=</span><span class="kw">c</span>(<span class="dv">10</span>,<span class="dv">5</span>))</code></pre></div>
-<p><img src="fig-09/unnamed-chunk-19-2.png" title="plot of chunk unnamed-chunk-19" alt="plot of chunk unnamed-chunk-19" style="display: block; margin: auto;" /></p>
+<pre class="error"><code>Error in heatmap.2(highly_variable_lcpm, col = rev(morecols(50)), trace = &quot;none&quot;, : object &#39;lib.col&#39; not found
+</code></pre>
 <h2 id="normalisation">Normalisation</h2>
 <p>Let’s do TMM normalisation</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">y &lt;-<span class="st"> </span><span class="kw">calcNormFactors</span>(y)
@@ -184,69 +197,51 @@ SRR031728.bam     1  4031608    1.0106328
 <h2 id="differential-expression">Differential expression</h2>
 <h3 id="set-up-design-matrix">Set up design matrix</h3>
 <p>We want to test for differences between the treated and untreated samples. However, we know that the library preparation adds variability to the data, so we need to account for it in our model. We do this by modelling both Group and Library as variables in our design matrix. This is known as an additive model.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">design &lt;-<span class="st"> </span><span class="kw">model.matrix</span>(~targets$Library +<span class="st"> </span>targets$Group)
-design</code></pre></div>
-<pre class="output"><code>  (Intercept) targets$LibrarySE targets$GroupUntreated
-1           1                 0                      1
-2           1                 0                      1
-3           1                 0                      0
-4           1                 0                      0
-5           1                 1                      1
-6           1                 1                      0
-7           1                 1                      1
-attr(,&quot;assign&quot;)
-[1] 0 1 2
-attr(,&quot;contrasts&quot;)
-attr(,&quot;contrasts&quot;)$`targets$Library`
-[1] &quot;contr.treatment&quot;
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">design &lt;-<span class="st"> </span><span class="kw">model.matrix</span>(~targets$Library +<span class="st"> </span>targets$Group)</code></pre></div>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;targets&#39; not found
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">design</code></pre></div>
+<pre class="output"><code>standardGeneric for &quot;design&quot; defined from package &quot;BiocGenerics&quot;
 
-attr(,&quot;contrasts&quot;)$`targets$Group`
-[1] &quot;contr.treatment&quot;
+function (object, ...) 
+standardGeneric(&quot;design&quot;)
+&lt;environment: 0x7fea94077f48&gt;
+Methods may be defined for arguments: object
+Use  showMethods(&quot;design&quot;)  for currently available ones.
 </code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">colnames</span>(design) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Int&quot;</span>,<span class="st">&quot;SEvsPE&quot;</span>,<span class="st">&quot;UVsT&quot;</span>)</code></pre></div>
+<pre class="error"><code>Error in `colnames&lt;-`(`*tmp*`, value = c(&quot;Int&quot;, &quot;SEvsPE&quot;, &quot;UVsT&quot;)): attempt to set &#39;colnames&#39; on an object with less than two dimensions
+</code></pre>
 <h3 id="voom-transform-the-data">Voom transform the data</h3>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))
 v &lt;-<span class="st"> </span><span class="kw">voom</span>(y,design,<span class="dt">plot=</span><span class="ot">TRUE</span>)</code></pre></div>
-<p><img src="fig-09/unnamed-chunk-23-1.png" title="plot of chunk unnamed-chunk-23" alt="plot of chunk unnamed-chunk-23" style="display: block; margin: auto;" /></p>
+<pre class="error"><code>Error in as.vector(x, mode): cannot coerce type &#39;closure&#39; to vector of type &#39;any&#39;
+</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
 <span class="kw">boxplot</span>(logcounts)
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="kw">median</span>(logcounts),<span class="dt">col=</span><span class="dv">4</span>)
-<span class="kw">boxplot</span>(v$E)
-<span class="kw">abline</span>(<span class="dt">h=</span><span class="kw">median</span>(v$E),<span class="dt">col=</span><span class="dv">4</span>)</code></pre></div>
+<span class="kw">boxplot</span>(v$E)</code></pre></div>
+<pre class="error"><code>Error in boxplot(v$E): object &#39;v&#39; not found
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">abline</span>(<span class="dt">h=</span><span class="kw">median</span>(v$E),<span class="dt">col=</span><span class="dv">4</span>)</code></pre></div>
+<pre class="error"><code>Error in median(v$E): object &#39;v&#39; not found
+</code></pre>
 <p><img src="fig-09/unnamed-chunk-24-1.png" title="plot of chunk unnamed-chunk-24" alt="plot of chunk unnamed-chunk-24" style="display: block; margin: auto;" /></p>
 <h3 id="test-for-differential-expression">Test for differential expression</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit &lt;-<span class="st"> </span><span class="kw">lmFit</span>(v,design)
-fit &lt;-<span class="st"> </span><span class="kw">eBayes</span>(fit)
-results &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit)
-<span class="kw">summary</span>(results)</code></pre></div>
-<pre class="output"><code>    Int SEvsPE UVsT
--1    4    125  440
-0    66   7142 6641
-1  7454    257  443
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit &lt;-<span class="st"> </span><span class="kw">lmFit</span>(v,design)</code></pre></div>
+<pre class="error"><code>Error in is(object, &quot;list&quot;): object &#39;v&#39; not found
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit &lt;-<span class="st"> </span><span class="kw">eBayes</span>(fit)</code></pre></div>
+<pre class="error"><code>Error in ebayes(fit = fit, proportion = proportion, stdev.coef.lim = stdev.coef.lim, : object &#39;fit&#39; not found
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">results &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit)</code></pre></div>
+<pre class="error"><code>Error in is(object, &quot;MArrayLM&quot;): object &#39;fit&#39; not found
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(results)</code></pre></div>
+<pre class="error"><code>Error in summary(results): object &#39;results&#39; not found
 </code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre></div>
-<pre class="output"><code>                logFC   AveExpr         t      P.Value    adj.P.Val
-FBgn0025111 -2.863110  6.253448 -31.24326 9.756044e-13 4.734428e-09
-FBgn0003360  3.089242  7.778378  30.57062 1.258487e-12 4.734428e-09
-FBgn0026562  2.422219 11.359837  24.25592 1.868075e-11 4.685133e-08
-FBgn0029167  2.247086  7.825170  21.77945 6.509505e-11 1.224438e-07
-FBgn0035085  2.677008  5.180607  18.97509 3.188148e-10 4.797524e-07
-FBgn0039155  4.272254  4.800907  17.42222 8.476440e-10 1.062946e-06
-FBgn0040091  1.559497  6.245766  15.43293 3.363833e-09 3.615639e-06
-FBgn0023479  1.576335  7.768886  15.06473 4.419245e-09 3.877495e-06
-FBgn0029896  2.312097  4.881577  15.00033 4.638152e-09 3.877495e-06
-FBgn0027279  1.180272  7.760889  14.37303 7.503535e-09 5.645660e-06
-                   B
-FBgn0025111 19.04663
-FBgn0003360 19.04370
-FBgn0026562 16.57869
-FBgn0029167 15.57725
-FBgn0035085 13.66077
-FBgn0039155 12.15024
-FBgn0040091 11.72125
-FBgn0023479 11.43434
-FBgn0029896 11.25267
-FBgn0027279 10.89435
+<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit&#39; not found
 </code></pre>
 <h3 id="add-annotation-from-org.dm.eg.db">Add annotation from org.Dm.eg.db</h3>
 <p>The rownames of the fit object are the ensemble gene ids. The <code>select</code> function doesn’t work in this case, but there is a less elegant way to get around it, using the <code>toTable</code> command.</p>
@@ -283,7 +278,7 @@ ann2 &lt;-<span class="st"> </span><span class="kw">merge</span>(ann1,genename,<
 </code></pre>
 <p>Now we need to match up between <code>rownames(fit)</code> and the ensemble gene id in <code>ann2</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m &lt;-<span class="st"> </span><span class="kw">match</span>(<span class="kw">rownames</span>(fit),ann2$ensembl_id)</code></pre></div>
-<pre class="error"><code>Error in match(rownames(fit), ann2$ensembl_id): object &#39;ann2&#39; not found
+<pre class="error"><code>Error in rownames(fit): object &#39;fit&#39; not found
 </code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(<span class="kw">is.na</span>(m))</code></pre></div>
 <pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;m&#39; not found
@@ -292,73 +287,52 @@ ann2 &lt;-<span class="st"> </span><span class="kw">merge</span>(ann1,genename,<
 <pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;ann2&#39; not found
 </code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre></div>
-<pre class="output"><code>                logFC   AveExpr         t      P.Value    adj.P.Val
-FBgn0025111 -2.863110  6.253448 -31.24326 9.756044e-13 4.734428e-09
-FBgn0003360  3.089242  7.778378  30.57062 1.258487e-12 4.734428e-09
-FBgn0026562  2.422219 11.359837  24.25592 1.868075e-11 4.685133e-08
-FBgn0029167  2.247086  7.825170  21.77945 6.509505e-11 1.224438e-07
-FBgn0035085  2.677008  5.180607  18.97509 3.188148e-10 4.797524e-07
-FBgn0039155  4.272254  4.800907  17.42222 8.476440e-10 1.062946e-06
-FBgn0040091  1.559497  6.245766  15.43293 3.363833e-09 3.615639e-06
-FBgn0023479  1.576335  7.768886  15.06473 4.419245e-09 3.877495e-06
-FBgn0029896  2.312097  4.881577  15.00033 4.638152e-09 3.877495e-06
-FBgn0027279  1.180272  7.760889  14.37303 7.503535e-09 5.645660e-06
-                   B
-FBgn0025111 19.04663
-FBgn0003360 19.04370
-FBgn0026562 16.57869
-FBgn0029167 15.57725
-FBgn0035085 13.66077
-FBgn0039155 12.15024
-FBgn0040091 11.72125
-FBgn0023479 11.43434
-FBgn0029896 11.25267
-FBgn0027279 10.89435
+<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit&#39; not found
 </code></pre>
 <p>Let’s check the expression of pasilla.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ps &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="st">&quot;pasilla&quot;</span>,fit$genes$gene_name)
-<span class="kw">topTable</span>(fit[ps,],<span class="dt">coef=</span><span class="dv">3</span>)</code></pre></div>
-<pre class="output"><code>data frame with 0 columns and 0 rows
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ps &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="st">&quot;pasilla&quot;</span>,fit$genes$gene_name)</code></pre></div>
+<pre class="error"><code>Error in grep(&quot;pasilla&quot;, fit$genes$gene_name): object &#39;fit&#39; not found
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit[ps,],<span class="dt">coef=</span><span class="dv">3</span>)</code></pre></div>
+<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit&#39; not found
 </code></pre>
 <h2 id="plots-after-testing-for-de">Plots after testing for DE</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
-<span class="kw">plotMD</span>(fit,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">status=</span>results[,<span class="st">&quot;UVsT&quot;</span>])
-
-<span class="kw">volcanoplot</span>(fit,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">highlight=</span><span class="dv">100</span>,<span class="dt">names=</span>fit$genes$symbol)</code></pre></div>
-<p><img src="fig-09/unnamed-chunk-31-1.png" title="plot of chunk unnamed-chunk-31" alt="plot of chunk unnamed-chunk-31" style="display: block; margin: auto;" /></p>
+<span class="kw">plotMD</span>(fit,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">status=</span>results[,<span class="st">&quot;UVsT&quot;</span>])</code></pre></div>
+<pre class="error"><code>Error in plotMD(fit, coef = 3, status = results[, &quot;UVsT&quot;]): object &#39;fit&#39; not found
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">volcanoplot</span>(fit,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">highlight=</span><span class="dv">100</span>,<span class="dt">names=</span>fit$genes$symbol)</code></pre></div>
+<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit&#39; not found
+</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">stripchart</span>(v$E[<span class="st">&quot;FBgn0025111&quot;</span>,]~targets$Group)</code></pre></div>
-<p><img src="fig-09/unnamed-chunk-32-1.png" title="plot of chunk unnamed-chunk-32" alt="plot of chunk unnamed-chunk-32" style="display: block; margin: auto;" /></p>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;v&#39; not found
+</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Check expression of Pasilla</span>
 <span class="kw">stripchart</span>(v$E[<span class="st">&quot;FBgn0261552&quot;</span>,]~targets$Group)</code></pre></div>
-<p><img src="fig-09/unnamed-chunk-33-1.png" title="plot of chunk unnamed-chunk-33" alt="plot of chunk unnamed-chunk-33" style="display: block; margin: auto;" /></p>
+<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;v&#39; not found
+</code></pre>
 <h2 id="testing-relative-to-a-threshold">Testing relative to a threshold</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit.treat &lt;-<span class="st"> </span><span class="kw">treat</span>(fit,<span class="dt">lfc=</span><span class="dv">1</span>)
-res.treat &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit.treat)
-<span class="kw">summary</span>(res.treat)</code></pre></div>
-<pre class="output"><code>    Int SEvsPE UVsT
--1    2     13   10
-0   350   7510 7496
-1  7172      1   18
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit.treat &lt;-<span class="st"> </span><span class="kw">treat</span>(fit,<span class="dt">lfc=</span><span class="dv">1</span>)</code></pre></div>
+<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit&#39; not found
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res.treat &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit.treat)</code></pre></div>
+<pre class="error"><code>Error in is(object, &quot;MArrayLM&quot;): object &#39;fit.treat&#39; not found
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(res.treat)</code></pre></div>
+<pre class="error"><code>Error in summary(res.treat): object &#39;res.treat&#39; not found
 </code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTreat</span>(fit.treat,<span class="dt">coef=</span><span class="dv">3</span>)</code></pre></div>
-<pre class="output"><code>                logFC   AveExpr          t      P.Value    adj.P.Val
-FBgn0003360  3.089242  7.778378  20.674784 5.940461e-11 2.711163e-07
-FBgn0025111 -2.863110  6.253448 -20.330911 7.206708e-11 2.711163e-07
-FBgn0026562  2.422219 11.359837  14.241997 4.158446e-09 1.042938e-05
-FBgn0039155  4.272254  4.800907  13.344224 8.653631e-09 1.627748e-05
-FBgn0029167  2.247086  7.825170  12.087142 2.578989e-08 3.880863e-05
-FBgn0035085  2.677008  5.180607  11.886920 3.099362e-08 3.886600e-05
-FBgn0034736  3.407306  3.372966   8.780952 7.931358e-07 8.094637e-04
-FBgn0000071 -2.572434  4.209333  -8.710932 8.606738e-07 8.094637e-04
-FBgn0029896  2.312097  4.881577   8.512571 1.091548e-06 8.898178e-04
-FBgn0039827  3.925533  3.204658   8.449359 1.182639e-06 8.898178e-04
+<pre class="error"><code>Error in is(fit, &quot;MArrayLM&quot;): object &#39;fit.treat&#39; not found
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMD</span>(fit.treat,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">status=</span>res.treat[,<span class="st">&quot;UVsT&quot;</span>])
-<span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre></div>
-<p><img src="fig-09/unnamed-chunk-35-1.png" title="plot of chunk unnamed-chunk-35" alt="plot of chunk unnamed-chunk-35" style="display: block; margin: auto;" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMD</span>(fit.treat,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">status=</span>res.treat[,<span class="st">&quot;UVsT&quot;</span>])</code></pre></div>
+<pre class="error"><code>Error in plotMD(fit.treat, coef = 3, status = res.treat[, &quot;UVsT&quot;]): object &#39;fit.treat&#39; not found
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre></div>
+<pre class="error"><code>Error in int_abline(a = a, b = b, h = h, v = v, untf = untf, ...): plot.new has not been called yet
+</code></pre>
 <h2 id="gene-set-testing-with-goana">Gene set testing with goana</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">go &lt;-<span class="st"> </span><span class="kw">goana</span>(fit, <span class="dt">coef=</span><span class="st">&quot;UVsT&quot;</span>,<span class="dt">species =</span> <span class="st">&quot;Dm&quot;</span>, <span class="dt">geneid=</span><span class="st">&quot;gene_id&quot;</span>)</code></pre></div>
-<pre class="error"><code>Error in goana.MArrayLM(fit, coef = &quot;UVsT&quot;, species = &quot;Dm&quot;, geneid = &quot;gene_id&quot;): Column gene_id not found in de$genes
+<pre class="error"><code>Error in goana(fit, coef = &quot;UVsT&quot;, species = &quot;Dm&quot;, geneid = &quot;gene_id&quot;): object &#39;fit&#39; not found
 </code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topGO</span>(go, <span class="dt">n=</span><span class="dv">10</span>)</code></pre></div>
 <pre class="error"><code>Error in is.data.frame(results): object &#39;go&#39; not found

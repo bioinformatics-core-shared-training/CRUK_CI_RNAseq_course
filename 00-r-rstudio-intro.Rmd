@@ -224,26 +224,32 @@ then "New Folder", then type "data" and click "OK".
 
 ```{r}
 # Read the data into R
-seqdata <- read.delim("data/GSE60450_Lactation-GenewiseCounts.txt", stringsAsFactors = FALSE)
+#small_counts <- read.delim("data/GSE60450_Lactation-GenewiseCounts.txt", stringsAsFactors = FALSE)
 # Read the sample information into R
-targets <- read.delim("data/targets.txt")
+small_counts <- read.table("data/small_counts.txt",header=TRUE)
+sampleinfo <- read.delim("data/SampleInfo.txt")
+ResultsTable_small <- read.table("data/ResultsTable_small.txt",stringsAsFactors = FALSE,header=TRUE)
 ```
 
 ```{r}
-head(seqdata)
-dim(seqdata)
+print(small_counts)
+dim(small_counts)
+```
+
+```{r}
+print(ResultsTable_small)
 ```
 
 ## Working with Data Frames
 
 ```{r}
-seqdata_sample = seqdata[1:4, 1:4]
-print(seqdata_sample)
+small_counts_sample = small_counts[1:4, 1:4]
+print(small_counts_sample)
 
-#names(seqdata_sample)[3:6] <- c("sample1", "sample2", "sample3", "sample4")
-#print(seqdata_sample)
+#names(small_counts_sample)[3:6] <- c("sample1", "sample2", "sample3", "sample4")
+#print(small_counts_sample)
 
-str(seqdata_sample)
+str(small_counts_sample)
 ```
 
 ## Data types
@@ -270,45 +276,45 @@ write.csv(cats.df, "data/feline-data.csv", row.names = FALSE)
 ## Factors
 
 ```{r}
-targets <- read.delim("data/targets.txt")
-print(targets)
-str(targets)
+sampleinfo <- read.delim("data/sampleinfo.txt")
+print(sampleinfo)
+str(sampleinfo)
 ```
 
 ```{r}
-targets <- read.delim("data/targets.txt", stringsAsFactors = FALSE)
-str(targets)
+sampleinfo <- read.delim("data/sampleinfo.txt", stringsAsFactors = FALSE)
+str(sampleinfo)
 ```
 
 ```{r}
-targets <- read.delim("data/targets.txt")
-str(targets)
+sampleinfo <- read.delim("data/sampleinfo.txt")
+str(sampleinfo)
 ```
 
 ```{r}
-targets$Status
+sampleinfo$Status
 ```
 
 ```{r}
-factor(targets$Status, levels = c("virgin", "pregnant", "lactate"), ordered = TRUE)
+factor(sampleinfo$Status, levels = c("virgin", "pregnant", "lactate"), ordered = TRUE)
 ```
 
 ## Subsetting using logical statements
 
 ```{r}
-targets$CellType
+sampleinfo$CellType
 ```
 
 ```{r}
-targets$CellType == "luminal"
+sampleinfo$CellType == "luminal"
 ```
 
 ```{r}
-targets$CellType[targets$CellType == "luminal"]
+sampleinfo$CellType[sampleinfo$CellType == "luminal"]
 ```
 
 ```{r}
-targets[targets$CellType == "luminal",]
+sampleinfo[sampleinfo$CellType == "luminal",]
 ```
 
 > ## Tip: Logical Operators in R {.callout}
