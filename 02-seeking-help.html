@@ -38,8 +38,8 @@
 </section>
 <h2 id="reading-help-files">Reading Help files</h2>
 <p>R, and every package, provide help files for functions. To search for help on a function from a specific function that is in a package loaded into your namespace (your interactive R session):</p>
-<pre class="sourceCode r"><code class="sourceCode r">?function_name
-<span class="kw">help</span>(function_name)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">?function_name
+<span class="kw">help</span>(function_name)</code></pre></div>
 <p>This will load up a help page in RStudio (or as plain text in R by itself).</p>
 <p>Each help page is broken down into sections:</p>
 <ul>
@@ -62,24 +62,24 @@
 </aside>
 <h2 id="special-operators">Special Operators</h2>
 <p>To seek help on special operators, use quotes:</p>
-<pre class="sourceCode r"><code class="sourceCode r">?<span class="st">&quot;+&quot;</span></code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">?<span class="st">&quot;+&quot;</span></code></pre></div>
 <h2 id="getting-help-on-packages">Getting help on packages</h2>
 <p>Many packages come with “vignettes”: tutorials and extended example documentation. Without any arguments, <code>vignette()</code> will list all vignettes for all installed packages; <code>vignette(package=&quot;package-name&quot;)</code> will list all available vignettes for <code>package-name</code>, and <code>vignette(&quot;vignette-name&quot;)</code> will open the specified vignette.</p>
 <p>If a package doesn’t have any vignettes, you can usually find help by typing <code>help(&quot;package-name&quot;)</code>.</p>
 <h2 id="when-you-kind-of-remember-the-function">When you kind of remember the function</h2>
 <p>If you’re not sure what package a function is in, or how it’s specifically spelled you can do a fuzzy search:</p>
-<pre class="sourceCode r"><code class="sourceCode r">??function_name</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">??function_name</code></pre></div>
 <h2 id="when-you-have-no-idea-where-to-begin">When you have no idea where to begin</h2>
 <p>If you don’t know what function or package you need to use <a href="http://cran.at.r-project.org/web/views">CRAN Task Views</a> is a specially maintained list of packages grouped into fields. This can be a good starting point.</p>
 <h2 id="when-your-code-doesnt-work-seeking-help-from-your-peers">When your code doesn’t work: seeking help from your peers</h2>
 <p>If you’re having trouble using a function, 9 times out of 10, the answers you are seeking have already been answered on <a href="http://stackoverflow.com/">Stack Overflow</a>. You can search using the <code>[r]</code> tag.</p>
 <p>If you can’t find the answer, there are a few useful functions to help you ask a question from your peers:</p>
-<pre class="sourceCode r"><code class="sourceCode r">?dput</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">?dput</code></pre></div>
 <p>Will dump the data you’re working with into a format so that it can be copy and pasted by anyone else into their R session.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sessionInfo</span>()</code></pre>
-<pre class="output"><code>R version 3.2.4 (2016-03-10)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sessionInfo</span>()</code></pre></div>
+<pre class="output"><code>R version 3.3.1 (2016-06-21)
 Platform: x86_64-apple-darwin13.4.0 (64-bit)
-Running under: OS X 10.11.4 (El Capitan)
+Running under: OS X 10.11.6 (El Capitan)
 
 locale:
 [1] en_AU.UTF-8/en_AU.UTF-8/en_AU.UTF-8/C/en_AU.UTF-8/en_AU.UTF-8
@@ -88,11 +88,11 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  base     
 
 other attached packages:
-[1] knitr_1.12.3
+[1] knitr_1.14
 
 loaded via a namespace (and not attached):
-[1] magrittr_1.5  formatR_1.3   tools_3.2.4   stringi_1.0-1 methods_3.2.4
-[6] stringr_1.0.0 evaluate_0.9 
+[1] magrittr_1.5  formatR_1.4   tools_3.3.1   stringi_1.1.1 methods_3.3.1
+[6] stringr_1.1.0 evaluate_0.9 
 </code></pre>
 <p>Will print out your current version of R, as well as any packages you have loaded. This can be useful for others to help reproduce and debug your issue.</p>
 <section class="challenge panel panel-success">
@@ -101,9 +101,9 @@ loaded via a namespace (and not attached):
 </div>
 <div class="panel-body">
 <p>Look at the help for the <code>c</code> function. What kind of vector do you expect you will create if you evaluate the following:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>)
 <span class="kw">c</span>(<span class="st">&#39;d&#39;</span>, <span class="st">&#39;e&#39;</span>, <span class="st">&#39;f&#39;</span>)
-<span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="st">&#39;f&#39;</span>)<span class="st">`</span></code></pre>
+<span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="st">&#39;f&#39;</span>)<span class="st">`</span></code></pre></div>
 </div>
 </section>
 <section class="challenge panel panel-success">
@@ -129,9 +129,6 @@ loaded via a namespace (and not attached):
 <p>The <code>c()</code> function creates a vector, in which all elements are the same type. In the first case, the elements are numeric, in the second, they are characters, and in the third they are characters: the numeric values “coerced” to be characters.</p>
 </div>
 </section>
-<div class="references">
-
-</div>
         </div>
       </div>
       </article>

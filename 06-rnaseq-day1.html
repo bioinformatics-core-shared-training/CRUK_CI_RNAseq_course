@@ -26,9 +26,16 @@
           <h2 class="subtitle">Differential expression analysis</h2>
           <p><strong>Authors: Belinda Phipson, Anna Trigos, Matt Ritchie, Maria Doyle, Harriet Dashnow</strong></p>
 <h2 id="resources-and-data-files">Resources and data files</h2>
-<p>This material has been created using the following resources:<br />http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf <span class="citation">(Lun, Chen, and Smyth 2016)</span><br />http://monashbioinformaticsplatform.github.io/RNAseq-DE-analysis-with-R/99-RNAseq_DE_analysis_with_R.html</p>
-<p>Data files downloaded from:<br />ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE60nnn/GSE60450/suppl/GSE60450_Lactation-GenewiseCounts.txt.gz http://bioinf.wehi.edu.au/software/MSigDB/mouse_c2_v5.rdata http://bioinf.wehi.edu.au/software/MSigDB/mouse_H_v5.rdata</p>
-<p>Data files:<br />targets.txt<br />GSE60450_Lactation-GenewiseCounts.txt<br />mouse_c2_v5.rdata<br />mouse_H_v5.rdata</p>
+<p>This material has been created using the following resources:<br />
+http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf <span class="citation">(Lun, Chen, and Smyth 2016)</span><br />
+http://monashbioinformaticsplatform.github.io/RNAseq-DE-analysis-with-R/99-RNAseq_DE_analysis_with_R.html</p>
+<p>Data files downloaded from:<br />
+ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE60nnn/GSE60450/suppl/GSE60450_Lactation-GenewiseCounts.txt.gz http://bioinf.wehi.edu.au/software/MSigDB/mouse_c2_v5.rdata http://bioinf.wehi.edu.au/software/MSigDB/mouse_H_v5.rdata</p>
+<p>Data files:<br />
+targets.txt<br />
+GSE60450_Lactation-GenewiseCounts.txt<br />
+mouse_c2_v5.rdata<br />
+mouse_H_v5.rdata</p>
 <p>Data files available from: <a href="https://figshare.com/s/1d788fd384d33e913a2a" class="uri">https://figshare.com/s/1d788fd384d33e913a2a</a> You should download these files and place them in your <code>/data</code> directory.</p>
 <p>Packages used: limma, edgeR, gplots, org.Mm.eg.db, EDASeq, RColorBrewer, Glimma</p>
 <h2 id="overview">Overview</h2>
@@ -46,28 +53,24 @@
 <p>Measuring gene expression on a genome-wide scale has become common practice over the last two decades or so, with microarrays predominantly used pre-2008. With the advent of next generation sequencing technology in 2008, an increasing number of scientists use this technology to measure and understand changes in gene expression in often complex systems. As sequencing costs have decreased, using RNA-Seq to simultaneously measure the expression of tens of thousands of genes for multiple samples has never been easier. The cost of these experiments has now moved from generating the data to storing and analysing it.</p>
 <p>There are many steps involved in analysing an RNA-Seq experiment. Analysing an RNAseq experiment begins with sequencing reads. These are aligned to a reference genome, then the number of reads mapped to each gene can be counted. This results in a table of counts, which is what we perform statistical analyses on in R. While mapping and counting are important and necessary tasks, today we will be starting from the count data and getting stuck into analysis.</p>
 <p>First, let’s load all the packages we will need to analyse the data.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(edgeR)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(edgeR)
 <span class="kw">library</span>(limma)
 <span class="kw">library</span>(EDASeq)
-<span class="kw">library</span>(Glimma)</code></pre>
-<pre class="error"><code>Warning: package &#39;Glimma&#39; was built under R version 3.3.0
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(gplots)
-<span class="kw">library</span>(org.Mm.eg.db)</code></pre>
-<pre class="error"><code>Warning: package &#39;DBI&#39; was built under R version 3.2.5
-</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(RColorBrewer)</code></pre>
+<span class="kw">library</span>(Glimma)
+<span class="kw">library</span>(gplots)
+<span class="kw">library</span>(org.Mm.eg.db)
+<span class="kw">library</span>(RColorBrewer)</code></pre></div>
 <h3 id="mouse-mammary-gland-dataset">Mouse mammary gland dataset</h3>
 <p>The data for this tutorial comes from a Nature Cell Biology paper, <a href="http://www.ncbi.nlm.nih.gov/pubmed/25730472"><em>EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival</em></a> <span class="citation">(Fu et al. 2015)</span>. Both the raw data (sequence reads) and processed data (counts) can be downloaded from Gene Expression Omnibus database (GEO) under accession number <a href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60450">GSE60450</a>.</p>
 <p>This study examines the expression profiles of basal stem-cell enriched cells (B) and committed luminal cells (L) in the mammary gland of virgin, pregnant and lactating mice. Six groups are present, with one for each combination of cell type and mouse status. Each group contains two biological replicates. We will first use the counts file as a starting point for our analysis. This data has already been aligned to the mouse genome. The command line tool featureCounts <span class="citation">(Liao, Smyth, and Shi 2014)</span> was used to count reads mapped to mouse genes from Refseq annotation (see the <a href="http://www.ncbi.nlm.nih.gov/pubmed/25730472">paper</a> for details).</p>
 <h3 id="reading-in-the-data">Reading in the data</h3>
 <p><em>Set up an RStudio project specifying the directory where you have saved the <code>/data</code> directory</em>. Download and read in the data.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Read the data into R</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Read the data into R</span>
 seqdata &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/GSE60450_Lactation-GenewiseCounts.txt&quot;</span>, <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>)
 <span class="co"># Read the sample information into R</span>
-targets &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/targets.txt&quot;</span>)</code></pre>
+targets &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/targets.txt&quot;</span>)</code></pre></div>
 <p>Let’s take a look at the data. You can use the <code>head</code> command to see the first 6 lines. The <code>dim</code> command will tell you how many rows and columns the data frame has.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(seqdata)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(seqdata)</code></pre></div>
 <pre class="output"><code>  EntrezGeneID Length MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1
 1       497097   3634                               438
 2    100503874   3259                                 1
@@ -118,11 +121,11 @@ targets &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span c
 5                                10
 6                               342
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(seqdata)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(seqdata)</code></pre></div>
 <pre class="output"><code>[1] 27179    14
 </code></pre>
 <p>The <code>seqdata</code> object contains information about genes (one gene per row), the first column has the Entrez gene id, the second has the gene length and the remaining columns contain information about the number of reads aligning to the gene in each experimental sample. There are two replicates for each cell type and timepoint (detailed sample info can be found in file “GSE60450_series_matrix.txt” from the <a href="http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60450">GEO website</a>). The targets file contains basic information about the samples that we will need for the analysis today.</p>
-<pre class="sourceCode r"><code class="sourceCode r">targets</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">targets</code></pre></div>
 <pre class="output"><code>                            FileName SampleName CellType   Status
 1  MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1    MCL1.DG    basal   virgin
 2  MCL1.DH_BC2CTUACXX_CAGATC_L002_R1    MCL1.DH    basal   virgin
@@ -140,10 +143,10 @@ targets &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span c
 <p>We will be manipulating and reformating the counts matrix into a suitable format for downstream analysis. The first two columns in the <code>seqdata</code> dataframe contain annotation information. We need to make a new matrix containing only the counts, but we can store the gene identifiers (the <code>EntrezGeneID</code> column) as rownames. We will add more annotation information about each gene later on in the workshop.</p>
 <h3 id="format-the-data">Format the data</h3>
 <p>Let’s create a new data object, <code>countdata</code>, that contains only the counts for the 12 samples.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Remove first two columns from seqdata</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Remove first two columns from seqdata</span>
 countdata &lt;-<span class="st"> </span>seqdata[,-(<span class="dv">1</span>:<span class="dv">2</span>)]
 <span class="co"># Look at the output</span>
-<span class="kw">head</span>(countdata)</code></pre>
+<span class="kw">head</span>(countdata)</code></pre></div>
 <pre class="output"><code>  MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1 MCL1.DH_BC2CTUACXX_CAGATC_L002_R1
 1                               438                               300
 2                                 1                                 0
@@ -187,10 +190,10 @@ countdata &lt;-<span class="st"> </span>seqdata[,-(<span class="dv">1</span>:<sp
 5                                 3                                10
 6                               307                               342
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Store EntrezGeneID as rownames</span>
-<span class="kw">rownames</span>(countdata) &lt;-<span class="st"> </span>seqdata[,<span class="dv">1</span>]</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Store EntrezGeneID as rownames</span>
+<span class="kw">rownames</span>(countdata) &lt;-<span class="st"> </span>seqdata[,<span class="dv">1</span>]</code></pre></div>
 <p>Take a look at the output</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(countdata)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(countdata)</code></pre></div>
 <pre class="output"><code>          MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1
 497097                                  438
 100503874                                 1
@@ -277,7 +280,7 @@ countdata &lt;-<span class="st"> </span>seqdata[,-(<span class="dv">1</span>:<sp
 27395                                   342
 </code></pre>
 <p>Now take a look at the column names</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">colnames</span>(countdata)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">colnames</span>(countdata)</code></pre></div>
 <pre class="output"><code> [1] &quot;MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1&quot;
  [2] &quot;MCL1.DH_BC2CTUACXX_CAGATC_L002_R1&quot;
  [3] &quot;MCL1.DI_BC2CTUACXX_ACAGTG_L002_R1&quot;
@@ -292,10 +295,10 @@ countdata &lt;-<span class="st"> </span>seqdata[,-(<span class="dv">1</span>:<sp
 [12] &quot;MCL1.LF_BC2CTUACXX_CTTGTA_L001_R1&quot;
 </code></pre>
 <p>These are the sample names which are pretty long so we’ll shorten these to contain only the relevant information about each sample. We will use the <code>substr</code> command to extract the first 7 characters and use these as the colnames.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># using substr, you extract the characters starting at position 1 and stopping at position 7 of the colnames</span>
-<span class="kw">colnames</span>(countdata) &lt;-<span class="st"> </span><span class="kw">substr</span>(<span class="kw">colnames</span>(countdata),<span class="dt">start=</span><span class="dv">1</span>,<span class="dt">stop=</span><span class="dv">7</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># using substr, you extract the characters starting at position 1 and stopping at position 7 of the colnames</span>
+<span class="kw">colnames</span>(countdata) &lt;-<span class="st"> </span><span class="kw">substr</span>(<span class="kw">colnames</span>(countdata),<span class="dt">start=</span><span class="dv">1</span>,<span class="dt">stop=</span><span class="dv">7</span>)</code></pre></div>
 <p>Take a look at the output</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(countdata)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(countdata)</code></pre></div>
 <pre class="output"><code>          MCL1.DG MCL1.DH MCL1.DI MCL1.DJ MCL1.DK MCL1.DL MCL1.LA MCL1.LB
 497097        438     300      65     237     354     287       0       0
 100503874       1       0       1       1       0       4       0       0
@@ -312,7 +315,7 @@ countdata &lt;-<span class="st"> </span>seqdata[,-(<span class="dv">1</span>:<sp
 27395         489     328     307     342
 </code></pre>
 <p>Note that the column names are now the same as <code>SampleName</code> in the <code>targets</code> file. This is good because it means our sample information in <code>targets</code> is in the same order as the columns in <code>countdata</code>.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(<span class="kw">colnames</span>(countdata)==targets$SampleName)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(<span class="kw">colnames</span>(countdata)==targets$SampleName)</code></pre></div>
 <pre class="output"><code>
 TRUE 
   12 
@@ -320,11 +323,11 @@ TRUE
 <h2 id="filtering-to-remove-lowly-expressed-genes">Filtering to remove lowly expressed genes</h2>
 <p>Genes with very low counts across all libraries provide little evidence for differential expression and they interfere with some of the statistical approximations that are used later in the pipeline. They also add to the multiple testing burden when estimating false discovery rates, reducing power to detect differentially expressed genes. These genes should be filtered out prior to further analysis.</p>
 <p>There are a few ways to filter out lowly expressed genes. When there are biological replicates in each group, in this case we have a sample size of 2 in each group, we favour filtering on a minimum counts per million threshold present in at least 2 samples. Two represents the smallest sample size for each group in our experiment. In this dataset, we choose to retain genes if they are expressed at a counts-per-million (CPM) above 0.5 in at least two samples.</p>
-<p>We’ll use the <code>cpm</code> function from the <em>edgeR</em> library <span class="citation">(<span class="citeproc-not-found" data-reference-id="robinson2010edgeR"><strong>???</strong></span>)</span> to generate the CPM values and then filter. Note that by converting to CPMs we are normalising for the different sequencing depths for each sample.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Obtain CPMs</span>
+<p>We’ll use the <code>cpm</code> function from the <em>edgeR</em> library <span class="citation">(M D Robinson, McCarthy, and Smyth 2010)</span> to generate the CPM values and then filter. Note that by converting to CPMs we are normalising for the different sequencing depths for each sample.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Obtain CPMs</span>
 myCPM &lt;-<span class="st"> </span><span class="kw">cpm</span>(countdata)
 <span class="co"># Have a look at the output</span>
-<span class="kw">head</span>(myCPM)</code></pre>
+<span class="kw">head</span>(myCPM)</code></pre></div>
 <pre class="output"><code>              MCL1.DG     MCL1.DH     MCL1.DI     MCL1.DJ   MCL1.DK
 497097    18.85684388 13.77543859  2.69700983 10.45648006 16.442685
 100503874  0.04305215  0.00000000  0.04149246  0.04412017  0.000000
@@ -347,10 +350,10 @@ myCPM &lt;-<span class="st"> </span><span class="kw">cpm</span>(countdata)
 20671      0.1213404  0.4055595
 27395     12.4171715 13.8701357
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Which values in myCPM are greater than 0.5?</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Which values in myCPM are greater than 0.5?</span>
 thresh &lt;-<span class="st"> </span>myCPM &gt;<span class="st"> </span><span class="fl">0.5</span>
 <span class="co"># This produces a logical matrix with TRUEs and FALSEs</span>
-<span class="kw">head</span>(thresh)</code></pre>
+<span class="kw">head</span>(thresh)</code></pre></div>
 <pre class="output"><code>          MCL1.DG MCL1.DH MCL1.DI MCL1.DJ MCL1.DK MCL1.DL MCL1.LA MCL1.LB
 497097       TRUE    TRUE    TRUE    TRUE    TRUE    TRUE   FALSE   FALSE
 100503874   FALSE   FALSE   FALSE   FALSE   FALSE   FALSE   FALSE   FALSE
@@ -366,39 +369,39 @@ thresh &lt;-<span class="st"> </span>myCPM &gt;<span class="st"> </span><span cl
 20671        TRUE   FALSE   FALSE   FALSE
 27395        TRUE    TRUE    TRUE    TRUE
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Summary of how many TRUEs there are in each row</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Summary of how many TRUEs there are in each row</span>
 <span class="co"># There are 11433 genes that have TRUEs in all 12 samples.</span>
-<span class="kw">table</span>(<span class="kw">rowSums</span>(thresh))</code></pre>
+<span class="kw">table</span>(<span class="kw">rowSums</span>(thresh))</code></pre></div>
 <pre class="output"><code>
     0     1     2     3     4     5     6     7     8     9    10    11 
 10857   518   544   307   346   307   652   323   547   343   579   423 
    12 
 11433 
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># we would like to keep genes that have at least 2 TRUES in each row of thresh</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># we would like to keep genes that have at least 2 TRUES in each row of thresh</span>
 keep &lt;-<span class="st"> </span><span class="kw">rowSums</span>(thresh) &gt;=<span class="st"> </span><span class="dv">2</span>
 <span class="co"># Subset the rows of countdata to keep the more highly expressed genes</span>
 counts.keep &lt;-<span class="st"> </span>countdata[keep,]
-<span class="kw">summary</span>(keep)</code></pre>
+<span class="kw">summary</span>(keep)</code></pre></div>
 <pre class="output"><code>   Mode   FALSE    TRUE    NA&#39;s 
 logical   11375   15804       0 
 </code></pre>
 <p>A CPM of 0.5 is used as it corresponds to a count of 10-15 for the library sizes in this data set. If the count is any smaller, it is considered to be very low, indicating that the associated gene is not expressed in that sample. A requirement for expression in two or more libraries is used as each group contains two replicates. This ensures that a gene will be retained if it is only expressed in one group. Smaller CPM thresholds are usually appropriate for larger libraries. As a general rule, a good threshold can be chosen by identifying the CPM that corresponds to a count of 10, which in this case is about 0.5. You should filter with CPMs rather than filtering on the counts directly, as the latter does not account for differences in library sizes between samples.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s have a look and see whether our threshold of 0.5 does indeed correspond to a count of about 10-15</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s have a look and see whether our threshold of 0.5 does indeed correspond to a count of about 10-15</span>
 <span class="co"># We will look at the first sample</span>
-<span class="kw">plot</span>(myCPM[,<span class="dv">1</span>],countdata[,<span class="dv">1</span>])</code></pre>
+<span class="kw">plot</span>(myCPM[,<span class="dv">1</span>],countdata[,<span class="dv">1</span>])</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-13-1.png" title="plot of chunk unnamed-chunk-13" alt="plot of chunk unnamed-chunk-13" style="display: block; margin: auto;" /></p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let us limit the x and y-axis so we can actually look to see what is happening at the smaller counts</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let us limit the x and y-axis so we can actually look to see what is happening at the smaller counts</span>
 <span class="kw">plot</span>(myCPM[,<span class="dv">1</span>],countdata[,<span class="dv">1</span>],<span class="dt">ylim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">50</span>),<span class="dt">xlim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">3</span>))
 <span class="co"># Add a vertical line at 0.5 CPM</span>
-<span class="kw">abline</span>(<span class="dt">v=</span><span class="fl">0.5</span>)</code></pre>
+<span class="kw">abline</span>(<span class="dt">v=</span><span class="fl">0.5</span>)</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-13-2.png" title="plot of chunk unnamed-chunk-13" alt="plot of chunk unnamed-chunk-13" style="display: block; margin: auto;" /></p>
 <p><span style="color:blue">Exercise: (1) Plot the counts-per-million versus counts for the second sample. (2) Add a vertical line at 0.5 and a horizontal line at 10. (3) Add the lines again, colouring them blue </span> <span style="color:red">HINT: use the <code>col</code> parameter.</span></p>
 <h2 id="convert-counts-to-dgelist-object">Convert counts to DGEList object</h2>
 <p>Next we’ll create a <code>DGEList</code> object. This is an object used by <em>edgeR</em> to store count data. It has a number of slots for storing various parameters about the data.</p>
-<pre class="sourceCode r"><code class="sourceCode r">y &lt;-<span class="st"> </span><span class="kw">DGEList</span>(counts.keep)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">y &lt;-<span class="st"> </span><span class="kw">DGEList</span>(counts.keep)
 <span class="co"># have a look at y</span>
-y</code></pre>
+y</code></pre></div>
 <pre class="output"><code>An object of class &quot;DGEList&quot;
 $counts
        MCL1.DG MCL1.DH MCL1.DI MCL1.DJ MCL1.DK MCL1.DL MCL1.LA MCL1.LB
@@ -424,12 +427,12 @@ MCL1.DJ     1 22656713            1
 MCL1.DK     1 21522033            1
 7 more rows ...
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># See what slots are stored in y</span>
-<span class="kw">names</span>(y)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># See what slots are stored in y</span>
+<span class="kw">names</span>(y)</code></pre></div>
 <pre class="output"><code>[1] &quot;counts&quot;  &quot;samples&quot;
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Library size information is stored in the samples slot</span>
-y$samples</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Library size information is stored in the samples slot</span>
+y$samples</code></pre></div>
 <pre class="output"><code>        group lib.size norm.factors
 MCL1.DG     1 23218026            1
 MCL1.DH     1 21768136            1
@@ -448,52 +451,52 @@ MCL1.LF     1 24652963            1
 <p>Now that we have got rid of the lowly expressed genes and have our counts stored in a <code>DGEList</code> object, we can look at a few different plots to check that the data is good quality, and that the samples are as we would expect.</p>
 <h3 id="library-sizes-and-distribution-plots">Library sizes and distribution plots</h3>
 <p>First, we can check how many reads we have for each sample in the <code>y</code>.</p>
-<pre class="sourceCode r"><code class="sourceCode r">y$samples$lib.size</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">y$samples$lib.size</code></pre></div>
 <pre class="output"><code> [1] 23218026 21768136 24091588 22656713 21522033 20008326 20384562
  [8] 21698793 22235847 21982745 24719697 24652963
 </code></pre>
 <p>We can also plot the library sizes as a barplot to see whether there are any major discrepanies between the samples more easily.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># The names argument tells the barplot to use the sample names on the x-axis</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># The names argument tells the barplot to use the sample names on the x-axis</span>
 <span class="co"># The las argument rotates the axis names</span>
 <span class="kw">barplot</span>(y$samples$lib.size,<span class="dt">names=</span><span class="kw">colnames</span>(y),<span class="dt">las=</span><span class="dv">2</span>)
 <span class="co"># Add a title to the plot</span>
-<span class="kw">title</span>(<span class="st">&quot;Barplot of library sizes&quot;</span>)</code></pre>
+<span class="kw">title</span>(<span class="st">&quot;Barplot of library sizes&quot;</span>)</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-16-1.png" title="plot of chunk unnamed-chunk-16" alt="plot of chunk unnamed-chunk-16" style="display: block; margin: auto;" /></p>
 <p>Count data is not normally distributed, so if we want to examine the distributions of the raw counts we need to log the counts. Next we’ll use box plots to check the distribution of the read counts on the log2 scale. We can use the <code>cpm</code> function to get log2 counts per million, which are corrected for the different library sizes. The <code>cpm</code> function also adds a small offset to avoid taking log of zero.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Get log2 counts per million</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Get log2 counts per million</span>
 logcounts &lt;-<span class="st"> </span><span class="kw">cpm</span>(y,<span class="dt">log=</span><span class="ot">TRUE</span>)
 <span class="co"># Check distributions of samples using boxplots</span>
 <span class="kw">boxplot</span>(logcounts, <span class="dt">xlab=</span><span class="st">&quot;&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;Log2 counts per million&quot;</span>,<span class="dt">las=</span><span class="dv">2</span>)
 <span class="co"># Let&#39;s add a blue horizontal line that corresponds to the median logCPM</span>
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="kw">median</span>(logcounts),<span class="dt">col=</span><span class="st">&quot;blue&quot;</span>)
-<span class="kw">title</span>(<span class="st">&quot;Boxplots of logCPMs (unnormalised)&quot;</span>)</code></pre>
+<span class="kw">title</span>(<span class="st">&quot;Boxplots of logCPMs (unnormalised)&quot;</span>)</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-17-1.png" title="plot of chunk unnamed-chunk-17" alt="plot of chunk unnamed-chunk-17" style="display: block; margin: auto;" /></p>
 <p>From the boxplots we see that overall the density distributions of raw log-intensities are not identical but still not very different. If a sample is really far above or below the blue horizontal line we may need to investigate that sample further.</p>
 <p>Another kind of QC plot that is helpful in checking for dodgy samples is a relative log expression (RLE) plot from the <em>EDASeq</em> package <span class="citation">(Risso et al. 2011)</span>. It shows boxplots of gene-level read counts of each sample relative to a reference sample, which is defined as the median across the samples.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># You need to give plotRLE a matrix of counts</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># You need to give plotRLE a matrix of counts</span>
 <span class="kw">plotRLE</span>(y$counts,<span class="dt">las=</span><span class="dv">2</span>)
-<span class="kw">title</span>(<span class="st">&quot;RLE plot of unnormalised counts&quot;</span>)</code></pre>
+<span class="kw">title</span>(<span class="st">&quot;RLE plot of unnormalised counts&quot;</span>)</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-18-1.png" title="plot of chunk unnamed-chunk-18" alt="plot of chunk unnamed-chunk-18" style="display: block; margin: auto;" /></p>
 <p>Ideally, the distributions should be centred around zero and be as tight as possible. It looks a bit different to the boxplot of the logcounts, but overall the patterns look the same. Which samples appear to be more variable/different than the rest?</p>
 <h3 id="multidimensional-scaling-plots">Multidimensional scaling plots</h3>
 <p>By far, one of the most important plots we make when we analyse RNA-Seq data are MDSplots. An MDSplot is a visualisation of a principle components analysis, which determines the greatest sources of variation in the data. A principle components analysis is an example of an unsupervised analysis, where we don’t need to specify the groups. If your experiment is well controlled and has worked well, what we hope to see is that the greatest sources of variation in the data are the treatments/groups we are interested in. It is also an incredibly useful tool for quality control and checking for outliers. We can use the <code>plotMDS</code> function to create the MDS plot.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMDS</span>(y)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMDS</span>(y)</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-19-1.png" title="plot of chunk unnamed-chunk-19" alt="plot of chunk unnamed-chunk-19" style="display: block; margin: auto;" /></p>
 <p>It is a bit difficult to see exactly what is going on with the default plot, although we do see samples grouping together in pairs. To make this plot more informative, we can colour the samples according to the grouping information. We can also change the labels, or instead of labels we can have points.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># We specify the option to let us plot two plots side-by-sde</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># We specify the option to let us plot two plots side-by-sde</span>
 <span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
 <span class="co"># Let&#39;s set up colour schemes for CellType</span>
 <span class="co"># How many cell types and in what order are they stored?</span>
-<span class="kw">levels</span>(targets$CellType)</code></pre>
+<span class="kw">levels</span>(targets$CellType)</code></pre></div>
 <pre class="output"><code>[1] &quot;basal&quot;   &quot;luminal&quot;
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">## Let&#39;s choose purple for basal and orange for luminal
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Let&#39;s choose purple for basal and orange for luminal
 col.cell &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;purple&quot;</span>,<span class="st">&quot;orange&quot;</span>)[targets$CellType]
-col.cell</code></pre>
+col.cell</code></pre></div>
 <pre class="output"><code> [1] &quot;purple&quot; &quot;purple&quot; &quot;purple&quot; &quot;purple&quot; &quot;purple&quot; &quot;purple&quot; &quot;orange&quot;
  [8] &quot;orange&quot; &quot;orange&quot; &quot;orange&quot; &quot;orange&quot; &quot;orange&quot;
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Redo the MDS with cell type colouring</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Redo the MDS with cell type colouring</span>
 <span class="kw">plotMDS</span>(y,<span class="dt">col=</span>col.cell)
 <span class="co"># Let&#39;s add a legend to the plot so we know which colours correspond to which cell type</span>
 <span class="kw">legend</span>(<span class="st">&quot;bottomleft&quot;</span>,<span class="dt">fill=</span><span class="kw">c</span>(<span class="st">&quot;purple&quot;</span>,<span class="st">&quot;orange&quot;</span>),<span class="dt">legend=</span><span class="kw">levels</span>(targets$CellType))
@@ -501,44 +504,44 @@ col.cell</code></pre>
 <span class="kw">title</span>(<span class="st">&quot;Cell type&quot;</span>)
 
 <span class="co"># Similarly for status</span>
-<span class="kw">levels</span>(targets$Status)</code></pre>
+<span class="kw">levels</span>(targets$Status)</code></pre></div>
 <pre class="output"><code>[1] &quot;lactate&quot;  &quot;pregnant&quot; &quot;virgin&quot;  
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">col.status &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>,<span class="st">&quot;red&quot;</span>,<span class="st">&quot;dark green&quot;</span>)[targets$Status]
-col.status</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">col.status &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>,<span class="st">&quot;red&quot;</span>,<span class="st">&quot;dark green&quot;</span>)[targets$Status]
+col.status</code></pre></div>
 <pre class="output"><code> [1] &quot;dark green&quot; &quot;dark green&quot; &quot;red&quot;        &quot;red&quot;        &quot;blue&quot;      
  [6] &quot;blue&quot;       &quot;dark green&quot; &quot;dark green&quot; &quot;red&quot;        &quot;red&quot;       
 [11] &quot;blue&quot;       &quot;blue&quot;      
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMDS</span>(y,<span class="dt">col=</span>col.status)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMDS</span>(y,<span class="dt">col=</span>col.status)
 <span class="kw">legend</span>(<span class="st">&quot;bottomleft&quot;</span>,<span class="dt">fill=</span><span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>,<span class="st">&quot;red&quot;</span>,<span class="st">&quot;dark green&quot;</span>),<span class="dt">legend=</span><span class="kw">levels</span>(targets$Status),<span class="dt">cex=</span><span class="fl">0.8</span>)
-<span class="kw">title</span>(<span class="st">&quot;Status&quot;</span>)</code></pre>
+<span class="kw">title</span>(<span class="st">&quot;Status&quot;</span>)</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-20-1.png" title="plot of chunk unnamed-chunk-20" alt="plot of chunk unnamed-chunk-20" style="display: block; margin: auto;" /></p>
 <p>What is the greatest source of variation in the data (i.e. what does dimension 1 represent)? What is the second greatest source of variation in the data?</p>
 <p><span style="color:blue">Exercise: (1) Redo the plots choosing your own colours. (2) Change the plotting characters to symbols instead of the column names</span> <span style="color:red">HINT: use <code>pch</code> argument. Try <code>pch=16</code> and see what happens.</span></p>
 <p>Now let’s combine the two levels of information on the plot using different plotting characters for the cell type and different colours for the status.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s combine status and cell type info on one plot using plotting characters and colours</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s combine status and cell type info on one plot using plotting characters and colours</span>
 <span class="co"># Make a new group variable that joins together cell type and status with the paste command</span>
 <span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))
 group &lt;-<span class="st"> </span><span class="kw">factor</span>(<span class="kw">paste</span>(targets$CellType,targets$Status,<span class="dt">sep=</span><span class="st">&quot;.&quot;</span>))
-group</code></pre>
+group</code></pre></div>
 <pre class="output"><code> [1] basal.virgin     basal.virgin     basal.pregnant   basal.pregnant  
  [5] basal.lactate    basal.lactate    luminal.virgin   luminal.virgin  
  [9] luminal.pregnant luminal.pregnant luminal.lactate  luminal.lactate 
 6 Levels: basal.lactate basal.pregnant basal.virgin ... luminal.virgin
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># the table function will tell us how many samples we have in each group</span>
-<span class="kw">table</span>(group)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># the table function will tell us how many samples we have in each group</span>
+<span class="kw">table</span>(group)</code></pre></div>
 <pre class="output"><code>group
    basal.lactate   basal.pregnant     basal.virgin  luminal.lactate 
                2                2                2                2 
 luminal.pregnant   luminal.virgin 
                2                2 
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">points &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">15</span>,<span class="dv">16</span>,<span class="dv">17</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">points &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">15</span>,<span class="dv">16</span>,<span class="dv">17</span>)
 colors &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>, <span class="st">&quot;darkgreen&quot;</span>, <span class="st">&quot;red&quot;</span>), <span class="dv">2</span>)
 <span class="kw">plotMDS</span>(y, <span class="dt">col=</span>colors[group], <span class="dt">pch=</span>points[group])
-<span class="kw">legend</span>(<span class="st">&quot;bottomleft&quot;</span>, <span class="dt">legend=</span><span class="kw">levels</span>(group), <span class="dt">pch=</span>points, <span class="dt">col=</span>colors, <span class="dt">ncol=</span><span class="dv">2</span>,<span class="dt">cex=</span><span class="fl">0.7</span>)</code></pre>
+<span class="kw">legend</span>(<span class="st">&quot;bottomleft&quot;</span>, <span class="dt">legend=</span><span class="kw">levels</span>(group), <span class="dt">pch=</span>points, <span class="dt">col=</span>colors, <span class="dt">ncol=</span><span class="dv">2</span>,<span class="dt">cex=</span><span class="fl">0.7</span>)</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-21-1.png" title="plot of chunk unnamed-chunk-21" alt="plot of chunk unnamed-chunk-21" style="display: block; margin: auto;" /></p>
 <p>The distance between each pair of samples in the MDS plot is calculated as the leading fold change, defined as the root-mean-square of the largest 500 log2-fold changes between that pair of samples. Replicate samples from the same group cluster together in the plot, while samples from different groups form separate clusters. This indicates that the differences between groups are larger than those within groups, i.e., differential expression is greater than the variance and can be detected. In the MDS plot, the distance between basal samples on the left and luminal cells on the right is about 6 units, corresponding to a leading fold change of about 64-fold (2^6 = 64) between basal and luminal. The expression differences between virgin, pregnant and lactating are greater for luminal cells than for basal.</p>
 <p>Notes</p>
@@ -547,39 +550,39 @@ colors &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="kw
 <li>Clustering in the MDS plot can be used to motivate changes to the design matrix in light of potential batch effects. For example, imagine that the first replicate of each group was prepared at a separate time from the second replicate. If the MDS plot showed separation of samples by time, it might be worthwhile including time in the down stream analysis to account for the time-based effect.</li>
 </ul>
 <p><code>plotMDS</code> plots the first two dimensions as a default, however you can plot higher dimensions using the <code>dim</code> argument.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMDS</span>(y,<span class="dt">dim=</span><span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">4</span>),<span class="dt">col=</span>colors[group], <span class="dt">pch=</span>points[group])
-<span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend=</span><span class="kw">levels</span>(group), <span class="dt">pch=</span>points, <span class="dt">col=</span>colors, <span class="dt">ncol=</span><span class="dv">2</span>,<span class="dt">cex=</span><span class="fl">0.8</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMDS</span>(y,<span class="dt">dim=</span><span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">4</span>),<span class="dt">col=</span>colors[group], <span class="dt">pch=</span>points[group])
+<span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>, <span class="dt">legend=</span><span class="kw">levels</span>(group), <span class="dt">pch=</span>points, <span class="dt">col=</span>colors, <span class="dt">ncol=</span><span class="dv">2</span>,<span class="dt">cex=</span><span class="fl">0.8</span>)</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-22-1.png" title="plot of chunk unnamed-chunk-22" alt="plot of chunk unnamed-chunk-22" style="display: block; margin: auto;" /></p>
 <p>If we want to see how much variability is attributed to each principle component, we can use the <code>prcomp</code> function. <code>plotMDS</code> automatically takes logCPMs when you give it a DGEList object, however <code>prcomp</code> doesn’t, so you need to give <code>prcomp</code> the <code>logcounts</code> object. You can see that the first component captures the majority of the variation in the data.</p>
-<pre class="sourceCode r"><code class="sourceCode r">pca &lt;-<span class="st"> </span><span class="kw">prcomp</span>(logcounts)
-<span class="kw">plot</span>(pca$sdev)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pca &lt;-<span class="st"> </span><span class="kw">prcomp</span>(logcounts)
+<span class="kw">plot</span>(pca$sdev)</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-23-1.png" title="plot of chunk unnamed-chunk-23" alt="plot of chunk unnamed-chunk-23" style="display: block; margin: auto;" /></p>
 <p>Another alternative is to generate an interactive MDS plot using the <em>Glimma</em> package. This allows the user to interactively explore the different dimensions.</p>
-<pre class="sourceCode r"><code class="sourceCode r">labels &lt;-<span class="st"> </span><span class="kw">paste</span>(targets$SampleName, targets$CellType, targets$Status)
-<span class="kw">glMDSPlot</span>(y, <span class="dt">labels=</span>labels, <span class="dt">groups=</span>group, <span class="dt">folder=</span><span class="st">&quot;mds&quot;</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">labels &lt;-<span class="st"> </span><span class="kw">paste</span>(targets$SampleName, targets$CellType, targets$Status)
+<span class="kw">glMDSPlot</span>(y, <span class="dt">labels=</span>labels, <span class="dt">groups=</span>group, <span class="dt">folder=</span><span class="st">&quot;mds&quot;</span>)</code></pre></div>
 <p><em>Glimma</em> was created to make interactive versions of some of the popular plots from the <em>limma</em> package. At present it can be used to obtain MDS plots and mean-difference (MD) plots, which will be covered later. The output of <code>glMDSPlot</code> is an <a href="http://bphipson.github.io/RNAseq-R/demo/mds/MDS-Plot.html">html page</a> that shows the MDS plot on the left, and the amount of variation explained by each dimension in a barplot on the right. The user can hover over points to find out sample information, and switch between successive dimensions in the MDS plot by clicking on the bars in the barplot. The default MDS plots shows dimensions 1 and 2.</p>
 <h3 id="hierarchical-clustering-with-heatmaps">Hierarchical clustering with heatmaps</h3>
 <p>An alternative to <code>plotMDS</code> for examining relationships between samples is using hierarchical clustering. Heatmaps are a nice visualisation to examine hierarchical clustering of your samples. We can do this using the <code>heatmap.2</code> function from the <em>gplots</em> package. In this example <code>heatmap.2</code> calculates a matrix of euclidean distances from the logCPM (<code>logcounts</code> object) for the 500 most variable genes.</p>
 <p>The <em>RColorBrewer</em> package has nicer colour schemes, accessed using the <code>brewer.pal</code> function. “RdYlBu” is a common choice, and “Spectral” is also nice.</p>
 <p>Note:The <code>png</code> function will create a png file to save the plots created straight after, and will close this file when <code>dev.off()</code> is called. To see your plots interactively, simply omit those two lines.</p>
 <p>Let’s select data for the 500 most variable genes and plot the heatmap</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># We estimate the variance for each row in the logcounts matrix</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># We estimate the variance for each row in the logcounts matrix</span>
 var_genes &lt;-<span class="st"> </span><span class="kw">apply</span>(logcounts, <span class="dv">1</span>, var)
-<span class="kw">head</span>(var_genes)</code></pre>
+<span class="kw">head</span>(var_genes)</code></pre></div>
 <pre class="output"><code>    497097      20671      27395      18777      21399      58175 
 27.4382296  3.3141188  0.1596456  0.1313426  0.3947091  6.2321017 
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Get the gene names for the top 500 most variable genes</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Get the gene names for the top 500 most variable genes</span>
 select_var &lt;-<span class="st"> </span><span class="kw">names</span>(<span class="kw">sort</span>(var_genes, <span class="dt">decreasing=</span><span class="ot">TRUE</span>))[<span class="dv">1</span>:<span class="dv">500</span>]
-<span class="kw">head</span>(select_var)</code></pre>
+<span class="kw">head</span>(select_var)</code></pre></div>
 <pre class="output"><code>[1] &quot;16846&quot;  &quot;72902&quot;  &quot;56747&quot;  &quot;497097&quot; &quot;24117&quot;  &quot;109205&quot;
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Subset logcounts matrix</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Subset logcounts matrix</span>
 highly_variable_lcpm &lt;-<span class="st"> </span>logcounts[select_var,]
-<span class="kw">dim</span>(highly_variable_lcpm)</code></pre>
+<span class="kw">dim</span>(highly_variable_lcpm)</code></pre></div>
 <pre class="output"><code>[1] 500  12
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(highly_variable_lcpm)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(highly_variable_lcpm)</code></pre></div>
 <pre class="output"><code>         MCL1.DG  MCL1.DH  MCL1.DI  MCL1.DJ  MCL1.DK  MCL1.DL   MCL1.LA
 16846  0.4290261 1.394877 4.025241 6.068229 5.923462 5.467369 -6.486175
 72902  1.4460253 2.569794 6.084854 5.183325 5.216547 4.629406 -6.486175
@@ -595,27 +598,27 @@ highly_variable_lcpm &lt;-<span class="st"> </span>logcounts[select_var,]
 24117  -0.7124885 -0.366455  0.01712352 -4.276248 -4.273190
 109205 -1.7975234 -2.388018 -3.29144547 -4.276248 -2.527764
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">## Get some nicer colours
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Get some nicer colours
 mypalette &lt;-<span class="st"> </span><span class="kw">brewer.pal</span>(<span class="dv">11</span>,<span class="st">&quot;RdYlBu&quot;</span>)
 morecols &lt;-<span class="st"> </span><span class="kw">colorRampPalette</span>(mypalette)
 <span class="co"># Plot the heatmap</span>
-<span class="kw">heatmap.2</span>(highly_variable_lcpm,<span class="dt">col=</span><span class="kw">rev</span>(<span class="kw">morecols</span>(<span class="dv">50</span>)),<span class="dt">trace=</span><span class="st">&quot;none&quot;</span>, <span class="dt">main=</span><span class="st">&quot;Top 500 most variable genes across samples&quot;</span>,<span class="dt">ColSideColors=</span>col.cell,<span class="dt">scale=</span><span class="st">&quot;row&quot;</span>)</code></pre>
+<span class="kw">heatmap.2</span>(highly_variable_lcpm,<span class="dt">col=</span><span class="kw">rev</span>(<span class="kw">morecols</span>(<span class="dv">50</span>)),<span class="dt">trace=</span><span class="st">&quot;none&quot;</span>, <span class="dt">main=</span><span class="st">&quot;Top 500 most variable genes across samples&quot;</span>,<span class="dt">ColSideColors=</span>col.cell,<span class="dt">scale=</span><span class="st">&quot;row&quot;</span>)</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-25-1.png" title="plot of chunk unnamed-chunk-25" alt="plot of chunk unnamed-chunk-25" style="display: block; margin: auto;" /></p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Save the heatmap</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Save the heatmap</span>
 <span class="kw">png</span>(<span class="dt">file=</span><span class="st">&quot;High_var_genes.heatmap.png&quot;</span>)
 <span class="kw">heatmap.2</span>(highly_variable_lcpm,<span class="dt">col=</span><span class="kw">rev</span>(<span class="kw">morecols</span>(<span class="dv">50</span>)),<span class="dt">trace=</span><span class="st">&quot;none&quot;</span>, <span class="dt">main=</span><span class="st">&quot;Top 500 most variable genes across samples&quot;</span>,<span class="dt">ColSideColors=</span>col.cell,<span class="dt">scale=</span><span class="st">&quot;row&quot;</span>)
-<span class="kw">dev.off</span>()</code></pre>
+<span class="kw">dev.off</span>()</code></pre></div>
 <pre class="output"><code>quartz_off_screen 
                 2 
 </code></pre>
 <p><span style="color:blue">Exercise: (1) Change the colour scheme to “PiYG” and redo the heatmap. Try <code>?RColorBrewer</code> and see what other colour schemes are available. (2) Change the sample names to <code>group</code> using the <code>labCol</code> argument (3) Redo the heatmap using the top 500 LEAST variable genes.</span></p>
 <hr />
 <h2 id="normalisation-for-composition-bias">Normalisation for composition bias</h2>
-<p>TMM normalization is performed to eliminate composition biases between libraries <span class="citation">(Robinson and Oshlack 2010)</span>. This generates a set of normalization factors, where the product of these factors and the library sizes defines the effective library size. The <code>calcNormFactors</code> function calculates the normalization factors between libraries. TMM normalisation (and most scaling normalisation methods) scale relative to one sample.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Apply normalisation to DGEList object</span>
-y &lt;-<span class="st"> </span><span class="kw">calcNormFactors</span>(y)</code></pre>
+<p>TMM normalization is performed to eliminate composition biases between libraries <span class="citation">(Mark D Robinson and Oshlack 2010)</span>. This generates a set of normalization factors, where the product of these factors and the library sizes defines the effective library size. The <code>calcNormFactors</code> function calculates the normalization factors between libraries. TMM normalisation (and most scaling normalisation methods) scale relative to one sample.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Apply normalisation to DGEList object</span>
+y &lt;-<span class="st"> </span><span class="kw">calcNormFactors</span>(y)</code></pre></div>
 <p>This will update the normalisation factors in the <code>DGEList</code> object (their default values are 1). Take a look at the normalisation factors for these samples.</p>
-<pre class="sourceCode r"><code class="sourceCode r">y$samples</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">y$samples</code></pre></div>
 <pre class="output"><code>        group lib.size norm.factors
 MCL1.DG     1 23218026    1.2368993
 MCL1.DH     1 21768136    1.2139485
@@ -632,18 +635,18 @@ MCL1.LF     1 24652963    0.5354877
 </code></pre>
 <p>The normalization factors multiply to unity across all libraries. A normalization factor below one indicates that the library size will be scaled down, as there is more suppression (i.e., composition bias) in that library relative to the other libraries. This is also equivalent to scaling the counts upwards in that sample. Conversely, a factor above one scales up the library size and is equivalent to downscaling the counts.</p>
 <p>The last two samples have much smaller normalisation factors, and MCL1.LA and MCL1.LB have the largest. If we plot mean difference plots using the <code>plotMD</code> function for these samples, we should be able to see the composition bias problem. We will use the <code>logcounts</code>, which have been normalised for library size, but not for composition bias.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
 <span class="kw">plotMD</span>(logcounts,<span class="dt">column =</span> <span class="dv">7</span>)
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)
 <span class="kw">plotMD</span>(logcounts,<span class="dt">column =</span> <span class="dv">11</span>)
-<span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre>
+<span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-28-1.png" title="plot of chunk unnamed-chunk-28" alt="plot of chunk unnamed-chunk-28" style="display: block; margin: auto;" /></p>
 <p>The mean-difference plots show average expression (mean: x-axis) against log-fold-changes (difference: y-axis). Because our <code>DGEList</code> object contains the normalisation factors, if we redo these plots using <code>y</code>, we should see the composition bias problem has been solved.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
 <span class="kw">plotMD</span>(y,<span class="dt">column =</span> <span class="dv">7</span>)
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)
 <span class="kw">plotMD</span>(y,<span class="dt">column =</span> <span class="dv">11</span>)
-<span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre>
+<span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-29-1.png" title="plot of chunk unnamed-chunk-29" alt="plot of chunk unnamed-chunk-29" style="display: block; margin: auto;" /></p>
 <p><span style="color:blue">Exercise: Plot the biased and unbiased MD plots side by side for the same sample to see the before and after TMM normalisation effect.</span></p>
 <h2 id="differential-expression-with-limma-voom">Differential expression with limma-voom</h2>
@@ -651,16 +654,16 @@ MCL1.LF     1 24652963    0.5354877
 <h3 id="create-the-design-matrix">Create the design matrix</h3>
 <p>First we need to create a design matrix for the groups (see the excellent <a href="https://bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf">limma user guide</a> for more information on design matrices). There are many different ways to set up your design matrix, and it is dictated by what comparisons you would like to test. We will follow the set-up from pg 43 of the limma vignette (“Interaction models: 2X2 factorial designs”).</p>
 <p>In this analysis let’s assume that we will be testing differences in status in the different cell types separately. For example, we want to know which genes are differentially expressed between pregnant and lactating in basal cells only. We have already coded our <code>group</code> variable for our final MDSplot, which was a concatenation of cell type and status. Coding the cell type and status in this way allows us to be flexible in specifying which comparisons we are interested in.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Look at group variable again</span>
-group</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Look at group variable again</span>
+group</code></pre></div>
 <pre class="output"><code> [1] basal.virgin     basal.virgin     basal.pregnant   basal.pregnant  
  [5] basal.lactate    basal.lactate    luminal.virgin   luminal.virgin  
  [9] luminal.pregnant luminal.pregnant luminal.lactate  luminal.lactate 
 6 Levels: basal.lactate basal.pregnant basal.virgin ... luminal.virgin
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Specify a design matrix without an intercept term</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Specify a design matrix without an intercept term</span>
 design &lt;-<span class="st"> </span><span class="kw">model.matrix</span>(~<span class="st"> </span><span class="dv">0</span> +<span class="st"> </span>group)
-design</code></pre>
+design</code></pre></div>
 <pre class="output"><code>   groupbasal.lactate groupbasal.pregnant groupbasal.virgin
 1                   0                   0                 1
 2                   0                   0                 1
@@ -693,9 +696,9 @@ attr(,&quot;contrasts&quot;)
 attr(,&quot;contrasts&quot;)$group
 [1] &quot;contr.treatment&quot;
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">## Make the column names of the design matrix a bit nicer
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Make the column names of the design matrix a bit nicer
 <span class="kw">colnames</span>(design) &lt;-<span class="st"> </span><span class="kw">levels</span>(group)
-design</code></pre>
+design</code></pre></div>
 <pre class="output"><code>   basal.lactate basal.pregnant basal.virgin luminal.lactate
 1              0              0            1               0
 2              0              0            1               0
@@ -731,11 +734,11 @@ attr(,&quot;contrasts&quot;)$group
 <p>Each column of the design matrix tells us which samples correspond to each group. The samples which come from basal cells from a lactating mouse correspond to columns 5 and 6 in the counts matrix, i.e. the samples which have 1s.</p>
 <h3 id="voom-transform-the-data">Voom transform the data</h3>
 <p>Once we have our design matrix ready to go, we can perform our voom transformation. Voom will automatically adjust the library sizes using the <code>norm.factors</code> already calculated. The voom transformation uses the experiment design matrix, and produces an <code>EList</code> object. We can add <code>plot=TRUE</code> to generate a plot of the mean-variance trend. This plot can also tell us if there are any genes that look really variable in our data, and if we’ve filtered the low counts adequately..</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))
-v &lt;-<span class="st"> </span><span class="kw">voom</span>(y,design,<span class="dt">plot =</span> <span class="ot">TRUE</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))
+v &lt;-<span class="st"> </span><span class="kw">voom</span>(y,design,<span class="dt">plot =</span> <span class="ot">TRUE</span>)</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-31-1.png" title="plot of chunk unnamed-chunk-31" alt="plot of chunk unnamed-chunk-31" style="display: block; margin: auto;" /></p>
 <p>The voom normalised log2 counts can be found in v$E. Take a look at what is in the voom object.</p>
-<pre class="sourceCode r"><code class="sourceCode r">v</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">v</code></pre></div>
 <pre class="output"><code>An object of class &quot;EList&quot;
 $targets
         group lib.size norm.factors
@@ -791,30 +794,30 @@ $design
 5                0              0
 7 more rows ...
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># What is contained in this object?</span>
-<span class="kw">names</span>(v)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># What is contained in this object?</span>
+<span class="kw">names</span>(v)</code></pre></div>
 <pre class="output"><code>[1] &quot;targets&quot; &quot;E&quot;       &quot;weights&quot; &quot;design&quot; 
 </code></pre>
 <p><span style="color:blue">Exercise: (1) What is in the <code>targets</code> slot of <code>v</code> and what does it correspond to in <code>y</code>? (2) What are the dimensions of the <code>weights</code> slot in <code>v</code>?</span></p>
 <p>We can repeat the box plots for the normalised data to compare to before normalisation. The expression values in <code>v$E</code> are already log2 values so we don’t need to log-transform.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
 <span class="kw">boxplot</span>(logcounts, <span class="dt">xlab=</span><span class="st">&quot;&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;Log2 counts per million&quot;</span>,<span class="dt">las=</span><span class="dv">2</span>,<span class="dt">main=</span><span class="st">&quot;Unnormalised logCPM&quot;</span>)
 ## Let&#39;s add a blue horizontal line that corresponds to the median logCPM
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="kw">median</span>(logcounts),<span class="dt">col=</span><span class="st">&quot;blue&quot;</span>)
 <span class="kw">boxplot</span>(v$E, <span class="dt">xlab=</span><span class="st">&quot;&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;Log2 counts per million&quot;</span>,<span class="dt">las=</span><span class="dv">2</span>,<span class="dt">main=</span><span class="st">&quot;Voom transformed logCPM&quot;</span>)
 ## Let&#39;s add a blue horizontal line that corresponds to the median logCPM
-<span class="kw">abline</span>(<span class="dt">h=</span><span class="kw">median</span>(v$E),<span class="dt">col=</span><span class="st">&quot;blue&quot;</span>)</code></pre>
+<span class="kw">abline</span>(<span class="dt">h=</span><span class="kw">median</span>(v$E),<span class="dt">col=</span><span class="st">&quot;blue&quot;</span>)</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-33-1.png" title="plot of chunk unnamed-chunk-33" alt="plot of chunk unnamed-chunk-33" style="display: block; margin: auto;" /></p>
 <p>Compare these box plots to the box plots we generated before performing the normalisation. Can you see any differences?</p>
 <h3 id="testing-for-differential-expression">Testing for differential expression</h3>
 <p>Now that we have the voom transformed data we can use <em>limma</em> to test for differential expression. First we fit a linear model for each gene using the <code>lmFit</code> function in <em>limma</em>. <code>lmFit</code> needs the voom object and the design matrix that we have already specified, which is stored within the voom object.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Fit the linear model</span>
-fit &lt;-<span class="st"> </span><span class="kw">lmFit</span>(v)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Fit the linear model</span>
+fit &lt;-<span class="st"> </span><span class="kw">lmFit</span>(v)</code></pre></div>
 <p><code>lmFit</code> estimates group means according to the design matrix, as well as gene-wise variances. There are a number of items stored in the <code>fit</code> object, most of which are specific to the statistical testing, and we won’t be discussing these in detail today.</p>
 <p>Since we are interested in differences between groups, we need to specify which comparisons we want to test. The comparison of interest can be specified using the <code>makeContrasts</code> function. Here, we are interested in knowing which genes are differentially expressed between the pregnant and lactating group in the basal cells. This is done by defining the null hypothesis as basal.pregnant - basal.lactate = 0 for each gene. Note that the group names must exactly match the column names of the design matrix.</p>
-<pre class="sourceCode r"><code class="sourceCode r">cont.matrix &lt;-<span class="st"> </span><span class="kw">makeContrasts</span>(<span class="dt">B.PregVsLac=</span>basal.pregnant -<span class="st"> </span>basal.lactate,<span class="dt">levels=</span>design)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cont.matrix &lt;-<span class="st"> </span><span class="kw">makeContrasts</span>(<span class="dt">B.PregVsLac=</span>basal.pregnant -<span class="st"> </span>basal.lactate,<span class="dt">levels=</span>design)</code></pre></div>
 <p>Take a look at the contrast matrix. The contrast matrix tells <em>limma</em> which columns of the design matrix we are interested in testing our comparison. Note that here we have specified only one comparison to test, but we can specify as many as we want in one go.</p>
-<pre class="sourceCode r"><code class="sourceCode r">cont.matrix</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">cont.matrix</code></pre></div>
 <pre class="output"><code>                  Contrasts
 Levels             B.PregVsLac
   basal.lactate             -1
@@ -825,16 +828,16 @@ Levels             B.PregVsLac
   luminal.virgin             0
 </code></pre>
 <p>Now we can apply the contrasts matrix to the <code>fit</code> object to get the statistics and estimated parameters of our comparison that we are interested in. Here we call the <code>contrasts.fit</code> function in <em>limma</em>.</p>
-<pre class="sourceCode r"><code class="sourceCode r">fit.cont &lt;-<span class="st"> </span><span class="kw">contrasts.fit</span>(fit, cont.matrix)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit.cont &lt;-<span class="st"> </span><span class="kw">contrasts.fit</span>(fit, cont.matrix)</code></pre></div>
 <p>The final step is to call the <code>eBayes</code> function, which performs empirical Bayes shrinkage on the variances, and estimates moderated t-statistics and the associated p-values.</p>
-<pre class="sourceCode r"><code class="sourceCode r">fit.cont &lt;-<span class="st"> </span><span class="kw">eBayes</span>(fit.cont)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit.cont &lt;-<span class="st"> </span><span class="kw">eBayes</span>(fit.cont)</code></pre></div>
 <p>Check the dimensions of the fit object</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(fit.cont)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(fit.cont)</code></pre></div>
 <pre class="output"><code>[1] 15804     1
 </code></pre>
 <p>We can use the <em>limma</em> <code>decideTests</code> function to generate a quick summary of DE genes for the contrasts.</p>
-<pre class="sourceCode r"><code class="sourceCode r">summa.fit &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit.cont)
-<span class="kw">summary</span>(summa.fit)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">summa.fit &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit.cont)
+<span class="kw">summary</span>(summa.fit)</code></pre></div>
 <pre class="output"><code>   B.PregVsLac
 -1        2635
 0        10464
@@ -843,7 +846,7 @@ Levels             B.PregVsLac
 <p><span style="color:blue">Exercise: (1) Add another contrast to the contrasts matrix: <code>L.PregVsLac = luminal.pregnant - luminal.lactate</code> and re-run the code above. You should have two comparisons in <code>fit.cont</code> now. (2) Check out the <code>vennDiagram</code> function</span> <span style="color:red">(HINT: type <code>?vennDiagram</code>)</span>. <span style="color:blue">Can you show the overlap of differentially expressed genes between the two comparisons? How many genes are commonly differentially expressed?</span></p>
 <p>The <em>limma</em> <code>topTable</code> function summarises the output in a table format. Significant DE genes for a particular comparison can be identified by selecting genes with a p-value smaller than a chosen cut-off value and/or a fold change greater than a chosen value in this table. By default the table will be sorted by the B statistic, which is the log-odds of differential expression. Usually the B statistic and p-value ranking will be the same, but this is not always the case. We will explicitly rank by p-value, which we can specify with the <code>sort.by</code> argument.</p>
 <p>The <code>topTable</code> command will always output the top 10 genes by default, even if they are not statistically significant. We can specify the coefficient we are interested in by the name we used in the contrast matrix (“B.PregVsLac”), or by the column number.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre></div>
 <pre class="output"><code>           logFC  AveExpr         t      P.Value    adj.P.Val        B
 24117   1.819943 2.975545  20.10780 1.063770e-10 1.016240e-06 14.96977
 381290 -2.143885 3.944066 -19.07495 1.982934e-10 1.016240e-06 14.39556
@@ -856,8 +859,8 @@ Levels             B.PregVsLac
 231991 -2.598105 4.275930 -16.53634 1.059885e-09 1.718703e-06 12.66020
 14620   3.600094 3.525281  16.46627 1.113755e-09 1.718703e-06 12.54071
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">## This will give the same output
-<span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## This will give the same output
+<span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre></div>
 <pre class="output"><code>           logFC  AveExpr         t      P.Value    adj.P.Val        B
 24117   1.819943 2.975545  20.10780 1.063770e-10 1.016240e-06 14.96977
 381290 -2.143885 3.944066 -19.07495 1.982934e-10 1.016240e-06 14.39556
@@ -873,7 +876,7 @@ Levels             B.PregVsLac
 <h3 id="adding-annotation-and-saving-the-results">Adding annotation and saving the results</h3>
 <p>We have a list of significantly differentially expressed genes, but the only annotation we can see is the Entrez Gene ID, which is not very informative. We would like to add some annotation information. There are a number of ways to do this. We will demonstrate how to do this using the <em>org.Mm.eg.db</em> package.</p>
 <p>First we need to decide what information we want. In order to see what we can extract we can run the <code>columns</code> function on the annotation database.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">columns</span>(org.Mm.eg.db)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">columns</span>(org.Mm.eg.db)</code></pre></div>
 <pre class="output"><code> [1] &quot;ACCNUM&quot;       &quot;ALIAS&quot;        &quot;ENSEMBL&quot;      &quot;ENSEMBLPROT&quot; 
  [5] &quot;ENSEMBLTRANS&quot; &quot;ENTREZID&quot;     &quot;ENZYME&quot;       &quot;EVIDENCE&quot;    
  [9] &quot;EVIDENCEALL&quot;  &quot;GENENAME&quot;     &quot;GO&quot;           &quot;GOALL&quot;       
@@ -882,29 +885,29 @@ Levels             B.PregVsLac
 [21] &quot;REFSEQ&quot;       &quot;SYMBOL&quot;       &quot;UNIGENE&quot;      &quot;UNIPROT&quot;     
 </code></pre>
 <p>We definitely want gene symbols and perhaps the full gene name. Let’s build up our annotation information in a separate data frame using the <code>select</code> function.</p>
-<pre class="sourceCode r"><code class="sourceCode r">ann &lt;-<span class="st"> </span><span class="kw">select</span>(org.Mm.eg.db,<span class="dt">keys=</span><span class="kw">rownames</span>(fit.cont),<span class="dt">columns=</span><span class="kw">c</span>(<span class="st">&quot;ENTREZID&quot;</span>,<span class="st">&quot;SYMBOL&quot;</span>,<span class="st">&quot;GENENAME&quot;</span>))</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ann &lt;-<span class="st"> </span><span class="kw">select</span>(org.Mm.eg.db,<span class="dt">keys=</span><span class="kw">rownames</span>(fit.cont),<span class="dt">columns=</span><span class="kw">c</span>(<span class="st">&quot;ENTREZID&quot;</span>,<span class="st">&quot;SYMBOL&quot;</span>,<span class="st">&quot;GENENAME&quot;</span>))</code></pre></div>
 <pre class="output"><code>&#39;select()&#39; returned 1:1 mapping between keys and columns
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Have a look at the annotation</span>
-<span class="kw">head</span>(ann)</code></pre>
-<pre class="output"><code>  ENTREZID SYMBOL                                             GENENAME
-1   497097   Xkr4 X Kell blood group precursor related family member 4
-2    20671  Sox17                SRY (sex determining region Y)-box 17
-3    27395 Mrpl15                  mitochondrial ribosomal protein L15
-4    18777 Lypla1                                  lysophospholipase 1
-5    21399  Tcea1            transcription elongation factor A (SII) 1
-6    58175  Rgs20                  regulator of G-protein signaling 20
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Have a look at the annotation</span>
+<span class="kw">head</span>(ann)</code></pre></div>
+<pre class="output"><code>  ENTREZID SYMBOL                                  GENENAME
+1   497097   Xkr4         X-linked Kx blood group related 4
+2    20671  Sox17     SRY (sex determining region Y)-box 17
+3    27395 Mrpl15       mitochondrial ribosomal protein L15
+4    18777 Lypla1                       lysophospholipase 1
+5    21399  Tcea1 transcription elongation factor A (SII) 1
+6    58175  Rgs20       regulator of G-protein signaling 20
 </code></pre>
 <p>Let’s double check that the <code>ENTREZID</code> column matches exactly to our <code>fit.cont</code> rownames.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(ann$ENTREZID==<span class="kw">rownames</span>(fit.cont))</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(ann$ENTREZID==<span class="kw">rownames</span>(fit.cont))</code></pre></div>
 <pre class="output"><code>
  TRUE 
 15804 
 </code></pre>
 <p>We can slot in the annotation information into the <code>genes</code> slot of <code>fit.cont</code>. (Please note that if the <code>select</code> function returns a 1:many mapping then you can’t just append the annotation to the fit object. An alternative way to get annotation will be discussed tomorrow during the analysis of the second dataset.)</p>
-<pre class="sourceCode r"><code class="sourceCode r">fit.cont$genes &lt;-<span class="st"> </span>ann</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit.cont$genes &lt;-<span class="st"> </span>ann</code></pre></div>
 <p>Now when we run the <code>topTable</code> command, the annotation information should be included in the output.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre></div>
 <pre class="output"><code>       ENTREZID        SYMBOL                                     GENENAME
 24117     24117          Wif1                      Wnt inhibitory factor 1
 381290   381290        Atp2b4 ATPase, Ca++ transporting, plasma membrane 4
@@ -929,59 +932,59 @@ Levels             B.PregVsLac
 14620   3.600094 3.525281  16.46627 1.113755e-09 1.718703e-06 12.54071
 </code></pre>
 <p>To get the full table (i.e. the information for all genes, not just the top 10) we can specify <code>n=&quot;Inf&quot;</code>.</p>
-<pre class="sourceCode r"><code class="sourceCode r">limma.res &lt;-<span class="st"> </span><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>,<span class="dt">n=</span><span class="st">&quot;Inf&quot;</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">limma.res &lt;-<span class="st"> </span><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>,<span class="dt">n=</span><span class="st">&quot;Inf&quot;</span>)</code></pre></div>
 <p>We can save the results table using the <code>write.csv</code> function, which writes the results out to a csv file, which you can open in excel. You can also use this csv file as input to <em>Degust</em>. Make sure to save this table as we will be using it in the <em>Degust</em> section of the workshop.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">write.csv</span>(limma.res,<span class="dt">file=</span><span class="st">&quot;B.PregVsLacResults.csv&quot;</span>,<span class="dt">row.names=</span><span class="ot">FALSE</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">write.csv</span>(limma.res,<span class="dt">file=</span><span class="st">&quot;B.PregVsLacResults.csv&quot;</span>,<span class="dt">row.names=</span><span class="ot">FALSE</span>)</code></pre></div>
 <p><strong>A note about deciding how many genes are significant</strong>: In order to decide which genes are differentially expressed, we usually take a cut-off of 0.05 on the adjusted p-value, NOT the raw p-value. This is because we are testing more than 15000 genes, and the chances of finding differentially expressed genes is very high when you do that many tests. Hence we need to control the false discovery rate, which is the adjusted p-value column in the results table. What this means is that if 100 genes are significant at a 5% false discovery rate, we are willing to accept that 5 will be false positives. Note that the <code>decideTests</code> function displays significant genes at 5% FDR.</p>
 <h3 id="plots-after-testing-for-de">Plots after testing for DE</h3>
 <p>Let’s do a few plots to make sure everything looks good and that we haven’t made a mistake in the analysis. Genome-wide plots that are useful for checking are MAplots (or MDplots) and volcano plots. There are functions in limma for plotting these with <code>fit.cont</code> as input.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># We want to highlight the significant genes. We can get this from decideTests.</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># We want to highlight the significant genes. We can get this from decideTests.</span>
 <span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
 <span class="kw">plotMD</span>(fit.cont,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">status=</span>summa.fit[,<span class="st">&quot;B.PregVsLac&quot;</span>])
 
 <span class="co"># For the volcano plot we have to specify how many of the top genes to hightlight.</span>
 <span class="co"># We can also specify that we want to plot the gene symbol for the highlighted genes.</span>
 <span class="co"># let&#39;s highlight the top 100 most DE genes</span>
-<span class="kw">volcanoplot</span>(fit.cont,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">highlight=</span><span class="dv">100</span>,<span class="dt">names=</span>fit.cont$genes$SYMBOL)</code></pre>
+<span class="kw">volcanoplot</span>(fit.cont,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">highlight=</span><span class="dv">100</span>,<span class="dt">names=</span>fit.cont$genes$SYMBOL)</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-49-1.png" title="plot of chunk unnamed-chunk-49" alt="plot of chunk unnamed-chunk-49" style="display: block; margin: auto;" /></p>
 <p><span style="color:blue">Exercise: Look at the MD plot and volcano plot for the second comparison, <code>L.PregVsLac</code>. Change the number of highlighted genes to 200 in the volcano plot.</span></p>
 <p>Before following up on the DE genes with further lab work, it is recommended to have a look at the expression levels of the individual samples for the genes of interest. We can quickly look at grouped expression using <code>stripchart</code>. We can use the normalised log expression values in the voom object (<code>v$E</code>).</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s look at the first gene in the topTable, Wif1, which has a rowname 24117</span>
-<span class="kw">stripchart</span>(v$E[<span class="st">&quot;24117&quot;</span>,]~group)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s look at the first gene in the topTable, Wif1, which has a rowname 24117</span>
+<span class="kw">stripchart</span>(v$E[<span class="st">&quot;24117&quot;</span>,]~group)</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-50-1.png" title="plot of chunk unnamed-chunk-50" alt="plot of chunk unnamed-chunk-50" style="display: block; margin: auto;" /></p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># This plot is ugly, let&#39;s make it better</span>
-<span class="kw">stripchart</span>(v$E[<span class="st">&quot;24117&quot;</span>,]~group,<span class="dt">vertical=</span><span class="ot">TRUE</span>,<span class="dt">las=</span><span class="dv">2</span>,<span class="dt">cex.axis=</span><span class="fl">0.8</span>,<span class="dt">pch=</span><span class="dv">16</span>,<span class="dt">col=</span><span class="dv">1</span>:<span class="dv">6</span>,<span class="dt">method=</span><span class="st">&quot;jitter&quot;</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># This plot is ugly, let&#39;s make it better</span>
+<span class="kw">stripchart</span>(v$E[<span class="st">&quot;24117&quot;</span>,]~group,<span class="dt">vertical=</span><span class="ot">TRUE</span>,<span class="dt">las=</span><span class="dv">2</span>,<span class="dt">cex.axis=</span><span class="fl">0.8</span>,<span class="dt">pch=</span><span class="dv">16</span>,<span class="dt">col=</span><span class="dv">1</span>:<span class="dv">6</span>,<span class="dt">method=</span><span class="st">&quot;jitter&quot;</span>)</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-50-2.png" title="plot of chunk unnamed-chunk-50" alt="plot of chunk unnamed-chunk-50" style="display: block; margin: auto;" /></p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s use nicer colours</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s use nicer colours</span>
 nice.col &lt;-<span class="st"> </span><span class="kw">brewer.pal</span>(<span class="dv">6</span>,<span class="dt">name=</span><span class="st">&quot;Dark2&quot;</span>)
-<span class="kw">stripchart</span>(v$E[<span class="st">&quot;24117&quot;</span>,]~group,<span class="dt">vertical=</span><span class="ot">TRUE</span>,<span class="dt">las=</span><span class="dv">2</span>,<span class="dt">cex.axis=</span><span class="fl">0.8</span>,<span class="dt">pch=</span><span class="dv">16</span>,<span class="dt">cex=</span><span class="fl">1.3</span>,<span class="dt">col=</span>nice.col,<span class="dt">method=</span><span class="st">&quot;jitter&quot;</span>,<span class="dt">ylab=</span><span class="st">&quot;Normalised log2 expression&quot;</span>,<span class="dt">main=</span><span class="st">&quot;Wif1&quot;</span>)</code></pre>
+<span class="kw">stripchart</span>(v$E[<span class="st">&quot;24117&quot;</span>,]~group,<span class="dt">vertical=</span><span class="ot">TRUE</span>,<span class="dt">las=</span><span class="dv">2</span>,<span class="dt">cex.axis=</span><span class="fl">0.8</span>,<span class="dt">pch=</span><span class="dv">16</span>,<span class="dt">cex=</span><span class="fl">1.3</span>,<span class="dt">col=</span>nice.col,<span class="dt">method=</span><span class="st">&quot;jitter&quot;</span>,<span class="dt">ylab=</span><span class="st">&quot;Normalised log2 expression&quot;</span>,<span class="dt">main=</span><span class="st">&quot;Wif1&quot;</span>)</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-50-3.png" title="plot of chunk unnamed-chunk-50" alt="plot of chunk unnamed-chunk-50" style="display: block; margin: auto;" /></p>
 <p>Notice anything interesting about the expression of this gene?</p>
 <p><span style="color:blue">Exercise: Take the top gene from the L.PregVsLactate comparison and make a stripchart of grouped expression as above. (Don’t forget to change the title of the plot.)</span></p>
 <p>An interactive version of the volcano plot above that includes the raw per sample values in a separate panel is possible via the <code>glMDPlot</code> function in the <em>Glimma</em> package. This function was written to make interactive mean-difference plots by default (as we will see later) but can be re-configured to give a volcano plot by selecting the columns of interest from an unsorted top table of differential expression results.</p>
-<pre class="sourceCode r"><code class="sourceCode r">group2 &lt;-<span class="st"> </span>group
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">group2 &lt;-<span class="st"> </span>group
 <span class="kw">levels</span>(group2) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;basal.lactate&quot;</span>,<span class="st">&quot;basal.preg&quot;</span>,<span class="st">&quot;basal.virgin&quot;</span>,<span class="st">&quot;lum.lactate&quot;</span>, <span class="st">&quot;lum.preg&quot;</span>, <span class="st">&quot;lum.virgin&quot;</span>)
 topt &lt;-<span class="st"> </span><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">number=</span><span class="ot">Inf</span>,<span class="dt">sort.by=</span><span class="st">&quot;none&quot;</span>)
 <span class="kw">glMDPlot</span>(topt, <span class="dt">xval=</span><span class="st">&quot;logFC&quot;</span>, <span class="dt">yval=</span><span class="st">&quot;B&quot;</span>, <span class="dt">counts=</span>y$counts, <span class="dt">anno=</span>fit.cont$genes, <span class="dt">groups=</span>group2, <span class="dt">samples=</span>labels,
 <span class="dt">status=</span>summa.fit[,<span class="st">&quot;B.PregVsLac&quot;</span>], <span class="dt">id.column=</span><span class="st">&quot;ENTREZID&quot;</span>, <span class="dt">search.by=</span><span class="st">&quot;SYMBOL&quot;</span>,
 <span class="dt">display.columns=</span><span class="kw">c</span>(<span class="st">&quot;ENTREZID&quot;</span>, <span class="st">&quot;SYMBOL&quot;</span>, <span class="st">&quot;GENENAME&quot;</span>),
-<span class="dt">html=</span><span class="st">&quot;volcano&quot;</span>, <span class="dt">folder=</span><span class="st">&quot;volcano&quot;</span>, <span class="dt">main=</span><span class="st">&quot;B.PregVsLac&quot;</span>)</code></pre>
+<span class="dt">html=</span><span class="st">&quot;volcano&quot;</span>, <span class="dt">folder=</span><span class="st">&quot;volcano&quot;</span>, <span class="dt">main=</span><span class="st">&quot;B.PregVsLac&quot;</span>)</code></pre></div>
 <p>This function creates an <a href="http://bphipson.github.io/RNAseq-R/demo/volcano/volcano.html">html page</a> with a volcano plot on the left and a plot showing the log-CPM per sample for a selected gene on the right. A search bar is available to allow gene IDs (gene Symbols in this case) to be searched.</p>
 <h3 id="testing-relative-to-a-threshold-treat">Testing relative to a threshold (TREAT)</h3>
-<p>When there is a lot of differential expression, sometimes we may want to cut-off on a fold change threshold as well as a p-value threshold so that we follow up on the most biologically significant genes. However, it is not recommended to simply rank by p-value and then discard genes with small logFC’s, as this has been shown to increase the false discovery rate. In other words, you are not controlling the false discovery rate at 5% anymore. There is a function called <code>treat</code> in the <em>limma</em> package that performs this style of analysis correctly <span class="citation">(McCarthy and Smyth 2009)</span>. <code>treat</code> will simply take our <code>fit.cont</code> object, as well as a user-specified log fold change cut-off, and recalculate the moderated t-statistics and p-values with the new information about logFC.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s decide that we are only interested in genes that have a absolute logFC of 1.</span>
+<p>When there is a lot of differential expression, sometimes we may want to cut-off on a fold change threshold as well as a p-value threshold so that we follow up on the most biologically significant genes. However, it is not recommended to simply rank by p-value and then discard genes with small logFC’s, as this has been shown to increase the false discovery rate. In other words, you are not controlling the false discovery rate at 5% anymore. There is a function called <code>treat</code> in the <em>limma</em> package that performs this style of analysis correctly <span class="citation">(D. J. McCarthy and Smyth 2009)</span>. <code>treat</code> will simply take our <code>fit.cont</code> object, as well as a user-specified log fold change cut-off, and recalculate the moderated t-statistics and p-values with the new information about logFC.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s decide that we are only interested in genes that have a absolute logFC of 1.</span>
 <span class="co"># This corresponds to a fold change of 2, or 0.5 (i.e. double or half).</span>
 <span class="co"># We can perform a treat analysis which ranks our genes according to p-value AND logFC.</span>
 <span class="co"># This is easy to do after our analysis, we just give the treat function the fit.cont object and specify our cut-off.</span>
 fit.treat &lt;-<span class="st"> </span><span class="kw">treat</span>(fit.cont,<span class="dt">lfc=</span><span class="dv">1</span>)
 res.treat &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit.treat)
-<span class="kw">summary</span>(res.treat)</code></pre>
+<span class="kw">summary</span>(res.treat)</code></pre></div>
 <pre class="output"><code>   B.PregVsLac
 -1          53
 0        15677
 1           74
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit.treat,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit.treat,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre></div>
 <pre class="output"><code>       ENTREZID        SYMBOL                                     GENENAME
 211577   211577        Mrgprf                    MAS-related GPR, member F
 78896     78896 1500015O10Rik                   RIKEN cDNA 1500015O10 gene
@@ -1005,19 +1008,19 @@ res.treat &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit.
 381290 -2.143885  3.9440659 -10.17758 1.322118e-07 2.050763e-04
 231991 -2.598105  4.2759295 -10.17157 1.330809e-07 2.050763e-04
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Notice that much fewer genes are highlighted in the MAplot</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Notice that much fewer genes are highlighted in the MAplot</span>
 <span class="kw">plotMD</span>(fit.treat,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">status=</span>res.treat[,<span class="st">&quot;B.PregVsLac&quot;</span>])
-<span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre>
+<span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-52-1.png" title="plot of chunk unnamed-chunk-52" alt="plot of chunk unnamed-chunk-52" style="display: block; margin: auto;" /></p>
 <p><span style="color:blue">Exercise: Change the cut-off so that we are interested in genes that change at least 50% on the fold change scale.</span> <span style="color:red">(HINT: what is the corresponding logFC value of 50% fold change? Assume basal.pregnant is 50% higher than basal.lactate)</span></p>
 <p>An interactive version of the mean-difference plots is possible via the <code>glMDPlot</code> function in the <em>Glimma</em> package.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">glMDPlot</span>(fit.treat, <span class="dt">counts=</span>y$counts, <span class="dt">anno=</span>fit.cont$genes, <span class="dt">groups=</span>group2, <span class="dt">samples=</span>labels,
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">glMDPlot</span>(fit.treat, <span class="dt">counts=</span>y$counts, <span class="dt">anno=</span>fit.cont$genes, <span class="dt">groups=</span>group2, <span class="dt">samples=</span>labels,
 <span class="dt">status=</span>res.treat[,<span class="st">&quot;B.PregVsLac&quot;</span>], <span class="dt">id.column=</span><span class="st">&quot;ENTREZID&quot;</span>,
 <span class="dt">search.by=</span><span class="st">&quot;SYMBOL&quot;</span>, <span class="dt">display.columns=</span><span class="kw">c</span>(<span class="st">&quot;ENTREZID&quot;</span>, <span class="st">&quot;SYMBOL&quot;</span>,
-<span class="st">&quot;GENENAME&quot;</span>), <span class="dt">folder=</span><span class="st">&quot;md&quot;</span>, <span class="dt">main=</span><span class="st">&quot;B.PregVsLac&quot;</span>)</code></pre>
+<span class="st">&quot;GENENAME&quot;</span>), <span class="dt">folder=</span><span class="st">&quot;md&quot;</span>, <span class="dt">main=</span><span class="st">&quot;B.PregVsLac&quot;</span>)</code></pre></div>
 <p>As for the volcano plot example above, this function creates an <a href="http://bphipson.github.io/RNAseq-R/demo/md/MD-Plot.html">html page</a> that allows the user to search for their favourite gene.</p>
 <p><strong>We need to save a few data objects to use for the gene set testing section for Day 2 so we don’t have to rerun everything</strong></p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># save(fit.cont,seqdata,v,design,cont.matrix,file=&quot;day1objects.Rdata&quot;)</span></code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># save(fit.cont,seqdata,v,design,cont.matrix,file=&quot;day1objects.Rdata&quot;)</span></code></pre></div>
 <h2 id="degust-analysis">Degust analysis</h2>
 <ul>
 <li>Load in the results from the limma-voom analysis using the Degust GUI</li>
@@ -1026,8 +1029,8 @@ res.treat &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit.
 <p><a href="degust.pdf">Degust instructions</a> (pdf)</p>
 <h2 id="generating-heatmaps-for-de-genes">Generating heatmaps for DE genes</h2>
 <p>For visualisation purposes, we can make heatmaps of the most differentially expressed genes. First we’ll select out the significant genes, the genes below a specified adj.P.value. In this case we’ll use 0.01</p>
-<pre class="sourceCode r"><code class="sourceCode r">limma.res.pval &lt;-<span class="st"> </span><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">n=</span><span class="st">&quot;Inf&quot;</span>,<span class="dt">p.val=</span><span class="fl">0.01</span>)
-<span class="kw">head</span>(limma.res.pval)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">limma.res.pval &lt;-<span class="st"> </span><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">n=</span><span class="st">&quot;Inf&quot;</span>,<span class="dt">p.val=</span><span class="fl">0.01</span>)
+<span class="kw">head</span>(limma.res.pval)</code></pre></div>
 <pre class="output"><code>       ENTREZID        SYMBOL                                     GENENAME
 24117     24117          Wif1                      Wnt inhibitory factor 1
 381290   381290        Atp2b4 ATPase, Ca++ transporting, plasma membrane 4
@@ -1044,13 +1047,13 @@ res.treat &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit.
 16012  -2.896115 1.978449 -18.21525 3.413066e-10 1.01624e-06 13.46984
 </code></pre>
 <p>Check the dimensions to see how many genes this is</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(limma.res.pval)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(limma.res.pval)</code></pre></div>
 <pre class="output"><code>[1] 2995    9
 </code></pre>
 <p>Next to select the 50 genes that show the greatest upregulation and the 50 that show the greatest downregulation we first order by logFC</p>
-<pre class="sourceCode r"><code class="sourceCode r">o &lt;-<span class="st"> </span><span class="kw">order</span>(limma.res.pval$logFC,<span class="dt">decreasing =</span> <span class="ot">TRUE</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">o &lt;-<span class="st"> </span><span class="kw">order</span>(limma.res.pval$logFC,<span class="dt">decreasing =</span> <span class="ot">TRUE</span>)
 lfc.ordered &lt;-<span class="st"> </span>limma.res.pval[o, ]
-<span class="kw">head</span>(lfc.ordered)</code></pre>
+<span class="kw">head</span>(lfc.ordered)</code></pre></div>
 <pre class="output"><code>       ENTREZID        SYMBOL
 140474   140474          Muc4
 16071     16071          Igkc
@@ -1074,16 +1077,16 @@ lfc.ordered &lt;-<span class="st"> </span>limma.res.pval[o, ]
 21819  -2.85209902  5.062078 2.678370e-04 2.484651e-03 -0.4861841
 </code></pre>
 <p>Then we can select the 50 most upregulated genes using the head function. Head selects the top genes and as we’ve ordered by logFC these will be the genes with the highest logFC.</p>
-<pre class="sourceCode r"><code class="sourceCode r">up50 &lt;-<span class="st"> </span><span class="kw">head</span>(lfc.ordered, <span class="dv">50</span>)
-<span class="kw">dim</span>(up50)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">up50 &lt;-<span class="st"> </span><span class="kw">head</span>(lfc.ordered, <span class="dv">50</span>)
+<span class="kw">dim</span>(up50)</code></pre></div>
 <pre class="output"><code>[1] 50  9
 </code></pre>
 <p>To create the heatmap we need to get the normalised log counts from the <code>voom</code> object <code>v</code> for these up50 genes</p>
-<pre class="sourceCode r"><code class="sourceCode r">mu50 &lt;-<span class="st"> </span><span class="kw">match</span>(<span class="kw">rownames</span>(up50), <span class="kw">rownames</span>(v))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mu50 &lt;-<span class="st"> </span><span class="kw">match</span>(<span class="kw">rownames</span>(up50), <span class="kw">rownames</span>(v))
 up50.counts.voom &lt;-<span class="st"> </span>v$E[mu50, ]
-<span class="kw">rownames</span>(up50.counts.voom) &lt;-<span class="st"> </span>up50$SYMBOL</code></pre>
+<span class="kw">rownames</span>(up50.counts.voom) &lt;-<span class="st"> </span>up50$SYMBOL</code></pre></div>
 <p>Then create a heatmap of the normalised counts for these 50 genes. We’ll use the heatmap.2 library and the blue-red colour palette</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">heatmap.2</span>(up50.counts.voom, <span class="dt">Rowv =</span> F, <span class="dt">Colv =</span> F, <span class="dt">trace=</span><span class="st">&quot;none&quot;</span>, <span class="dt">ColSideColors=</span>nice.col[group],<span class="dt">col=</span><span class="kw">bluered</span>(<span class="dv">100</span>),<span class="dt">labCol=</span>group,<span class="dt">margins=</span><span class="kw">c</span>(<span class="dv">8</span>,<span class="dv">7</span>))</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">heatmap.2</span>(up50.counts.voom, <span class="dt">Rowv =</span> F, <span class="dt">Colv =</span> F, <span class="dt">trace=</span><span class="st">&quot;none&quot;</span>, <span class="dt">ColSideColors=</span>nice.col[group],<span class="dt">col=</span><span class="kw">bluered</span>(<span class="dv">100</span>),<span class="dt">labCol=</span>group,<span class="dt">margins=</span><span class="kw">c</span>(<span class="dv">8</span>,<span class="dv">7</span>))</code></pre></div>
 <pre class="error"><code>Warning in heatmap.2(up50.counts.voom, Rowv = F, Colv = F, trace =
 &quot;none&quot;, : Discrepancy: Rowv is FALSE, while dendrogram is `both&#39;. Omitting
 row dendogram.
@@ -1094,12 +1097,12 @@ Omitting column dendogram.
 </code></pre>
 <p><img src="fig-06/unnamed-chunk-60-1.png" title="plot of chunk unnamed-chunk-60" alt="plot of chunk unnamed-chunk-60" style="display: block; margin: auto;" /></p>
 <p>Now do the same to create a heatmap for the 50 most downregulated genes. We can select the 50 genes that show the greatest downregulation by using the <code>tail</code> function. <code>tail</code> selects the bottom genes and as we’ve ordered by logFC these will be the genes with the lowest logFC.</p>
-<pre class="sourceCode r"><code class="sourceCode r">down50 &lt;-<span class="st"> </span><span class="kw">tail</span>(lfc.ordered, <span class="dv">50</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">down50 &lt;-<span class="st"> </span><span class="kw">tail</span>(lfc.ordered, <span class="dv">50</span>)</code></pre></div>
 <p>Get the normalised log counts for the samples for these genes</p>
-<pre class="sourceCode r"><code class="sourceCode r">md50 &lt;-<span class="st"> </span><span class="kw">match</span>(<span class="kw">rownames</span>(down50), <span class="kw">rownames</span>(v))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">md50 &lt;-<span class="st"> </span><span class="kw">match</span>(<span class="kw">rownames</span>(down50), <span class="kw">rownames</span>(v))
 down50.counts.voom &lt;-<span class="st"> </span>v$E[md50, ]
-<span class="kw">rownames</span>(down50.counts.voom) &lt;-<span class="st"> </span>down50$SYMBOL</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">heatmap.2</span>(down50.counts.voom, <span class="dt">Rowv =</span> F, <span class="dt">Colv =</span> F, <span class="dt">trace=</span><span class="st">&quot;none&quot;</span>, <span class="dt">ColSideColors=</span>nice.col[group], <span class="dt">col=</span><span class="kw">bluered</span>(<span class="dv">100</span>),<span class="dt">labCol=</span>group,<span class="dt">margins=</span><span class="kw">c</span>(<span class="dv">8</span>,<span class="dv">7</span>))</code></pre>
+<span class="kw">rownames</span>(down50.counts.voom) &lt;-<span class="st"> </span>down50$SYMBOL</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">heatmap.2</span>(down50.counts.voom, <span class="dt">Rowv =</span> F, <span class="dt">Colv =</span> F, <span class="dt">trace=</span><span class="st">&quot;none&quot;</span>, <span class="dt">ColSideColors=</span>nice.col[group], <span class="dt">col=</span><span class="kw">bluered</span>(<span class="dv">100</span>),<span class="dt">labCol=</span>group,<span class="dt">margins=</span><span class="kw">c</span>(<span class="dv">8</span>,<span class="dv">7</span>))</code></pre></div>
 <pre class="error"><code>Warning in heatmap.2(down50.counts.voom, Rowv = F, Colv = F, trace =
 &quot;none&quot;, : Discrepancy: Rowv is FALSE, while dendrogram is `both&#39;. Omitting
 row dendogram.
@@ -1114,38 +1117,38 @@ Omitting column dendogram.
 <p>Sometimes there is quite a long list of differentially expressed genes to interpret after a differential expression analysis, and it is usually infeasible to go through the list one gene at a time trying to understand it’s biological function. A common downstream procedure is gene set testing, which aims to understand which pathways/gene networks the differentially expressed genes are implicated in.</p>
 <p>There are a number of different ways to go about testing for enrichment of biological pathways, and the test you choose usually depends on the question you’re asking. There are two kinds of tests: self-contained and competitive gene set tests. Self-contained tests, which include the <code>ROAST</code> procedure, ask the question “Are the genes in the set/pathway differentially expressed as a whole?” Competitive gene set tests, like <code>goana</code> and <code>camera</code> ask the question whether the differentially expressed genes tend to be over-represented in the gene set, compared to all the other genes in the experiment. These different questions use different statistical methodology.</p>
 <p><strong>Load in the saved data from the previous day</strong></p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load(&quot;day1objects.Rdata&quot;)</span></code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load(&quot;day1objects.Rdata&quot;)</span></code></pre></div>
 <h3 id="gene-ontology-testing-with-goana">Gene ontology testing with goana</h3>
 <p>First, we will perform a gene ontology (GO) enrichment analysis using the <code>goana</code> function in <em>limma</em>. There are approximately 20,000 GO terms, and they are split into three categories: BP (biological process), MF (molecular function) and CC (cellular component). <code>goana</code> uses annotation from the appropriate Bioconductor package and can be used for any of the five species specified (Hs, Mm, Rn, Dm or Pt). <code>goana</code> has an advantage over other methods, such as DAVID, in that there is the option to take into account the gene length bias inherent in RNA-Seq data.</p>
 <p>Suppose we want to identify GO terms that are over-represented in the basal lactating group compared to the basal pregnancy group. This can be achieved by applying the goana function to the differential expression results of that comparison. <code>goana</code> takes the <code>fit.cont</code> object, the coefficient of interest and the species. The top set of most enriched GO terms can be viewed with the topGO function.</p>
-<pre class="sourceCode r"><code class="sourceCode r">go &lt;-<span class="st"> </span><span class="kw">goana</span>(fit.cont, <span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">species =</span> <span class="st">&quot;Mm&quot;</span>)
-<span class="kw">topGO</span>(go, <span class="dt">n=</span><span class="dv">10</span>)</code></pre>
-<pre class="output"><code>                                           Term Ont    N  Up Down
-GO:0044822                  poly(A) RNA binding  MF 1089 403  112
-GO:0003723                          RNA binding  MF 1408 473  155
-GO:0030529            ribonucleoprotein complex  CC  625 246   46
-GO:0022613 ribonucleoprotein complex biogenesis  BP  309 145   22
-GO:0022626                   cytosolic ribosome  CC   85  66    1
-GO:0042254                  ribosome biogenesis  BP  202 110    7
-GO:0003676                 nucleic acid binding  MF 2810 705  425
-GO:1901363        heterocyclic compound binding  MF 4310 965  682
-GO:0006364                      rRNA processing  BP  142  80    2
-GO:0005730                            nucleolus  CC  671 225   94
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">go &lt;-<span class="st"> </span><span class="kw">goana</span>(fit.cont, <span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">species =</span> <span class="st">&quot;Mm&quot;</span>)
+<span class="kw">topGO</span>(go, <span class="dt">n=</span><span class="dv">10</span>)</code></pre></div>
+<pre class="output"><code>                                              Term Ont    N  Up Down
+GO:0044822                     poly(A) RNA binding  MF 1092 404  113
+GO:0003723                             RNA binding  MF 1429 477  158
+GO:0030529 intracellular ribonucleoprotein complex  CC  646 251   47
+GO:1990904               ribonucleoprotein complex  CC  646 251   47
+GO:0042254                     ribosome biogenesis  BP  223 125    7
+GO:0022626                      cytosolic ribosome  CC   97  76    1
+GO:0022613    ribonucleoprotein complex biogenesis  BP  336 161   24
+GO:0003676                    nucleic acid binding  MF 2834 711  431
+GO:0005730                               nucleolus  CC  663 234   81
+GO:0006364                         rRNA processing  BP  146  84    2
                    P.Up    P.Down
-GO:0044822 1.023184e-60 1.0000000
-GO:0003723 5.314314e-57 1.0000000
-GO:0030529 1.088768e-41 1.0000000
-GO:0022613 1.302828e-34 1.0000000
-GO:0022626 1.749135e-34 0.9999999
-GO:0042254 7.486654e-34 1.0000000
-GO:0003676 2.429937e-33 0.9999405
-GO:1901363 5.748009e-27 0.9998453
-GO:0006364 2.837929e-26 1.0000000
-GO:0005730 2.860724e-26 0.9951386
+GO:0044822 5.855477e-61 1.0000000
+GO:0003723 1.045288e-56 1.0000000
+GO:0030529 1.831235e-41 1.0000000
+GO:1990904 1.831235e-41 1.0000000
+GO:0042254 3.796293e-40 1.0000000
+GO:0022626 4.596217e-40 1.0000000
+GO:0022613 7.781795e-40 1.0000000
+GO:0003676 8.025765e-34 0.9999085
+GO:0005730 4.464262e-31 0.9999542
+GO:0006364 1.939360e-28 1.0000000
 </code></pre>
 <p>The row names of the output are the universal identifiers of the GO terms, with one term per row. The Term column gives the names of the GO terms. These terms cover three domains - biological process (BP), cellular component (CC) and molecular function (MF), as shown in the Ont column. The N column represents the total number of genes that are annotated with each GO term. The Up and Down columns represent the number of differentially expressed genes that overlap with the genes in the GO term. The P.Up and P.Down columns contain the p-values for over-representation of the GO term across the set of up- and down-regulated genes, respectively. The output table is sorted by the minimum of P.Up and P.Down by default.</p>
 <p>An additional refinement is to supply <code>goana</code> with the gene lengths using the <code>covariate</code> argument. In the original data matrix that we loaded into R, there is a column called “Length”.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">colnames</span>(seqdata)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">colnames</span>(seqdata)</code></pre></div>
 <pre class="output"><code> [1] &quot;EntrezGeneID&quot;                     
  [2] &quot;Length&quot;                           
  [3] &quot;MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1&quot;
@@ -1162,36 +1165,36 @@ GO:0005730 2.860724e-26 0.9951386
 [14] &quot;MCL1.LF_BC2CTUACXX_CTTGTA_L001_R1&quot;
 </code></pre>
 <p>In order to get the gene lengths for every gene in <code>fit.cont</code>, we can use the <code>match</code> command. Note that the gene length supplied needs to be in the correct order.</p>
-<pre class="sourceCode r"><code class="sourceCode r">m &lt;-<span class="st"> </span><span class="kw">match</span>(<span class="kw">rownames</span>(fit.cont),seqdata$EntrezGeneID)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m &lt;-<span class="st"> </span><span class="kw">match</span>(<span class="kw">rownames</span>(fit.cont),seqdata$EntrezGeneID)
 gene_length &lt;-<span class="st"> </span>seqdata$Length[m]
-<span class="kw">head</span>(gene_length)</code></pre>
+<span class="kw">head</span>(gene_length)</code></pre></div>
 <pre class="output"><code>[1] 3634 3130 4203 2433 2847 2241
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Rerun goana with gene length information</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Rerun goana with gene length information</span>
 go_length &lt;-<span class="st"> </span><span class="kw">goana</span>(fit.cont,<span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">species=</span><span class="st">&quot;Mm&quot;</span>,<span class="dt">covariate=</span>gene_length)
-<span class="kw">topGO</span>(go_length, <span class="dt">n=</span><span class="dv">10</span>)</code></pre>
-<pre class="output"><code>                                           Term Ont    N  Up Down
-GO:0044822                  poly(A) RNA binding  MF 1089 403  112
-GO:0003723                          RNA binding  MF 1408 473  155
-GO:0030529            ribonucleoprotein complex  CC  625 246   46
-GO:0022626                   cytosolic ribosome  CC   85  66    1
-GO:0042254                  ribosome biogenesis  BP  202 110    7
-GO:0022613 ribonucleoprotein complex biogenesis  BP  309 145   22
-GO:0003676                 nucleic acid binding  MF 2810 705  425
-GO:0005840                             ribosome  CC  195  97    5
-GO:0044391                    ribosomal subunit  CC  138  76    2
-GO:0006364                      rRNA processing  BP  142  80    2
+<span class="kw">topGO</span>(go_length, <span class="dt">n=</span><span class="dv">10</span>)</code></pre></div>
+<pre class="output"><code>                                              Term Ont    N  Up Down
+GO:0044822                     poly(A) RNA binding  MF 1092 404  113
+GO:0003723                             RNA binding  MF 1429 477  158
+GO:0030529 intracellular ribonucleoprotein complex  CC  646 251   47
+GO:1990904               ribonucleoprotein complex  CC  646 251   47
+GO:0022626                      cytosolic ribosome  CC   97  76    1
+GO:0042254                     ribosome biogenesis  BP  223 125    7
+GO:0022613    ribonucleoprotein complex biogenesis  BP  336 161   24
+GO:0003676                    nucleic acid binding  MF 2834 711  431
+GO:0005840                                ribosome  CC  203 101    5
+GO:0005730                               nucleolus  CC  663 234   81
                    P.Up    P.Down
-GO:0044822 2.274027e-61 1.0000000
-GO:0003723 3.716227e-58 1.0000000
-GO:0030529 2.644116e-45 1.0000000
-GO:0022626 1.780504e-38 0.9999992
-GO:0042254 4.456874e-36 1.0000000
-GO:0022613 4.912403e-36 0.9999999
-GO:0003676 6.406921e-32 0.9999852
-GO:0005840 1.720275e-30 1.0000000
-GO:0044391 2.402151e-28 1.0000000
-GO:0006364 5.785544e-28 1.0000000
+GO:0044822 1.540662e-61 1.0000000
+GO:0003723 7.698725e-58 1.0000000
+GO:0030529 4.685509e-45 1.0000000
+GO:1990904 4.685509e-45 1.0000000
+GO:0022626 9.692343e-45 0.9999999
+GO:0042254 4.880627e-43 1.0000000
+GO:0022613 1.272779e-41 1.0000000
+GO:0003676 2.397121e-32 0.9999772
+GO:0005840 9.698368e-32 1.0000000
+GO:0005730 1.028139e-31 0.9999368
 </code></pre>
 <p>Notes</p>
 <ul>
@@ -1202,39 +1205,33 @@ GO:0006364 5.785544e-28 1.0000000
 <h3 id="camera-gene-set-testing-using-the-broads-curated-gene-sets">CAMERA gene set testing using the Broad’s curated gene sets</h3>
 <p>Other databases of gene sets that are available come from the Broad Institute’s Molecular Signatures Database (<a href="http://software.broadinstitute.org/gsea/msigdb">MSigDB</a>). CAMERA is good option for testing a very large number of gene sets such as the MSigDB sets, as it is very fast. CAMERA is known as a competitive gene set test, however it has the advantage that it can take into account inter-gene correlation within each gene set <span class="citation">(D. Wu and Smyth 2012)</span>. It also works seemlessly with a <code>voom</code> object, taking into account the mean-variance relationship in RNA-Seq data.</p>
 <p>Here we will be using the C2 gene sets for mouse, available as .rdata files from the WEHI bioinformatics page <a href="http://bioinf.wehi.edu.au/software/MSigDB/index.html" class="uri">http://bioinf.wehi.edu.au/software/MSigDB/index.html</a>. The C2 gene sets contain 4725 curated gene sets collected from a variety of places: BioCarta, KEGG, Pathway Interaction Database, Reactome as well as some published studies.It doesn’t include GO terms.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Load in the mouse c2 gene sets</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Load in the mouse c2 gene sets</span>
 <span class="co"># The R object is called Mm.c2</span>
 <span class="kw">load</span>(<span class="st">&quot;data/mouse_c2_v5.rdata&quot;</span>)
 <span class="co"># Have a look at the first few gene sets</span>
-<span class="kw">names</span>(Mm.c2)[<span class="dv">1</span>:<span class="dv">5</span>]</code></pre>
+<span class="kw">names</span>(Mm.c2)[<span class="dv">1</span>:<span class="dv">5</span>]</code></pre></div>
 <pre class="output"><code>[1] &quot;KEGG_GLYCOLYSIS_GLUCONEOGENESIS&quot;              
 [2] &quot;KEGG_CITRATE_CYCLE_TCA_CYCLE&quot;                 
 [3] &quot;KEGG_PENTOSE_PHOSPHATE_PATHWAY&quot;               
 [4] &quot;KEGG_PENTOSE_AND_GLUCURONATE_INTERCONVERSIONS&quot;
 [5] &quot;KEGG_FRUCTOSE_AND_MANNOSE_METABOLISM&quot;         
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Number of gene sets in C2</span>
-<span class="kw">length</span>(Mm.c2)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Number of gene sets in C2</span>
+<span class="kw">length</span>(Mm.c2)</code></pre></div>
 <pre class="output"><code>[1] 4725
 </code></pre>
 <p>The gene identifiers are Entrez Gene ID, which is the same as the rownames of our voom object. We need to map the Entrez gene ids between the list of gene sets and our voom object. We can do this using the <code>ids2indices</code> function.</p>
-<pre class="sourceCode r"><code class="sourceCode r">c2.ind &lt;-<span class="st"> </span><span class="kw">ids2indices</span>(Mm.c2, <span class="kw">rownames</span>(v))</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">c2.ind &lt;-<span class="st"> </span><span class="kw">ids2indices</span>(Mm.c2, <span class="kw">rownames</span>(v))</code></pre></div>
 <p>CAMERA takes as input the voom object <code>v</code>, the indexed list of gene sets <code>c2.ind</code>, the design matrix, the contrast being tested, as well as some other arguments. By default, CAMERA can estimate the correlation for each gene set separately. However, in practise, it works well to set a small inter-gene correlation of about 0.05 using the <code>inter.gene.cor</code> argument.</p>
-<pre class="sourceCode r"><code class="sourceCode r">gst.camera &lt;-<span class="st"> </span><span class="kw">camera</span>(v,<span class="dt">index=</span>c2.ind,<span class="dt">design=</span>design,<span class="dt">contrast =</span> cont.matrix[,<span class="dv">1</span>],<span class="dt">inter.gene.cor=</span><span class="fl">0.05</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">gst.camera &lt;-<span class="st"> </span><span class="kw">camera</span>(v,<span class="dt">index=</span>c2.ind,<span class="dt">design=</span>design,<span class="dt">contrast =</span> cont.matrix[,<span class="dv">1</span>],<span class="dt">inter.gene.cor=</span><span class="fl">0.05</span>)</code></pre></div>
 <p>CAMERA outputs a dataframe of the resulting statistics, with each row denoting a different gene set. The output is ordered by p-value so that the most significant should be at the top. Let’s look at the top 5 gene sets:</p>
-<pre class="sourceCode r"><code class="sourceCode r">gst.camera[<span class="dv">1</span>:<span class="dv">5</span>,]</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">gst.camera[<span class="dv">1</span>:<span class="dv">5</span>,]</code></pre></div>
 <pre class="output"><code>                                                                           NGenes
 REACTOME_PEPTIDE_CHAIN_ELONGATION                                              81
 KEGG_RIBOSOME                                                                  83
 REACTOME_3_UTR_MEDIATED_TRANSLATIONAL_REGULATION                              102
 REACTOME_FORMATION_OF_THE_TERNARY_COMPLEX_AND_SUBSEQUENTLY_THE_43S_COMPLEX     48
 REACTOME_SRP_DEPENDENT_COTRANSLATIONAL_PROTEIN_TARGETING_TO_MEMBRANE          108
-                                                                           Correlation
-REACTOME_PEPTIDE_CHAIN_ELONGATION                                                 0.05
-KEGG_RIBOSOME                                                                     0.05
-REACTOME_3_UTR_MEDIATED_TRANSLATIONAL_REGULATION                                  0.05
-REACTOME_FORMATION_OF_THE_TERNARY_COMPLEX_AND_SUBSEQUENTLY_THE_43S_COMPLEX        0.05
-REACTOME_SRP_DEPENDENT_COTRANSLATIONAL_PROTEIN_TARGETING_TO_MEMBRANE              0.05
                                                                            Direction
 REACTOME_PEPTIDE_CHAIN_ELONGATION                                                 Up
 KEGG_RIBOSOME                                                                     Up
@@ -1255,18 +1252,18 @@ REACTOME_FORMATION_OF_THE_TERNARY_COMPLEX_AND_SUBSEQUENTLY_THE_43S_COMPLEX 1.620
 REACTOME_SRP_DEPENDENT_COTRANSLATIONAL_PROTEIN_TARGETING_TO_MEMBRANE       1.620981e-05
 </code></pre>
 <p>The total number of significant gene sets at 5% FDR is</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(gst.camera$FDR &lt;<span class="st"> </span><span class="fl">0.05</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(gst.camera$FDR &lt;<span class="st"> </span><span class="fl">0.05</span>)</code></pre></div>
 <pre class="output"><code>
 FALSE  TRUE 
  4593   129 
 </code></pre>
 <p>You can write out the camera results to a csv file to open in excel.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">write.csv</span>(gst.camera,<span class="dt">file=</span><span class="st">&quot;gst_BPregVsLac.csv&quot;</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">write.csv</span>(gst.camera,<span class="dt">file=</span><span class="st">&quot;gst_BPregVsLac.csv&quot;</span>)</code></pre></div>
 <p><span style="color:blue">Exercise: (1) Run <code>camera</code> on the second contrast in the contrast matrix. (2) Run <code>camera</code> on a different set of MSigDB gene sets, the hallmark datasets, <code>mouse_H_v5.rdata</code>. You will need to load in the hallmark gene sets.</span></p>
 <h3 id="roast-gene-set-testing">ROAST gene set testing</h3>
 <p>ROAST is an example of a self-contained gene set test <span class="citation">(D. Wu et al. 2010)</span>. It asks the question, “Do the genes in my set tend to be differentially expressed between my conditions of interest?”. ROAST doesn’t care about what the other genes in the experiment are doing, which is different to <code>camera</code> and <code>goana</code>. ROAST is a good option for when you’re interested in a specific set, or a few sets. It is not really used to test thousands of sets at one time.</p>
 <p>Let’s have a look at the top 10 genes differentially expressed in the basal pregant vs lactating group.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre></div>
 <pre class="output"><code>       ENTREZID        SYMBOL                                     GENENAME
 24117     24117          Wif1                      Wnt inhibitory factor 1
 381290   381290        Atp2b4 ATPase, Ca++ transporting, plasma membrane 4
@@ -1291,14 +1288,14 @@ FALSE  TRUE
 14620   3.600094 3.525281  16.46627 1.113755e-09 1.718703e-06 12.54071
 </code></pre>
 <p>The top gene is Wnt inhibitory factor 1. Let’s see if there are any WNT signalling pathways in MsigDB C2 collection. We can do this with the <code>grep</code> command on the names of the gene sets.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">grep</span>(<span class="st">&quot;WNT&quot;</span>,<span class="kw">names</span>(c2.ind))</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">grep</span>(<span class="st">&quot;WNT&quot;</span>,<span class="kw">names</span>(c2.ind))</code></pre></div>
 <pre class="output"><code> [1]  106  402  405  421  441  467  504  513  666 2642 3403 3671 3672 3675
 [15] 3676
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s save these so that we can subset c2.ind to test all gene sets with WNT in the name</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s save these so that we can subset c2.ind to test all gene sets with WNT in the name</span>
 wnt &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="st">&quot;WNT&quot;</span>,<span class="kw">names</span>(c2.ind))
 <span class="co"># What are these pathways called?</span>
-<span class="kw">names</span>(c2.ind)[wnt]</code></pre>
+<span class="kw">names</span>(c2.ind)[wnt]</code></pre></div>
 <pre class="output"><code> [1] &quot;KEGG_WNT_SIGNALING_PATHWAY&quot;         
  [2] &quot;BIOCARTA_WNT_PATHWAY&quot;               
  [3] &quot;ST_WNT_CA2_CYCLIC_GMP_PATHWAY&quot;      
@@ -1316,8 +1313,8 @@ wnt &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="st">
 [15] &quot;LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN&quot;
 </code></pre>
 <p>Let’s use ROAST to see if these WNT related gene sets tend to be differentially expressed. Note that the syntax for <code>camera</code> and <code>roast</code> is almost identical.</p>
-<pre class="sourceCode r"><code class="sourceCode r">wnt.rst &lt;-<span class="st"> </span><span class="kw">roast</span>(v,<span class="dt">index=</span>c2.ind[wnt],<span class="dt">design=</span>design,<span class="dt">contrast=</span>cont.matrix[,<span class="dv">1</span>],<span class="dt">nrot=</span><span class="dv">9999</span>)
-wnt.rst</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">wnt.rst &lt;-<span class="st"> </span><span class="kw">roast</span>(v,<span class="dt">index=</span>c2.ind[wnt],<span class="dt">design=</span>design,<span class="dt">contrast=</span>cont.matrix[,<span class="dv">1</span>],<span class="dt">nrot=</span><span class="dv">9999</span>)
+wnt.rst</code></pre></div>
 <pre class="output"><code>                                    NGenes  PropDown     PropUp Direction
 LABBE_WNT3A_TARGETS_UP                 104 0.2307692 0.49038462        Up
 PID_WNT_NONCANONICAL_PATHWAY            31 0.4516129 0.09677419      Down
@@ -1326,8 +1323,8 @@ SANSOM_WNT_PATHWAY_REQUIRE_MYC          53 0.1886792 0.45283019        Up
 REACTOME_SIGNALING_BY_WNT               62 0.1290323 0.50000000        Up
 PID_WNT_CANONICAL_PATHWAY               19 0.4736842 0.21052632      Down
 BIOCARTA_WNT_PATHWAY                    24 0.2500000 0.33333333        Up
-ST_WNT_BETA_CATENIN_PATHWAY             32 0.3125000 0.34375000        Up
 KEGG_WNT_SIGNALING_PATHWAY             131 0.3740458 0.25190840      Down
+ST_WNT_BETA_CATENIN_PATHWAY             32 0.3125000 0.34375000        Up
 LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP    100 0.3400000 0.38000000        Up
 PID_WNT_SIGNALING_PATHWAY               23 0.3043478 0.30434783        Up
 LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN     90 0.2555556 0.40000000        Up
@@ -1335,37 +1332,37 @@ ST_WNT_CA2_CYCLIC_GMP_PATHWAY           14 0.2857143 0.35714286        Up
 LABBE_WNT3A_TARGETS_DN                  65 0.2615385 0.27692308        Up
 WNT_SIGNALING                           75 0.3600000 0.30666667      Down
                                     PValue        FDR PValue.Mixed
-LABBE_WNT3A_TARGETS_UP              0.0002 0.00112500       0.0007
-PID_WNT_NONCANONICAL_PATHWAY        0.0002 0.00112500       0.0004
-WILLERT_WNT_SIGNALING               0.0010 0.00475000       0.0006
-SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0020 0.00731250       0.0002
-REACTOME_SIGNALING_BY_WNT           0.0157 0.04062500       0.0021
-PID_WNT_CANONICAL_PATHWAY           0.0163 0.04062500       0.0004
-BIOCARTA_WNT_PATHWAY                0.0411 0.08796429       0.0002
-ST_WNT_BETA_CATENIN_PATHWAY         0.0493 0.08991667       0.0001
-KEGG_WNT_SIGNALING_PATHWAY          0.0540 0.08991667       0.0001
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0606 0.09082500       0.0002
-PID_WNT_SIGNALING_PATHWAY           0.0968 0.13193182       0.0002
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.1709 0.21356250       0.0001
-ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.2521 0.29082692       0.0003
-LABBE_WNT3A_TARGETS_DN              0.4954 0.53073214       0.0005
-WNT_SIGNALING                       0.8838 0.88380000       0.0001
+LABBE_WNT3A_TARGETS_UP              0.0003 0.00337500       0.0003
+PID_WNT_NONCANONICAL_PATHWAY        0.0005 0.00337500       0.0008
+WILLERT_WNT_SIGNALING               0.0008 0.00375000       0.0001
+SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0016 0.00581250       0.0001
+REACTOME_SIGNALING_BY_WNT           0.0151 0.04362500       0.0029
+PID_WNT_CANONICAL_PATHWAY           0.0175 0.04362500       0.0001
+BIOCARTA_WNT_PATHWAY                0.0434 0.08108333       0.0002
+KEGG_WNT_SIGNALING_PATHWAY          0.0450 0.08108333       0.0001
+ST_WNT_BETA_CATENIN_PATHWAY         0.0487 0.08108333       0.0001
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0621 0.09307500       0.0002
+PID_WNT_SIGNALING_PATHWAY           0.0923 0.12579545       0.0002
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.1607 0.20081250       0.0001
+ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.2545 0.29359615       0.0004
+LABBE_WNT3A_TARGETS_DN              0.5094 0.54573214       0.0003
+WNT_SIGNALING                       0.8855 0.88550000       0.0001
                                        FDR.Mixed
-LABBE_WNT3A_TARGETS_UP              0.0007000000
-PID_WNT_NONCANONICAL_PATHWAY        0.0004772727
-WILLERT_WNT_SIGNALING               0.0006346154
-SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0002812500
-REACTOME_SIGNALING_BY_WNT           0.0021000000
-PID_WNT_CANONICAL_PATHWAY           0.0004772727
-BIOCARTA_WNT_PATHWAY                0.0002812500
-ST_WNT_BETA_CATENIN_PATHWAY         0.0001875000
-KEGG_WNT_SIGNALING_PATHWAY          0.0001875000
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0002812500
-PID_WNT_SIGNALING_PATHWAY           0.0002812500
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.0001875000
-ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.0004166667
-LABBE_WNT3A_TARGETS_DN              0.0005625000
-WNT_SIGNALING                       0.0001875000
+LABBE_WNT3A_TARGETS_UP              0.0003125000
+PID_WNT_NONCANONICAL_PATHWAY        0.0008035714
+WILLERT_WNT_SIGNALING               0.0001071429
+SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0001071429
+REACTOME_SIGNALING_BY_WNT           0.0029000000
+PID_WNT_CANONICAL_PATHWAY           0.0001071429
+BIOCARTA_WNT_PATHWAY                0.0002250000
+KEGG_WNT_SIGNALING_PATHWAY          0.0001071429
+ST_WNT_BETA_CATENIN_PATHWAY         0.0001071429
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0002250000
+PID_WNT_SIGNALING_PATHWAY           0.0002250000
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.0001071429
+ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.0004038462
+LABBE_WNT3A_TARGETS_DN              0.0003125000
+WNT_SIGNALING                       0.0001071429
 </code></pre>
 <p>Each row corresponds to a single gene set. The NGenes column gives the number of genes in each set. The PropDown and PropUp columns contain the proportions of genes in the set that are down- and up-regulated, respectively, with absolute fold changes greater than 2. The net direction of change is determined from the significance of changes in each direction, and is shown in the Direction column. The PValue provides evidence for whether the majority of genes in the set are DE in the specified direction, whereas the PValue.Mixed tests for differential expression in any direction. FDRs are computed from the corresponding p-values across all sets.</p>
 <p><span style="color:blue">Exercise: (1) test whether the wnt signalling pathways tend to be differentially expressed between luminal pregnant vs lactating (the second contrast) (2) Look for gene sets containing “MYC” in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.</span></p>
@@ -1379,8 +1376,8 @@ WNT_SIGNALING                       0.0001875000
 <h3 id="visualising-gene-set-tests-barcode-and-enrichment-plots">Visualising gene set tests: Barcode and enrichment plots</h3>
 <p>A barcode plot can be produced with the <code>barcodeplot</code> function to visualize the results for any particular set. To display a barcodeplot, we need to decide what statistics to use, usually we choose either logFC or t-statistics for the comparison of interest. We also need to make sure we give the statistics in the correct order, such that subsetting the statistics vector will give the genes for the gene set we’re interested in. The best way to do this is to work with the fit object directly. The <code>coefficients</code> slot contains the logFCs and the <code>t</code> slot contains the t-statistics.</p>
 <p>Let’s have a look at the top MYC related pathway in the ROAST test that you did in the exercise, “MENSSEN_MYC_TARGETS”.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Have a look at the logFCs and t-statistics in fit.cont</span>
-<span class="kw">names</span>(fit.cont)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Have a look at the logFCs and t-statistics in fit.cont</span>
+<span class="kw">names</span>(fit.cont)</code></pre></div>
 <pre class="output"><code> [1] &quot;coefficients&quot;     &quot;stdev.unscaled&quot;   &quot;sigma&quot;           
  [4] &quot;df.residual&quot;      &quot;cov.coefficients&quot; &quot;rank&quot;            
  [7] &quot;Amean&quot;            &quot;method&quot;           &quot;design&quot;          
@@ -1390,7 +1387,7 @@ WNT_SIGNALING                       0.0001875000
 [19] &quot;lods&quot;             &quot;F&quot;                &quot;F.p.value&quot;       
 [22] &quot;genes&quot;           
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(fit.cont$coefficients)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(fit.cont$coefficients)</code></pre></div>
 <pre class="output"><code>        Contrasts
          B.PregVsLac
   497097 -1.62084708
@@ -1400,7 +1397,7 @@ WNT_SIGNALING                       0.0001875000
   21399   0.21912852
   58175   1.49852621
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(fit.cont$t)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(fit.cont$t)</code></pre></div>
 <pre class="output"><code>        Contrasts
          B.PregVsLac
   497097  -4.0541969
@@ -1410,20 +1407,20 @@ WNT_SIGNALING                       0.0001875000
   21399    2.1866392
   58175    1.5788218
 </code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">1</span>))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">2</span>,<span class="dv">1</span>))
 <span class="co"># barcode plot with logFCs</span>
 <span class="kw">barcodeplot</span>(fit.cont$coeff[,<span class="dv">1</span>], <span class="dt">index=</span>c2.ind[[<span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>]], <span class="dt">main=</span><span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>)
 <span class="co"># barcode plot using t-statistics</span>
-<span class="kw">barcodeplot</span>(fit.cont$t[,<span class="dv">1</span>], <span class="dt">index=</span>c2.ind[[<span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>]], <span class="dt">main=</span><span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>)</code></pre>
+<span class="kw">barcodeplot</span>(fit.cont$t[,<span class="dv">1</span>], <span class="dt">index=</span>c2.ind[[<span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>]], <span class="dt">main=</span><span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>)</code></pre></div>
 <p><img src="fig-06/unnamed-chunk-77-1.png" title="plot of chunk unnamed-chunk-77" alt="plot of chunk unnamed-chunk-77" style="display: block; margin: auto;" /></p>
 <p>Here, genes are represented by bars and are ranked from left to right by decreasing log-fold change or t-statistic. This forms the barcode-like pattern. The line above the barcode shows the relative local enrichment of the vertical bars in each part of the plot. The barcodeplot shows that the genes in this gene set tend to be up-regulated between pregnant and lactating in basal cells.</p>
 <p><span style="color:blue">Exercise: (1) Produce a barcodeplot for luminal pregnant vs lactating for this gene set. Does the pattern of enrichment look as strong? (2) Choose one of the Wnt signalling pathways and produce a barcode plot for both comparisons.(3) You can put two gene sets on one plot, for example a set that is up-regulated and one that is down-regulated, by adding a gene set to the <code>index2</code> argument. Produce a barcodeplot with two sets of your choosing.</span></p>
 <h1 id="record-package-and-version-info-with-sessioninfo">Record package and version info with sessionInfo()</h1>
 <p>The session information describes the versions of R and of the packages that were used in the analysis. This is useful for record-keeping purposes, and ensures that an analysis can be reproduced even when the software is updated over time.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sessionInfo</span>()</code></pre>
-<pre class="output"><code>R version 3.2.4 (2016-03-10)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sessionInfo</span>()</code></pre></div>
+<pre class="output"><code>R version 3.3.1 (2016-06-21)
 Platform: x86_64-apple-darwin13.4.0 (64-bit)
-Running under: OS X 10.11.4 (El Capitan)
+Running under: OS X 10.11.6 (El Capitan)
 
 locale:
 [1] en_AU.UTF-8/en_AU.UTF-8/en_AU.UTF-8/C/en_AU.UTF-8/en_AU.UTF-8
@@ -1433,63 +1430,74 @@ attached base packages:
 [8] datasets  base     
 
 other attached packages:
- [1] GO.db_3.2.2                RColorBrewer_1.1-2        
- [3] org.Mm.eg.db_3.2.3         RSQLite_1.0.0             
- [5] DBI_0.4                    AnnotationDbi_1.32.3      
- [7] gplots_3.0.1               Glimma_1.0.0              
- [9] EDASeq_2.4.1               ShortRead_1.28.0          
-[11] GenomicAlignments_1.6.3    SummarizedExperiment_1.0.2
-[13] Rsamtools_1.22.0           GenomicRanges_1.22.4      
-[15] GenomeInfoDb_1.6.3         Biostrings_2.38.4         
-[17] XVector_0.10.0             IRanges_2.4.8             
-[19] S4Vectors_0.8.11           BiocParallel_1.4.3        
-[21] Biobase_2.30.0             BiocGenerics_0.16.1       
-[23] edgeR_3.12.1               limma_3.26.9              
-[25] knitr_1.12.3              
+ [1] RColorBrewer_1.1-2         org.Mm.eg.db_3.3.0        
+ [3] AnnotationDbi_1.34.4       gplots_3.0.1              
+ [5] Glimma_1.0.0               EDASeq_2.6.2              
+ [7] ShortRead_1.30.0           GenomicAlignments_1.8.4   
+ [9] SummarizedExperiment_1.2.3 Rsamtools_1.24.0          
+[11] GenomicRanges_1.24.3       GenomeInfoDb_1.8.7        
+[13] Biostrings_2.40.2          XVector_0.12.1            
+[15] IRanges_2.6.1              S4Vectors_0.10.3          
+[17] BiocParallel_1.6.6         Biobase_2.32.0            
+[19] BiocGenerics_0.18.0        edgeR_3.14.0              
+[21] limma_3.28.21              knitr_1.14                
 
 loaded via a namespace (and not attached):
- [1] locfit_1.5-9.1            Rcpp_0.12.4              
- [3] lattice_0.20-33           gtools_3.5.0             
- [5] plyr_1.8.3                chron_2.3-47             
- [7] futile.options_1.0.0      acepack_1.3-3.3          
- [9] aroma.light_3.0.0         DESeq_1.22.1             
-[11] evaluate_0.9              ggplot2_2.1.0            
-[13] zlibbioc_1.16.0           GenomicFeatures_1.22.13  
-[15] gdata_2.17.0              data.table_1.9.6         
-[17] annotate_1.48.0           R.utils_2.3.0            
-[19] R.oo_1.20.0               rpart_4.1-10             
-[21] Matrix_1.2-6              splines_3.2.4            
-[23] geneplotter_1.48.0        stringr_1.0.0            
-[25] foreign_0.8-66            RCurl_1.95-4.8           
-[27] biomaRt_2.26.1            munsell_0.4.3            
-[29] rtracklayer_1.30.4        nnet_7.3-12              
-[31] gridExtra_2.2.1           Hmisc_3.17-4             
-[33] matrixStats_0.50.2        XML_3.98-1.4             
-[35] bitops_1.0-6              R.methodsS3_1.7.1        
-[37] grid_3.2.4                xtable_1.8-2             
-[39] gtable_0.2.0              BiasedUrn_1.07           
-[41] magrittr_1.5              formatR_1.3              
-[43] scales_0.4.0              KernSmooth_2.23-15       
-[45] stringi_1.0-1             hwriter_1.3.2            
-[47] genefilter_1.52.1         RcppArmadillo_0.6.700.3.0
-[49] latticeExtra_0.6-28       futile.logger_1.4.1      
-[51] Formula_1.2-1             lambda.r_1.1.7           
-[53] tools_3.2.4               DESeq2_1.10.1            
-[55] survival_2.39-3           colorspace_1.2-6         
-[57] cluster_2.0.4             caTools_1.17.1           
+ [1] Rcpp_0.12.7            locfit_1.5-9.1         lattice_0.20-34       
+ [4] GO.db_3.3.0            gtools_3.5.0           plyr_1.8.4            
+ [7] chron_2.3-47           acepack_1.3-3.3        aroma.light_3.2.0     
+[10] RSQLite_1.0.0          DESeq_1.24.0           evaluate_0.9          
+[13] ggplot2_2.1.0          zlibbioc_1.18.0        GenomicFeatures_1.24.5
+[16] data.table_1.9.6       annotate_1.50.0        gdata_2.17.0          
+[19] R.utils_2.4.0          R.oo_1.20.0            rpart_4.1-10          
+[22] Matrix_1.2-7.1         splines_3.3.1          geneplotter_1.50.0    
+[25] stringr_1.1.0          foreign_0.8-67         RCurl_1.95-4.8        
+[28] biomaRt_2.28.0         munsell_0.4.3          rtracklayer_1.32.2    
+[31] nnet_7.3-12            gridExtra_2.2.1        Hmisc_3.17-4          
+[34] matrixStats_0.50.2     XML_3.98-1.4           bitops_1.0-6          
+[37] R.methodsS3_1.7.1      grid_3.3.1             xtable_1.8-2          
+[40] gtable_0.2.0           DBI_0.5-1              BiasedUrn_1.07        
+[43] magrittr_1.5           formatR_1.4            scales_0.4.0          
+[46] KernSmooth_2.23-15     stringi_1.1.1          hwriter_1.3.2         
+[49] genefilter_1.54.2      latticeExtra_0.6-28    Formula_1.2-1         
+[52] tools_3.3.1            DESeq2_1.12.4          survival_2.39-5       
+[55] colorspace_1.2-6       cluster_2.0.4          caTools_1.17.1        
 </code></pre>
-<div class="references">
 <h1 id="references" class="unnumbered">References</h1>
-<p>Fu, Nai Yang, Anne C Rios, Bhupinder Pal, Rina Soetanto, Aaron T L Lun, Kevin Liu, Tamara Beck, et al. 2015. “EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival.” <em>Nature Cell Biology</em> 17 (4): 365–75. doi:<a href="http://dx.doi.org/10.1038/ncb3117">10.1038/ncb3117</a>.</p>
-<p>Law, Charity W, Yunshun Chen, Wei Shi, and Gordon K Smyth. 2014. “Voom: precision weights unlock linear model analysis tools for RNA-seq read counts.” <em>Genome Biology</em> 15 (2): R29. doi:<a href="http://dx.doi.org/10.1186/gb-2014-15-2-r29">10.1186/gb-2014-15-2-r29</a>.</p>
-<p>Liao, Yang, Gordon K Smyth, and Wei Shi. 2014. “featureCounts: an efficient general purpose program for assigning sequence reads to genomic features.” <em>Bioinformatics (Oxford, England)</em> 30 (7): 923–30. doi:<a href="http://dx.doi.org/10.1093/bioinformatics/btt656">10.1093/bioinformatics/btt656</a>.</p>
-<p>Lun, Aaron T L, Yunshun Chen, and Gordon K Smyth. 2016. “It’s DE-licious: A Recipe for Differential Expression Analyses of RNA-seq Experiments Using Quasi-Likelihood Methods in edgeR.” <em>Methods in Molecular Biology (Clifton, N.J.)</em> 1418 (January): 391–416. doi:<a href="http://dx.doi.org/10.1007/978-1-4939-3578-9\_19">10.1007/978-1-4939-3578-9\_19</a>.</p>
-<p>McCarthy, Davis J, and Gordon K Smyth. 2009. “Testing significance relative to a fold-change threshold is a TREAT.” <em>Bioinformatics (Oxford, England)</em> 25 (6): 765–71. doi:<a href="http://dx.doi.org/10.1093/bioinformatics/btp053">10.1093/bioinformatics/btp053</a>.</p>
-<p>Risso, Davide, Katja Schwartz, Gavin Sherlock, and Sandrine Dudoit. 2011. “GC-content normalization for RNA-Seq data.” <em>BMC Bioinformatics</em> 12 (1): 480. doi:<a href="http://dx.doi.org/10.1186/1471-2105-12-480">10.1186/1471-2105-12-480</a>.</p>
-<p>Ritchie, M. E., B. Phipson, D. Wu, Y. Hu, C. W. Law, W. Shi, and G. K. Smyth. 2015. “limma powers differential expression analyses for RNA-sequencing and microarray studies.” <em>Nucleic Acids Research</em>, January, gkv007. doi:<a href="http://dx.doi.org/10.1093/nar/gkv007">10.1093/nar/gkv007</a>.</p>
-<p>Robinson, Mark D, and Alicia Oshlack. 2010. “A scaling normalization method for differential expression analysis of RNA-seq data.” <em>Genome Biology</em> 11 (3): R25. doi:<a href="http://dx.doi.org/10.1186/gb-2010-11-3-r25">10.1186/gb-2010-11-3-r25</a>.</p>
-<p>Wu, D, and G K Smyth. 2012. “Camera: a competitive gene set test accounting for inter-gene correlation.” <em>Nucleic Acids Research</em> 40 (17). Oxford University Press: e133—–133.</p>
+<div id="refs" class="references">
+<div id="ref-Fu2015">
+<p>Fu, Nai Yang, Anne C Rios, Bhupinder Pal, Rina Soetanto, Aaron T L Lun, Kevin Liu, Tamara Beck, et al. 2015. “EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival.” <em>Nature Cell Biology</em> 17 (4): 365–75. doi:<a href="https://doi.org/10.1038/ncb3117">10.1038/ncb3117</a>.</p>
+</div>
+<div id="ref-Law2014">
+<p>Law, Charity W, Yunshun Chen, Wei Shi, and Gordon K Smyth. 2014. “Voom: precision weights unlock linear model analysis tools for RNA-seq read counts.” <em>Genome Biology</em> 15 (2): R29. doi:<a href="https://doi.org/10.1186/gb-2014-15-2-r29">10.1186/gb-2014-15-2-r29</a>.</p>
+</div>
+<div id="ref-Liao2014">
+<p>Liao, Yang, Gordon K Smyth, and Wei Shi. 2014. “featureCounts: an efficient general purpose program for assigning sequence reads to genomic features.” <em>Bioinformatics (Oxford, England)</em> 30 (7): 923–30. doi:<a href="https://doi.org/10.1093/bioinformatics/btt656">10.1093/bioinformatics/btt656</a>.</p>
+</div>
+<div id="ref-Lun2016">
+<p>Lun, Aaron T L, Yunshun Chen, and Gordon K Smyth. 2016. “It’s DE-licious: A Recipe for Differential Expression Analyses of RNA-seq Experiments Using Quasi-Likelihood Methods in edgeR.” <em>Methods in Molecular Biology (Clifton, N.J.)</em> 1418 (January): 391–416. doi:<a href="https://doi.org/10.1007/978-1-4939-3578-9\_19">10.1007/978-1-4939-3578-9\_19</a>.</p>
+</div>
+<div id="ref-McCarthy2009">
+<p>McCarthy, Davis J, and Gordon K Smyth. 2009. “Testing significance relative to a fold-change threshold is a TREAT.” <em>Bioinformatics (Oxford, England)</em> 25 (6): 765–71. doi:<a href="https://doi.org/10.1093/bioinformatics/btp053">10.1093/bioinformatics/btp053</a>.</p>
+</div>
+<div id="ref-Risso2011">
+<p>Risso, Davide, Katja Schwartz, Gavin Sherlock, and Sandrine Dudoit. 2011. “GC-content normalization for RNA-Seq data.” <em>BMC Bioinformatics</em> 12 (1): 480. doi:<a href="https://doi.org/10.1186/1471-2105-12-480">10.1186/1471-2105-12-480</a>.</p>
+</div>
+<div id="ref-Ritchie2015">
+<p>Ritchie, M. E., B. Phipson, D. Wu, Y. Hu, C. W. Law, W. Shi, and G. K. Smyth. 2015. “limma powers differential expression analyses for RNA-sequencing and microarray studies.” <em>Nucleic Acids Research</em>, January, gkv007. doi:<a href="https://doi.org/10.1093/nar/gkv007">10.1093/nar/gkv007</a>.</p>
+</div>
+<div id="ref-robinson2010edgeR">
+<p>Robinson, M D, D J McCarthy, and G K Smyth. 2010. “edgeR: a Bioconductor package for differential expression analysis of digital gene expression data.” <em>Bioinformatics</em> 26 (1). Oxford Univ Press: 139–40.</p>
+</div>
+<div id="ref-robinson2010tmm">
+<p>Robinson, Mark D, and Alicia Oshlack. 2010. “A scaling normalization method for differential expression analysis of RNA-seq data.” <em>Genome Biology</em> 11 (3): R25. doi:<a href="https://doi.org/10.1186/gb-2010-11-3-r25">10.1186/gb-2010-11-3-r25</a>.</p>
+</div>
+<div id="ref-wu2012camera">
+<p>Wu, D, and G K Smyth. 2012. “Camera: a competitive gene set test accounting for inter-gene correlation.” <em>Nucleic Acids Research</em> 40 (17). Oxford University Press: e133—–e133.</p>
+</div>
+<div id="ref-wu2010roast">
 <p>Wu, D, E Lim, F Vaillant, M L Asselin-Labat, J E Visvader, and G K Smyth. 2010. “ROAST: rotation gene set tests for complex microarray experiments.” <em>Bioinformatics</em> 26 (17). Oxford Univ Press: 2176–82.</p>
+</div>
 </div>
         </div>
       </div>

@@ -78,12 +78,12 @@
 <p>The first thing you will see in the R interactive session is a bunch of information, followed by a “&gt;” and a blinking cursor. In many ways this is similar to the shell environment you learned about during the shell lessons: it operates on the same idea of a “Read, evaluate, print loop”: you type in commands, R tries to execute them, and then returns a result.</p>
 <h2 id="using-r-as-a-calculator">Using R as a calculator</h2>
 <p>The simplest thing you could do with R is do arithmetic:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> +<span class="st"> </span><span class="dv">100</span></code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="dv">1</span> +<span class="st"> </span><span class="dv">100</span></code></pre></div>
 <pre class="output"><code>[1] 101
 </code></pre>
 <p>And R will print out the answer, with a preceding “[1]”. Don’t worry about this for now, we’ll explain that later. For now think of it as indicating ouput.</p>
 <p>Just like bash, if you type in an incomplete command, R will wait for you to complete it:</p>
-<pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="dv">1</span> +</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">&gt;<span class="st"> </span><span class="dv">1</span> +</code></pre></div>
 <pre class="output"><code>+</code></pre>
 <p>Any time you hit return and the R session shows a “+” instead of a “&gt;”, it means it’s waiting for you to complete the command. If you want to cancel a command you can simply hit “Esc” and RStudio will give you back the “&gt;” prompt.</p>
 <aside class="callout panel panel-info">
@@ -115,8 +115,8 @@
 </ul>
 <p>For this workshop we will also be using packages from These can all be obtained from Bioconductor, except for Glimma (see below).</p>
 <p>Open RStudio and run the following commands to install packages from <a href="https://www.bioconductor.org/">Bioconductor</a>. These are installed slightly differently. For example, to install the package <code>limma</code>:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">source</span>(<span class="st">&quot;http://bioconductor.org/biocLite.R&quot;</span>)
-<span class="kw">biocLite</span>(<span class="st">&quot;limma&quot;</span>)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">source</span>(<span class="st">&quot;http://bioconductor.org/biocLite.R&quot;</span>)
+<span class="kw">biocLite</span>(<span class="st">&quot;limma&quot;</span>)</code></pre></div>
 <h2 id="rstudio-project-management">RStudio project management</h2>
 <p>The scientific process is naturally incremental, and many projects start life as random notes, some code, then a manuscript, and eventually everything is a bit mixed together.</p>
 <blockquote class="twitter-tweet">
@@ -183,9 +183,9 @@ Managing your projects in a reproducible fashion doesn’t just make your scienc
 <li>Load the library</li>
 <li>Initialise the project:</li>
 </ol>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;ProjectTemplate&quot;</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;ProjectTemplate&quot;</span>)
 <span class="kw">library</span>(ProjectTemplate)
-<span class="kw">create.project</span>(<span class="st">&quot;../my_project&quot;</span>, <span class="dt">merge.strategy =</span> <span class="st">&quot;allow.non.conflict&quot;</span>)</code></pre>
+<span class="kw">create.project</span>(<span class="st">&quot;../my_project&quot;</span>, <span class="dt">merge.strategy =</span> <span class="st">&quot;allow.non.conflict&quot;</span>)</code></pre></div>
 <p>For more information on ProjectTemplate and its functionality visit the home page <a href="http://projecttemplate.net/index.html">ProjectTemplate</a></p>
 </div>
 </aside>
@@ -223,9 +223,6 @@ Managing your projects in a reproducible fashion doesn’t just make your scienc
 <p>We will load and inspect these data later.</p>
 </div>
 </section>
-<div class="references">
-
-</div>
         </div>
       </div>
       </article>

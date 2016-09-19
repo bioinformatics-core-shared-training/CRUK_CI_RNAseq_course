@@ -20,8 +20,6 @@ FILTERS = $(wildcard tools/filters/*.py)
 # Inclusions.
 INCLUDES = \
 	-Vheader="$$(cat _includes/header.html)" \
-	-Vbanner="$$(cat _includes/banner.html)" \
-	-Vfooter="$$(cat _includes/footer.html)" \
 	-Vjavascript="$$(cat _includes/javascript.html)"
 
 # Chunk options for knitr (used in R conversion).
