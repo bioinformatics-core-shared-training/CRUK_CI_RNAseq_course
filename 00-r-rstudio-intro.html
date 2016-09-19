@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="generator" content="pandoc">
+    <title>RNA-seq analysis in R</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-theme.css" />
+    <link rel="stylesheet" type="text/css" href="css/swc.css" />
+    <link rel="alternate" type="application/rss+xml" title="Software Carpentry Blog" href="http://software-carpentry.org/feed.xml"/>
+    <meta charset="UTF-8" />
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body class="lesson">
+    <div class="container card">
+      
+      <article>
+      <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+                    <a href="index.html"><h1 class="title">RNA-seq analysis in R</h1></a>
+          <h2 class="subtitle">R for RNAseq</h2>
+          <h2 id="introduction-to-rstudio">Introduction to RStudio</h2>
+<p>We’ll be using RStudio: a free, open source R integrated development environment. It provides a built in editor, works on all platforms (including on servers) and provides many advantages such as integration with version control and project management.</p>
+<p><strong>Basic layout</strong></p>
+<p>When you first open RStudio, you will be greeted by three panels:</p>
+<ul>
+<li>The interactive R console (entire left)</li>
+<li>Environment/History (tabbed in upper right)</li>
+<li>Files/Plots/Packages/Help/Viewer (tabbed in lower right)</li>
+</ul>
+<p>Once you open files, such as R scripts, an editor panel will also open in the top left.</p>
+<h2 id="work-flow-within-rstudio">Work flow within RStudio</h2>
+<p>There are two main ways one can work within RStudio.</p>
+<ol style="list-style-type: decimal">
+<li>Test and play within the interactive R console then copy code into a .R file to run later.</li>
+</ol>
+<ul>
+<li>This works well when doing small tests and initially starting off.</li>
+<li>It quickly becomes laborious</li>
+</ul>
+<ol start="2" style="list-style-type: decimal">
+<li>Start writing in an .R file and use RStudio’s command / short cut to push current line, selected lines or modified lines to the interactive R console.</li>
+</ol>
+<ul>
+<li>This is a great way to start; all your code is saved for later</li>
+<li>You will be able to run the file you create from within RStudio or using R’s <code>source()</code> function.</li>
+</ul>
+<aside class="callout panel panel-info">
+<div class="panel-heading">
+<h2 id="tip-running-segments-of-your-code"><span class="glyphicon glyphicon-pushpin"></span>Tip: Running segments of your code</h2>
+</div>
+<div class="panel-body">
+<p>RStudio offers you great flexibility in running code from within the editor window. There are buttons, menu choices, and keyboard shortcuts. To run the current line, you can 1. click on the <code>Run</code> button just above the editor panel, or 2. select “Run Lines” from the “Code” menu, or 3. hit Ctrl-Enter in Windows or Linux or Command-Enter on OS X. (This shortcut can also be seen by hovering the mouse over the button). To run a block of code, select it and then <code>Run</code>. If you have modified a line of code within a block of code you have just run, there is no need to reselct the section and <code>Run</code>, you can use the next button along, <code>Re-run the previous region</code>. This will run the previous code block inculding the modifications you have made.</p>
+</div>
+</aside>
+<h2 id="your-rstudio-environment">Your RStudio environment</h2>
+<p>Much of your time in R will be spent in the R interactive console. This is where you will run all of your code, and can be a useful environment to try out ideas before adding them to an R script file. This console in RStudio is the same as the one you would get if you just typed in <code>R</code> in your commandline environment.</p>
+<h2 id="r-packages">R Packages</h2>
+<p>It is possible to add functions to R by writing a package, or by obtaining a package written by someone else. As of this writing, there are over 7,000 packages available on CRAN (the comprehensive R archive network). R and RStudio have functionality for managing packages:</p>
+<ul>
+<li>You can see what packages are installed by typing <code>installed.packages()</code></li>
+<li>You can install packages by typing <code>install.packages(&quot;packagename&quot;)</code>, where <code>packagename</code> is the package name, in quotes.</li>
+<li>You can update installed packages by typing <code>update.packages()</code></li>
+<li>You can remove a package with <code>remove.packages(&quot;packagename&quot;)</code></li>
+<li>You can make a package available for use with <code>library(packagename)</code></li>
+</ul>
+<p>For this workshop we will also be using packages from These can all be obtained from Bioconductor.</p>
+<p>Open RStudio and run the following commands to install packages from <a href="https://www.bioconductor.org/">Bioconductor</a>. These are installed slightly differently. For example, to install the package <code>limma</code>:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">source</span>(<span class="st">&quot;http://bioconductor.org/biocLite.R&quot;</span>)
+<span class="kw">biocLite</span>(<span class="st">&quot;limma&quot;</span>)</code></pre></div>
+<h2 id="rstudio-project-management">RStudio project management</h2>
+<p>The scientific process is naturally incremental, and many projects start life as random notes, some code, then a manuscript, and eventually everything is a bit mixed together.</p>
+<blockquote class="twitter-tweet">
+<p>
+Managing your projects in a reproducible fashion doesn’t just make your science reproducible, it makes your life easier.
+</p>
+— Vince Buffalo <a href="https://twitter.com/vsbuffalo/status/323638476153167872">April 15, 2013</a>
+</blockquote>
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>Most people tend to organize their projects like this:</p>
+<div class="figure">
+<img src="fig/bad_layout.png" />
+
+</div>
+<p>There are many reasons why we should <em>ALWAYS</em> avoid this:</p>
+<ol style="list-style-type: decimal">
+<li>It is really hard to tell which version of your data is the original and which is the modified;</li>
+<li>It gets really messy because it mixes files with various extensions together;</li>
+<li>It probably takes you a lot of time to actually find things, and relate the correct figures to the exact code that has been used to generate it;</li>
+</ol>
+<p>A good project layout will ultimately make your life easier:</p>
+<ul>
+<li>It will help ensure the integrity of your data;</li>
+<li>It makes it simpler to share your code with someone else (a lab-mate, collaborator, or supervisor);</li>
+<li>It allows you to easily upload your code with your manuscript submission;</li>
+<li>It makes it easier to pick the project back up after a break.</li>
+</ul>
+<h2 id="a-possible-solution">A possible solution</h2>
+<p>Fortunately, there are tools and packages which can help you manage your work effectively.</p>
+<p>One of the most powerful and useful aspects of RStudio is its project management functionality. We’ll be using this today to create a self-contained, reproducible project.</p>
+<section class="challenge panel panel-success">
+<div class="panel-heading">
+<h2 id="challenge-creating-a-self-contained-project"><span class="glyphicon glyphicon-pencil"></span>Challenge: Creating a self-contained project</h2>
+</div>
+<div class="panel-body">
+<p>We’re going to create a new project in RStudio:</p>
+<ol style="list-style-type: decimal">
+<li>Click the “File” menu button, then “New Project”.</li>
+<li>Click “New Directory”.</li>
+<li>Click “Empty Project”.</li>
+<li>Type in the name of the directory to store your project, e.g. “my_project”, or better yet use the name of this workshop.</li>
+<li>Click the “Create Project” button.</li>
+</ol>
+</div>
+</section>
+<p>Now when we start R in this project directory, or open this project with RStudio, all of our work on this project will be entirely self-contained in this directory.</p>
+<h2 id="best-practices-for-project-organisation">Best practices for project organisation</h2>
+<p>Although there is no “best” way to lay out a project, there are some general principles to adhere to that will make project management easier:</p>
+<h2 id="treat-data-as-read-only">Treat data as read only</h2>
+<p>This is probably the most important goal of setting up a project. Data is typically time consuming and/or expensive to collect. Working with them interactively (e.g., in Excel) where they can be modified means you are never sure of where the data came from, or how it has been modified since collection. It is therefore a good idea to treat your data as “read-only”.</p>
+<h2 id="data-cleaning">Data Cleaning</h2>
+<p>In many cases your data will be “dirty”: it will need significant preprocessing to get into a format R (or any other programming language) will find useful. This task is sometimes called “data munging”. I find it useful to store these scripts in a separate folder, and create a second “read-only” data folder to hold the “cleaned” data sets.</p>
+<h2 id="treat-generated-output-as-disposable">Treat generated output as disposable</h2>
+<p>Anything generated by your scripts should be treated as disposable: it should all be able to be regenerated from your scripts.</p>
+<p>There are lots of different was to manage this output. I find it useful to have an output folder with different sub-directories for each separate analysis. This makes it easier later, as many of my analyses are exploratory and don’t end up being used in the final project, and some of the analyses get shared between projects.</p>
+<h2 id="separate-function-definition-and-application">Separate function definition and application</h2>
+<p>The most effective way I find to work in R, is to play around in the interactive session, then copy commands across to a script file when I’m sure they work and do what I want. You can also save all the commands you’ve entered using the <code>history</code> command, but I don’t find it useful because when I’m typing its 90% trial and error.</p>
+<p>When your project is new and shiny, the script file usually contains many lines of directly executed code. As it matures, reusable chunks get pulled into their own functions. It’s a good idea to separate these into separate folders; one to store useful functions that you’ll reuse across analyses and projects, and one to store the analysis scripts.</p>
+<aside class="callout panel panel-info">
+<div class="panel-heading">
+<h2 id="tip-avoiding-duplication"><span class="glyphicon glyphicon-pushpin"></span>Tip: avoiding duplication</h2>
+</div>
+<div class="panel-body">
+<p>You may find yourself using data or analysis scripts across several projects. Typically you want to avoid duplication to save space and avoid having to make updates to code in multiple places.</p>
+<p>In this case I find it useful to make “symbolic links”, which are essentially shortcuts to files somewhere else on a filesystem. On Linux and OS X you can use the <code>ln -s</code> command, and on windows you can either create a shortcut or use the <code>mklink</code> command from the windows terminal.</p>
+</div>
+</aside>
+<h2 id="save-the-data-in-the-data-directory">Save the data in the data directory</h2>
+<p>Now we have a good directory structure we will now place/save the data file in the <code>data/</code> directory.</p>
+<p>Download the RNAseq data for this workshop.</p>
+<ul>
+<li>Mouse mammary data (counts): <a href="https://figshare.com/s/1d788fd384d33e913a2a" class="uri">https://figshare.com/s/1d788fd384d33e913a2a</a></li>
+<li>Drosophila data (counts): <a href="https://figshare.com/s/e08e71c42f118dbe8be6" class="uri">https://figshare.com/s/e08e71c42f118dbe8be6</a></li>
+</ul>
+<section class="challenge panel panel-success">
+<div class="panel-heading">
+<h2 id="challenge"><span class="glyphicon glyphicon-pencil"></span>Challenge</h2>
+</div>
+<div class="panel-body">
+<ol style="list-style-type: decimal">
+<li>Create a <code>/data</code> directory. In the bottom right panel select the “Files” tab, then “New Folder”, then type “data” and click “OK”.</li>
+<li>Download the RNAseq data using the links above (if you find the internet is slow, you can just download Day 1 for now).</li>
+<li>Click “Download all” (this will download a zip file).</li>
+<li>Unzip the file (usually double clicking on it will do the trick).</li>
+<li>Move all the files inside into the <code>data/</code> folder within your project.</li>
+</ol>
+</div>
+</section>
+<h2 id="reading-data-into-r">Reading data into R</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Read the data into R</span>
+seqdata &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/GSE60450_Lactation-GenewiseCounts.txt&quot;</span>, <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>)
+<span class="co"># Read the sample information into R</span>
+targets &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/targets.txt&quot;</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(seqdata)</code></pre></div>
+<pre class="output"><code>  EntrezGeneID Length MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1
+1       497097   3634                               438
+2    100503874   3259                                 1
+3    100038431   1634                                 0
+4        19888   9747                                 1
+5        20671   3130                               106
+6        27395   4203                               309
+  MCL1.DH_BC2CTUACXX_CAGATC_L002_R1 MCL1.DI_BC2CTUACXX_ACAGTG_L002_R1
+1                               300                                65
+2                                 0                                 1
+3                                 0                                 0
+4                                 1                                 0
+5                               182                                82
+6                               234                               337
+  MCL1.DJ_BC2CTUACXX_CGATGT_L002_R1 MCL1.DK_BC2CTUACXX_TTAGGC_L002_R1
+1                               237                               354
+2                                 1                                 0
+3                                 0                                 0
+4                                 0                                 0
+5                               105                                43
+6                               300                               290
+  MCL1.DL_BC2CTUACXX_ATCACG_L002_R1 MCL1.LA_BC2CTUACXX_GATCAG_L001_R1
+1                               287                                 0
+2                                 4                                 0
+3                                 0                                 0
+4                                 0                                10
+5                                82                                16
+6                               270                               560
+  MCL1.LB_BC2CTUACXX_TGACCA_L001_R1 MCL1.LC_BC2CTUACXX_GCCAAT_L001_R1
+1                                 0                                 0
+2                                 0                                 0
+3                                 0                                 0
+4                                 3                                10
+5                                25                                18
+6                               464                               489
+  MCL1.LD_BC2CTUACXX_GGCTAC_L001_R1 MCL1.LE_BC2CTUACXX_TAGCTT_L001_R1
+1                                 0                                 0
+2                                 0                                 0
+3                                 0                                 0
+4                                 2                                 0
+5                                 8                                 3
+6                               328                               307
+  MCL1.LF_BC2CTUACXX_CTTGTA_L001_R1
+1                                 0
+2                                 0
+3                                 0
+4                                 0
+5                                10
+6                               342
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(seqdata)</code></pre></div>
+<pre class="output"><code>[1] 27179    14
+</code></pre>
+<h2 id="working-with-data-frames">Working with Data Frames</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">seqdata_sample =<span class="st"> </span>seqdata[<span class="dv">1</span>:<span class="dv">4</span>, <span class="dv">1</span>:<span class="dv">4</span>]
+<span class="kw">print</span>(seqdata_sample)</code></pre></div>
+<pre class="output"><code>  EntrezGeneID Length MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1
+1       497097   3634                               438
+2    100503874   3259                                 1
+3    100038431   1634                                 0
+4        19888   9747                                 1
+  MCL1.DH_BC2CTUACXX_CAGATC_L002_R1
+1                               300
+2                                 0
+3                                 0
+4                                 1
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#names(seqdata_sample)[3:6] &lt;- c(&quot;sample1&quot;, &quot;sample2&quot;, &quot;sample3&quot;, &quot;sample4&quot;)</span>
+<span class="co">#print(seqdata_sample)</span>
+
+<span class="kw">str</span>(seqdata_sample)</code></pre></div>
+<pre class="output"><code>&#39;data.frame&#39;:   4 obs. of  4 variables:
+ $ EntrezGeneID                     : int  497097 100503874 100038431 19888
+ $ Length                           : int  3634 3259 1634 9747
+ $ MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1: int  438 1 0 1
+ $ MCL1.DH_BC2CTUACXX_CAGATC_L002_R1: int  300 0 0 1
+</code></pre>
+<h2 id="data-types">Data types</h2>
+<p>There are 5 main types: doubles, integers, complex, logical and character.</p>
+<pre><code>typeof(3.14)
+typeof(1L)
+typeof(1+1i)
+typeof(TRUE)
+typeof(&#39;banana&#39;)</code></pre>
+<p>Note the <code>L</code> suffix to insist that a number is an integer. No matter how complicated our analyses become, all data in R is interpreted as one of these basic data types.</p>
+<h2 id="factors">Factors</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">targets &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/targets.txt&quot;</span>)
+<span class="kw">print</span>(targets)</code></pre></div>
+<pre class="output"><code>                            FileName SampleName CellType   Status
+1  MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1    MCL1.DG    basal   virgin
+2  MCL1.DH_BC2CTUACXX_CAGATC_L002_R1    MCL1.DH    basal   virgin
+3  MCL1.DI_BC2CTUACXX_ACAGTG_L002_R1    MCL1.DI    basal pregnant
+4  MCL1.DJ_BC2CTUACXX_CGATGT_L002_R1    MCL1.DJ    basal pregnant
+5  MCL1.DK_BC2CTUACXX_TTAGGC_L002_R1    MCL1.DK    basal  lactate
+6  MCL1.DL_BC2CTUACXX_ATCACG_L002_R1    MCL1.DL    basal  lactate
+7  MCL1.LA_BC2CTUACXX_GATCAG_L001_R1    MCL1.LA  luminal   virgin
+8  MCL1.LB_BC2CTUACXX_TGACCA_L001_R1    MCL1.LB  luminal   virgin
+9  MCL1.LC_BC2CTUACXX_GCCAAT_L001_R1    MCL1.LC  luminal pregnant
+10 MCL1.LD_BC2CTUACXX_GGCTAC_L001_R1    MCL1.LD  luminal pregnant
+11 MCL1.LE_BC2CTUACXX_TAGCTT_L001_R1    MCL1.LE  luminal  lactate
+12 MCL1.LF_BC2CTUACXX_CTTGTA_L001_R1    MCL1.LF  luminal  lactate
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">str</span>(targets)</code></pre></div>
+<pre class="output"><code>&#39;data.frame&#39;:   12 obs. of  4 variables:
+ $ FileName  : Factor w/ 12 levels &quot;MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
+ $ SampleName: Factor w/ 12 levels &quot;MCL1.DG&quot;,&quot;MCL1.DH&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
+ $ CellType  : Factor w/ 2 levels &quot;basal&quot;,&quot;luminal&quot;: 1 1 1 1 1 1 2 2 2 2 ...
+ $ Status    : Factor w/ 3 levels &quot;lactate&quot;,&quot;pregnant&quot;,..: 3 3 2 2 1 1 3 3 2 2 ...
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">targets &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/targets.txt&quot;</span>, <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>)
+<span class="kw">str</span>(targets)</code></pre></div>
+<pre class="output"><code>&#39;data.frame&#39;:   12 obs. of  4 variables:
+ $ FileName  : chr  &quot;MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1&quot; &quot;MCL1.DH_BC2CTUACXX_CAGATC_L002_R1&quot; &quot;MCL1.DI_BC2CTUACXX_ACAGTG_L002_R1&quot; &quot;MCL1.DJ_BC2CTUACXX_CGATGT_L002_R1&quot; ...
+ $ SampleName: chr  &quot;MCL1.DG&quot; &quot;MCL1.DH&quot; &quot;MCL1.DI&quot; &quot;MCL1.DJ&quot; ...
+ $ CellType  : chr  &quot;basal&quot; &quot;basal&quot; &quot;basal&quot; &quot;basal&quot; ...
+ $ Status    : chr  &quot;virgin&quot; &quot;virgin&quot; &quot;pregnant&quot; &quot;pregnant&quot; ...
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">targets &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/targets.txt&quot;</span>)
+<span class="kw">str</span>(targets)</code></pre></div>
+<pre class="output"><code>&#39;data.frame&#39;:   12 obs. of  4 variables:
+ $ FileName  : Factor w/ 12 levels &quot;MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
+ $ SampleName: Factor w/ 12 levels &quot;MCL1.DG&quot;,&quot;MCL1.DH&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
+ $ CellType  : Factor w/ 2 levels &quot;basal&quot;,&quot;luminal&quot;: 1 1 1 1 1 1 2 2 2 2 ...
+ $ Status    : Factor w/ 3 levels &quot;lactate&quot;,&quot;pregnant&quot;,..: 3 3 2 2 1 1 3 3 2 2 ...
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">targets$Status</code></pre></div>
+<pre class="output"><code> [1] virgin   virgin   pregnant pregnant lactate  lactate  virgin  
+ [8] virgin   pregnant pregnant lactate  lactate 
+Levels: lactate pregnant virgin
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">factor</span>(targets$Status, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="st">&quot;virgin&quot;</span>, <span class="st">&quot;pregnant&quot;</span>, <span class="st">&quot;lactate&quot;</span>), <span class="dt">ordered =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<pre class="output"><code> [1] virgin   virgin   pregnant pregnant lactate  lactate  virgin  
+ [8] virgin   pregnant pregnant lactate  lactate 
+Levels: virgin &lt; pregnant &lt; lactate
+</code></pre>
+<h2 id="subsetting-using-logical-statements">Subsetting using logical statements</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">targets$CellType</code></pre></div>
+<pre class="output"><code> [1] basal   basal   basal   basal   basal   basal   luminal luminal
+ [9] luminal luminal luminal luminal
+Levels: basal luminal
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">targets$CellType ==<span class="st"> &quot;luminal&quot;</span></code></pre></div>
+<pre class="output"><code> [1] FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
+[12]  TRUE
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">targets$CellType[targets$CellType ==<span class="st"> &quot;luminal&quot;</span>]</code></pre></div>
+<pre class="output"><code>[1] luminal luminal luminal luminal luminal luminal
+Levels: basal luminal
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">targets[targets$CellType ==<span class="st"> &quot;luminal&quot;</span>,]</code></pre></div>
+<pre class="output"><code>                            FileName SampleName CellType   Status
+7  MCL1.LA_BC2CTUACXX_GATCAG_L001_R1    MCL1.LA  luminal   virgin
+8  MCL1.LB_BC2CTUACXX_TGACCA_L001_R1    MCL1.LB  luminal   virgin
+9  MCL1.LC_BC2CTUACXX_GCCAAT_L001_R1    MCL1.LC  luminal pregnant
+10 MCL1.LD_BC2CTUACXX_GGCTAC_L001_R1    MCL1.LD  luminal pregnant
+11 MCL1.LE_BC2CTUACXX_TAGCTT_L001_R1    MCL1.LE  luminal  lactate
+12 MCL1.LF_BC2CTUACXX_CTTGTA_L001_R1    MCL1.LF  luminal  lactate
+</code></pre>
+<aside class="callout panel panel-info">
+<div class="panel-heading">
+<h2 id="tip-logical-operators-in-r"><span class="glyphicon glyphicon-pushpin"></span>Tip: Logical Operators in R</h2>
+</div>
+<div class="panel-body">
+<table>
+<thead>
+<tr class="header">
+<th>Operator</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>&lt;</td>
+<td>less than</td>
+</tr>
+<tr class="even">
+<td>&lt;=</td>
+<td>less than or equal to</td>
+</tr>
+<tr class="odd">
+<td>&gt;</td>
+<td>greater than</td>
+</tr>
+<tr class="even">
+<td>&gt;=</td>
+<td>greater than or equal to</td>
+</tr>
+<tr class="odd">
+<td>==</td>
+<td>exactly equal to</td>
+</tr>
+<tr class="even">
+<td>!=</td>
+<td>not equal to</td>
+</tr>
+<tr class="odd">
+<td>!x</td>
+<td>Not x</td>
+</tr>
+<tr class="even">
+<td>x</td>
+<td>y</td>
+</tr>
+<tr class="odd">
+<td>x &amp; y</td>
+<td>x AND y</td>
+</tr>
+<tr class="even">
+<td>isTRUE(x)</td>
+<td>test if X is TRUE</td>
+</tr>
+</tbody>
+</table>
+<p>Source: <a href="http://www.statmethods.net/management/operators.html">Quick-R</a></p>
+</div>
+</aside>
+        </div>
+      </div>
+      </article>
+      
+    </div>
+    <!-- Javascript placed at the end of the document so the pages load faster -->
+    <script src="http://software-carpentry.org/v5/js/jquery-1.9.1.min.js"></script>
+    <script src="css/bootstrap/bootstrap-js/bootstrap.js"></script>
+    <script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
+  </body>
+</html>
