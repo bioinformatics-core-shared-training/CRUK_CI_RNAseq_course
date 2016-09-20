@@ -196,7 +196,14 @@ plot(myCPM[,1],countdata[,1],ylim=c(0,50),xlim=c(0,3))
 abline(v=0.5)
 ```
 
-<span style="color:blue">Exercise: (1) Plot the counts-per-million versus counts for the second sample. (2) Add a vertical line at 0.5 and a horizontal line at 10. (3) Add the lines again, colouring them blue </span> <span style="color:red">HINT: use the `col` parameter.</span>
+> ## Challenge {.challenge}
+>
+> 1. Plot the counts-per-million versus counts for the second sample.
+> 1. Add a vertical line at 0.5 and a horizontal line at 10.
+> 1. Add the lines again, colouring them blue
+>
+> HINT: use the `col` parameter.
+>
 
 ```{r,echo=FALSE}
 plot(myCPM[,2],countdata[,2],ylim=c(0,50),xlim=c(0,3))
@@ -255,7 +262,11 @@ title("Boxplots of logCPMs (unnormalised)")
 
 From the boxplots we see that overall the density distributions of raw log-intensities are not identical but still not very different. If a sample is really far above or below the blue horizontal line we may need to investigate that sample further.
 
-<span style="color:red">Discussion: Do any samples appear to be different compared to the others?</span>
+> ## Discussion {.challenge}
+>
+> Do any samples appear to be different compared to the others?
+>
+
 
 ### Multidimensional scaling plots
 
@@ -293,7 +304,12 @@ legend("topleft",fill=c("blue","red","dark green"),legend=levels(sampleinfo$Stat
 title("Status")
 ```
 
-<span style="color:red">Discussion: Look at the MDS plot coloured by cell type. Is there something strange going on with the samples? Identify the two samples that don't appear to be in the right place.</span>
+> ## Discussion {.challenge}
+>
+> Look at the MDS plot coloured by cell type.
+> Is there something strange going on with the samples?
+> Identify the two samples that don't appear to be in the right place.
+>
 
 ```{r}
 # There is a sample info corrected file in your data directory
@@ -304,9 +320,19 @@ sampleinfo <- read.delim("data/SampleInfo_Corrected.txt")
 sampleinfo
 ```
 
-<span style="color:red">Discussion: What is the greatest source of variation in the data (i.e. what does dimension 1 represent)? What is the second greatest source of variation in the data?</span>
+> ## Discussion {.challenge}
+>
+> What is the greatest source of variation in the data (i.e. what does dimension 1 represent)?
+> What is the second greatest source of variation in the data?
+>
 
-<span style="color:blue">Exercise: (1) Redo the plots choosing your own colours. (2) Change the plotting character to a symbol instead of the column names</span> <span style="color:red">HINT: use `pch` argument. Try `pch=16` and see what happens. </span> (3) Change the plotting characters such that basal samples have the value `1` and luminal samples have the value `4`. Colour by status (lactate, pregnant, virgin)</span>
+> ## Challenge {.challenge}
+>
+> 1. Redo the plots choosing your own colours.
+> 1. Change the plotting character to a symbol instead of the column names
+> HINT: use `pch` argument. Try `pch=16` and see what happens.
+> 1. Change the plotting characters such that basal samples have the value `1` and luminal samples have the value `4`. Colour by status (lactate, pregnant, virgin)
+>
 
 ```{r,echo=FALSE}
 # Solution to 3
@@ -384,7 +410,12 @@ heatmap.2(highly_variable_lcpm,col=rev(morecols(50)),trace="none", main="Top 500
 dev.off()
 ```
 
-<span style="color:blue">Exercise: (1) Change the colour scheme to "PiYG" and redo the heatmap. Try `?RColorBrewer` and see what other colour schemes are available. (2) Change the sample names to `group` using the `labCol` argument (3) Redo the heatmap using the top 500 LEAST variable genes.</span>
+> ## Challenge {.challenge}
+>
+> 1. Change the colour scheme to "PiYG" and redo the heatmap. Try `?RColorBrewer` and see what other colour schemes are available.
+> 1. Change the sample names to `group` using the `labCol` argument
+> 1. Redo the heatmap using the top 500 LEAST variable genes.
+>
 
 ```{r,echo=FALSE}
 # Solution 1 and 2
@@ -443,7 +474,10 @@ plotMD(y,column = 11)
 abline(h=0,col="grey")
 ```
 
-<span style="color:blue">Exercise: Plot the biased and unbiased MD plots side by side for the same sample to see the before and after TMM normalisation effect.</span>
+> ## Challenge {.challenge}
+>
+> Plot the biased and unbiased MD plots side by side for the same sample to see the before and after TMM normalisation effect.
+>
 
 ```{r,echo=FALSE}
 par(mfrow=c(1,2))
@@ -495,7 +529,11 @@ v
 names(v)
 ```
 
-<span style="color:blue">Exercise: (1) What is in the `targets` slot of `v` and what does it correspond to in `y`? (2) What are the dimensions of the `weights` slot in `v`?</span>
+> ## Challenge {.challenge}
+>
+> 1. What is in the `targets` slot of `v` and what does it correspond to in `y`?
+> 1. What are the dimensions of the `weights` slot in `v`?
+>
 
 We can repeat the box plots for the normalised data to compare to before normalisation. The expression values in `v$E` are already log2 values so we don't need to log-transform.
 
@@ -560,7 +598,13 @@ summa.fit <- decideTests(fit.cont)
 summary(summa.fit)
 ```
 
-<span style="color:blue">Exercise: (1) Add another contrast to the contrasts matrix: `L.PregVsLac = luminal.pregnant - luminal.lactate` and re-run the code above. You should have two comparisons in `fit.cont` now. (2) Check out the `vennDiagram` function</span> <span style="color:red">(HINT: type `?vennDiagram`)</span>. <span style="color:blue">Can you show the overlap of differentially expressed genes between the two comparisons? How many genes are commonly differentially expressed?</span>
+> ## Challenge {.challenge}
+>
+> 1. Add another contrast to the contrasts matrix: `L.PregVsLac = luminal.pregnant - luminal.lactate` and re-run the code above. You should have two comparisons in `fit.cont` now.
+> 1. Check out the `vennDiagram` function
+> (HINT: type `?vennDiagram`).
+> Can you show the overlap of differentially expressed genes between the two comparisons? How many genes are commonly differentially expressed?
+>
 
 ```{r,echo=FALSE}
 # Solution
@@ -654,7 +698,10 @@ plotMD(fit.cont,coef=1,status=summa.fit[,"B.PregVsLac"])
 volcanoplot(fit.cont,coef=1,highlight=100,names=fit.cont$genes$SYMBOL)
 ```
 
-<span style="color:blue">Exercise: Look at the MD plot and volcano plot for the second comparison, `L.PregVsLac`. Change the number of highlighted genes to 200 in the volcano plot.</span>
+> ## Challenge {.challenge}
+>
+> Look at the MD plot and volcano plot for the second comparison, `L.PregVsLac`. Change the number of highlighted genes to 200 in the volcano plot.
+>
 
 ```{r,echo=FALSE}
 par(mfrow=c(1,2))
@@ -678,7 +725,10 @@ stripchart(v$E["24117",]~group,vertical=TRUE,las=2,cex.axis=0.8,pch=16,cex=1.3,c
 
 Notice anything interesting about the expression of this gene?
 
-<span style="color:blue">Exercise: Take the top gene from the L.PregVsLactate comparison and make a stripchart of grouped expression as above. (Don't forget to change the title of the plot.)</span>
+> ## Challenge {.challenge}
+>
+> Take the top gene from the L.PregVsLactate comparison and make a stripchart of grouped expression as above. (Don't forget to change the title of the plot.)
+>
 
 ```{r,echo=FALSE}
 # Soution
@@ -722,7 +772,12 @@ plotMD(fit.treat,coef=2,status=res.treat[,"L.PregVsLac"])
 abline(h=0,col="grey")
 ```
 
-<span style="color:blue">Exercise: Change the cut-off so that we are interested in genes that change at least 50\% on the fold change scale.</span> <span style="color:red">(HINT: what is the corresponding logFC value of 50\% fold change? Assume basal.pregnant is 50\% higher than basal.lactate)</span>
+> ## Challenge {.challenge}
+>
+> Change the cut-off so that we are interested in genes that change at least 50\% on the fold change scale.
+>
+> HINT: what is the corresponding logFC value of 50\% fold change? Assume basal.pregnant is 50\% higher than basal.lactate
+>
 
 ```{r,echo=FALSE}
 #Solution
@@ -867,8 +922,12 @@ You can write out the camera results to a csv file to open in excel.
 write.csv(gst.camera,file="gst_BPregVsLac.csv")
 ```
 
-
-<span style="color:blue">Exercise: (1) Run `camera` on the second contrast in the contrast matrix. (2) Run `camera` on a different set of MSigDB gene sets, the hallmark datasets, `mouse_H_v5.rdata`. You will need to load in the hallmark gene sets, and the object will be called `Mm.H` in R.</span>
+> ## Challenge {.challenge}
+>
+> 1. Run `camera` on the second contrast in the contrast matrix.
+> 1. Run `camera` on a different set of MSigDB gene sets, the hallmark datasets, `mouse_H_v5.rdata`.
+> You will need to load in the hallmark gene sets, and the object will be called `Mm.H` in R.
+>
 
 ```{r,echo=FALSE}
 load("data/mouse_H_v5.rdata")
@@ -883,7 +942,7 @@ H.camera[1:10,]
 
 ROAST is an example of a self-contained gene set test [@wu2010roast]. It asks the question, "Do the genes in my set tend to be differentially expressed between my conditions of interest?". ROAST doesn't care about what the other genes in the experiment are doing, which is different to `camera` and `goana`. ROAST is a good option for when you're interested in a specific set, or a few sets. It is not really used to test thousands of sets at one time.
 
-From the Hallmark gene sets, two MYC pathways were most significant. 
+From the Hallmark gene sets, two MYC pathways were most significant.
 
 ```{r}
 H.camera[1:10,]
@@ -908,7 +967,11 @@ myc.rst[1:15,]
 
 Each row corresponds to a single gene set. The NGenes column gives the number of genes in each set. The PropDown and PropUp columns contain the proportions of genes in the set that are down- and up-regulated, respectively, with absolute fold changes greater than 2. The net direction of change is determined from the significance of changes in each direction, and is shown in the Direction column. The PValue provides evidence for whether the majority of genes in the set are DE in the specified direction, whereas the PValue.Mixed tests for differential expression in any direction. FDRs are computed from the corresponding p-values across all sets.
 
-<span style="color:blue">Exercise: (1) test whether the MYC signalling pathways tend to be differentially expressed between luminal pregnant vs lactating (the second contrast) (2) Look for gene sets containing "WNT" in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.</span>
+> ## Challenge {.challenge}
+>
+> 1. Test whether the MYC signalling pathways tend to be differentially expressed between luminal pregnant vs lactating (the second contrast).
+> 1. Look for gene sets containing "WNT" in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.
+>
 
 ```{r,echo=FALSE}
 #Solution 1
@@ -950,7 +1013,13 @@ barcodeplot(fit.cont$t[,1], index=c2.ind[["MENSSEN_MYC_TARGETS"]], main="MENSSEN
 
 Here, genes are represented by bars and are ranked from left to right by decreasing log-fold change or t-statistic. This forms the barcode-like pattern. The line above the barcode shows the relative local enrichment of the vertical bars in each part of the plot. The barcodeplot shows that the genes in this gene set tend to be up-regulated between pregnant and lactating in basal cells.
 
-<span style="color:blue">Exercise: (1) Produce a barcodeplot for luminal pregnant vs lactating for this gene set. Does the pattern of enrichment look as strong? (2) Choose one of the Wnt signalling pathways and produce a barcode plot for both comparisons.(3) You can put two gene sets on one plot, for example a set that is up-regulated and one that is down-regulated, by adding a gene set to the `index2` argument. Produce a barcodeplot with two sets of your choosing.</span>
+> ## Challenge {.challenge}
+>
+> 1. Produce a barcodeplot for luminal pregnant vs lactating for this gene set. Does the pattern of enrichment look as strong?
+> 1. Choose one of the Wnt signalling pathways and produce a barcode plot for both comparisons.
+> 1. You can put two gene sets on one plot, for example a set that is up-regulated and one that is down-regulated,
+> by adding a gene set to the `index2` argument. Produce a barcodeplot with two sets of your choosing.
+>
 
 ```{r,echo=FALSE}
 # Solution 1
