@@ -18,7 +18,7 @@ opts_chunk$set(fig.path = "fig-09/")
 ## Data files needed
 
 * counts_Drosophila.txt
-* targetsD.txt
+* SampleInfo_Drosophila.txt
 
 Available from [https://figshare.com/s/e08e71c42f118dbe8be6](https://figshare.com/s/e08e71c42f118dbe8be6).
 
@@ -27,7 +27,6 @@ Available from [https://figshare.com/s/e08e71c42f118dbe8be6](https://figshare.co
 * limma
 * edgeR
 * org.Dm.eg.db
-* EDASeq
 * gplots
 * RColorBrewer
 
@@ -71,7 +70,6 @@ First, let's load all the libraries we will need today.
 ```{r, message = FALSE}
 library(limma)
 library(edgeR)
-library(EDASeq)
 library(gplots)
 library(RColorBrewer)
 library(org.Dm.eg.db)
@@ -361,7 +359,7 @@ topTable(fit[ps,],coef=3)
 par(mfrow=c(1,2))
 plotMD(fit,coef=3,status=results[,"UVsT"])
 
-volcanoplot(fit,coef=3,highlight=100,names=fit$genes$symbol)
+volcanoplot(fit,coef=3,highlight=100,names=fit$genes$SYMBOL)
 ```
 
 ```{r}
