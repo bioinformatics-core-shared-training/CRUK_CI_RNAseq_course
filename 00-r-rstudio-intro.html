@@ -218,7 +218,7 @@ Sox17       106       82
 Mrpl15      309      337
 </code></pre>
 <h3 id="vectorisation">Vectorisation</h3>
-<p>R arethmetic operators are vectorised by default.</p>
+<p>R arithmetic operators are vectorised by default.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">small_counts$Sample_1 *<span class="st"> </span><span class="dv">2</span></code></pre></div>
 <pre class="output"><code> [1]  876  212  618 1304 3208    8 1538 2988 2688 3382
 </code></pre>
@@ -652,6 +652,35 @@ factor_ordering_example &lt;-<span class="st"> </span><span class="kw">factor</s
 <p>Source: <a href="http://www.statmethods.net/management/operators.html">Quick-R</a></p>
 </div>
 </aside>
+<p>We might also want to reduce our results table down to a set of genes that we are interested in. We can use similar logical subsetting logic to do this.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_genes &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Smad7&quot;</span>, <span class="st">&quot;Wif1&quot;</span>, <span class="st">&quot;Fam102b&quot;</span>, <span class="st">&quot;Tppp3&quot;</span>)</code></pre></div>
+<p>For each gene in ResultsTable_small$SYMBOL, does it appear in my_genes?</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ResultsTable_small$SYMBOL %in%<span class="st"> </span>my_genes</code></pre></div>
+<pre class="output"><code> [1]  TRUE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+[12] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE
+[23] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
+[34] FALSE FALSE FALSE  TRUE FALSE FALSE FALSE
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ResultsTable_small[ResultsTable_small$SYMBOL %in%<span class="st"> </span>my_genes, ]</code></pre></div>
+<pre class="output"><code>   ENTREZID  SYMBOL     logFC  AveExpr         t      P.Value    adj.P.Val
+1     24117    Wif1  1.819943 2.975545  20.10780 1.063770e-10 1.016240e-06
+20    17131   Smad7  1.972771 6.717519  14.14348 6.493642e-09 5.131276e-06
+33   329739 Fam102b -1.520291 4.188130 -12.75357 2.120968e-08 1.015751e-05
+37    67971   Tppp3 -2.653398 4.908163 -12.22845 3.416616e-08 1.419445e-05
+</code></pre>
+<p>You can use <code>match</code> to get the same subset, but this time make sure they are in the same order as in <code>my_genes</code>. This can be useful if you are trying to merge together data from two sources.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">match</span>(my_genes, ResultsTable_small$SYMBOL)</code></pre></div>
+<pre class="output"><code>[1] 20  1 33 37
+</code></pre>
+<p>This returns the index for where each of the genes in <code>my_list appears</code> in <code>ResultsTable_small$SYMBOL</code>. We can then use this to subset the columns from <code>ResultsTable_small</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ResultsTable_small[<span class="kw">match</span>(my_genes, ResultsTable_small$SYMBOL), ]</code></pre></div>
+<pre class="output"><code>   ENTREZID  SYMBOL     logFC  AveExpr         t      P.Value    adj.P.Val
+20    17131   Smad7  1.972771 6.717519  14.14348 6.493642e-09 5.131276e-06
+1     24117    Wif1  1.819943 2.975545  20.10780 1.063770e-10 1.016240e-06
+33   329739 Fam102b -1.520291 4.188130 -12.75357 2.120968e-08 1.015751e-05
+37    67971   Tppp3 -2.653398 4.908163 -12.22845 3.416616e-08 1.419445e-05
+</code></pre>
+<p>You can see they are in the same order as <code>my_genes</code>!</p>
         </div>
       </div>
       </article>

@@ -264,7 +264,7 @@ small_counts[1:3, c("Sample_1", "Sample_3")]
 
 ### Vectorisation
 
-R arethmetic operators are vectorised by default.
+R arithmetic operators are vectorised by default.
 ```{r}
 small_counts$Sample_1 * 2
 ```
@@ -473,3 +473,36 @@ ResultsTable_small[abs(ResultsTable_small$logFC) > 3, ]
 > |isTRUE(x) | test if X is TRUE|
 > Source: [Quick-R](http://www.statmethods.net/management/operators.html)
 >
+
+We might also want to reduce our results table down to a set of genes that we are interested in.
+We can use similar logical subsetting logic to do this.
+
+```{r}
+my_genes <- c("Smad7", "Wif1", "Fam102b", "Tppp3")
+```
+
+For each gene in ResultsTable_small$SYMBOL, does it appear in my_genes?
+
+```{r}
+ResultsTable_small$SYMBOL %in% my_genes
+```
+
+```{r}
+ResultsTable_small[ResultsTable_small$SYMBOL %in% my_genes, ]
+```
+
+You can use `match` to get the same subset, but this time make sure they are in the same order as in `my_genes`.
+This can be useful if you are trying to merge together data from two sources.
+
+```{r}
+match(my_genes, ResultsTable_small$SYMBOL)
+```
+
+This returns the index for where each of the genes in `my_list appears` in `ResultsTable_small$SYMBOL`.
+We can then use this to subset the columns from `ResultsTable_small`.
+
+```{r}
+ResultsTable_small[match(my_genes, ResultsTable_small$SYMBOL), ]
+```
+
+You can see they are in the same order as `my_genes`!
