@@ -162,12 +162,9 @@ Managing your projects in a reproducible fashion doesn’t just make your scienc
 </div>
 </section>
 <h2 id="reading-data-into-r">Reading data into R</h2>
+<p>Our data is tab delmited, which is what read.table expect by default so we don’t need to specify <code>delim</code>. However, we do need <code>header = TRUE</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Read the data into R</span>
-<span class="co">#small_counts &lt;- read.delim(&quot;data/GSE60450_Lactation-GenewiseCounts.txt&quot;, stringsAsFactors = FALSE)</span>
-<span class="co"># Read the sample information into R</span>
-small_counts &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="st">&quot;data/small_counts.txt&quot;</span>,<span class="dt">header=</span><span class="ot">TRUE</span>)
-sampleinfo &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/SampleInfo.txt&quot;</span>)
-ResultsTable_small &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="st">&quot;data/ResultsTable_small.txt&quot;</span>,<span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>,<span class="dt">header=</span><span class="ot">TRUE</span>)</code></pre></div>
+small_counts &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="st">&quot;data/small_counts.txt&quot;</span>, <span class="dt">header =</span> <span class="ot">TRUE</span>)</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(small_counts)</code></pre></div>
 <pre class="output"><code>        Sample_1 Sample_2 Sample_3 Sample_4
 Xkr4         438      300       65      237
@@ -184,7 +181,96 @@ Rrs1        1691     1808     2127     1653
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">dim</span>(small_counts)</code></pre></div>
 <pre class="output"><code>[1] 10  4
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">print</span>(ResultsTable_small)</code></pre></div>
+<h2 id="working-with-data-frames">Working with Data Frames</h2>
+<h3 id="subsetting">Subsetting</h3>
+<p>Let’s say we want the all the counts for Sample_1. There are three main ways we could do this:</p>
+<p><code>$</code> notation with the column name</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">small_counts$Sample_1</code></pre></div>
+<pre class="output"><code> [1]  438  106  309  652 1604    4  769 1494 1344 1691
+</code></pre>
+<p><code>[row, column]</code> notation with numeric indices</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">small_counts[, <span class="dv">1</span>]</code></pre></div>
+<pre class="output"><code> [1]  438  106  309  652 1604    4  769 1494 1344 1691
+</code></pre>
+<p><code>[row, column]</code> notation using the column name (in a vector)</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">small_counts[, <span class="kw">c</span>(<span class="st">&quot;Sample_1&quot;</span>)]</code></pre></div>
+<pre class="output"><code> [1]  438  106  309  652 1604    4  769 1494 1344 1691
+</code></pre>
+<p>This is handy when you want to grab multiple columns</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">small_counts[, <span class="kw">c</span>(<span class="st">&quot;Sample_1&quot;</span>, <span class="st">&quot;Sample_3&quot;</span>)]</code></pre></div>
+<pre class="output"><code>        Sample_1 Sample_3
+Xkr4         438       65
+Sox17        106       82
+Mrpl15       309      337
+Lypla1       652      948
+Tcea1       1604     1721
+Rgs20          4       14
+Atp6v1h      769     1062
+Rb1cc1      1494     1157
+Pcmtd1      1344     1374
+Rrs1        1691     2127
+</code></pre>
+<p>You can even mix numerical and named indices</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">small_counts[<span class="dv">1</span>:<span class="dv">3</span>, <span class="kw">c</span>(<span class="st">&quot;Sample_1&quot;</span>, <span class="st">&quot;Sample_3&quot;</span>)]</code></pre></div>
+<pre class="output"><code>       Sample_1 Sample_3
+Xkr4        438       65
+Sox17       106       82
+Mrpl15      309      337
+</code></pre>
+<h3 id="vectorisation">Vectorisation</h3>
+<p>R arethmetic operators are vectorised by default.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">small_counts$Sample_1 *<span class="st"> </span><span class="dv">2</span></code></pre></div>
+<pre class="output"><code> [1]  876  212  618 1304 3208    8 1538 2988 2688 3382
+</code></pre>
+<p>So are many R functions.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">log</span>(small_counts)</code></pre></div>
+<pre class="output"><code>        Sample_1  Sample_2 Sample_3 Sample_4
+Xkr4    6.082219 5.7037825 4.174387 5.468060
+Sox17   4.663439 5.2040067 4.406719 4.653960
+Mrpl15  5.733341 5.4553211 5.820083 5.703782
+Lypla1  6.480045 6.2441669 6.854355 6.840547
+Tcea1   7.380256 7.3098815 7.450661 7.183112
+Rgs20   1.386294 0.6931472 2.639057 1.386294
+Atp6v1h 6.645091 6.6227363 6.967909 6.894670
+Rb1cc1  7.309212 7.2527624 7.053586 6.874198
+Pcmtd1  7.203406 7.1244783 7.225481 7.373374
+Rrs1    7.433075 7.4999765 7.662468 7.410347
+</code></pre>
+<p>Let’s say we want to calculate the sum of counts for each sample. We can do this for each sample by subsetting and then using the <code>sum</code> function.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sum</span>(small_counts$Sample_1)</code></pre></div>
+<pre class="output"><code>[1] 8411
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sum</span>(small_counts$Sample_2)</code></pre></div>
+<pre class="output"><code>[1] 7942
+</code></pre>
+<p>If you had a lot of samples, you can imagine this would get tedious. So instead, we can use an <code>apply</code> statement to apply the <code>sum</code> function to every column at once. In R, this is usually quicker than using a loop. Note the <code>MARGIN</code> argument tells <code>apply</code> which direction you want to go in. MARGIN = 1 will apply <code>sum</code> to each row, while MARGIN = 2 will apply <code>sum</code> to each column.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Sum the counts for each sample</span>
+sample_sums =<span class="st"> </span><span class="kw">apply</span>(small_counts, <span class="dt">MARGIN =</span> <span class="dv">2</span>, sum)
+<span class="kw">print</span>(sample_sums)</code></pre></div>
+<pre class="output"><code>Sample_1 Sample_2 Sample_3 Sample_4 
+    8411     7942     8887     8098 
+</code></pre>
+<h2 id="data-types">Data types</h2>
+<p>There are 5 main types: doubles, integers, complex, logical and character.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">typeof</span>(<span class="fl">3.14</span>)</code></pre></div>
+<pre class="output"><code>[1] &quot;double&quot;
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">typeof</span>(1L)</code></pre></div>
+<pre class="output"><code>[1] &quot;integer&quot;
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">typeof</span>(<span class="dv">1</span>+1i)</code></pre></div>
+<pre class="output"><code>[1] &quot;complex&quot;
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">typeof</span>(<span class="ot">TRUE</span>)</code></pre></div>
+<pre class="output"><code>[1] &quot;logical&quot;
+</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">typeof</span>(<span class="st">&#39;banana&#39;</span>)</code></pre></div>
+<pre class="output"><code>[1] &quot;character&quot;
+</code></pre>
+<p>Note the <code>L</code> suffix to insist that a number is an integer. No matter how complicated our analyses become, all data in R is interpreted as one of these basic data types.</p>
+<p>Let’s read in some data that contains things of more than one type. This is actually a sample of a differential expression results table that you will generate later in the workshop.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ResultsTable_small &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="st">&quot;data/ResultsTable_small.txt&quot;</span>, <span class="dt">header=</span><span class="ot">TRUE</span>)
+<span class="kw">print</span>(ResultsTable_small)</code></pre></div>
 <pre class="output"><code>   ENTREZID        SYMBOL     logFC     AveExpr         t      P.Value
 1     24117          Wif1  1.819943  2.97554452  20.10780 1.063770e-10
 2    381290        Atp2b4 -2.143885  3.94406593 -19.07495 1.982934e-10
@@ -268,105 +354,245 @@ Rrs1        1691     1808     2127     1653
 39 1.419445e-05
 40 1.462109e-05
 </code></pre>
-<h2 id="working-with-data-frames">Working with Data Frames</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">small_counts_sample =<span class="st"> </span>small_counts[<span class="dv">1</span>:<span class="dv">4</span>, <span class="dv">1</span>:<span class="dv">4</span>]
-<span class="kw">print</span>(small_counts_sample)</code></pre></div>
-<pre class="output"><code>       Sample_1 Sample_2 Sample_3 Sample_4
-Xkr4        438      300       65      237
-Sox17       106      182       82      105
-Mrpl15      309      234      337      300
-Lypla1      652      515      948      935
+<p>We can use <code>str</code> to reveal the structure of our <code>ResultsTable_small</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">str</span>(ResultsTable_small)</code></pre></div>
+<pre class="output"><code>&#39;data.frame&#39;:   40 obs. of  7 variables:
+ $ ENTREZID : int  24117 381290 78896 226101 16012 231830 16669 55987 231991 14620 ...
+ $ SYMBOL   : Factor w/ 40 levels &quot;1500015O10Rik&quot;,..: 40 3 1 26 20 23 21 8 9 16 ...
+ $ logFC    : num  1.82 -2.14 2.81 -2.33 -2.9 ...
+ $ AveExpr  : num  2.98 3.94 3.04 6.22 1.98 ...
+ $ t        : num  20.1 -19.1 18.5 -18.3 -18.2 ...
+ $ P.Value  : num  1.06e-10 1.98e-10 2.76e-10 3.30e-10 3.41e-10 ...
+ $ adj.P.Val: num  1.02e-06 1.02e-06 1.02e-06 1.02e-06 1.02e-06 ...
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#names(small_counts_sample)[3:6] &lt;- c(&quot;sample1&quot;, &quot;sample2&quot;, &quot;sample3&quot;, &quot;sample4&quot;)</span>
-<span class="co">#print(small_counts_sample)</span>
-
-<span class="kw">str</span>(small_counts_sample)</code></pre></div>
-<pre class="output"><code>&#39;data.frame&#39;:   4 obs. of  4 variables:
- $ Sample_1: int  438 106 309 652
- $ Sample_2: int  300 182 234 515
- $ Sample_3: int  65 82 337 948
- $ Sample_4: int  237 105 300 935
+<p>We can see that it’s a data frame, and <code>str</code> also tells us the type of each column. Everything in a single column must be of the same type, while each column can be a different type. This is because data frames are actually lists of vectors, and vectors must contain data of only one type.</p>
+<p>When you try to mix types in a vector, strange things can happen.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">my_vector =<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="st">&quot;hello&quot;</span>, <span class="ot">TRUE</span>)
+<span class="kw">print</span>(my_vector)</code></pre></div>
+<pre class="output"><code>[1] &quot;1&quot;     &quot;hello&quot; &quot;TRUE&quot; 
 </code></pre>
-<h2 id="data-types">Data types</h2>
-<p>There are 5 main types: doubles, integers, complex, logical and character.</p>
-<pre><code>typeof(3.14)
-typeof(1L)
-typeof(1+1i)
-typeof(TRUE)
-typeof(&#39;banana&#39;)</code></pre>
-<p>Note the <code>L</code> suffix to insist that a number is an integer. No matter how complicated our analyses become, all data in R is interpreted as one of these basic data types.</p>
-<h2 id="factors">Factors</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sampleinfo &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/sampleinfo.txt&quot;</span>)
-<span class="kw">print</span>(sampleinfo)</code></pre></div>
-<pre class="output"><code>                            FileName SampleName CellType   Status
-1  MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1    MCL1.DG  luminal   virgin
-2  MCL1.DH_BC2CTUACXX_CAGATC_L002_R1    MCL1.DH    basal   virgin
-3  MCL1.DI_BC2CTUACXX_ACAGTG_L002_R1    MCL1.DI    basal pregnant
-4  MCL1.DJ_BC2CTUACXX_CGATGT_L002_R1    MCL1.DJ    basal pregnant
-5  MCL1.DK_BC2CTUACXX_TTAGGC_L002_R1    MCL1.DK    basal  lactate
-6  MCL1.DL_BC2CTUACXX_ATCACG_L002_R1    MCL1.DL    basal  lactate
-7  MCL1.LA_BC2CTUACXX_GATCAG_L001_R1    MCL1.LA    basal   virgin
-8  MCL1.LB_BC2CTUACXX_TGACCA_L001_R1    MCL1.LB  luminal   virgin
-9  MCL1.LC_BC2CTUACXX_GCCAAT_L001_R1    MCL1.LC  luminal pregnant
-10 MCL1.LD_BC2CTUACXX_GGCTAC_L001_R1    MCL1.LD  luminal pregnant
-11 MCL1.LE_BC2CTUACXX_TAGCTT_L001_R1    MCL1.LE  luminal  lactate
-12 MCL1.LF_BC2CTUACXX_CTTGTA_L001_R1    MCL1.LF  luminal  lactate
+<p>Notice that everything has been converted to a character. You can check this with <code>typeof</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">typeof</span>(my_vector)</code></pre></div>
+<pre class="output"><code>[1] &quot;character&quot;
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">str</span>(sampleinfo)</code></pre></div>
-<pre class="output"><code>&#39;data.frame&#39;:   12 obs. of  4 variables:
- $ FileName  : Factor w/ 12 levels &quot;MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
- $ SampleName: Factor w/ 12 levels &quot;MCL1.DG&quot;,&quot;MCL1.DH&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
- $ CellType  : Factor w/ 2 levels &quot;basal&quot;,&quot;luminal&quot;: 2 1 1 1 1 1 1 2 2 2 ...
- $ Status    : Factor w/ 3 levels &quot;lactate&quot;,&quot;pregnant&quot;,..: 3 3 2 2 1 1 3 3 2 2 ...
+<p>This is called type coercion. When you try to create a vector containing a mixture of types R will automatically (and silently) convert everthing to the same type. Generally it will chose a type that means you don’t lose any information.</p>
+<p>The coercion rules go: <code>logical</code> -&gt; <code>integer</code> -&gt; <code>numeric</code> -&gt; <code>complex</code> -&gt; <code>character</code>.</p>
+<p>Note, the same thing will happen if you try to read in data from a file that has a mixture of types within a single column.</p>
+<h3 id="factors">Factors</h3>
+<p>You may have noticed that <code>ResultsTable_small</code> contained a column annotated as <code>Factor</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">str</span>(ResultsTable_small)</code></pre></div>
+<pre class="output"><code>&#39;data.frame&#39;:   40 obs. of  7 variables:
+ $ ENTREZID : int  24117 381290 78896 226101 16012 231830 16669 55987 231991 14620 ...
+ $ SYMBOL   : Factor w/ 40 levels &quot;1500015O10Rik&quot;,..: 40 3 1 26 20 23 21 8 9 16 ...
+ $ logFC    : num  1.82 -2.14 2.81 -2.33 -2.9 ...
+ $ AveExpr  : num  2.98 3.94 3.04 6.22 1.98 ...
+ $ t        : num  20.1 -19.1 18.5 -18.3 -18.2 ...
+ $ P.Value  : num  1.06e-10 1.98e-10 2.76e-10 3.30e-10 3.41e-10 ...
+ $ adj.P.Val: num  1.02e-06 1.02e-06 1.02e-06 1.02e-06 1.02e-06 ...
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sampleinfo &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/sampleinfo.txt&quot;</span>, <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>)
-<span class="kw">str</span>(sampleinfo)</code></pre></div>
-<pre class="output"><code>&#39;data.frame&#39;:   12 obs. of  4 variables:
- $ FileName  : chr  &quot;MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1&quot; &quot;MCL1.DH_BC2CTUACXX_CAGATC_L002_R1&quot; &quot;MCL1.DI_BC2CTUACXX_ACAGTG_L002_R1&quot; &quot;MCL1.DJ_BC2CTUACXX_CGATGT_L002_R1&quot; ...
- $ SampleName: chr  &quot;MCL1.DG&quot; &quot;MCL1.DH&quot; &quot;MCL1.DI&quot; &quot;MCL1.DJ&quot; ...
- $ CellType  : chr  &quot;luminal&quot; &quot;basal&quot; &quot;basal&quot; &quot;basal&quot; ...
- $ Status    : chr  &quot;virgin&quot; &quot;virgin&quot; &quot;pregnant&quot; &quot;pregnant&quot; ...
+<p>Factors usually look like character data, but are typically used to represent categorical information.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">str</span>(ResultsTable_small$SYMBOL)</code></pre></div>
+<pre class="output"><code> Factor w/ 40 levels &quot;1500015O10Rik&quot;,..: 40 3 1 26 20 23 21 8 9 16 ...
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sampleinfo &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="st">&quot;data/sampleinfo.txt&quot;</span>)
-<span class="kw">str</span>(sampleinfo)</code></pre></div>
-<pre class="output"><code>&#39;data.frame&#39;:   12 obs. of  4 variables:
- $ FileName  : Factor w/ 12 levels &quot;MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
- $ SampleName: Factor w/ 12 levels &quot;MCL1.DG&quot;,&quot;MCL1.DH&quot;,..: 1 2 3 4 5 6 7 8 9 10 ...
- $ CellType  : Factor w/ 2 levels &quot;basal&quot;,&quot;luminal&quot;: 2 1 1 1 1 1 1 2 2 2 ...
- $ Status    : Factor w/ 3 levels &quot;lactate&quot;,&quot;pregnant&quot;,..: 3 3 2 2 1 1 3 3 2 2 ...
+<p>Instead of printing out the strings we gave it, we got a bunch of numbers instead. R has replaced our human-readable categories with numbered indices under the hood:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">typeof</span>(ResultsTable_small$SYMBOL)</code></pre></div>
+<pre class="output"><code>[1] &quot;integer&quot;
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sampleinfo$Status</code></pre></div>
-<pre class="output"><code> [1] virgin   virgin   pregnant pregnant lactate  lactate  virgin  
- [8] virgin   pregnant pregnant lactate  lactate 
-Levels: lactate pregnant virgin
+<p>In modeling functions, it’s important to know what the baseline levels are. This is assumed to be the first factor, but by default factors are labeled in alphabetical order. You can change this by specifying the levels:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mydata &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;case&quot;</span>, <span class="st">&quot;control&quot;</span>, <span class="st">&quot;control&quot;</span>, <span class="st">&quot;case&quot;</span>)
+factor_ordering_example &lt;-<span class="st"> </span><span class="kw">factor</span>(mydata, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="st">&quot;control&quot;</span>, <span class="st">&quot;case&quot;</span>))
+<span class="kw">str</span>(factor_ordering_example)</code></pre></div>
+<pre class="output"><code> Factor w/ 2 levels &quot;control&quot;,&quot;case&quot;: 2 1 1 2
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">factor</span>(sampleinfo$Status, <span class="dt">levels =</span> <span class="kw">c</span>(<span class="st">&quot;virgin&quot;</span>, <span class="st">&quot;pregnant&quot;</span>, <span class="st">&quot;lactate&quot;</span>), <span class="dt">ordered =</span> <span class="ot">TRUE</span>)</code></pre></div>
-<pre class="output"><code> [1] virgin   virgin   pregnant pregnant lactate  lactate  virgin  
- [8] virgin   pregnant pregnant lactate  lactate 
-Levels: virgin &lt; pregnant &lt; lactate
+<p>In this case, we’ve explicitly told R that “control” should represented by 1, and “case” by 2. This designation can be very important for interpreting the results of statistical models!</p>
+<p>If you prefer not to work with factors, you can simply tell the <code>read.table</code> function to keep all strings as characters.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ResultsTable_small &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="st">&quot;data/ResultsTable_small.txt&quot;</span>, <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>, <span class="dt">header=</span><span class="ot">TRUE</span>)</code></pre></div>
+<h3 id="sorting">Sorting</h3>
+<p>If you just want to sort a vector from smallest to largest, you can use the <code>sort</code> function:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sort</span>(ResultsTable_small$logFC)</code></pre></div>
+<pre class="output"><code> [1] -6.070143 -5.827889 -5.146268 -3.313648 -3.211148 -2.896115 -2.653398
+ [8] -2.598105 -2.597044 -2.538596 -2.329744 -2.312721 -2.171896 -2.143885
+[15] -2.071469 -2.011808 -1.708973 -1.567424 -1.520291 -1.515469 -1.331437
+[22] -1.258671 -1.109156  1.474671  1.522405  1.710380  1.751340  1.788601
+[29]  1.819943  1.887561  1.972771  2.180370  2.253400  2.278879  2.342914
+[36]  2.766745  2.807548  2.835624  3.600094  3.738933
 </code></pre>
-<h2 id="subsetting-using-logical-statements">Subsetting using logical statements</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sampleinfo$CellType</code></pre></div>
-<pre class="output"><code> [1] luminal basal   basal   basal   basal   basal   basal   luminal
- [9] luminal luminal luminal luminal
-Levels: basal luminal
+<p>To reverse the sort order so it goes from largest to smallest:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sort</span>(ResultsTable_small$logFC, <span class="dt">decreasing =</span> <span class="ot">TRUE</span>)</code></pre></div>
+<pre class="output"><code> [1]  3.738933  3.600094  2.835624  2.807548  2.766745  2.342914  2.278879
+ [8]  2.253400  2.180370  1.972771  1.887561  1.819943  1.788601  1.751340
+[15]  1.710380  1.522405  1.474671 -1.109156 -1.258671 -1.331437 -1.515469
+[22] -1.520291 -1.567424 -1.708973 -2.011808 -2.071469 -2.143885 -2.171896
+[29] -2.312721 -2.329744 -2.538596 -2.597044 -2.598105 -2.653398 -2.896115
+[36] -3.211148 -3.313648 -5.146268 -5.827889 -6.070143
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sampleinfo$CellType ==<span class="st"> &quot;luminal&quot;</span></code></pre></div>
-<pre class="output"><code> [1]  TRUE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE
-[12]  TRUE
+<p>And this works with characters:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sort</span>(ResultsTable_small$SYMBOL)</code></pre></div>
+<pre class="output"><code> [1] &quot;1500015O10Rik&quot; &quot;Ak1&quot;           &quot;Atp2b4&quot;        &quot;Bhlhe41&quot;      
+ [5] &quot;Ccdc129&quot;       &quot;Ccdc153&quot;       &quot;Chil1&quot;         &quot;Cpxm2&quot;        
+ [9] &quot;Creb5&quot;         &quot;Csf1&quot;          &quot;Csn1s2b&quot;       &quot;Cyp2s1&quot;       
+[13] &quot;Ddit4&quot;         &quot;Fam102b&quot;       &quot;Fam110a&quot;       &quot;Gjb3&quot;         
+[17] &quot;Gpsm2&quot;         &quot;Hmcn1&quot;         &quot;Hs6st2&quot;        &quot;Igfbp6&quot;       
+[21] &quot;Krt19&quot;         &quot;Lif&quot;           &quot;Micall2&quot;       &quot;Mrgprf&quot;       
+[25] &quot;Mtmr11&quot;        &quot;Myof&quot;          &quot;Naaa&quot;          &quot;Nfatc2&quot;       
+[29] &quot;Nr1d1&quot;         &quot;Pdzd3&quot;         &quot;Ppp2r3a&quot;       &quot;Serpinf1&quot;     
+[33] &quot;Skil&quot;          &quot;Slit3&quot;         &quot;Smad7&quot;         &quot;Sox4&quot;         
+[37] &quot;Tnni2&quot;         &quot;Tppp3&quot;         &quot;Trp53inp1&quot;     &quot;Wif1&quot;         
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sampleinfo$CellType[sampleinfo$CellType ==<span class="st"> &quot;luminal&quot;</span>]</code></pre></div>
-<pre class="output"><code>[1] luminal luminal luminal luminal luminal luminal
-Levels: basal luminal
+<p>If you want to sort the entire data frame by the values in a single column, you can use the <code>order</code> function. This gives you the indexes for if the data was sorted. For example:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">order</span>(ResultsTable_small$logFC)</code></pre></div>
+<pre class="output"><code> [1] 19 18 11 23 14  5 37  9 31 30  4  7 32  2 39 36 17 27 33  8 21 28 38
+[24] 24 40 12 35 34  1 16 20 13  6 29 26 15  3 25 10 22
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sampleinfo[sampleinfo$CellType ==<span class="st"> &quot;luminal&quot;</span>,]</code></pre></div>
-<pre class="output"><code>                            FileName SampleName CellType   Status
-1  MCL1.DG_BC2CTUACXX_ACTTGA_L002_R1    MCL1.DG  luminal   virgin
-8  MCL1.LB_BC2CTUACXX_TGACCA_L001_R1    MCL1.LB  luminal   virgin
-9  MCL1.LC_BC2CTUACXX_GCCAAT_L001_R1    MCL1.LC  luminal pregnant
-10 MCL1.LD_BC2CTUACXX_GGCTAC_L001_R1    MCL1.LD  luminal pregnant
-11 MCL1.LE_BC2CTUACXX_TAGCTT_L001_R1    MCL1.LE  luminal  lactate
-12 MCL1.LF_BC2CTUACXX_CTTGTA_L001_R1    MCL1.LF  luminal  lactate
+<p>You then use these indexes to sort the data:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ResultsTable_small$logFC[<span class="kw">order</span>(ResultsTable_small$logFC)]</code></pre></div>
+<pre class="output"><code> [1] -6.070143 -5.827889 -5.146268 -3.313648 -3.211148 -2.896115 -2.653398
+ [8] -2.598105 -2.597044 -2.538596 -2.329744 -2.312721 -2.171896 -2.143885
+[15] -2.071469 -2.011808 -1.708973 -1.567424 -1.520291 -1.515469 -1.331437
+[22] -1.258671 -1.109156  1.474671  1.522405  1.710380  1.751340  1.788601
+[29]  1.819943  1.887561  1.972771  2.180370  2.253400  2.278879  2.342914
+[36]  2.766745  2.807548  2.835624  3.600094  3.738933
+</code></pre>
+<p>You can then use these indices to sort the rows:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ResultsTable_small[<span class="kw">order</span>(ResultsTable_small$logFC), ]</code></pre></div>
+<pre class="output"><code>   ENTREZID        SYMBOL     logFC     AveExpr         t      P.Value
+19    12992       Csn1s2b -6.070143  3.56295004 -14.16565 6.377604e-09
+18    21953         Tnni2 -5.827889  0.30207159 -14.40327 5.265278e-09
+11   211577        Mrgprf -5.146268 -0.93683349 -16.36573 1.196263e-09
+23   170761         Pdzd3 -3.313648 -0.06019306 -13.62372 9.982985e-09
+14   270150       Ccdc153 -3.211148 -1.34083882 -15.50126 2.249931e-09
+5     16012        Igfbp6 -2.896115  1.97844876 -18.21525 3.413066e-10
+37    67971         Tppp3 -2.653398  4.90816305 -12.22845 3.416616e-08
+9    231991         Creb5 -2.598105  4.27592952 -16.53634 1.059885e-09
+31   232016       Ccdc129 -2.597044  5.00471484 -13.02266 1.672195e-08
+30    67111          Naaa -2.538596  3.29074575 -13.04083 1.645823e-08
+4    226101          Myof -2.329744  6.22352456 -18.26861 3.297667e-10
+7     16669         Krt19 -2.312721  8.74189184 -17.07937 7.264548e-10
+32    76123         Gpsm2 -2.171896  4.99093472 -12.76344 2.102397e-08
+2    381290        Atp2b4 -2.143885  3.94406593 -19.07495 1.982934e-10
+39    74134        Cyp2s1 -2.071469  1.40704575 -12.20154 3.502805e-08
+36    18019        Nfatc2 -2.011808  5.79499693 -12.27561 3.271067e-08
+17   194126        Mtmr11 -1.708973  2.50804119 -14.48746 4.922928e-09
+27   545370         Hmcn1 -1.567424  3.10302591 -13.19053 1.444832e-08
+33   329739       Fam102b -1.520291  4.18813047 -12.75357 2.120968e-08
+8     55987         Cpxm2 -1.515469  2.83451194 -16.64333 9.829870e-10
+21    20564         Slit3 -1.331437  3.44179493 -13.88522 8.026279e-09
+28    60599     Trp53inp1 -1.258671  6.11839605 -13.16241 1.480464e-08
+38   235542       Ppp2r3a -1.109156  6.50105941 -12.22041 3.442139e-08
+24    73847       Fam110a  1.474671  6.84086068  13.62251 9.993185e-09
+40    20677          Sox4  1.522405  7.46932835  12.13548 3.724389e-08
+12    20317      Serpinf1  1.710380  3.38883490  15.77280 1.838727e-09
+35    50786        Hs6st2  1.751340  0.53953600  12.43097 2.836919e-08
+34    79362       Bhlhe41  1.788601  6.18368494  12.70504 2.214908e-08
+1     24117          Wif1  1.819943  2.97554452  20.10780 1.063770e-10
+16    20482          Skil  1.887561  8.49892507  14.65488 4.311334e-09
+20    17131         Smad7  1.972771  6.71751902  14.14348 6.493642e-09
+13    74747         Ddit4  2.180370  6.86479110  15.70145 1.938279e-09
+6    231830       Micall2  2.253400  4.76059697  18.02627 3.858161e-10
+29   217166         Nr1d1  2.278879  6.26087761  13.12885 1.524242e-08
+26    12654         Chil1  2.342914  5.57645724  13.21976 1.408760e-08
+15    11636           Ak1  2.766745  4.30347462  15.27694 2.664640e-09
+3     78896 1500015O10Rik  2.807548  3.03651950  18.54773 2.758828e-10
+25    12977          Csf1  2.835624  7.47759094  13.41902 1.187300e-08
+10    14620          Gjb3  3.600094  3.52528051  16.46627 1.113755e-09
+22    16878           Lif  3.738933  6.68203417  13.73344 9.105708e-09
+      adj.P.Val
+19 5.131276e-06
+18 4.622914e-06
+11 1.718703e-06
+23 6.580512e-06
+14 2.539851e-06
+5  1.016240e-06
+37 1.419445e-05
+9  1.718703e-06
+31 8.524957e-06
+30 8.524957e-06
+4  1.016240e-06
+7  1.640127e-06
+32 1.015751e-05
+2  1.016240e-06
+39 1.419445e-05
+36 1.419445e-05
+17 4.576586e-06
+27 8.306595e-06
+33 1.015751e-05
+8  1.718703e-06
+21 6.040348e-06
+28 8.306595e-06
+38 1.419445e-05
+24 6.580512e-06
+40 1.462109e-05
+12 2.356351e-06
+35 1.280991e-05
+34 1.029541e-05
+1  1.016240e-06
+16 4.258521e-06
+20 5.131276e-06
+13 2.356351e-06
+6  1.016240e-06
+29 8.306595e-06
+26 8.306595e-06
+15 2.807465e-06
+3  1.016240e-06
+25 7.505634e-06
+10 1.718703e-06
+22 6.541210e-06
+</code></pre>
+<h3 id="subsetting-using-logical-statements">Subsetting using logical statements</h3>
+<p>Let’s say we only want to look at the rows where the log fold change is greater than 3. We can ask if each <code>logFC</code> is greater than 3.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ResultsTable_small$logFC &gt;<span class="st"> </span><span class="dv">3</span></code></pre></div>
+<pre class="output"><code> [1] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE
+[12] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE  TRUE
+[23] FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+[34] FALSE FALSE FALSE FALSE FALSE FALSE FALSE
+</code></pre>
+<p>This gives us a vector of TRUE/FALSE for each value stating if it is greater than 3. We can then use this to subset the data.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ResultsTable_small$logFC[ResultsTable_small$logFC &gt;<span class="st"> </span><span class="dv">3</span>]</code></pre></div>
+<pre class="output"><code>[1] 3.600094 3.738933
+</code></pre>
+<p>And to subset the rows of the data frame.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ResultsTable_small[ResultsTable_small$logFC &gt;<span class="st"> </span><span class="dv">3</span>, ]</code></pre></div>
+<pre class="output"><code>   ENTREZID SYMBOL    logFC  AveExpr        t      P.Value    adj.P.Val
+10    14620   Gjb3 3.600094 3.525281 16.46627 1.113755e-09 1.718703e-06
+22    16878    Lif 3.738933 6.682034 13.73344 9.105708e-09 6.541210e-06
+</code></pre>
+<p>In fact, we probably care about things that are -3 as well, so let’s include those too:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ResultsTable_small[ResultsTable_small$logFC &gt;<span class="st"> </span><span class="dv">3</span> |<span class="st"> </span>ResultsTable_small$logFC &lt;<span class="st"> </span>-<span class="dv">3</span>, ]</code></pre></div>
+<pre class="output"><code>   ENTREZID  SYMBOL     logFC     AveExpr         t      P.Value
+10    14620    Gjb3  3.600094  3.52528051  16.46627 1.113755e-09
+11   211577  Mrgprf -5.146268 -0.93683349 -16.36573 1.196263e-09
+14   270150 Ccdc153 -3.211148 -1.34083882 -15.50126 2.249931e-09
+18    21953   Tnni2 -5.827889  0.30207159 -14.40327 5.265278e-09
+19    12992 Csn1s2b -6.070143  3.56295004 -14.16565 6.377604e-09
+22    16878     Lif  3.738933  6.68203417  13.73344 9.105708e-09
+23   170761   Pdzd3 -3.313648 -0.06019306 -13.62372 9.982985e-09
+      adj.P.Val
+10 1.718703e-06
+11 1.718703e-06
+14 2.539851e-06
+18 4.622914e-06
+19 5.131276e-06
+22 6.541210e-06
+23 6.580512e-06
+</code></pre>
+<p>Or we can simplify this using the <code>abs</code> function to find the absolute value of each <code>logFC</code> before testing them.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ResultsTable_small[<span class="kw">abs</span>(ResultsTable_small$logFC) &gt;<span class="st"> </span><span class="dv">3</span>, ]</code></pre></div>
+<pre class="output"><code>   ENTREZID  SYMBOL     logFC     AveExpr         t      P.Value
+10    14620    Gjb3  3.600094  3.52528051  16.46627 1.113755e-09
+11   211577  Mrgprf -5.146268 -0.93683349 -16.36573 1.196263e-09
+14   270150 Ccdc153 -3.211148 -1.34083882 -15.50126 2.249931e-09
+18    21953   Tnni2 -5.827889  0.30207159 -14.40327 5.265278e-09
+19    12992 Csn1s2b -6.070143  3.56295004 -14.16565 6.377604e-09
+22    16878     Lif  3.738933  6.68203417  13.73344 9.105708e-09
+23   170761   Pdzd3 -3.313648 -0.06019306 -13.62372 9.982985e-09
+      adj.P.Val
+10 1.718703e-06
+11 1.718703e-06
+14 2.539851e-06
+18 4.622914e-06
+19 5.131276e-06
+22 6.541210e-06
+23 6.580512e-06
 </code></pre>
 <aside class="callout panel panel-info">
 <div class="panel-heading">
@@ -426,8 +652,6 @@ Levels: basal luminal
 <p>Source: <a href="http://www.statmethods.net/management/operators.html">Quick-R</a></p>
 </div>
 </aside>
-<h2 id="vectorisation">Vectorisation</h2>
-<p>Do an apply statement</p>
         </div>
       </div>
       </article>
