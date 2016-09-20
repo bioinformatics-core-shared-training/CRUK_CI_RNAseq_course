@@ -268,7 +268,7 @@ topTable(fit,coef=3,sort.by="p")
 
 ### Add annotation from org.Dm.eg.db
 
-The rownames of the fit object are [http://flybase.org/](FlyBase) ids. 
+The rownames of the fit object are [http://flybase.org/](FlyBase) ids.
 
 First we need to decide what information we want. In order to see what we can extract we can run the `columns` function on the annotation database.
 
@@ -276,7 +276,7 @@ First we need to decide what information we want. In order to see what we can ex
 columns(org.Dm.eg.db)
 ```
 
-We definitely want gene symbols and perhaps the full gene name and Entrez id. Let's build up our annotation information in a separate data frame using the `select` function. Note, by default, the `select` function assumes that the keys provided are Entrez ids. However, in this case we are using FlyBase ids as the keys. As such, we need to give the `select` function this information using the `keytype` argument which we will set to `"FLYBASE"`. 
+We definitely want gene symbols and perhaps the full gene name and Entrez id. Let's build up our annotation information in a separate data frame using the `select` function. Note, by default, the `select` function assumes that the keys provided are Entrez ids. However, in this case we are using FlyBase ids as the keys. As such, we need to give the `select` function this information using the `keytype` argument which we will set to `"FLYBASE"`.
 
 ```{r}
 ann <- select(org.Dm.eg.db,keys=rownames(fit),columns=c("FLYBASE","ENTREZID","SYMBOL","GENENAME"),keytype="FLYBASE")
@@ -326,7 +326,7 @@ Now we need to match up between `rownames(fit)` and the ensemble gene id in `ann
 ```{r}
 m <- match(rownames(fit),ann2$flybase_id)
 table(is.na(m)) # check for unmatched rows
-ann3 <- ann3[m[!is.na(m)],] # exclude unmatched rows
+ann3 <- ann2[m[!is.na(m)],] # exclude unmatched rows
 
 # compare the results in ann3 to what is in the fit object
 head(ann3)
@@ -380,6 +380,6 @@ abline(h=0,col="grey")
 ## Gene set testing with goana
 
 ```{r}
-go <- goana(fit, coef="UVsT",species = "Dm", geneid="gene_id")
+go <- goana(fit, coef="UVsT",species = "Dm", geneid="ENTREZID")
 topGO(go, n=10)
 ```

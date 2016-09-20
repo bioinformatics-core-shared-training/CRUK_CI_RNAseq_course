@@ -55,8 +55,6 @@ http://www.ncbi.nlm.nih.gov/pubmed/20921232</p>
 <span class="kw">library</span>(gplots)
 <span class="kw">library</span>(RColorBrewer)
 <span class="kw">library</span>(org.Dm.eg.db)</code></pre></div>
-<pre class="error"><code>Error in library(org.Dm.eg.db): there is no package called &#39;org.Dm.eg.db&#39;
-</code></pre>
 <p>Next, read in the data and targets file:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">counts &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="dt">file=</span><span class="st">&quot;data/counts_Drosophila.txt&quot;</span>)
 targets &lt;-<span class="st"> </span><span class="kw">read.delim</span>(<span class="dt">file=</span><span class="st">&quot;data/SampleInfo_Drosophila.txt&quot;</span>)</code></pre></div>
@@ -252,126 +250,232 @@ FBgn0027279 10.89435
 <p>The rownames of the fit object are <a href="FlyBase">http://flybase.org/</a> ids.</p>
 <p>First we need to decide what information we want. In order to see what we can extract we can run the <code>columns</code> function on the annotation database.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">columns</span>(org.Dm.eg.db)</code></pre></div>
-<pre class="error"><code>Error in eval(expr, envir, enclos): could not find function &quot;columns&quot;
+<pre class="output"><code> [1] &quot;ACCNUM&quot;       &quot;ALIAS&quot;        &quot;ENSEMBL&quot;      &quot;ENSEMBLPROT&quot; 
+ [5] &quot;ENSEMBLTRANS&quot; &quot;ENTREZID&quot;     &quot;ENZYME&quot;       &quot;EVIDENCE&quot;    
+ [9] &quot;EVIDENCEALL&quot;  &quot;FLYBASE&quot;      &quot;FLYBASECG&quot;    &quot;FLYBASEPROT&quot; 
+[13] &quot;GENENAME&quot;     &quot;GO&quot;           &quot;GOALL&quot;        &quot;MAP&quot;         
+[17] &quot;ONTOLOGY&quot;     &quot;ONTOLOGYALL&quot;  &quot;PATH&quot;         &quot;PMID&quot;        
+[21] &quot;REFSEQ&quot;       &quot;SYMBOL&quot;       &quot;UNIGENE&quot;      &quot;UNIPROT&quot;     
 </code></pre>
 <p>We definitely want gene symbols and perhaps the full gene name and Entrez id. Let’s build up our annotation information in a separate data frame using the <code>select</code> function. Note, by default, the <code>select</code> function assumes that the keys provided are Entrez ids. However, in this case we are using FlyBase ids as the keys. As such, we need to give the <code>select</code> function this information using the <code>keytype</code> argument which we will set to <code>&quot;FLYBASE&quot;</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ann &lt;-<span class="st"> </span><span class="kw">select</span>(org.Dm.eg.db,<span class="dt">keys=</span><span class="kw">rownames</span>(fit),<span class="dt">columns=</span><span class="kw">c</span>(<span class="st">&quot;FLYBASE&quot;</span>,<span class="st">&quot;ENTREZID&quot;</span>,<span class="st">&quot;SYMBOL&quot;</span>,<span class="st">&quot;GENENAME&quot;</span>),<span class="dt">keytype=</span><span class="st">&quot;FLYBASE&quot;</span>)</code></pre></div>
-<pre class="error"><code>Error in eval(expr, envir, enclos): could not find function &quot;select&quot;
+<pre class="output"><code>&#39;select()&#39; returned 1:1 mapping between keys and columns
 </code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Have a look at the annotation</span>
 <span class="kw">head</span>(ann)</code></pre></div>
-<pre class="error"><code>Error in head(ann): object &#39;ann&#39; not found
+<pre class="output"><code>      FLYBASE ENTREZID   SYMBOL
+1 FBgn0037213    40522  CG12581
+2 FBgn0053294  3772637  CR33294
+3 FBgn0037215    40524 beta-Man
+4 FBgn0037217    40526  CG14636
+5 FBgn0037218    40527      aux
+6 FBgn0261436    40528     DhpD
+                                         GENENAME
+1 CG12581 gene product from transcript CG12581-RB
+2                                          pseudo
+3                                beta-Mannosidase
+4 CG14636 gene product from transcript CG14636-RA
+5                                         auxilin
+6                         Dihydropterin deaminase
 </code></pre>
 <p>Let’s double check that the <code>FLYBASE</code> column matches exactly to our <code>fit</code> rownames.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(ann$FLYBASE==<span class="kw">rownames</span>(fit))</code></pre></div>
-<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;ann&#39; not found
+<pre class="output"><code>
+TRUE 
+7524 
 </code></pre>
 <p>We can slot in the annotation information into the <code>genes</code> slot of <code>fit</code>. (Please note that if the <code>select</code> function returns a 1:many mapping then you can’t just append the annotation to the fit object. An alternative way to get annotation is shown below.)</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit$genes &lt;-<span class="st"> </span>ann</code></pre></div>
-<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;ann&#39; not found
-</code></pre>
 <p>Now when we run the <code>topTable</code> command, the annotation information should be included in the output.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre></div>
-<pre class="output"><code>                logFC   AveExpr         t      P.Value    adj.P.Val
-FBgn0025111 -2.863110  6.253448 -31.24326 9.756044e-13 4.734428e-09
-FBgn0003360  3.089242  7.778378  30.57062 1.258487e-12 4.734428e-09
-FBgn0026562  2.422219 11.359837  24.25592 1.868075e-11 4.685133e-08
-FBgn0029167  2.247086  7.825170  21.77945 6.509505e-11 1.224438e-07
-FBgn0035085  2.677008  5.180607  18.97509 3.188148e-10 4.797524e-07
-FBgn0039155  4.272254  4.800907  17.42222 8.476440e-10 1.062946e-06
-FBgn0040091  1.559497  6.245766  15.43293 3.363833e-09 3.615639e-06
-FBgn0023479  1.576335  7.768886  15.06473 4.419245e-09 3.877495e-06
-FBgn0029896  2.312097  4.881577  15.00033 4.638152e-09 3.877495e-06
-FBgn0027279  1.180272  7.760889  14.37303 7.503535e-09 5.645660e-06
-                   B
-FBgn0025111 19.04663
-FBgn0003360 19.04370
-FBgn0026562 16.57869
-FBgn0029167 15.57725
-FBgn0035085 13.66077
-FBgn0039155 12.15024
-FBgn0040091 11.72125
-FBgn0023479 11.43434
-FBgn0029896 11.25267
-FBgn0027279 10.89435
+<pre class="output"><code>                FLYBASE ENTREZID    SYMBOL
+FBgn0025111 FBgn0025111    32008      Ant2
+FBgn0003360 FBgn0003360    32007      sesB
+FBgn0026562 FBgn0026562    43230     SPARC
+FBgn0029167 FBgn0029167    39529       Hml
+FBgn0035085 FBgn0035085    37991    CG3770
+FBgn0039155 FBgn0039155    42865      Kal1
+FBgn0040091 FBgn0040091    37590   Ugt58Fa
+FBgn0023479 FBgn0023479    39048   Tequila
+FBgn0029896 FBgn0029896    31612    CG3168
+FBgn0027279 FBgn0027279    33137 l(1)G0196
+                                                 GENENAME     logFC
+FBgn0025111              Adenine nucleotide translocase 2 -2.863110
+FBgn0003360                            stress-sensitive B  3.089242
+FBgn0026562       Secreted protein, acidic, cysteine-rich  2.422219
+FBgn0029167                                    Hemolectin  2.247086
+FBgn0035085 CG3770 gene product from transcript CG3770-RA  2.677008
+FBgn0039155                  Kallmann syndrome 1 ortholog  4.272254
+FBgn0040091 CG4414 gene product from transcript CG4414-RB  1.559497
+FBgn0023479 CG4821 gene product from transcript CG4821-RG  1.576335
+FBgn0029896 CG3168 gene product from transcript CG3168-RG  2.312097
+FBgn0027279                              lethal (1) G0196  1.180272
+              AveExpr         t      P.Value    adj.P.Val        B
+FBgn0025111  6.253448 -31.24326 9.756044e-13 4.734428e-09 19.04663
+FBgn0003360  7.778378  30.57062 1.258487e-12 4.734428e-09 19.04370
+FBgn0026562 11.359837  24.25592 1.868075e-11 4.685133e-08 16.57869
+FBgn0029167  7.825170  21.77945 6.509505e-11 1.224438e-07 15.57725
+FBgn0035085  5.180607  18.97509 3.188148e-10 4.797524e-07 13.66077
+FBgn0039155  4.800907  17.42222 8.476440e-10 1.062946e-06 12.15024
+FBgn0040091  6.245766  15.43293 3.363833e-09 3.615639e-06 11.72125
+FBgn0023479  7.768886  15.06473 4.419245e-09 3.877495e-06 11.43434
+FBgn0029896  4.881577  15.00033 4.638152e-09 3.877495e-06 11.25267
+FBgn0027279  7.760889  14.37303 7.503535e-09 5.645660e-06 10.89435
 </code></pre>
 <p>If for some reason the <code>select</code> function doesn’t work, or the result is a 1:many mapping, there is a less elegant way to get the annotations using the <code>toTable</code> command.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s see what we can get in table format from org.Dm.eg.db</span>
 <span class="kw">ls</span>(<span class="st">&quot;package:org.Dm.eg.db&quot;</span>)</code></pre></div>
-<pre class="error"><code>Error in as.environment(pos): no item called &quot;package:org.Dm.eg.db&quot; on the search list
+<pre class="output"><code> [1] &quot;org.Dm.eg&quot;                &quot;org.Dm.eg_dbconn&quot;        
+ [3] &quot;org.Dm.eg_dbfile&quot;         &quot;org.Dm.eg_dbInfo&quot;        
+ [5] &quot;org.Dm.eg_dbschema&quot;       &quot;org.Dm.eg.db&quot;            
+ [7] &quot;org.Dm.egACCNUM&quot;          &quot;org.Dm.egACCNUM2EG&quot;      
+ [9] &quot;org.Dm.egALIAS2EG&quot;        &quot;org.Dm.egCHR&quot;            
+[11] &quot;org.Dm.egCHRLENGTHS&quot;      &quot;org.Dm.egCHRLOC&quot;         
+[13] &quot;org.Dm.egCHRLOCEND&quot;       &quot;org.Dm.egENSEMBL&quot;        
+[15] &quot;org.Dm.egENSEMBL2EG&quot;      &quot;org.Dm.egENSEMBLPROT&quot;    
+[17] &quot;org.Dm.egENSEMBLPROT2EG&quot;  &quot;org.Dm.egENSEMBLTRANS&quot;   
+[19] &quot;org.Dm.egENSEMBLTRANS2EG&quot; &quot;org.Dm.egENZYME&quot;         
+[21] &quot;org.Dm.egENZYME2EG&quot;       &quot;org.Dm.egFLYBASE&quot;        
+[23] &quot;org.Dm.egFLYBASE2EG&quot;      &quot;org.Dm.egFLYBASECG&quot;      
+[25] &quot;org.Dm.egFLYBASECG2EG&quot;    &quot;org.Dm.egFLYBASEPROT&quot;    
+[27] &quot;org.Dm.egFLYBASEPROT2EG&quot;  &quot;org.Dm.egGENENAME&quot;       
+[29] &quot;org.Dm.egGO&quot;              &quot;org.Dm.egGO2ALLEGS&quot;      
+[31] &quot;org.Dm.egGO2EG&quot;           &quot;org.Dm.egMAP&quot;            
+[33] &quot;org.Dm.egMAP2EG&quot;          &quot;org.Dm.egMAPCOUNTS&quot;      
+[35] &quot;org.Dm.egORGANISM&quot;        &quot;org.Dm.egPATH&quot;           
+[37] &quot;org.Dm.egPATH2EG&quot;         &quot;org.Dm.egPMID&quot;           
+[39] &quot;org.Dm.egPMID2EG&quot;         &quot;org.Dm.egREFSEQ&quot;         
+[41] &quot;org.Dm.egREFSEQ2EG&quot;       &quot;org.Dm.egSYMBOL&quot;         
+[43] &quot;org.Dm.egSYMBOL2EG&quot;       &quot;org.Dm.egUNIGENE&quot;        
+[45] &quot;org.Dm.egUNIGENE2EG&quot;      &quot;org.Dm.egUNIPROT&quot;        
 </code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Get annotation</span>
-fly &lt;-<span class="st"> </span><span class="kw">toTable</span>(org.Dm.egFLYBASE)</code></pre></div>
-<pre class="error"><code>Error in eval(expr, envir, enclos): could not find function &quot;toTable&quot;
+fly &lt;-<span class="st"> </span><span class="kw">toTable</span>(org.Dm.egFLYBASE)
+<span class="kw">head</span>(fly)</code></pre></div>
+<pre class="output"><code>  gene_id  flybase_id
+1   30970 FBgn0040373
+2   30971 FBgn0040372
+3   30972 FBgn0261446
+4   30973 FBgn0000316
+5   30975 FBgn0005427
+6   30976 FBgn0040370
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(fly)</code></pre></div>
-<pre class="error"><code>Error in head(fly): object &#39;fly&#39; not found
-</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">symbol &lt;-<span class="st"> </span><span class="kw">toTable</span>(org.Dm.egSYMBOL)</code></pre></div>
-<pre class="error"><code>Error in eval(expr, envir, enclos): could not find function &quot;toTable&quot;
-</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">genename &lt;-<span class="st"> </span><span class="kw">toTable</span>(org.Dm.egGENENAME)</code></pre></div>
-<pre class="error"><code>Error in eval(expr, envir, enclos): could not find function &quot;toTable&quot;
-</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># We can use the merge command to merge two dataframes</span>
-ann1 &lt;-<span class="st"> </span><span class="kw">merge</span>(fly,symbol,<span class="dt">by=</span><span class="st">&quot;gene_id&quot;</span>)</code></pre></div>
-<pre class="error"><code>Error in merge(fly, symbol, by = &quot;gene_id&quot;): object &#39;fly&#39; not found
-</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(ann1)</code></pre></div>
-<pre class="error"><code>Error in head(ann1): object &#39;ann1&#39; not found
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">symbol &lt;-<span class="st"> </span><span class="kw">toTable</span>(org.Dm.egSYMBOL)
+genename &lt;-<span class="st"> </span><span class="kw">toTable</span>(org.Dm.egGENENAME)
+
+<span class="co"># We can use the merge command to merge two dataframes</span>
+ann1 &lt;-<span class="st"> </span><span class="kw">merge</span>(fly,symbol,<span class="dt">by=</span><span class="st">&quot;gene_id&quot;</span>)
+<span class="kw">head</span>(ann1)</code></pre></div>
+<pre class="output"><code>   gene_id  flybase_id  symbol
+1 10178776 FBgn0261702 CR42738
+2 10178777 FBgn0262024 CG42835
+3 10178779 FBgn0058354 CR40354
+4 10178780 FBgn0053929 CR33929
+5 10178781 FBgn0262141 CG42867
+6 10178782 FBgn0062978 CG31808
 </code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Add genename table to ann1</span>
-ann2 &lt;-<span class="st"> </span><span class="kw">merge</span>(ann1,genename,<span class="dt">by=</span><span class="st">&quot;gene_id&quot;</span>)</code></pre></div>
-<pre class="error"><code>Error in merge(ann1, genename, by = &quot;gene_id&quot;): object &#39;ann1&#39; not found
-</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(ann2)</code></pre></div>
-<pre class="error"><code>Error in head(ann2): object &#39;ann2&#39; not found
+ann2 &lt;-<span class="st"> </span><span class="kw">merge</span>(ann1,genename,<span class="dt">by=</span><span class="st">&quot;gene_id&quot;</span>)
+<span class="kw">head</span>(ann2)</code></pre></div>
+<pre class="output"><code>   gene_id  flybase_id  symbol
+1 10178776 FBgn0261702 CR42738
+2 10178777 FBgn0262024 CG42835
+3 10178779 FBgn0058354 CR40354
+4 10178780 FBgn0053929 CR33929
+5 10178781 FBgn0262141 CG42867
+6 10178782 FBgn0062978 CG31808
+                                        gene_name
+1                                           ncRNA
+2 CG42835 gene product from transcript CG42835-RA
+3                                          pseudo
+4                                          pseudo
+5 CG42867 gene product from transcript CG42867-RB
+6 CG31808 gene product from transcript CG31808-RC
 </code></pre>
 <p>Now we need to match up between <code>rownames(fit)</code> and the ensemble gene id in <code>ann2</code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m &lt;-<span class="st"> </span><span class="kw">match</span>(<span class="kw">rownames</span>(fit),ann2$flybase_id)</code></pre></div>
-<pre class="error"><code>Error in match(rownames(fit), ann2$flybase_id): object &#39;ann2&#39; not found
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">m &lt;-<span class="st"> </span><span class="kw">match</span>(<span class="kw">rownames</span>(fit),ann2$flybase_id)
+<span class="kw">table</span>(<span class="kw">is.na</span>(m)) <span class="co"># check for unmatched rows</span></code></pre></div>
+<pre class="output"><code>
+FALSE  TRUE 
+ 7010   514 
 </code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(<span class="kw">is.na</span>(m)) <span class="co"># check for unmatched rows</span></code></pre></div>
-<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;m&#39; not found
-</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ann3 &lt;-<span class="st"> </span>ann3[m[!<span class="kw">is.na</span>(m)],] <span class="co"># exclude unmatched rows</span></code></pre></div>
-<pre class="error"><code>Error in eval(expr, envir, enclos): object &#39;ann3&#39; not found
-</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># compare the results in ann3 to what is in the fit object</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ann3 &lt;-<span class="st"> </span>ann2[m[!<span class="kw">is.na</span>(m)],] <span class="co"># exclude unmatched rows</span>
+
+<span class="co"># compare the results in ann3 to what is in the fit object</span>
 <span class="kw">head</span>(ann3)</code></pre></div>
-<pre class="error"><code>Error in head(ann3): object &#39;ann3&#39; not found
+<pre class="output"><code>      gene_id  flybase_id   symbol
+16166   40522 FBgn0037213  CG12581
+13702 3772637 FBgn0053294  CR33294
+16167   40524 FBgn0037215 beta-Man
+16168   40526 FBgn0037217  CG14636
+16169   40527 FBgn0037218      aux
+16170   40528 FBgn0261436     DhpD
+                                            gene_name
+16166 CG12581 gene product from transcript CG12581-RB
+13702                                          pseudo
+16167                                beta-Mannosidase
+16168 CG14636 gene product from transcript CG14636-RA
+16169                                         auxilin
+16170                         Dihydropterin deaminase
 </code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(fit$genes)</code></pre></div>
-<pre class="output"><code>NULL
+<pre class="output"><code>      FLYBASE ENTREZID   SYMBOL
+1 FBgn0037213    40522  CG12581
+2 FBgn0053294  3772637  CR33294
+3 FBgn0037215    40524 beta-Man
+4 FBgn0037217    40526  CG14636
+5 FBgn0037218    40527      aux
+6 FBgn0261436    40528     DhpD
+                                         GENENAME
+1 CG12581 gene product from transcript CG12581-RB
+2                                          pseudo
+3                                beta-Mannosidase
+4 CG14636 gene product from transcript CG14636-RA
+5                                         auxilin
+6                         Dihydropterin deaminase
 </code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre></div>
-<pre class="output"><code>                logFC   AveExpr         t      P.Value    adj.P.Val
-FBgn0025111 -2.863110  6.253448 -31.24326 9.756044e-13 4.734428e-09
-FBgn0003360  3.089242  7.778378  30.57062 1.258487e-12 4.734428e-09
-FBgn0026562  2.422219 11.359837  24.25592 1.868075e-11 4.685133e-08
-FBgn0029167  2.247086  7.825170  21.77945 6.509505e-11 1.224438e-07
-FBgn0035085  2.677008  5.180607  18.97509 3.188148e-10 4.797524e-07
-FBgn0039155  4.272254  4.800907  17.42222 8.476440e-10 1.062946e-06
-FBgn0040091  1.559497  6.245766  15.43293 3.363833e-09 3.615639e-06
-FBgn0023479  1.576335  7.768886  15.06473 4.419245e-09 3.877495e-06
-FBgn0029896  2.312097  4.881577  15.00033 4.638152e-09 3.877495e-06
-FBgn0027279  1.180272  7.760889  14.37303 7.503535e-09 5.645660e-06
-                   B
-FBgn0025111 19.04663
-FBgn0003360 19.04370
-FBgn0026562 16.57869
-FBgn0029167 15.57725
-FBgn0035085 13.66077
-FBgn0039155 12.15024
-FBgn0040091 11.72125
-FBgn0023479 11.43434
-FBgn0029896 11.25267
-FBgn0027279 10.89435
+<pre class="output"><code>                FLYBASE ENTREZID    SYMBOL
+FBgn0025111 FBgn0025111    32008      Ant2
+FBgn0003360 FBgn0003360    32007      sesB
+FBgn0026562 FBgn0026562    43230     SPARC
+FBgn0029167 FBgn0029167    39529       Hml
+FBgn0035085 FBgn0035085    37991    CG3770
+FBgn0039155 FBgn0039155    42865      Kal1
+FBgn0040091 FBgn0040091    37590   Ugt58Fa
+FBgn0023479 FBgn0023479    39048   Tequila
+FBgn0029896 FBgn0029896    31612    CG3168
+FBgn0027279 FBgn0027279    33137 l(1)G0196
+                                                 GENENAME     logFC
+FBgn0025111              Adenine nucleotide translocase 2 -2.863110
+FBgn0003360                            stress-sensitive B  3.089242
+FBgn0026562       Secreted protein, acidic, cysteine-rich  2.422219
+FBgn0029167                                    Hemolectin  2.247086
+FBgn0035085 CG3770 gene product from transcript CG3770-RA  2.677008
+FBgn0039155                  Kallmann syndrome 1 ortholog  4.272254
+FBgn0040091 CG4414 gene product from transcript CG4414-RB  1.559497
+FBgn0023479 CG4821 gene product from transcript CG4821-RG  1.576335
+FBgn0029896 CG3168 gene product from transcript CG3168-RG  2.312097
+FBgn0027279                              lethal (1) G0196  1.180272
+              AveExpr         t      P.Value    adj.P.Val        B
+FBgn0025111  6.253448 -31.24326 9.756044e-13 4.734428e-09 19.04663
+FBgn0003360  7.778378  30.57062 1.258487e-12 4.734428e-09 19.04370
+FBgn0026562 11.359837  24.25592 1.868075e-11 4.685133e-08 16.57869
+FBgn0029167  7.825170  21.77945 6.509505e-11 1.224438e-07 15.57725
+FBgn0035085  5.180607  18.97509 3.188148e-10 4.797524e-07 13.66077
+FBgn0039155  4.800907  17.42222 8.476440e-10 1.062946e-06 12.15024
+FBgn0040091  6.245766  15.43293 3.363833e-09 3.615639e-06 11.72125
+FBgn0023479  7.768886  15.06473 4.419245e-09 3.877495e-06 11.43434
+FBgn0029896  4.881577  15.00033 4.638152e-09 3.877495e-06 11.25267
+FBgn0027279  7.760889  14.37303 7.503535e-09 5.645660e-06 10.89435
 </code></pre>
 <p>Let’s check the expression of pasilla.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ps &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="st">&quot;pasilla&quot;</span>,fit$genes$GENENAME)
 <span class="kw">topTable</span>(fit[ps,],<span class="dt">coef=</span><span class="dv">3</span>)</code></pre></div>
-<pre class="output"><code>data frame with 0 columns and 0 rows
+<pre class="output"><code>                FLYBASE ENTREZID SYMBOL GENENAME    logFC  AveExpr       t
+FBgn0261552 FBgn0261552    44258     ps  pasilla 1.845368 8.344996 11.5651
+                P.Value   adj.P.Val        B
+FBgn0261552 8.37355e-08 8.37355e-08 8.425095
 </code></pre>
 <h2 id="plots-after-testing-for-de">Plots after testing for DE</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
@@ -394,27 +498,68 @@ res.treat &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit.
 1  7172      1   18
 </code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTreat</span>(fit.treat,<span class="dt">coef=</span><span class="dv">3</span>)</code></pre></div>
-<pre class="output"><code>                logFC   AveExpr          t      P.Value    adj.P.Val
-FBgn0003360  3.089242  7.778378  20.674784 5.940461e-11 2.711163e-07
-FBgn0025111 -2.863110  6.253448 -20.330911 7.206708e-11 2.711163e-07
-FBgn0026562  2.422219 11.359837  14.241997 4.158446e-09 1.042938e-05
-FBgn0039155  4.272254  4.800907  13.344224 8.653631e-09 1.627748e-05
-FBgn0029167  2.247086  7.825170  12.087142 2.578989e-08 3.880863e-05
-FBgn0035085  2.677008  5.180607  11.886920 3.099362e-08 3.886600e-05
-FBgn0034736  3.407306  3.372966   8.780952 7.931358e-07 8.094637e-04
-FBgn0000071 -2.572434  4.209333  -8.710932 8.606738e-07 8.094637e-04
-FBgn0029896  2.312097  4.881577   8.512571 1.091548e-06 8.898178e-04
-FBgn0039827  3.925533  3.204658   8.449359 1.182639e-06 8.898178e-04
+<pre class="output"><code>                FLYBASE ENTREZID SYMBOL
+FBgn0003360 FBgn0003360    32007   sesB
+FBgn0025111 FBgn0025111    32008   Ant2
+FBgn0026562 FBgn0026562    43230  SPARC
+FBgn0039155 FBgn0039155    42865   Kal1
+FBgn0029167 FBgn0029167    39529    Hml
+FBgn0035085 FBgn0035085    37991 CG3770
+FBgn0034736 FBgn0034736    37572 CG6018
+FBgn0000071 FBgn0000071    40831    Ama
+FBgn0029896 FBgn0029896    31612 CG3168
+FBgn0039827 FBgn0039827    43689 CG1544
+                                                 GENENAME     logFC
+FBgn0003360                            stress-sensitive B  3.089242
+FBgn0025111              Adenine nucleotide translocase 2 -2.863110
+FBgn0026562       Secreted protein, acidic, cysteine-rich  2.422219
+FBgn0039155                  Kallmann syndrome 1 ortholog  4.272254
+FBgn0029167                                    Hemolectin  2.247086
+FBgn0035085 CG3770 gene product from transcript CG3770-RA  2.677008
+FBgn0034736 CG6018 gene product from transcript CG6018-RA  3.407306
+FBgn0000071                                       Amalgam -2.572434
+FBgn0029896 CG3168 gene product from transcript CG3168-RG  2.312097
+FBgn0039827 CG1544 gene product from transcript CG1544-RA  3.925533
+              AveExpr          t      P.Value    adj.P.Val
+FBgn0003360  7.778378  20.674784 5.940461e-11 2.711163e-07
+FBgn0025111  6.253448 -20.330911 7.206708e-11 2.711163e-07
+FBgn0026562 11.359837  14.241997 4.158446e-09 1.042938e-05
+FBgn0039155  4.800907  13.344224 8.653631e-09 1.627748e-05
+FBgn0029167  7.825170  12.087142 2.578989e-08 3.880863e-05
+FBgn0035085  5.180607  11.886920 3.099362e-08 3.886600e-05
+FBgn0034736  3.372966   8.780952 7.931358e-07 8.094637e-04
+FBgn0000071  4.209333  -8.710932 8.606738e-07 8.094637e-04
+FBgn0029896  4.881577   8.512571 1.091548e-06 8.898178e-04
+FBgn0039827  3.204658   8.449359 1.182639e-06 8.898178e-04
 </code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMD</span>(fit.treat,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">status=</span>res.treat[,<span class="st">&quot;UVsT&quot;</span>])
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre></div>
 <p><img src="fig-09/unnamed-chunk-40-1.png" title="plot of chunk unnamed-chunk-40" alt="plot of chunk unnamed-chunk-40" style="display: block; margin: auto;" /></p>
 <h2 id="gene-set-testing-with-goana">Gene set testing with goana</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">go &lt;-<span class="st"> </span><span class="kw">goana</span>(fit, <span class="dt">coef=</span><span class="st">&quot;UVsT&quot;</span>,<span class="dt">species =</span> <span class="st">&quot;Dm&quot;</span>, <span class="dt">geneid=</span><span class="st">&quot;gene_id&quot;</span>)</code></pre></div>
-<pre class="error"><code>Error in goana.MArrayLM(fit, coef = &quot;UVsT&quot;, species = &quot;Dm&quot;, geneid = &quot;gene_id&quot;): Column gene_id not found in de$genes
-</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topGO</span>(go, <span class="dt">n=</span><span class="dv">10</span>)</code></pre></div>
-<pre class="error"><code>Error in is.data.frame(results): object &#39;go&#39; not found
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">go &lt;-<span class="st"> </span><span class="kw">goana</span>(fit, <span class="dt">coef=</span><span class="st">&quot;UVsT&quot;</span>,<span class="dt">species =</span> <span class="st">&quot;Dm&quot;</span>, <span class="dt">geneid=</span><span class="st">&quot;ENTREZID&quot;</span>)
+<span class="kw">topGO</span>(go, <span class="dt">n=</span><span class="dv">10</span>)</code></pre></div>
+<pre class="output"><code>                                                     Term Ont   N Up Down
+GO:0019991                      septate junction assembly  BP  27  0   12
+GO:0044724 single-organism carbohydrate catabolic process  BP  22  1   10
+GO:0043297                       apical junction assembly  BP  34  0   12
+GO:0016052                 carbohydrate catabolic process  BP  23  1   10
+GO:0060856           establishment of blood-brain barrier  BP  14  0    8
+GO:0044421                      extracellular region part  CC 154 22   27
+GO:0005886                                plasma membrane  CC 496 36   58
+GO:0007043                    cell-cell junction assembly  BP  35  0   12
+GO:0005576                           extracellular region  CC 269 35   38
+GO:0071944                                 cell periphery  CC 577 43   64
+                   P.Up       P.Down
+GO:0019991 1.000000e+00 1.460559e-08
+GO:0044724 7.321697e-01 1.877361e-07
+GO:0043297 1.000000e+00 3.129742e-07
+GO:0016052 7.477650e-01 3.144861e-07
+GO:0060856 1.000000e+00 3.503620e-07
+GO:0044421 6.961118e-05 3.604688e-07
+GO:0005886 9.246429e-02 4.168760e-07
+GO:0007043 1.000000e+00 4.506965e-07
+GO:0005576 4.470930e-06 5.296478e-07
+GO:0071944 4.980817e-02 6.646739e-07
 </code></pre>
         </div>
       </div>
