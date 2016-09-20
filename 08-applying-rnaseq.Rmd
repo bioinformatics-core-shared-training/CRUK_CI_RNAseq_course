@@ -2,12 +2,12 @@
 layout: page
 title: "RNA-seq analysis in R"
 subtitle: "Analysis of Pasilla Knock-down Experiment in Drosophila"
-author: "Belinda Phipson"
-date: "11 - 12 May 2016"
+author: "Belinda Phipson and Jovana Maksimovic"
+date: "21, 23 September 2016"
 minutes: 120
 ---
 
-**Author: Belinda Phipson**
+**Author: Belinda Phipson and Jovana Maksimovic**
 
 ## Data files needed
 
@@ -22,7 +22,6 @@ Available from [https://figshare.com/s/f5d63d8c265a05618137](https://figshare.co
 * limma
 * edgeR
 * org.Dm.eg.db (annotation for Drosophila)
-* EDASeq
 * gplots
 * RColorBrewer
 
@@ -57,8 +56,7 @@ end sequencing while other samples were sequenced from one end only.
 The reads were aligned to the Drosophila reference genome,
 downloaded from Ensembl, using the tophat aligner.
 The reads were summarised at the gene-level using
-htseq-count, a function from the tool HTSeq
-(http://wwwhuber.embl.de/users/anders/HTSeq/doc/overview.html).
+htseq-count, a function from the tool [HTSeq](http://wwwhuber.embl.de/users/anders/HTSeq/doc/overview.html).
 
 For the purpose of today's workshop, we will be analysing the gene level counts.
 
@@ -69,7 +67,7 @@ For the purpose of today's workshop, we will be analysing the gene level counts.
 * Filtering out lowly expressed genes
 * Quality control
     + Check library sizes
-    + Check relative log expression plots (RLEplots)
+    + Check boxplots of log2 cpm
     + Check MDSplots
 * Hierarchical clustering with heatmap.2
 * Normalisation
@@ -86,4 +84,4 @@ For the purpose of today's workshop, we will be analysing the gene level counts.
 * Testing relative to a threshold
 * Gene set testing with goana
 
-* Try some interactive plots from Glimma or save topTable output and try Degust.
+* Try some interactive plots from Glimma and save the topTable output in a spreadsheet.

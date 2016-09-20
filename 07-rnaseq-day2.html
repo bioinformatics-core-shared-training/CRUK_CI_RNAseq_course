@@ -163,12 +163,22 @@ Finished. All records: 1000; all fragments: 1000; mapped fragments: 113; the map
 11 ./data/SRR1552454.fastq.gz.subread.BAM     1000       127      0.127
 12 ./data/SRR1552455.fastq.gz.subread.BAM     1000       113      0.113
 </code></pre>
-<p>Exercise: (1) Try aligning the fastq files allowing multi-mapping reads (set <code>unique = FALSE</code>), and allowing for up to 6 “best” locations to be reported (<code>nBestLocations = 6</code>). Specify the output file names (bam.files.multi) by substituting “.fastq.gz” with “.multi.bam” so we don’t overwrite our unique alignment bam files (2) Look at the proportion of reads mapped and see if we get any more reads mapping by specifying a less stringent criteria.</p>
+<section class="challenge panel panel-success">
+<div class="panel-heading">
+<h2 id="challenge"><span class="glyphicon glyphicon-pencil"></span>Challenge</h2>
+</div>
+<div class="panel-body">
+<ol style="list-style-type: decimal">
+<li>Try aligning the fastq files allowing multi-mapping reads (set <code>unique = FALSE</code>), and allowing for up to 6 “best” locations to be reported (<code>nBestLocations = 6</code>). Specify the output file names (bam.files.multi) by substituting “.fastq.gz” with “.multi.bam” so we don’t overwrite our unique alignment bam files.</li>
+<li>Look at the proportion of reads mapped and see if we get any more reads mapping by specifying a less stringent criteria.</li>
+</ol>
+</div>
+</section>
 <h2 id="quality-control">Quality control</h2>
 <p>We can have a look at the quality scores associated with each base that has been called by the sequencing machine using the <code>qualityScores</code> function in <em>Rsubread</em>.</p>
 <p>Let’s first extract quality scores for 100 reads for the file “SRR1552450.fastq.gz”.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Extract quality scores</span>
-qs &lt;-<span class="st"> </span><span class="kw">qualityScores</span>(<span class="dt">filename=</span><span class="st">&quot;SRR1552450.fastq.gz&quot;</span>,<span class="dt">nreads=</span><span class="dv">100</span>)</code></pre></div>
+qs &lt;-<span class="st"> </span><span class="kw">qualityScores</span>(<span class="dt">filename=</span><span class="st">&quot;data/SRR1552450.fastq.gz&quot;</span>,<span class="dt">nreads=</span><span class="dv">100</span>)</code></pre></div>
 <pre class="output"><code>
 qualityScores Rsubread 1.22.3
 
@@ -223,7 +233,17 @@ Completed successfully. Quality scores for 100 reads (equally spaced in the file
 <p>A quality score of 30 corresponds to a 1 in 1000 chance of an incorrect base call. (A quality score of 10 is a 1 in 10 chance of an incorrect base call.) To look at the overall distribution of quality scores across the 100 reads, we can look at a boxplot</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">boxplot</span>(qs)</code></pre></div>
 <p><img src="fig-07/unnamed-chunk-12-1.png" title="plot of chunk unnamed-chunk-12" alt="plot of chunk unnamed-chunk-12" style="display: block; margin: auto;" /></p>
-<p>Exercise: (1) Extract quality scores for SRR1552451.fastq.gz for 50 reads (2) Plot a boxplot of the quality scores for SRR1552451.fastq.gz.</p>
+<section class="challenge panel panel-success">
+<div class="panel-heading">
+<h2 id="challenge-1"><span class="glyphicon glyphicon-pencil"></span>Challenge</h2>
+</div>
+<div class="panel-body">
+<ol style="list-style-type: decimal">
+<li>Extract quality scores for SRR1552451.fastq.gz for 50 reads.</li>
+<li>Plot a boxplot of the quality scores for SRR1552451.fastq.gz.</li>
+</ol>
+</div>
+</section>
 <h2 id="counting">Counting</h2>
 <p>Now that we have figured out where each read comes from in the genome, we need to summarise the information across genes or exons. The alignment produces a set of BAM files, where each file contains the read alignments for each library. In the BAM file, there is a chromosomal location for every read that mapped uniquely. The mapped reads can be counted across mouse genes by using the <code>featureCounts</code> function. <code>featureCounts</code> contains built-in annotation for mouse (mm9, mm10) and human (hg19) genome assemblies (NCBI refseq annotation).</p>
 <p>The code below uses the exon intervals defined in the NCBI refseq annotation of the mm10 genome. Reads that map to exons of genes are added together to obtain the count for each gene, with some care taken with reads that span exon-exon boundaries. <code>featureCounts</code> takes all the BAM files as input, and outputs an object which includes the count matrix, similar to the count matrix we have been working with on Day 1. Each sample is a separate column, each row is a gene.</p>
@@ -496,13 +516,29 @@ fc$stat</code></pre></div>
 5         4492668;4493466;4493863;4495942;4496413   -;-;-;-;-   3130
 6         4776801;4777648;4782733;4784105;4785726   -;-;-;-;-   4203
 </code></pre>
-<p>Exercise: (1) Redo the counting over the exons, rather than the genes (specify <code>useMetaFeatures = FALSE</code>). Use the bam files generated doing alignment reporting only unique reads, and call the <code>featureCounts</code> object <code>fc.exon</code>. Check the dimension of the counts slot to see how much larger it is. (2) Using your “.multi.bam” files, redo the counting over genes, allowing for multimapping reads (specify <code>countMultiMappingReads = TRUE</code>), calling the object <code>fc.multi</code>. Check the stats.</p>
-<p>Notes<br />
-* If you are sequencing your own data, the sequencing facility will almost always provide fastq files.<br />
-* For publicly available sequence data from GEO/SRA, the files are usually in the Sequence Read Archive (SRA) format. Prior to read alignment, these files need to be converted into the FASTQ format using the fastq-dump utility from the SRA Toolkit. See http: //www.ncbi.nlm.nih.gov/books/NBK158900 for how to download and use the SRA Toolkit.<br />
-* By default, alignment is performed with <code>unique=TRUE</code>. If a read can be aligned to two or more locations, <em>Rsubread</em> will attempt to select the best location using a number of criteria. Only reads that have a unique best location are reported as being aligned. Keeping this default is recommended, as it avoids spurious signal from non-uniquely mapped reads derived from, e.g., repeat regions.<br />
-* The Phred offset determines the encoding for the base-calling quality string in the FASTQ file. For the Illumina 1.8 format onwards, this encoding is set at +33. However, older formats may use a +64 encoding. Users should ensure that the correct encoding is specified during alignment. If unsure, one can examine the first several quality strings in the FASTQ file. A good rule of thumb is to check whether lower-case letters are present (+64 encoding) or absent (+33).<br />
-* <code>featureCounts</code> requires gene annotation specifying the genomic start and end position of each exon of each gene. <em>Rsubread</em> contains built-in gene annotation for mouse and human. For other species, users will need to read in a data frame in GTF format to define the genes and exons. Users can also specify a custom annotation file in SAF format. See the Rsubread users guide for more information, or try <code>?featureCounts</code>, which has an example of what an SAF file should like like.</p>
+<section class="challenge panel panel-success">
+<div class="panel-heading">
+<h2 id="challenge-2"><span class="glyphicon glyphicon-pencil"></span>Challenge</h2>
+</div>
+<div class="panel-body">
+<ol style="list-style-type: decimal">
+<li>Redo the counting over the exons, rather than the genes (specify <code>useMetaFeatures = FALSE</code>). Use the bam files generated doing alignment reporting only unique reads, and call the <code>featureCounts</code> object <code>fc.exon</code>. Check the dimension of the counts slot to see how much larger it is.</li>
+<li>Using your “.multi.bam” files, redo the counting over genes, allowing for multimapping reads (specify <code>countMultiMappingReads = TRUE</code>), calling the object <code>fc.multi</code>. Check the stats.</li>
+</ol>
+</div>
+</section>
+<p>Notes</p>
+<ul>
+<li>If you are sequencing your own data, the sequencing facility will almost always provide fastq files.<br />
+</li>
+<li>For publicly available sequence data from GEO/SRA, the files are usually in the Sequence Read Archive (SRA) format. Prior to read alignment, these files need to be converted into the FASTQ format using the fastq-dump utility from the SRA Toolkit. See http: //www.ncbi.nlm.nih.gov/books/NBK158900 for how to download and use the SRA Toolkit.<br />
+</li>
+<li>By default, alignment is performed with <code>unique=TRUE</code>. If a read can be aligned to two or more locations, <em>Rsubread</em> will attempt to select the best location using a number of criteria. Only reads that have a unique best location are reported as being aligned. Keeping this default is recommended, as it avoids spurious signal from non-uniquely mapped reads derived from, e.g., repeat regions.<br />
+</li>
+<li>The Phred offset determines the encoding for the base-calling quality string in the FASTQ file. For the Illumina 1.8 format onwards, this encoding is set at +33. However, older formats may use a +64 encoding. Users should ensure that the correct encoding is specified during alignment. If unsure, one can examine the first several quality strings in the FASTQ file. A good rule of thumb is to check whether lower-case letters are present (+64 encoding) or absent (+33).<br />
+</li>
+<li><code>featureCounts</code> requires gene annotation specifying the genomic start and end position of each exon of each gene. <em>Rsubread</em> contains built-in gene annotation for mouse and human. For other species, users will need to read in a data frame in GTF format to define the genes and exons. Users can also specify a custom annotation file in SAF format. See the Rsubread users guide for more information, or try <code>?featureCounts</code>, which has an example of what an SAF file should like like.</li>
+</ul>
 <h1 id="package-versions-used">Package versions used</h1>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sessionInfo</span>()</code></pre></div>
 <pre class="output"><code>R version 3.3.1 (2016-06-21)

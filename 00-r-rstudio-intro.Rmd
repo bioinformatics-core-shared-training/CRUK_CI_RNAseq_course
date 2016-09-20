@@ -222,13 +222,12 @@ then "New Folder", then type "data" and click "OK".
 
 ## Reading data into R
 
+Our data is tab delmited, which is what read.table expect by default so we don't need to specify `delim`.
+However, we do need `header = TRUE`.
+
 ```{r}
 # Read the data into R
-#small_counts <- read.delim("data/GSE60450_Lactation-GenewiseCounts.txt", stringsAsFactors = FALSE)
-# Read the sample information into R
-small_counts <- read.table("data/small_counts.txt",header=TRUE)
-sampleinfo <- read.delim("data/SampleInfo.txt")
-ResultsTable_small <- read.table("data/ResultsTable_small.txt",stringsAsFactors = FALSE,header=TRUE)
+small_counts <- read.table("data/small_counts.txt", header = TRUE)
 ```
 
 ```{r}
@@ -236,27 +235,70 @@ print(small_counts)
 dim(small_counts)
 ```
 
-```{r}
-print(ResultsTable_small)
-```
-
 ## Working with Data Frames
 
+### Subsetting
+
+Let's say we want the all the counts for Sample_1. There are three main ways we could do this:
+
+`$` notation with the column name
 ```{r}
-small_counts_sample = small_counts[1:4, 1:4]
-print(small_counts_sample)
+small_counts$Sample_1
+```
+`[row, column]` notation with numeric indices
+```{r}
+small_counts[, 1]
+```
+`[row, column]` notation using the column name (in a vector)
+```{r}
+small_counts[, c("Sample_1")]
+```
+This is handy when you want to grab multiple columns
+```{r}
+small_counts[, c("Sample_1", "Sample_3")]
+```
+You can even mix numerical and named indices
+```{r}
+small_counts[1:3, c("Sample_1", "Sample_3")]
+```
 
-#names(small_counts_sample)[3:6] <- c("sample1", "sample2", "sample3", "sample4")
-#print(small_counts_sample)
+### Vectorisation
 
-str(small_counts_sample)
+R arithmetic operators are vectorised by default.
+```{r}
+small_counts$Sample_1 * 2
+```
+
+So are many R functions.
+```{r}
+log(small_counts)
+```
+
+Let's say we want to calculate the sum of counts for each sample.
+We can do this for each sample by subsetting and then using the `sum` function.
+
+```{r}
+sum(small_counts$Sample_1)
+sum(small_counts$Sample_2)
+```
+
+If you had a lot of samples, you can imagine this would get tedious.
+So instead, we can use an `apply` statement to apply the `sum` function to every column at once.
+In R, this is usually quicker than using a loop.
+Note the `MARGIN` argument tells `apply` which direction you want to go in.
+MARGIN = 1 will apply `sum` to each row, while MARGIN = 2 will apply `sum` to each column.
+
+```{r}
+# Sum the counts for each sample
+sample_sums = apply(small_counts, MARGIN = 2, sum)
+print(sample_sums)
 ```
 
 ## Data types
 
 There are 5 main types: doubles, integers, complex, logical and character.
 
-```
+```{r}
 typeof(3.14)
 typeof(1L)
 typeof(1+1i)
@@ -266,55 +308,153 @@ typeof('banana')
 
 Note the `L` suffix to insist that a number is an integer. No matter how complicated our analyses become, all data in R is interpreted as one of these basic data types.
 
-```{r, echo = FALSE}
-cats.df <- data.frame(coat = c("calico", "black", "tabby"),
-                      weight = c(2.1, 5.0, 3.2),
-                      likes_string = c(TRUE, FALSE, TRUE))
-write.csv(cats.df, "data/feline-data.csv", row.names = FALSE)
-```
-
-## Factors
+Let's read in some data that contains things of more than one type.
+This is actually a sample of a differential expression results table that you will generate later in the workshop.
 
 ```{r}
-sampleinfo <- read.delim("data/sampleinfo.txt")
-print(sampleinfo)
-str(sampleinfo)
+ResultsTable_small <- read.table("data/ResultsTable_small.txt", header=TRUE)
+print(ResultsTable_small)
 ```
 
+We can use `str` to reveal the structure of our `ResultsTable_small`.
 ```{r}
-sampleinfo <- read.delim("data/sampleinfo.txt", stringsAsFactors = FALSE)
-str(sampleinfo)
+str(ResultsTable_small)
 ```
 
+We can see that it's a data frame, and `str` also tells us the type of each column.
+Everything in a single column must be of the same type, while each column can be a different type.
+This is because data frames are actually lists of vectors, and vectors must contain data of only one type.
+
+When you try to mix types in a vector, strange things can happen.
+
 ```{r}
-sampleinfo <- read.delim("data/sampleinfo.txt")
-str(sampleinfo)
+my_vector = c(1, "hello", TRUE)
+print(my_vector)
 ```
 
+Notice that everything has been converted to a character. You can check this with `typeof`.
+
 ```{r}
-sampleinfo$Status
+typeof(my_vector)
 ```
 
+This is called type coercion.
+When you try to create a vector containing a mixture of types R will automatically (and silently) convert everthing to the same type.
+Generally it will chose a type that means you don't lose any information.
+
+The coercion rules go: `logical` -> `integer` -> `numeric` -> `complex` -> `character`.
+
+Note, the same thing will happen if you try to read in data from a file that has a mixture of types within a single column.
+
+### Factors
+
+You may have noticed that `ResultsTable_small` contained a column annotated as `Factor`.
+
 ```{r}
-factor(sampleinfo$Status, levels = c("virgin", "pregnant", "lactate"), ordered = TRUE)
+str(ResultsTable_small)
 ```
 
-## Subsetting using logical statements
+Factors usually look like character data, but are typically used to represent categorical information.
 
 ```{r}
-sampleinfo$CellType
+str(ResultsTable_small$SYMBOL)
 ```
 
-```{r}
-sampleinfo$CellType == "luminal"
-```
+Instead of printing out the strings we gave it, we got a bunch of numbers instead.
+R has replaced our human-readable categories with numbered indices under the hood:
 
 ```{r}
-sampleinfo$CellType[sampleinfo$CellType == "luminal"]
+typeof(ResultsTable_small$SYMBOL)
 ```
 
+In modeling functions, it's important to know what the baseline levels are. This is assumed to be the
+first factor, but by default factors are labeled in alphabetical order. You can change this by specifying the levels:
+
 ```{r}
-sampleinfo[sampleinfo$CellType == "luminal",]
+mydata <- c("case", "control", "control", "case")
+factor_ordering_example <- factor(mydata, levels = c("control", "case"))
+str(factor_ordering_example)
+```
+
+In this case, we've explicitly told R that "control" should represented by 1, and
+"case" by 2. This designation can be very important for interpreting the
+results of statistical models!
+
+If you prefer not to work with factors, you can simply tell the `read.table` function to keep all strings as characters.
+
+```{r}
+ResultsTable_small <- read.table("data/ResultsTable_small.txt", stringsAsFactors = FALSE, header=TRUE)
+```
+
+### Sorting
+
+If you just want to sort a vector from smallest to largest, you can use the `sort` function:
+
+```{r}
+sort(ResultsTable_small$logFC)
+```
+
+To reverse the sort order so it goes from largest to smallest:
+
+```{r}
+sort(ResultsTable_small$logFC, decreasing = TRUE)
+```
+
+And this works with characters:
+
+```{r}
+sort(ResultsTable_small$SYMBOL)
+```
+
+If you want to sort the entire data frame by the values in a single column, you can use the `order` function.
+This gives you the indexes for if the data was sorted. For example:
+
+```{r}
+order(ResultsTable_small$logFC)
+```
+
+You then use these indexes to sort the data:
+
+```{r}
+ResultsTable_small$logFC[order(ResultsTable_small$logFC)]
+```
+
+You can then use these indices to sort the rows:
+
+```{r}
+ResultsTable_small[order(ResultsTable_small$logFC), ]
+```
+
+### Subsetting using logical statements
+
+Let's say we only want to look at the rows where the log fold change is greater than 3.
+We can ask if each `logFC` is greater than 3.
+
+```{r}
+ResultsTable_small$logFC > 3
+```
+
+This gives us a vector of TRUE/FALSE for each value stating if it is greater than 3.
+We can then use this to subset the data.
+
+```{r}
+ResultsTable_small$logFC[ResultsTable_small$logFC > 3]
+```
+
+And to subset the rows of the data frame.
+
+```{r}
+ResultsTable_small[ResultsTable_small$logFC > 3, ]
+```
+
+In fact, we probably care about things that are -3 as well, so let's include those too:
+```{r}
+ResultsTable_small[ResultsTable_small$logFC > 3 | ResultsTable_small$logFC < -3, ]
+```
+Or we can simplify this using the `abs` function to find the absolute value of each `logFC` before testing them.
+
+```{r}
+ResultsTable_small[abs(ResultsTable_small$logFC) > 3, ]
 ```
 
 > ## Tip: Logical Operators in R {.callout}
@@ -334,6 +474,35 @@ sampleinfo[sampleinfo$CellType == "luminal",]
 > Source: [Quick-R](http://www.statmethods.net/management/operators.html)
 >
 
-## Vectorisation
+We might also want to reduce our results table down to a set of genes that we are interested in.
+We can use similar logical subsetting logic to do this.
 
-Do an apply statement
+```{r}
+my_genes <- c("Smad7", "Wif1", "Fam102b", "Tppp3")
+```
+
+For each gene in ResultsTable_small$SYMBOL, does it appear in my_genes?
+
+```{r}
+ResultsTable_small$SYMBOL %in% my_genes
+```
+
+```{r}
+ResultsTable_small[ResultsTable_small$SYMBOL %in% my_genes, ]
+```
+
+You can use `match` to get the same subset, but this time make sure they are in the same order as in `my_genes`.
+This can be useful if you are trying to merge together data from two sources.
+
+```{r}
+match(my_genes, ResultsTable_small$SYMBOL)
+```
+
+This returns the index for where each of the genes in `my_list appears` in `ResultsTable_small$SYMBOL`.
+We can then use this to subset the columns from `ResultsTable_small`.
+
+```{r}
+ResultsTable_small[match(my_genes, ResultsTable_small$SYMBOL), ]
+```
+
+You can see they are in the same order as `my_genes`!

@@ -118,7 +118,11 @@ props <- propmapped(files=bam.files)
 props
 ```
 
-Exercise: (1) Try aligning the fastq files allowing multi-mapping reads (set `unique = FALSE`), and allowing for up to 6 "best" locations to be reported (`nBestLocations = 6`). Specify the output file names (bam.files.multi) by substituting ".fastq.gz" with ".multi.bam" so we don't overwrite our unique alignment bam files (2) Look at the proportion of reads mapped and see if we get any more reads mapping by specifying a less stringent criteria.
+> ## Challenge {.challenge}
+>
+> 1. Try aligning the fastq files allowing multi-mapping reads (set `unique = FALSE`), and allowing for up to 6 "best" locations to be reported (`nBestLocations = 6`). Specify the output file names (bam.files.multi) by substituting ".fastq.gz" with ".multi.bam" so we don't overwrite our unique alignment bam files.
+> 1. Look at the proportion of reads mapped and see if we get any more reads mapping by specifying a less stringent criteria.
+>
 
 ## Quality control
 
@@ -128,7 +132,7 @@ Let's first extract quality scores for 100 reads for the file "SRR1552450.fastq.
 
 ```{r}
 # Extract quality scores
-qs <- qualityScores(filename="SRR1552450.fastq.gz",nreads=100)
+qs <- qualityScores(filename="data/SRR1552450.fastq.gz",nreads=100)
 # Check dimension of qs
 dim(qs)
 # Check first few elements of qs with head
@@ -141,7 +145,11 @@ A quality score of 30 corresponds to a 1 in 1000 chance of an incorrect base cal
 boxplot(qs)
 ```
 
-Exercise: (1) Extract quality scores for SRR1552451.fastq.gz for 50 reads (2) Plot a boxplot of the quality scores for SRR1552451.fastq.gz.
+> ## Challenge {.challenge}
+>
+> 1. Extract quality scores for SRR1552451.fastq.gz for 50 reads.
+> 1. Plot a boxplot of the quality scores for SRR1552451.fastq.gz.
+>
 
 ## Counting
 
@@ -180,9 +188,14 @@ The row names of the fc$counts matrix represent the Entrez gene identifiers for 
 head(fc$annotation)
 ```
 
-Exercise: (1) Redo the counting over the exons, rather than the genes (specify `useMetaFeatures = FALSE`). Use the bam files generated doing alignment reporting only unique reads, and call the `featureCounts` object `fc.exon`. Check the dimension of the counts slot to see how much larger it is. (2) Using your ".multi.bam" files, redo the counting over genes, allowing for multimapping reads (specify `countMultiMappingReads = TRUE`), calling the object `fc.multi`. Check the stats.
+> ## Challenge {.challenge}
+>
+> 1. Redo the counting over the exons, rather than the genes (specify `useMetaFeatures = FALSE`). Use the bam files generated doing alignment reporting only unique reads, and call the `featureCounts` object `fc.exon`. Check the dimension of the counts slot to see how much larger it is.
+> 1. Using your ".multi.bam" files, redo the counting over genes, allowing for multimapping reads (specify `countMultiMappingReads = TRUE`), calling the object `fc.multi`. Check the stats.
+>
 
-Notes  
+Notes
+
 * If you are sequencing your own data, the sequencing facility will almost always provide fastq files.  
 * For publicly available sequence data from GEO/SRA, the files are usually in the Sequence Read Archive
 (SRA) format. Prior to read alignment, these files need to be converted into the
