@@ -2,12 +2,12 @@
 layout: page
 title: "RNA-seq analysis in R"
 subtitle: "Solutions: Analysis of Pasilla Knock-down Experiment in Drosophila"
-author: "Belinda Phipson"
-date: "11 - 12 May 2016"
+author: "Belinda Phipson and Jovana Maksimovic"
+date: "21, 23 September 2016"
 minutes: 15
 ---
 
-**Author: Belinda Phipson**
+**Author: Belinda Phipson and Jovana Maksimovic**
 
 ```{r, include=FALSE}
 source("tools/chunk-options.R")
@@ -80,7 +80,7 @@ Next, read in the data and targets file:
 
 ```{r}
 counts <- read.delim(file="data/counts_Drosophila.txt")
-targets <- read.delim(file="data/targetsD.txt")
+targets <- read.delim(file="data/SampleInfo_Drosophila.txt")
 ```
 
 Check that the data has read in correctly
@@ -268,19 +268,53 @@ topTable(fit,coef=3,sort.by="p")
 
 ### Add annotation from org.Dm.eg.db
 
-The rownames of the fit object are the ensemble gene ids. The `select` function doesn't work in this case, but there is a less elegant way to get around it, using the `toTable` command.
+The rownames of the fit object are [http://flybase.org/](FlyBase) ids. 
+
+First we need to decide what information we want. In order to see what we can extract we can run the `columns` function on the annotation database.
+
+```{r}
+columns(org.Dm.eg.db)
+```
+
+We definitely want gene symbols and perhaps the full gene name and Entrez id. Let's build up our annotation information in a separate data frame using the `select` function. Note, by default, the `select` function assumes that the keys provided are Entrez ids. However, in this case we are using FlyBase ids as the keys. As such, we need to give the `select` function this information using the `keytype` argument which we will set to `"FLYBASE"`. 
+
+```{r}
+ann <- select(org.Dm.eg.db,keys=rownames(fit),columns=c("FLYBASE","ENTREZID","SYMBOL","GENENAME"),keytype="FLYBASE")
+# Have a look at the annotation
+head(ann)
+```
+
+Let's double check that the `FLYBASE` column matches exactly to our `fit` rownames.
+
+```{r}
+table(ann$FLYBASE==rownames(fit))
+```
+
+We can slot in the annotation information into the `genes` slot of `fit`. (Please note that if the `select` function returns a 1:many mapping then you can't just append the annotation to the fit object. An alternative way to get annotation is shown below.)
+
+```{r}
+fit$genes <- ann
+```
+
+Now when we run the `topTable` command, the annotation information should be included in the output.
+
+```{r}
+topTable(fit,coef=3,sort.by="p")
+```
+
+If for some reason the `select` function doesn't work, or the result is a 1:many mapping, there is a less elegant way to get the annotations using the `toTable` command.
 
 ```{r}
 # Let's see what we can get in table format from org.Dm.eg.db
 ls("package:org.Dm.eg.db")
-# Get ensemble annotation
-ens <- toTable(org.Dm.egENSEMBL)
-head(ens)
+# Get annotation
+fly <- toTable(org.Dm.egFLYBASE)
+head(fly)
 symbol <- toTable(org.Dm.egSYMBOL)
 genename <- toTable(org.Dm.egGENENAME)
 
 # We can use the merge command to merge two dataframes
-ann1 <- merge(ens,symbol,by="gene_id")
+ann1 <- merge(fly,symbol,by="gene_id")
 head(ann1)
 # Add genename table to ann1
 ann2 <- merge(ann1,genename,by="gene_id")
@@ -290,9 +324,13 @@ head(ann2)
 Now we need to match up between `rownames(fit)` and the ensemble gene id in `ann2`.
 
 ```{r}
-m <- match(rownames(fit),ann2$ensembl_id)
-table(is.na(m))
-fit$genes <- ann2[m,]
+m <- match(rownames(fit),ann2$flybase_id)
+table(is.na(m)) # check for unmatched rows
+ann3 <- ann3[m[!is.na(m)],] # exclude unmatched rows
+
+# compare the results in ann3 to what is in the fit object
+head(ann3)
+head(fit$genes)
 ```
 
 ```{r}
@@ -302,7 +340,7 @@ topTable(fit,coef=3,sort.by="p")
 Let's check the expression of pasilla.
 
 ```{r}
-ps <- grep("pasilla",fit$genes$gene_name)
+ps <- grep("pasilla",fit$genes$GENENAME)
 topTable(fit[ps,],coef=3)
 ```
 
