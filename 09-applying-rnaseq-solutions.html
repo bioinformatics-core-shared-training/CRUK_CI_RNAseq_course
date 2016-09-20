@@ -28,7 +28,7 @@
 <h2 id="data-files-needed">Data files needed</h2>
 <ul>
 <li>counts_Drosophila.txt</li>
-<li>targetsD.txt</li>
+<li>SampleInfo_Drosophila.txt</li>
 </ul>
 <p>Available from <a href="https://figshare.com/s/e08e71c42f118dbe8be6" class="uri">https://figshare.com/s/e08e71c42f118dbe8be6</a>.</p>
 <h2 id="libraries-needed">Libraries needed</h2>
@@ -36,7 +36,6 @@
 <li>limma</li>
 <li>edgeR</li>
 <li>org.Dm.eg.db</li>
-<li>EDASeq</li>
 <li>gplots</li>
 <li>RColorBrewer</li>
 </ul>
@@ -51,7 +50,6 @@ http://www.ncbi.nlm.nih.gov/pubmed/20921232</p>
 <p>First, let’s load all the libraries we will need today.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(limma)
 <span class="kw">library</span>(edgeR)
-<span class="kw">library</span>(EDASeq)
 <span class="kw">library</span>(gplots)
 <span class="kw">library</span>(RColorBrewer)
 <span class="kw">library</span>(org.Dm.eg.db)</code></pre></div>
@@ -493,7 +491,7 @@ FBgn0261552 8.37355e-08 8.37355e-08 8.425095
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
 <span class="kw">plotMD</span>(fit,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">status=</span>results[,<span class="st">&quot;UVsT&quot;</span>])
 
-<span class="kw">volcanoplot</span>(fit,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">highlight=</span><span class="dv">100</span>,<span class="dt">names=</span>fit$genes$symbol)</code></pre></div>
+<span class="kw">volcanoplot</span>(fit,<span class="dt">coef=</span><span class="dv">3</span>,<span class="dt">highlight=</span><span class="dv">100</span>,<span class="dt">names=</span>fit$genes$SYMBOL)</code></pre></div>
 <p><img src="fig-09/unnamed-chunk-35-1.png" title="plot of chunk unnamed-chunk-35" alt="plot of chunk unnamed-chunk-35" style="display: block; margin: auto;" /></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">stripchart</span>(v$E[<span class="st">&quot;FBgn0025111&quot;</span>,]~targets$Group)</code></pre></div>
 <p><img src="fig-09/unnamed-chunk-36-1.png" title="plot of chunk unnamed-chunk-36" alt="plot of chunk unnamed-chunk-36" style="display: block; margin: auto;" /></p>
