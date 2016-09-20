@@ -279,7 +279,7 @@ plotMDS(y)
 
 It is a bit difficult to see exactly what is going on with the default plot, although we do see samples grouping together in pairs. To make this plot more informative, we can colour the samples according to the grouping information. We can also change the labels, or instead of labels we can have points.
 
-```{r,fig.height=10,fig.width=5}
+```{r,fig.height=5,fig.width=10}
 # We specify the option to let us plot two plots side-by-sde
 par(mfrow=c(1,2))
 # Let's set up colour schemes for CellType
@@ -321,7 +321,7 @@ sampleinfo <- read.delim("data/SampleInfo_Corrected.txt")
 sampleinfo
 ```
 
-```{r,fig.height=10,fig.width=5}
+```{r,fig.height=5,fig.width=10}
 # Redo the MDSplot with corrected information
 par(mfrow=c(1,2))
 col.cell <- c("purple","orange")[sampleinfo$CellType]
@@ -473,7 +473,7 @@ The normalization factors multiply to unity across all libraries. A normalizatio
 
 The last two samples have much smaller normalisation factors, and MCL1.LA and MCL1.LB have the largest. If we plot mean difference plots using the `plotMD` function for these samples, we should be able to see the composition bias problem. We will use the `logcounts`, which have been normalised for library size, but not for composition bias.
 
-```{r,fig.height=10,fig.width=5}
+```{r,fig.height=5,fig.width=10}
 par(mfrow=c(1,2))
 plotMD(logcounts,column = 7)
 abline(h=0,col="grey")
@@ -484,7 +484,7 @@ abline(h=0,col="grey")
 The mean-difference plots show average expression (mean: x-axis) against log-fold-changes (difference: y-axis).
 Because our `DGEList` object contains the normalisation factors, if we redo these plots using `y`, we should see the composition bias problem has been solved.
 
-```{r,fig.height=10,fig.width=5}}
+```{r,fig.height=5,fig.width=10}
 par(mfrow=c(1,2))
 plotMD(y,column = 7)
 abline(h=0,col="grey")
@@ -498,7 +498,7 @@ abline(h=0,col="grey")
 >
 
 **Solution**
-```{r,echo=FALSE,fig.height=10,fig.width=5}
+```{r,echo=FALSE,fig.height=5,fig.width=10}
 par(mfrow=c(1,2))
 plotMD(logcounts,column = 11)
 abline(h=0,col="grey")
@@ -569,7 +569,7 @@ names(v)
 
 We can repeat the box plots for the normalised data to compare to before normalisation. The expression values in `v$E` are already log2 values so we don't need to log-transform.
 
-```{r,fig.height=10,fig.width=5}
+```{r,fig.height=5,fig.width=10}
 par(mfrow=c(1,2))
 boxplot(logcounts, xlab="", ylab="Log2 counts per million",las=2,main="Unnormalised logCPM")
 ## Let's add a blue horizontal line that corresponds to the median logCPM
@@ -720,7 +720,7 @@ write.csv(limma.res,file="B.PregVsLacResults.csv",row.names=FALSE)
 
 Let's do a few plots to make sure everything looks good and that we haven't made a mistake in the analysis. Genome-wide plots that are useful for checking are MAplots (or MDplots) and volcano plots. There are functions in limma for plotting these with `fit.cont` as input.
 
-```{r,fig.height=10,fig.width=5}
+```{r,fig.height=5,fig.width=10}
 # We want to highlight the significant genes. We can get this from decideTests.
 par(mfrow=c(1,2))
 plotMD(fit.cont,coef=1,status=summa.fit[,"B.PregVsLac"])
@@ -736,7 +736,7 @@ volcanoplot(fit.cont,coef=1,highlight=100,names=fit.cont$genes$SYMBOL)
 > Look at the MD plot and volcano plot for the second comparison, `L.PregVsLac`. Change the number of highlighted genes to 200 in the volcano plot.
 >
 
-```{r,echo=FALSE,fig.height=10,fig.width=5}
+```{r,echo=FALSE,fig.height=5,fig.width=10}
 par(mfrow=c(1,2))
 plotMD(fit.cont,coef=2,status=summa.fit[,"L.PregVsLac"])
 volcanoplot(fit.cont,coef=2,highlight=200,names=fit.cont$genes$SYMBOL)

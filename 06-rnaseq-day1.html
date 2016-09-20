@@ -411,7 +411,7 @@ logical   11375   15804       0
 <p>HINT: use the <code>col</code> parameter.</p>
 </div>
 </section>
-<p><img src="fig-06/unnamed-chunk-14-1.png" title="plot of chunk unnamed-chunk-14" alt="plot of chunk unnamed-chunk-14" style="display: block; margin: auto;" /> Note: When in doubt, a threshold of 1 CPM in at least <em>minimum</em> group sample size is a good rule of thumb.</p>
+<p><strong>Solution</strong> <img src="fig-06/unnamed-chunk-14-1.png" title="plot of chunk unnamed-chunk-14" alt="plot of chunk unnamed-chunk-14" style="display: block; margin: auto;" /> Note: When in doubt, a threshold of 1 CPM in at least <em>minimum</em> group sample size is a good rule of thumb.</p>
 <h2 id="convert-counts-to-dgelist-object">Convert counts to DGEList object</h2>
 <p>Next we’ll create a <code>DGEList</code> object. This is an object used by <em>edgeR</em> to store count data. It has a number of slots for storing various parameters about the data.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">y &lt;-<span class="st"> </span><span class="kw">DGEList</span>(counts.keep)
@@ -587,6 +587,17 @@ sampleinfo</code></pre></div>
 11 MCL1.LE_BC2CTUACXX_TAGCTT_L001_R1    MCL1.LE  luminal  lactate
 12 MCL1.LF_BC2CTUACXX_CTTGTA_L001_R1    MCL1.LF  luminal  lactate
 </code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Redo the MDSplot with corrected information</span>
+<span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
+col.cell &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;purple&quot;</span>,<span class="st">&quot;orange&quot;</span>)[sampleinfo$CellType]
+col.status &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>,<span class="st">&quot;red&quot;</span>,<span class="st">&quot;dark green&quot;</span>)[sampleinfo$Status]
+<span class="kw">plotMDS</span>(y,<span class="dt">col=</span>col.cell)
+<span class="kw">legend</span>(<span class="st">&quot;topleft&quot;</span>,<span class="dt">fill=</span><span class="kw">c</span>(<span class="st">&quot;purple&quot;</span>,<span class="st">&quot;orange&quot;</span>),<span class="dt">legend=</span><span class="kw">levels</span>(sampleinfo$CellType))
+<span class="kw">title</span>(<span class="st">&quot;Cell type&quot;</span>)
+<span class="kw">plotMDS</span>(y,<span class="dt">col=</span>col.status)
+<span class="kw">legend</span>(<span class="st">&quot;topleft&quot;</span>,<span class="dt">fill=</span><span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>,<span class="st">&quot;red&quot;</span>,<span class="st">&quot;dark green&quot;</span>),<span class="dt">legend=</span><span class="kw">levels</span>(sampleinfo$Status),<span class="dt">cex=</span><span class="fl">0.8</span>)
+<span class="kw">title</span>(<span class="st">&quot;Status&quot;</span>)</code></pre></div>
+<p><img src="fig-06/unnamed-chunk-22-1.png" title="plot of chunk unnamed-chunk-22" alt="plot of chunk unnamed-chunk-22" style="display: block; margin: auto;" /></p>
 <section class="challenge panel panel-success">
 <div class="panel-heading">
 <h2 id="discussion-2"><span class="glyphicon glyphicon-pencil"></span>Discussion</h2>
@@ -607,9 +618,10 @@ sampleinfo</code></pre></div>
 </ol>
 </div>
 </section>
+<p><strong>Solution</strong></p>
 <pre class="output"><code>[1] &quot;#1B9E77&quot; &quot;#D95F02&quot; &quot;#7570B3&quot;
 </code></pre>
-<p><img src="fig-06/unnamed-chunk-22-1.png" title="plot of chunk unnamed-chunk-22" alt="plot of chunk unnamed-chunk-22" style="display: block; margin: auto;" /></p>
+<p><img src="fig-06/unnamed-chunk-23-1.png" title="plot of chunk unnamed-chunk-23" alt="plot of chunk unnamed-chunk-23" style="display: block; margin: auto;" /></p>
 <p>The distance between each pair of samples in the MDS plot is calculated as the leading fold change, defined as the root-mean-square of the largest 500 log2-fold changes between that pair of samples. Replicate samples from the same group cluster together in the plot, while samples from different groups form separate clusters. This indicates that the differences between groups are larger than those within groups, i.e., differential expression is greater than the variance and can be detected. In the MDS plot, the distance between basal samples on the left and luminal cells on the right is about 6 units, corresponding to a leading fold change of about 64-fold (2^6 = 64) between basal and luminal. The expression differences between virgin, pregnant and lactating are greater for luminal cells than for basal.</p>
 <p>Notes</p>
 <ul>
@@ -617,10 +629,11 @@ sampleinfo</code></pre></div>
 <li>Clustering in the MDS plot can be used to motivate changes to the design matrix in light of potential batch effects. For example, imagine that the first replicate of each group was prepared at a separate time from the second replicate. If the MDS plot showed separation of samples by time, it might be worthwhile including time in the down stream analysis to account for the time-based effect.</li>
 </ul>
 <p><code>plotMDS</code> plots the first two dimensions as a default, however you can plot higher dimensions using the <code>dim</code> argument.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plotMDS</span>(y,<span class="dt">dim=</span><span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">4</span>),<span class="dt">col=</span>col.status,<span class="dt">pch=</span>char.celltype,<span class="dt">cex=</span><span class="dv">2</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Dimension 3 appears to separate pregnant samples from the rest. Dim4?</span>
+<span class="kw">plotMDS</span>(y,<span class="dt">dim=</span><span class="kw">c</span>(<span class="dv">3</span>,<span class="dv">4</span>),<span class="dt">col=</span>col.status,<span class="dt">pch=</span>char.celltype,<span class="dt">cex=</span><span class="dv">2</span>)
 <span class="kw">legend</span>(<span class="st">&quot;topright&quot;</span>,<span class="dt">legend=</span><span class="kw">levels</span>(sampleinfo$Status),<span class="dt">col=</span>cols,<span class="dt">pch=</span><span class="dv">16</span>)
 <span class="kw">legend</span>(<span class="st">&quot;bottomright&quot;</span>,<span class="dt">legend=</span><span class="kw">levels</span>(sampleinfo$CellType),<span class="dt">pch=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">4</span>))</code></pre></div>
-<p><img src="fig-06/unnamed-chunk-23-1.png" title="plot of chunk unnamed-chunk-23" alt="plot of chunk unnamed-chunk-23" style="display: block; margin: auto;" /></p>
+<p><img src="fig-06/unnamed-chunk-24-1.png" title="plot of chunk unnamed-chunk-24" alt="plot of chunk unnamed-chunk-24" style="display: block; margin: auto;" /></p>
 <p>Another alternative is to generate an interactive MDS plot using the <em>Glimma</em> package. This allows the user to interactively explore the different dimensions.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">labels &lt;-<span class="st"> </span><span class="kw">paste</span>(sampleinfo$SampleName, sampleinfo$CellType, sampleinfo$Status)
 group &lt;-<span class="st"> </span><span class="kw">paste</span>(sampleinfo$CellType,sampleinfo$Status,<span class="dt">sep=</span><span class="st">&quot;.&quot;</span>)
@@ -672,7 +685,7 @@ col.cell &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st
 
 <span class="co"># Plot the heatmap</span>
 <span class="kw">heatmap.2</span>(highly_variable_lcpm,<span class="dt">col=</span><span class="kw">rev</span>(<span class="kw">morecols</span>(<span class="dv">50</span>)),<span class="dt">trace=</span><span class="st">&quot;none&quot;</span>, <span class="dt">main=</span><span class="st">&quot;Top 500 most variable genes across samples&quot;</span>,<span class="dt">ColSideColors=</span>col.cell,<span class="dt">scale=</span><span class="st">&quot;row&quot;</span>)</code></pre></div>
-<p><img src="fig-06/unnamed-chunk-25-1.png" title="plot of chunk unnamed-chunk-25" alt="plot of chunk unnamed-chunk-25" style="display: block; margin: auto;" /></p>
+<p><img src="fig-06/unnamed-chunk-26-1.png" title="plot of chunk unnamed-chunk-26" alt="plot of chunk unnamed-chunk-26" style="display: block; margin: auto;" /></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Save the heatmap</span>
 <span class="kw">png</span>(<span class="dt">file=</span><span class="st">&quot;High_var_genes.heatmap.png&quot;</span>)
 <span class="kw">heatmap.2</span>(highly_variable_lcpm,<span class="dt">col=</span><span class="kw">rev</span>(<span class="kw">morecols</span>(<span class="dv">50</span>)),<span class="dt">trace=</span><span class="st">&quot;none&quot;</span>, <span class="dt">main=</span><span class="st">&quot;Top 500 most variable genes across samples&quot;</span>,<span class="dt">ColSideColors=</span>col.cell,<span class="dt">scale=</span><span class="st">&quot;row&quot;</span>)
@@ -692,10 +705,10 @@ col.cell &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st
 </ol>
 </div>
 </section>
-<p><img src="fig-06/unnamed-chunk-26-1.png" title="plot of chunk unnamed-chunk-26" alt="plot of chunk unnamed-chunk-26" style="display: block; margin: auto;" /></p>
+<p><strong>Solution</strong> <img src="fig-06/unnamed-chunk-27-1.png" title="plot of chunk unnamed-chunk-27" alt="plot of chunk unnamed-chunk-27" style="display: block; margin: auto;" /></p>
 <pre class="output"><code>[1] &quot;320714&quot; &quot;93684&quot;  &quot;245638&quot; &quot;26433&quot;  &quot;93747&quot;  &quot;236792&quot;
 </code></pre>
-<p><img src="fig-06/unnamed-chunk-26-2.png" title="plot of chunk unnamed-chunk-26" alt="plot of chunk unnamed-chunk-26" style="display: block; margin: auto;" /></p>
+<p><img src="fig-06/unnamed-chunk-27-2.png" title="plot of chunk unnamed-chunk-27" alt="plot of chunk unnamed-chunk-27" style="display: block; margin: auto;" /></p>
 <hr />
 <h2 id="normalisation-for-composition-bias">Normalisation for composition bias</h2>
 <p>TMM normalization is performed to eliminate composition biases between libraries <span class="citation">(Mark D Robinson and Oshlack 2010)</span>. This generates a set of normalization factors, where the product of these factors and the library sizes defines the effective library size. The <code>calcNormFactors</code> function calculates the normalization factors between libraries. TMM normalisation (and most scaling normalisation methods) scale relative to one sample.</p>
@@ -724,14 +737,14 @@ MCL1.LF     1 24652963    0.5354877
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)
 <span class="kw">plotMD</span>(logcounts,<span class="dt">column =</span> <span class="dv">11</span>)
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre></div>
-<p><img src="fig-06/unnamed-chunk-29-1.png" title="plot of chunk unnamed-chunk-29" alt="plot of chunk unnamed-chunk-29" style="display: block; margin: auto;" /></p>
+<p><img src="fig-06/unnamed-chunk-30-1.png" title="plot of chunk unnamed-chunk-30" alt="plot of chunk unnamed-chunk-30" style="display: block; margin: auto;" /></p>
 <p>The mean-difference plots show average expression (mean: x-axis) against log-fold-changes (difference: y-axis). Because our <code>DGEList</code> object contains the normalisation factors, if we redo these plots using <code>y</code>, we should see the composition bias problem has been solved.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))
 <span class="kw">plotMD</span>(y,<span class="dt">column =</span> <span class="dv">7</span>)
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)
 <span class="kw">plotMD</span>(y,<span class="dt">column =</span> <span class="dv">11</span>)
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre></div>
-<p><img src="fig-06/unnamed-chunk-30-1.png" title="plot of chunk unnamed-chunk-30" alt="plot of chunk unnamed-chunk-30" style="display: block; margin: auto;" /></p>
+<p><img src="fig-06/unnamed-chunk-31-1.png" title="plot of chunk unnamed-chunk-31" alt="plot of chunk unnamed-chunk-31" style="display: block; margin: auto;" /></p>
 <section class="challenge panel panel-success">
 <div class="panel-heading">
 <h2 id="challenge-3"><span class="glyphicon glyphicon-pencil"></span>Challenge</h2>
@@ -740,9 +753,14 @@ MCL1.LF     1 24652963    0.5354877
 <p>Plot the biased and unbiased MD plots side by side for the same sample to see the before and after TMM normalisation effect.</p>
 </div>
 </section>
-<p><img src="fig-06/unnamed-chunk-31-1.png" title="plot of chunk unnamed-chunk-31" alt="plot of chunk unnamed-chunk-31" style="display: block; margin: auto;" /></p>
+<p><strong>Solution</strong> <img src="fig-06/unnamed-chunk-32-1.png" title="plot of chunk unnamed-chunk-32" alt="plot of chunk unnamed-chunk-32" style="display: block; margin: auto;" /></p>
+<p><strong>We need to save a few data objects to use for Day 2 so we don’t have to rerun everything</strong></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># save(group,y,logcounts,sampleinfo,file=&quot;day1objects.Rdata&quot;)</span></code></pre></div>
 <h2 id="differential-expression-with-limma-voom">Differential expression with limma-voom</h2>
 <p>Now that we are happy that we have normalised the data and that the quality looks good, we can continue to testing for differentially expressed genes. There are a number of packages to analyse RNA-Seq data. The <em>limma</em> package <span class="citation">(Ritchie et al. 2015)</span> (since version 3.16.0) offers the <code>voom</code> function, which transforms the read counts into logCPMs while taking into account the mean-variance relationship in the data <span class="citation">(C. W. Law et al. 2014)</span>. After vooming, users can apply a linear model to the voom transformed data to test for differentially expressed genes, using standard <em>limma</em> commands.</p>
+<p><strong>Load the objects into the workspace that we created yesterday</strong></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load(&quot;day1objects.Rdata&quot;)</span>
+<span class="co"># objects()</span></code></pre></div>
 <h3 id="create-the-design-matrix">Create the design matrix</h3>
 <p>First we need to create a design matrix for the groups (see the excellent <a href="https://bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf">limma user guide</a> for more information on design matrices). There are many different ways to set up your design matrix, and it is dictated by what comparisons you would like to test. We will follow the set-up from pg 43 of the limma vignette (“Interaction models: 2X2 factorial designs”).</p>
 <p>In this analysis let’s assume that we will be testing differences in status in the different cell types separately. For example, we want to know which genes are differentially expressed between pregnant and lactating in basal cells only. We have previously codedthe <code>group</code> variable, which is a concatenation of cell type and status. Coding the cell type and status in this way allows us to be flexible in specifying which comparisons we are interested in.</p>
@@ -828,7 +846,7 @@ attr(,&quot;contrasts&quot;)$group
 <p>Once we have our design matrix ready to go, we can perform our voom transformation. Voom will automatically adjust the library sizes using the <code>norm.factors</code> already calculated. The voom transformation uses the experiment design matrix, and produces an <code>EList</code> object. We can add <code>plot=TRUE</code> to generate a plot of the mean-variance trend. This plot can also tell us if there are any genes that look really variable in our data, and if we’ve filtered the low counts adequately.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))
 v &lt;-<span class="st"> </span><span class="kw">voom</span>(y,design,<span class="dt">plot =</span> <span class="ot">TRUE</span>)</code></pre></div>
-<p><img src="fig-06/unnamed-chunk-33-1.png" title="plot of chunk unnamed-chunk-33" alt="plot of chunk unnamed-chunk-33" style="display: block; margin: auto;" /></p>
+<p><img src="fig-06/unnamed-chunk-36-1.png" title="plot of chunk unnamed-chunk-36" alt="plot of chunk unnamed-chunk-36" style="display: block; margin: auto;" /></p>
 <p>The voom normalised log2 counts can be found in v$E. Take a look at what is in the voom object.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">v</code></pre></div>
 <pre class="output"><code>An object of class &quot;EList&quot;
@@ -909,7 +927,7 @@ $design
 <span class="kw">boxplot</span>(v$E, <span class="dt">xlab=</span><span class="st">&quot;&quot;</span>, <span class="dt">ylab=</span><span class="st">&quot;Log2 counts per million&quot;</span>,<span class="dt">las=</span><span class="dv">2</span>,<span class="dt">main=</span><span class="st">&quot;Voom transformed logCPM&quot;</span>)
 ## Let&#39;s add a blue horizontal line that corresponds to the median logCPM
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="kw">median</span>(v$E),<span class="dt">col=</span><span class="st">&quot;blue&quot;</span>)</code></pre></div>
-<p><img src="fig-06/unnamed-chunk-35-1.png" title="plot of chunk unnamed-chunk-35" alt="plot of chunk unnamed-chunk-35" style="display: block; margin: auto;" /></p>
+<p><img src="fig-06/unnamed-chunk-38-1.png" title="plot of chunk unnamed-chunk-38" alt="plot of chunk unnamed-chunk-38" style="display: block; margin: auto;" /></p>
 <p>Compare these box plots to the box plots we generated before performing the normalisation. Can you see any differences?</p>
 <h3 id="testing-for-differential-expression">Testing for differential expression</h3>
 <p>Now that we have the voom transformed data we can use <em>limma</em> to test for differential expression. First we fit a linear model for each gene using the <code>lmFit</code> function in <em>limma</em>. <code>lmFit</code> needs the voom object and the design matrix that we have already specified, which is stored within the voom object.</p>
@@ -962,12 +980,13 @@ Levels             B.PregVsLac
 </ol>
 </div>
 </section>
+<p><strong>Solution</strong></p>
 <pre class="output"><code>   B.PregVsLac L.PregVsLac
 -1        2635        3686
 0        10464        8451
 1         2705        3667
 </code></pre>
-<p><img src="fig-06/unnamed-chunk-43-1.png" title="plot of chunk unnamed-chunk-43" alt="plot of chunk unnamed-chunk-43" style="display: block; margin: auto;" /></p>
+<p><img src="fig-06/unnamed-chunk-46-1.png" title="plot of chunk unnamed-chunk-46" alt="plot of chunk unnamed-chunk-46" style="display: block; margin: auto;" /></p>
 <p>The <em>limma</em> <code>topTable</code> function summarises the output in a table format. Significant DE genes for a particular comparison can be identified by selecting genes with a p-value smaller than a chosen cut-off value and/or a fold change greater than a chosen value in this table. By default the table will be sorted by the B statistic, which is the log-odds of differential expression. Usually the B statistic and p-value ranking will be the same, but this is not always the case. We will explicitly rank by p-value, which we can specify with the <code>sort.by</code> argument.</p>
 <p>The <code>topTable</code> command will always output the top 10 genes by default, even if they are not statistically significant. We can specify the coefficient we are interested in by the name we used in the contrast matrix (“B.PregVsLac”), or by the column number.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">topTable</span>(fit.cont,<span class="dt">coef=</span><span class="st">&quot;B.PregVsLac&quot;</span>,<span class="dt">sort.by=</span><span class="st">&quot;p&quot;</span>)</code></pre></div>
@@ -1070,7 +1089,7 @@ Levels             B.PregVsLac
 <span class="co"># We can also specify that we want to plot the gene symbol for the highlighted genes.</span>
 <span class="co"># let&#39;s highlight the top 100 most DE genes</span>
 <span class="kw">volcanoplot</span>(fit.cont,<span class="dt">coef=</span><span class="dv">1</span>,<span class="dt">highlight=</span><span class="dv">100</span>,<span class="dt">names=</span>fit.cont$genes$SYMBOL)</code></pre></div>
-<p><img src="fig-06/unnamed-chunk-52-1.png" title="plot of chunk unnamed-chunk-52" alt="plot of chunk unnamed-chunk-52" style="display: block; margin: auto;" /></p>
+<p><img src="fig-06/unnamed-chunk-55-1.png" title="plot of chunk unnamed-chunk-55" alt="plot of chunk unnamed-chunk-55" style="display: block; margin: auto;" /></p>
 <section class="challenge panel panel-success">
 <div class="panel-heading">
 <h2 id="challenge-6"><span class="glyphicon glyphicon-pencil"></span>Challenge</h2>
@@ -1079,7 +1098,7 @@ Levels             B.PregVsLac
 <p>Look at the MD plot and volcano plot for the second comparison, <code>L.PregVsLac</code>. Change the number of highlighted genes to 200 in the volcano plot.</p>
 </div>
 </section>
-<p><img src="fig-06/unnamed-chunk-53-1.png" title="plot of chunk unnamed-chunk-53" alt="plot of chunk unnamed-chunk-53" style="display: block; margin: auto;" /></p>
+<p><img src="fig-06/unnamed-chunk-56-1.png" title="plot of chunk unnamed-chunk-56" alt="plot of chunk unnamed-chunk-56" style="display: block; margin: auto;" /></p>
 <p>Before following up on the DE genes with further lab work, it is recommended to have a look at the expression levels of the individual samples for the genes of interest. We can quickly look at grouped expression using <code>stripchart</code>. We can use the normalised log expression values in the voom object (<code>v$E</code>).</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">3</span>))
 <span class="co"># Let&#39;s look at the first gene in the topTable, Wif1, which has a rowname 24117</span>
@@ -1089,7 +1108,7 @@ Levels             B.PregVsLac
 <span class="co"># Let&#39;s use nicer colours</span>
 nice.col &lt;-<span class="st"> </span><span class="kw">brewer.pal</span>(<span class="dv">6</span>,<span class="dt">name=</span><span class="st">&quot;Dark2&quot;</span>)
 <span class="kw">stripchart</span>(v$E[<span class="st">&quot;24117&quot;</span>,]~group,<span class="dt">vertical=</span><span class="ot">TRUE</span>,<span class="dt">las=</span><span class="dv">2</span>,<span class="dt">cex.axis=</span><span class="fl">0.8</span>,<span class="dt">pch=</span><span class="dv">16</span>,<span class="dt">cex=</span><span class="fl">1.3</span>,<span class="dt">col=</span>nice.col,<span class="dt">method=</span><span class="st">&quot;jitter&quot;</span>,<span class="dt">ylab=</span><span class="st">&quot;Normalised log2 expression&quot;</span>,<span class="dt">main=</span><span class="st">&quot;Wif1&quot;</span>)</code></pre></div>
-<p><img src="fig-06/unnamed-chunk-54-1.png" title="plot of chunk unnamed-chunk-54" alt="plot of chunk unnamed-chunk-54" style="display: block; margin: auto;" /></p>
+<p><img src="fig-06/unnamed-chunk-57-1.png" title="plot of chunk unnamed-chunk-57" alt="plot of chunk unnamed-chunk-57" style="display: block; margin: auto;" /></p>
 <p>Notice anything interesting about the expression of this gene?</p>
 <section class="challenge panel panel-success">
 <div class="panel-heading">
@@ -1099,6 +1118,7 @@ nice.col &lt;-<span class="st"> </span><span class="kw">brewer.pal</span>(<span 
 <p>Take the top gene from the L.PregVsLactate comparison and make a stripchart of grouped expression as above. (Don’t forget to change the title of the plot.)</p>
 </div>
 </section>
+<p><strong>Solution</strong></p>
 <pre class="output"><code>       ENTREZID   SYMBOL
 12992     12992  Csn1s2b
 13358     13358  Slc25a1
@@ -1133,7 +1153,7 @@ nice.col &lt;-<span class="st"> </span><span class="kw">brewer.pal</span>(<span 
 12683  -4.840655 3.3749575 -27.04271 3.123304e-12 5.484522e-09 18.58932
 26366  -3.295621 1.8210142 -25.45612 6.437086e-12 1.005946e-08 17.82256
 </code></pre>
-<p><img src="fig-06/unnamed-chunk-55-1.png" title="plot of chunk unnamed-chunk-55" alt="plot of chunk unnamed-chunk-55" style="display: block; margin: auto;" /></p>
+<p><img src="fig-06/unnamed-chunk-58-1.png" title="plot of chunk unnamed-chunk-58" alt="plot of chunk unnamed-chunk-58" style="display: block; margin: auto;" /></p>
 <p>An interactive version of the volcano plot above that includes the raw per sample values in a separate panel is possible via the <code>glMDPlot</code> function in the <em>Glimma</em> package. This function was written to make interactive mean-difference plots by default (as we will see later) but can be re-configured to give a volcano plot by selecting the columns of interest from an unsorted top table of differential expression results.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">group2 &lt;-<span class="st"> </span>group
 <span class="kw">levels</span>(group2) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;basal.lactate&quot;</span>,<span class="st">&quot;basal.preg&quot;</span>,<span class="st">&quot;basal.virgin&quot;</span>,<span class="st">&quot;lum.lactate&quot;</span>, <span class="st">&quot;lum.preg&quot;</span>, <span class="st">&quot;lum.virgin&quot;</span>)
@@ -1187,7 +1207,7 @@ res.treat &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit.
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)
 <span class="kw">plotMD</span>(fit.treat,<span class="dt">coef=</span><span class="dv">2</span>,<span class="dt">status=</span>res.treat[,<span class="st">&quot;L.PregVsLac&quot;</span>])
 <span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>,<span class="dt">col=</span><span class="st">&quot;grey&quot;</span>)</code></pre></div>
-<p><img src="fig-06/unnamed-chunk-57-1.png" title="plot of chunk unnamed-chunk-57" alt="plot of chunk unnamed-chunk-57" style="display: block; margin: auto;" /></p>
+<p><img src="fig-06/unnamed-chunk-60-1.png" title="plot of chunk unnamed-chunk-60" alt="plot of chunk unnamed-chunk-60" style="display: block; margin: auto;" /></p>
 <section class="challenge panel panel-success">
 <div class="panel-heading">
 <h2 id="challenge-8"><span class="glyphicon glyphicon-pencil"></span>Challenge</h2>
@@ -1197,6 +1217,7 @@ res.treat &lt;-<span class="st"> </span><span class="kw">decideTests</span>(fit.
 <p>HINT: what is the corresponding logFC value of 50% fold change? Assume basal.pregnant is 50% higher than basal.lactate</p>
 </div>
 </section>
+<p><strong>Solution</strong></p>
 <pre class="output"><code>   B.PregVsLac L.PregVsLac
 -1         234        1328
 0        15250       13397
@@ -1233,19 +1254,9 @@ toptreat &lt;-<span class="st"> </span><span class="kw">topTreat</span>(fit.trea
 <span class="dt">display.columns=</span><span class="kw">c</span>(<span class="st">&quot;ENTREZID&quot;</span>, <span class="st">&quot;SYMBOL&quot;</span>, <span class="st">&quot;GENENAME&quot;</span>),
 <span class="dt">html=</span><span class="st">&quot;MD-Plot&quot;</span>, <span class="dt">folder=</span><span class="st">&quot;md&quot;</span>, <span class="dt">main=</span><span class="st">&quot;B.PregVsLac&quot;</span>)</code></pre></div>
 <p>As for the volcano plot example above, this function creates an html page (./md/MD-Plot.html) that allows the user to search for their favourite gene.</p>
-<p><strong>We need to save a few data objects to use for the gene set testing section for Day 2 so we don’t have to rerun everything</strong></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># save(fit.cont,seqdata,v,design,cont.matrix,file=&quot;day1objects.Rdata&quot;)</span></code></pre></div>
-<h2 id="degust-analysis">Degust analysis</h2>
-<ul>
-<li>Load in the results from the limma-voom analysis using the Degust GUI</li>
-<li>Visualise the plots and results</li>
-</ul>
-<p><a href="degust.pdf">Degust instructions</a> (pdf)</p>
 <h2 id="gene-set-testing">Gene Set Testing</h2>
 <p>Sometimes there is quite a long list of differentially expressed genes to interpret after a differential expression analysis, and it is usually infeasible to go through the list one gene at a time trying to understand it’s biological function. A common downstream procedure is gene set testing, which aims to understand which pathways/gene networks the differentially expressed genes are implicated in.</p>
 <p>There are a number of different ways to go about testing for enrichment of biological pathways, and the test you choose usually depends on the question you’re asking. There are two kinds of tests: self-contained and competitive gene set tests. Self-contained tests, which include the <code>ROAST</code> procedure, ask the question “Are the genes in the set/pathway differentially expressed as a whole?” Competitive gene set tests, like <code>goana</code> and <code>camera</code> ask the question whether the differentially expressed genes tend to be over-represented in the gene set, compared to all the other genes in the experiment. These different questions use different statistical methodology.</p>
-<p><strong>Load in the saved data from the previous day</strong></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># load(&quot;day1objects.Rdata&quot;)</span></code></pre></div>
 <h3 id="gene-ontology-testing-with-goana">Gene ontology testing with goana</h3>
 <p>First, we will perform a gene ontology (GO) enrichment analysis using the <code>goana</code> function in <em>limma</em>. There are approximately 20,000 GO terms, and they are split into three categories: BP (biological process), MF (molecular function) and CC (cellular component). <code>goana</code> uses annotation from the appropriate Bioconductor package and can be used for any of the five species specified (Hs, Mm, Rn, Dm or Pt). <code>goana</code> has an advantage over other methods, such as DAVID, in that there is the option to take into account the gene length bias inherent in RNA-Seq data.</p>
 <p>Suppose we want to identify GO terms that are over-represented in the basal lactating group compared to the basal pregnancy group. This can be achieved by applying the goana function to the differential expression results of that comparison. <code>goana</code> takes the <code>fit.cont</code> object, the coefficient of interest and the species. The top set of most enriched GO terms can be viewed with the topGO function.</p>
@@ -1398,6 +1409,7 @@ FALSE  TRUE
 </ol>
 </div>
 </section>
+<p><strong>Solution</strong></p>
 <pre class="output"><code>
 FALSE  TRUE 
    45     5 
@@ -1453,158 +1465,128 @@ HALLMARK_ALLOGRAFT_REJECTION       3.028704e-01
 HALLMARK_MTORC1_SIGNALING          5.441718e-01
 </code></pre>
 <p>Let’s see if there are any MYC signalling pathways in MsigDB C2 collection. We can do this with the <code>grep</code> command on the names of the gene sets.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">grep</span>(<span class="st">&quot;MYC&quot;</span>,<span class="kw">names</span>(c2.ind))</code></pre></div>
-<pre class="output"><code> [1]  496  544  621  805 1591 1592 1678 1679 1680 1681 1682 1683 1783 1784
-[15] 1977 2028 2029 2030 2031 2032 2194 2195 2203 2204 2205 2206 2207 2208
-[29] 2284 2335 2435 2436 2506 2507 2600 2609 2620 2621 2629 2676 2694 2697
-[43] 2706 2716 2727 2743 2744 2748 2786 2824 3311 3341 3342 3401 3402 3403
-[57] 3765 3817 3943 3944 4204 4205 4206 4207 4208 4294 4433 4434 4507 4508
-[71] 4509 4616
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">grep</span>(<span class="st">&quot;MYC_&quot;</span>,<span class="kw">names</span>(c2.ind))</code></pre></div>
+<pre class="output"><code> [1]  496  544  621 1591 1592 1783 1784 2029 2030 2031 2032 2194 2195 2203
+[15] 2204 2435 2436 2506 2507 2600 2609 2620 2621 2629 2676 2694 2706 2716
+[29] 2727 2744 2786 2824 3311 3401 3817 3943 3944 4204 4205 4206 4207 4433
+[43] 4434 4616
 </code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Let&#39;s save these so that we can subset c2.ind to test all gene sets with MYC in the name</span>
-myc &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="st">&quot;MYC&quot;</span>,<span class="kw">names</span>(c2.ind))
+myc &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="st">&quot;MYC_&quot;</span>,<span class="kw">names</span>(c2.ind))
 <span class="co"># What are these pathways called?</span>
 <span class="kw">names</span>(c2.ind)[myc]</code></pre></div>
-<pre class="output"><code> [1] &quot;PID_MYC_ACTIV_PATHWAY&quot;                                                    
- [2] &quot;PID_MYC_PATHWAY&quot;                                                          
- [3] &quot;PID_MYC_REPRESS_PATHWAY&quot;                                                  
- [4] &quot;REACTOME_LATENT_INFECTION_OF_HOMO_SAPIENS_WITH_MYCOBACTERIUM_TUBERCULOSIS&quot;
- [5] &quot;ODONNELL_TARGETS_OF_MYC_AND_TFRC_UP&quot;                                      
- [6] &quot;ODONNELL_TARGETS_OF_MYC_AND_TFRC_DN&quot;                                      
- [7] &quot;HAHTOLA_MYCOSIS_FUNGOIDES_SKIN_UP&quot;                                        
- [8] &quot;HAHTOLA_MYCOSIS_FUNGOIDES_SKIN_DN&quot;                                        
- [9] &quot;HAHTOLA_MYCOSIS_FUNGOIDES_CD4_UP&quot;                                         
-[10] &quot;HAHTOLA_MYCOSIS_FUNGOIDES_CD4_DN&quot;                                         
-[11] &quot;HAHTOLA_MYCOSIS_FUNGOIDES_UP&quot;                                             
-[12] &quot;HAHTOLA_MYCOSIS_FUNGOIDES_DN&quot;                                             
-[13] &quot;CAIRO_PML_TARGETS_BOUND_BY_MYC_UP&quot;                                        
-[14] &quot;CAIRO_PML_TARGETS_BOUND_BY_MYC_DN&quot;                                        
-[15] &quot;LASTOWSKA_COAMPLIFIED_WITH_MYCN&quot;                                          
-[16] &quot;SCHLOSSER_SERUM_RESPONSE_AUGMENTED_BY_MYC&quot;                                
-[17] &quot;SCHLOSSER_MYC_AND_SERUM_RESPONSE_SYNERGY&quot;                                 
-[18] &quot;SCHLOSSER_MYC_TARGETS_REPRESSED_BY_SERUM&quot;                                 
-[19] &quot;SCHLOSSER_MYC_TARGETS_AND_SERUM_RESPONSE_DN&quot;                              
-[20] &quot;SCHLOSSER_MYC_TARGETS_AND_SERUM_RESPONSE_UP&quot;                              
-[21] &quot;CEBALLOS_TARGETS_OF_TP53_AND_MYC_UP&quot;                                      
-[22] &quot;CEBALLOS_TARGETS_OF_TP53_AND_MYC_DN&quot;                                      
-[23] &quot;KIM_MYC_AMPLIFICATION_TARGETS_UP&quot;                                         
-[24] &quot;KIM_MYC_AMPLIFICATION_TARGETS_DN&quot;                                         
-[25] &quot;KIM_MYCN_AMPLIFICATION_TARGETS_UP&quot;                                        
-[26] &quot;KIM_MYCN_AMPLIFICATION_TARGETS_DN&quot;                                        
-[27] &quot;KIM_MYCL1_AMPLIFICATION_TARGETS_UP&quot;                                       
-[28] &quot;KIM_MYCL1_AMPLIFICATION_TARGETS_DN&quot;                                       
-[29] &quot;COWLING_MYCN_TARGETS&quot;                                                     
-[30] &quot;WEI_MYCN_TARGETS_WITH_E_BOX&quot;                                              
-[31] &quot;BENPORATH_MYC_TARGETS_WITH_EBOX&quot;                                          
-[32] &quot;BENPORATH_MYC_MAX_TARGETS&quot;                                                
-[33] &quot;MORI_EMU_MYC_LYMPHOMA_BY_ONSET_TIME_UP&quot;                                   
-[34] &quot;MORI_EMU_MYC_LYMPHOMA_BY_ONSET_TIME_DN&quot;                                   
-[35] &quot;SCHUHMACHER_MYC_TARGETS_DN&quot;                                               
-[36] &quot;LEE_LIVER_CANCER_MYC_TGFA_DN&quot;                                             
-[37] &quot;LEE_LIVER_CANCER_MYC_UP&quot;                                                  
-[38] &quot;MENSSEN_MYC_TARGETS&quot;                                                      
-[39] &quot;LEE_LIVER_CANCER_MYC_TGFA_UP&quot;                                             
-[40] &quot;LEE_LIVER_CANCER_MYC_E2F1_DN&quot;                                             
-[41] &quot;LEE_LIVER_CANCER_MYC_E2F1_UP&quot;                                             
-[42] &quot;FERNANDEZ_BOUND_BY_MYC&quot;                                                   
-[43] &quot;SCHUHMACHER_MYC_TARGETS_UP&quot;                                               
-[44] &quot;LEE_LIVER_CANCER_MYC_DN&quot;                                                  
-[45] &quot;COLLER_MYC_TARGETS_UP&quot;                                                    
-[46] &quot;PENG_RAPAMYCIN_RESPONSE_DN&quot;                                               
-[47] &quot;COLLER_MYC_TARGETS_DN&quot;                                                    
-[48] &quot;PENG_RAPAMYCIN_RESPONSE_UP&quot;                                               
-[49] &quot;YU_MYC_TARGETS_UP&quot;                                                        
-[50] &quot;YU_MYC_TARGETS_DN&quot;                                                        
-[51] &quot;BILD_MYC_ONCOGENIC_SIGNATURE&quot;                                             
-[52] &quot;MCCOLLUM_GELDANAMYCIN_RESISTANCE_UP&quot;                                      
-[53] &quot;MCCOLLUM_GELDANAMYCIN_RESISTANCE_DN&quot;                                      
-[54] &quot;SANSOM_APC_MYC_TARGETS&quot;                                                   
-[55] &quot;SANSOM_APC_TARGETS_REQUIRE_MYC&quot;                                           
-[56] &quot;SANSOM_WNT_PATHWAY_REQUIRE_MYC&quot;                                           
-[57] &quot;WANG_NEOPLASTIC_TRANSFORMATION_BY_CCND1_MYC&quot;                              
-[58] &quot;SOUCEK_MYC_TARGETS&quot;                                                       
-[59] &quot;ELLWOOD_MYC_TARGETS_UP&quot;                                                   
-[60] &quot;ELLWOOD_MYC_TARGETS_DN&quot;                                                   
-[61] &quot;DANG_REGULATED_BY_MYC_UP&quot;                                                 
-[62] &quot;DANG_REGULATED_BY_MYC_DN&quot;                                                 
-[63] &quot;DANG_MYC_TARGETS_UP&quot;                                                      
-[64] &quot;DANG_MYC_TARGETS_DN&quot;                                                      
-[65] &quot;DANG_BOUND_BY_MYC&quot;                                                        
-[66] &quot;ZEMBUTSU_SENSITIVITY_TO_MITOMYCIN&quot;                                        
-[67] &quot;ACOSTA_PROLIFERATION_INDEPENDENT_MYC_TARGETS_UP&quot;                          
-[68] &quot;ACOSTA_PROLIFERATION_INDEPENDENT_MYC_TARGETS_DN&quot;                          
-[69] &quot;BILANGES_SERUM_AND_RAPAMYCIN_SENSITIVE_GENES&quot;                             
-[70] &quot;BILANGES_RAPAMYCIN_SENSITIVE_GENES&quot;                                       
-[71] &quot;BILANGES_RAPAMYCIN_SENSITIVE_VIA_TSC1_AND_TSC2&quot;                           
-[72] &quot;ALFANO_MYC_TARGETS&quot;                                                       
+<pre class="output"><code> [1] &quot;PID_MYC_ACTIV_PATHWAY&quot;                          
+ [2] &quot;PID_MYC_PATHWAY&quot;                                
+ [3] &quot;PID_MYC_REPRESS_PATHWAY&quot;                        
+ [4] &quot;ODONNELL_TARGETS_OF_MYC_AND_TFRC_UP&quot;            
+ [5] &quot;ODONNELL_TARGETS_OF_MYC_AND_TFRC_DN&quot;            
+ [6] &quot;CAIRO_PML_TARGETS_BOUND_BY_MYC_UP&quot;              
+ [7] &quot;CAIRO_PML_TARGETS_BOUND_BY_MYC_DN&quot;              
+ [8] &quot;SCHLOSSER_MYC_AND_SERUM_RESPONSE_SYNERGY&quot;       
+ [9] &quot;SCHLOSSER_MYC_TARGETS_REPRESSED_BY_SERUM&quot;       
+[10] &quot;SCHLOSSER_MYC_TARGETS_AND_SERUM_RESPONSE_DN&quot;    
+[11] &quot;SCHLOSSER_MYC_TARGETS_AND_SERUM_RESPONSE_UP&quot;    
+[12] &quot;CEBALLOS_TARGETS_OF_TP53_AND_MYC_UP&quot;            
+[13] &quot;CEBALLOS_TARGETS_OF_TP53_AND_MYC_DN&quot;            
+[14] &quot;KIM_MYC_AMPLIFICATION_TARGETS_UP&quot;               
+[15] &quot;KIM_MYC_AMPLIFICATION_TARGETS_DN&quot;               
+[16] &quot;BENPORATH_MYC_TARGETS_WITH_EBOX&quot;                
+[17] &quot;BENPORATH_MYC_MAX_TARGETS&quot;                      
+[18] &quot;MORI_EMU_MYC_LYMPHOMA_BY_ONSET_TIME_UP&quot;         
+[19] &quot;MORI_EMU_MYC_LYMPHOMA_BY_ONSET_TIME_DN&quot;         
+[20] &quot;SCHUHMACHER_MYC_TARGETS_DN&quot;                     
+[21] &quot;LEE_LIVER_CANCER_MYC_TGFA_DN&quot;                   
+[22] &quot;LEE_LIVER_CANCER_MYC_UP&quot;                        
+[23] &quot;MENSSEN_MYC_TARGETS&quot;                            
+[24] &quot;LEE_LIVER_CANCER_MYC_TGFA_UP&quot;                   
+[25] &quot;LEE_LIVER_CANCER_MYC_E2F1_DN&quot;                   
+[26] &quot;LEE_LIVER_CANCER_MYC_E2F1_UP&quot;                   
+[27] &quot;SCHUHMACHER_MYC_TARGETS_UP&quot;                     
+[28] &quot;LEE_LIVER_CANCER_MYC_DN&quot;                        
+[29] &quot;COLLER_MYC_TARGETS_UP&quot;                          
+[30] &quot;COLLER_MYC_TARGETS_DN&quot;                          
+[31] &quot;YU_MYC_TARGETS_UP&quot;                              
+[32] &quot;YU_MYC_TARGETS_DN&quot;                              
+[33] &quot;BILD_MYC_ONCOGENIC_SIGNATURE&quot;                   
+[34] &quot;SANSOM_APC_MYC_TARGETS&quot;                         
+[35] &quot;SOUCEK_MYC_TARGETS&quot;                             
+[36] &quot;ELLWOOD_MYC_TARGETS_UP&quot;                         
+[37] &quot;ELLWOOD_MYC_TARGETS_DN&quot;                         
+[38] &quot;DANG_REGULATED_BY_MYC_UP&quot;                       
+[39] &quot;DANG_REGULATED_BY_MYC_DN&quot;                       
+[40] &quot;DANG_MYC_TARGETS_UP&quot;                            
+[41] &quot;DANG_MYC_TARGETS_DN&quot;                            
+[42] &quot;ACOSTA_PROLIFERATION_INDEPENDENT_MYC_TARGETS_UP&quot;
+[43] &quot;ACOSTA_PROLIFERATION_INDEPENDENT_MYC_TARGETS_DN&quot;
+[44] &quot;ALFANO_MYC_TARGETS&quot;                             
 </code></pre>
 <p>Let’s use ROAST to see if these MYC related gene sets tend to be differentially expressed. Note that the syntax for <code>camera</code> and <code>roast</code> is almost identical.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">myc.rst &lt;-<span class="st"> </span><span class="kw">roast</span>(v,<span class="dt">index=</span>c2.ind[myc],<span class="dt">design=</span>design,<span class="dt">contrast=</span>cont.matrix[,<span class="dv">1</span>],<span class="dt">nrot=</span><span class="dv">999</span>)
 myc.rst[<span class="dv">1</span>:<span class="dv">15</span>,]</code></pre></div>
 <pre class="output"><code>                                                NGenes   PropDown
-COLLER_MYC_TARGETS_UP                               24 0.04166667
+SCHLOSSER_MYC_TARGETS_AND_SERUM_RESPONSE_DN         48 0.06250000
 MENSSEN_MYC_TARGETS                                 54 0.11111111
-CAIRO_PML_TARGETS_BOUND_BY_MYC_UP                   24 0.08333333
-MCCOLLUM_GELDANAMYCIN_RESISTANCE_UP                  8 0.75000000
-DANG_REGULATED_BY_MYC_UP                            69 0.10144928
+DANG_MYC_TARGETS_UP                                144 0.09722222
 PID_MYC_ACTIV_PATHWAY                               79 0.12658228
-HAHTOLA_MYCOSIS_FUNGOIDES_DN                        11 0.18181818
-BILANGES_RAPAMYCIN_SENSITIVE_VIA_TSC1_AND_TSC2      74 0.13513514
-SCHLOSSER_MYC_AND_SERUM_RESPONSE_SYNERGY            32 0.15625000
+SCHLOSSER_MYC_TARGETS_REPRESSED_BY_SERUM           156 0.12820513
 KIM_MYC_AMPLIFICATION_TARGETS_UP                   176 0.14772727
 BILD_MYC_ONCOGENIC_SIGNATURE                       187 0.27272727
-KIM_MYCN_AMPLIFICATION_TARGETS_UP                   77 0.19480519
 BENPORATH_MYC_TARGETS_WITH_EBOX                    216 0.21759259
-DANG_BOUND_BY_MYC                                 1041 0.21998079
-ACOSTA_PROLIFERATION_INDEPENDENT_MYC_TARGETS_DN     96 0.40625000
+MORI_EMU_MYC_LYMPHOMA_BY_ONSET_TIME_DN              16 0.37500000
+COLLER_MYC_TARGETS_UP                               24 0.04166667
+DANG_REGULATED_BY_MYC_UP                            69 0.10144928
+SCHLOSSER_MYC_TARGETS_AND_SERUM_RESPONSE_UP         48 0.12500000
+LEE_LIVER_CANCER_MYC_UP                             50 0.30000000
+SCHLOSSER_MYC_AND_SERUM_RESPONSE_SYNERGY            32 0.15625000
+ACOSTA_PROLIFERATION_INDEPENDENT_MYC_TARGETS_UP     82 0.19512195
                                                    PropUp Direction PValue
-COLLER_MYC_TARGETS_UP                           0.8333333        Up  0.001
+SCHLOSSER_MYC_TARGETS_AND_SERUM_RESPONSE_DN     0.7916667        Up  0.001
 MENSSEN_MYC_TARGETS                             0.7592593        Up  0.001
-CAIRO_PML_TARGETS_BOUND_BY_MYC_UP               0.7500000        Up  0.001
-MCCOLLUM_GELDANAMYCIN_RESISTANCE_UP             0.2500000      Down  0.001
-DANG_REGULATED_BY_MYC_UP                        0.7101449        Up  0.001
+DANG_MYC_TARGETS_UP                             0.7013889        Up  0.001
 PID_MYC_ACTIV_PATHWAY                           0.6455696        Up  0.001
-HAHTOLA_MYCOSIS_FUNGOIDES_DN                    0.6363636        Up  0.001
-BILANGES_RAPAMYCIN_SENSITIVE_VIA_TSC1_AND_TSC2  0.5405405        Up  0.001
-SCHLOSSER_MYC_AND_SERUM_RESPONSE_SYNERGY        0.5312500        Up  0.001
+SCHLOSSER_MYC_TARGETS_REPRESSED_BY_SERUM        0.6217949        Up  0.001
 KIM_MYC_AMPLIFICATION_TARGETS_UP                0.5284091        Up  0.001
 BILD_MYC_ONCOGENIC_SIGNATURE                    0.4973262        Up  0.001
-KIM_MYCN_AMPLIFICATION_TARGETS_UP               0.4415584        Up  0.001
 BENPORATH_MYC_TARGETS_WITH_EBOX                 0.4259259        Up  0.001
-DANG_BOUND_BY_MYC                               0.4082613        Up  0.001
-ACOSTA_PROLIFERATION_INDEPENDENT_MYC_TARGETS_DN 0.1875000      Down  0.001
-                                                  FDR PValue.Mixed
-COLLER_MYC_TARGETS_UP                           0.002        0.001
-MENSSEN_MYC_TARGETS                             0.002        0.001
-CAIRO_PML_TARGETS_BOUND_BY_MYC_UP               0.002        0.001
-MCCOLLUM_GELDANAMYCIN_RESISTANCE_UP             0.002        0.001
-DANG_REGULATED_BY_MYC_UP                        0.002        0.001
-PID_MYC_ACTIV_PATHWAY                           0.002        0.001
-HAHTOLA_MYCOSIS_FUNGOIDES_DN                    0.002        0.004
-BILANGES_RAPAMYCIN_SENSITIVE_VIA_TSC1_AND_TSC2  0.002        0.001
-SCHLOSSER_MYC_AND_SERUM_RESPONSE_SYNERGY        0.002        0.001
-KIM_MYC_AMPLIFICATION_TARGETS_UP                0.002        0.001
-BILD_MYC_ONCOGENIC_SIGNATURE                    0.002        0.001
-KIM_MYCN_AMPLIFICATION_TARGETS_UP               0.002        0.001
-BENPORATH_MYC_TARGETS_WITH_EBOX                 0.002        0.001
-DANG_BOUND_BY_MYC                               0.002        0.001
-ACOSTA_PROLIFERATION_INDEPENDENT_MYC_TARGETS_DN 0.002        0.002
+MORI_EMU_MYC_LYMPHOMA_BY_ONSET_TIME_DN          0.3125000      Down  0.001
+COLLER_MYC_TARGETS_UP                           0.8333333        Up  0.002
+DANG_REGULATED_BY_MYC_UP                        0.7101449        Up  0.002
+SCHLOSSER_MYC_TARGETS_AND_SERUM_RESPONSE_UP     0.6458333        Up  0.002
+LEE_LIVER_CANCER_MYC_UP                         0.5400000        Up  0.002
+SCHLOSSER_MYC_AND_SERUM_RESPONSE_SYNERGY        0.5312500        Up  0.002
+ACOSTA_PROLIFERATION_INDEPENDENT_MYC_TARGETS_UP 0.4390244        Up  0.002
+                                                        FDR PValue.Mixed
+SCHLOSSER_MYC_TARGETS_AND_SERUM_RESPONSE_DN     0.002444444        0.001
+MENSSEN_MYC_TARGETS                             0.002444444        0.001
+DANG_MYC_TARGETS_UP                             0.002444444        0.001
+PID_MYC_ACTIV_PATHWAY                           0.002444444        0.001
+SCHLOSSER_MYC_TARGETS_REPRESSED_BY_SERUM        0.002444444        0.001
+KIM_MYC_AMPLIFICATION_TARGETS_UP                0.002444444        0.001
+BILD_MYC_ONCOGENIC_SIGNATURE                    0.002444444        0.001
+BENPORATH_MYC_TARGETS_WITH_EBOX                 0.002444444        0.001
+MORI_EMU_MYC_LYMPHOMA_BY_ONSET_TIME_DN          0.002444444        0.002
+COLLER_MYC_TARGETS_UP                           0.004125000        0.002
+DANG_REGULATED_BY_MYC_UP                        0.004125000        0.002
+SCHLOSSER_MYC_TARGETS_AND_SERUM_RESPONSE_UP     0.004125000        0.002
+LEE_LIVER_CANCER_MYC_UP                         0.004125000        0.001
+SCHLOSSER_MYC_AND_SERUM_RESPONSE_SYNERGY        0.004125000        0.001
+ACOSTA_PROLIFERATION_INDEPENDENT_MYC_TARGETS_UP 0.004125000        0.002
                                                 FDR.Mixed
-COLLER_MYC_TARGETS_UP                               0.001
+SCHLOSSER_MYC_TARGETS_AND_SERUM_RESPONSE_DN         0.001
 MENSSEN_MYC_TARGETS                                 0.001
-CAIRO_PML_TARGETS_BOUND_BY_MYC_UP                   0.001
-MCCOLLUM_GELDANAMYCIN_RESISTANCE_UP                 0.001
-DANG_REGULATED_BY_MYC_UP                            0.001
+DANG_MYC_TARGETS_UP                                 0.001
 PID_MYC_ACTIV_PATHWAY                               0.001
-HAHTOLA_MYCOSIS_FUNGOIDES_DN                        0.004
-BILANGES_RAPAMYCIN_SENSITIVE_VIA_TSC1_AND_TSC2      0.001
-SCHLOSSER_MYC_AND_SERUM_RESPONSE_SYNERGY            0.001
+SCHLOSSER_MYC_TARGETS_REPRESSED_BY_SERUM            0.001
 KIM_MYC_AMPLIFICATION_TARGETS_UP                    0.001
 BILD_MYC_ONCOGENIC_SIGNATURE                        0.001
-KIM_MYCN_AMPLIFICATION_TARGETS_UP                   0.001
 BENPORATH_MYC_TARGETS_WITH_EBOX                     0.001
-DANG_BOUND_BY_MYC                                   0.001
-ACOSTA_PROLIFERATION_INDEPENDENT_MYC_TARGETS_DN     0.002
+MORI_EMU_MYC_LYMPHOMA_BY_ONSET_TIME_DN              0.002
+COLLER_MYC_TARGETS_UP                               0.002
+DANG_REGULATED_BY_MYC_UP                            0.002
+SCHLOSSER_MYC_TARGETS_AND_SERUM_RESPONSE_UP         0.002
+LEE_LIVER_CANCER_MYC_UP                             0.001
+SCHLOSSER_MYC_AND_SERUM_RESPONSE_SYNERGY            0.001
+ACOSTA_PROLIFERATION_INDEPENDENT_MYC_TARGETS_UP     0.002
 </code></pre>
 <p>Each row corresponds to a single gene set. The NGenes column gives the number of genes in each set. The PropDown and PropUp columns contain the proportions of genes in the set that are down- and up-regulated, respectively, with absolute fold changes greater than 2. The net direction of change is determined from the significance of changes in each direction, and is shown in the Direction column. The PValue provides evidence for whether the majority of genes in the set are DE in the specified direction, whereas the PValue.Mixed tests for differential expression in any direction. FDRs are computed from the corresponding p-values across all sets.</p>
 <section class="challenge panel panel-success">
@@ -1618,119 +1600,104 @@ ACOSTA_PROLIFERATION_INDEPENDENT_MYC_TARGETS_DN     0.002
 </ol>
 </div>
 </section>
-<pre class="output"><code>                                               NGenes   PropDown
-BILANGES_SERUM_AND_RAPAMYCIN_SENSITIVE_GENES       67 0.02985075
-HAHTOLA_MYCOSIS_FUNGOIDES_DN                       11 0.09090909
-HAHTOLA_MYCOSIS_FUNGOIDES_SKIN_DN                  27 0.18518519
-ELLWOOD_MYC_TARGETS_DN                             40 0.57500000
-MORI_EMU_MYC_LYMPHOMA_BY_ONSET_TIME_DN             16 0.56250000
-BILANGES_RAPAMYCIN_SENSITIVE_VIA_TSC1_AND_TSC2     74 0.28378378
-PID_MYC_PATHWAY                                    25 0.24000000
-LEE_LIVER_CANCER_MYC_E2F1_DN                       42 0.47619048
-BILD_MYC_ONCOGENIC_SIGNATURE                      187 0.29946524
-PID_MYC_REPRESS_PATHWAY                            59 0.25423729
-HAHTOLA_MYCOSIS_FUNGOIDES_SKIN_UP                 169 0.28402367
-KIM_MYC_AMPLIFICATION_TARGETS_DN                   82 0.30487805
-LEE_LIVER_CANCER_MYC_TGFA_DN                       44 0.43181818
-FERNANDEZ_BOUND_BY_MYC                            169 0.28994083
-CEBALLOS_TARGETS_OF_TP53_AND_MYC_UP                22 0.36363636
-                                                   PropUp Direction PValue
-BILANGES_SERUM_AND_RAPAMYCIN_SENSITIVE_GENES   0.94029851        Up  0.001
-HAHTOLA_MYCOSIS_FUNGOIDES_DN                   0.72727273        Up  0.001
-HAHTOLA_MYCOSIS_FUNGOIDES_SKIN_DN              0.66666667        Up  0.001
-ELLWOOD_MYC_TARGETS_DN                         0.25000000      Down  0.001
-MORI_EMU_MYC_LYMPHOMA_BY_ONSET_TIME_DN         0.31250000      Down  0.001
-BILANGES_RAPAMYCIN_SENSITIVE_VIA_TSC1_AND_TSC2 0.51351351        Up  0.001
-PID_MYC_PATHWAY                                0.48000000        Up  0.001
-LEE_LIVER_CANCER_MYC_E2F1_DN                   0.23809524      Down  0.001
-BILD_MYC_ONCOGENIC_SIGNATURE                   0.45989305        Up  0.001
-PID_MYC_REPRESS_PATHWAY                        0.45762712        Up  0.001
-HAHTOLA_MYCOSIS_FUNGOIDES_SKIN_UP              0.45562130        Up  0.001
-KIM_MYC_AMPLIFICATION_TARGETS_DN               0.45121951        Up  0.001
-LEE_LIVER_CANCER_MYC_TGFA_DN                   0.27272727      Down  0.001
-FERNANDEZ_BOUND_BY_MYC                         0.40828402        Up  0.001
-CEBALLOS_TARGETS_OF_TP53_AND_MYC_UP            0.09090909      Down  0.001
-                                                   FDR PValue.Mixed
-BILANGES_SERUM_AND_RAPAMYCIN_SENSITIVE_GENES   0.00225        0.001
-HAHTOLA_MYCOSIS_FUNGOIDES_DN                   0.00225        0.001
-HAHTOLA_MYCOSIS_FUNGOIDES_SKIN_DN              0.00225        0.001
-ELLWOOD_MYC_TARGETS_DN                         0.00225        0.001
-MORI_EMU_MYC_LYMPHOMA_BY_ONSET_TIME_DN         0.00225        0.001
-BILANGES_RAPAMYCIN_SENSITIVE_VIA_TSC1_AND_TSC2 0.00225        0.001
-PID_MYC_PATHWAY                                0.00225        0.001
-LEE_LIVER_CANCER_MYC_E2F1_DN                   0.00225        0.001
-BILD_MYC_ONCOGENIC_SIGNATURE                   0.00225        0.001
-PID_MYC_REPRESS_PATHWAY                        0.00225        0.001
-HAHTOLA_MYCOSIS_FUNGOIDES_SKIN_UP              0.00225        0.001
-KIM_MYC_AMPLIFICATION_TARGETS_DN               0.00225        0.001
-LEE_LIVER_CANCER_MYC_TGFA_DN                   0.00225        0.001
-FERNANDEZ_BOUND_BY_MYC                         0.00225        0.001
-CEBALLOS_TARGETS_OF_TP53_AND_MYC_UP            0.00225        0.001
-                                               FDR.Mixed
-BILANGES_SERUM_AND_RAPAMYCIN_SENSITIVE_GENES       0.001
-HAHTOLA_MYCOSIS_FUNGOIDES_DN                       0.001
-HAHTOLA_MYCOSIS_FUNGOIDES_SKIN_DN                  0.001
-ELLWOOD_MYC_TARGETS_DN                             0.001
-MORI_EMU_MYC_LYMPHOMA_BY_ONSET_TIME_DN             0.001
-BILANGES_RAPAMYCIN_SENSITIVE_VIA_TSC1_AND_TSC2     0.001
-PID_MYC_PATHWAY                                    0.001
-LEE_LIVER_CANCER_MYC_E2F1_DN                       0.001
-BILD_MYC_ONCOGENIC_SIGNATURE                       0.001
-PID_MYC_REPRESS_PATHWAY                            0.001
-HAHTOLA_MYCOSIS_FUNGOIDES_SKIN_UP                  0.001
-KIM_MYC_AMPLIFICATION_TARGETS_DN                   0.001
-LEE_LIVER_CANCER_MYC_TGFA_DN                       0.001
-FERNANDEZ_BOUND_BY_MYC                             0.001
-CEBALLOS_TARGETS_OF_TP53_AND_MYC_UP                0.001
+<p><strong>Solution</strong></p>
+<pre class="output"><code>                                       NGenes  PropDown     PropUp
+ELLWOOD_MYC_TARGETS_DN                     40 0.5750000 0.25000000
+MORI_EMU_MYC_LYMPHOMA_BY_ONSET_TIME_DN     16 0.5625000 0.31250000
+PID_MYC_PATHWAY                            25 0.2400000 0.48000000
+LEE_LIVER_CANCER_MYC_E2F1_DN               42 0.4761905 0.23809524
+PID_MYC_REPRESS_PATHWAY                    59 0.2542373 0.45762712
+BENPORATH_MYC_TARGETS_WITH_EBOX           216 0.3194444 0.43518519
+LEE_LIVER_CANCER_MYC_TGFA_DN               44 0.4318182 0.27272727
+CEBALLOS_TARGETS_OF_TP53_AND_MYC_UP        22 0.3636364 0.09090909
+CEBALLOS_TARGETS_OF_TP53_AND_MYC_DN        33 0.3030303 0.45454545
+ODONNELL_TARGETS_OF_MYC_AND_TFRC_DN        45 0.6666667 0.11111111
+BILD_MYC_ONCOGENIC_SIGNATURE              187 0.2994652 0.45989305
+KIM_MYC_AMPLIFICATION_TARGETS_DN           82 0.3048780 0.45121951
+DANG_MYC_TARGETS_DN                        30 0.1666667 0.56666667
+YU_MYC_TARGETS_UP                          43 0.7209302 0.11627907
+ALFANO_MYC_TARGETS                        220 0.3090909 0.42272727
+                                       Direction PValue         FDR
+ELLWOOD_MYC_TARGETS_DN                      Down  0.001 0.002750000
+MORI_EMU_MYC_LYMPHOMA_BY_ONSET_TIME_DN      Down  0.001 0.002750000
+PID_MYC_PATHWAY                               Up  0.001 0.002750000
+LEE_LIVER_CANCER_MYC_E2F1_DN                Down  0.001 0.002750000
+PID_MYC_REPRESS_PATHWAY                       Up  0.001 0.002750000
+BENPORATH_MYC_TARGETS_WITH_EBOX               Up  0.001 0.002750000
+LEE_LIVER_CANCER_MYC_TGFA_DN                Down  0.001 0.002750000
+CEBALLOS_TARGETS_OF_TP53_AND_MYC_UP         Down  0.001 0.002750000
+CEBALLOS_TARGETS_OF_TP53_AND_MYC_DN           Up  0.002 0.007333333
+ODONNELL_TARGETS_OF_MYC_AND_TFRC_DN         Down  0.003 0.009166667
+BILD_MYC_ONCOGENIC_SIGNATURE                  Up  0.003 0.009166667
+KIM_MYC_AMPLIFICATION_TARGETS_DN              Up  0.003 0.009166667
+DANG_MYC_TARGETS_DN                           Up  0.004 0.011846154
+YU_MYC_TARGETS_UP                           Down  0.005 0.014142857
+ALFANO_MYC_TARGETS                            Up  0.006 0.016133333
+                                       PValue.Mixed FDR.Mixed
+ELLWOOD_MYC_TARGETS_DN                        0.001     0.001
+MORI_EMU_MYC_LYMPHOMA_BY_ONSET_TIME_DN        0.001     0.001
+PID_MYC_PATHWAY                               0.001     0.001
+LEE_LIVER_CANCER_MYC_E2F1_DN                  0.001     0.001
+PID_MYC_REPRESS_PATHWAY                       0.001     0.001
+BENPORATH_MYC_TARGETS_WITH_EBOX               0.001     0.001
+LEE_LIVER_CANCER_MYC_TGFA_DN                  0.001     0.001
+CEBALLOS_TARGETS_OF_TP53_AND_MYC_UP           0.001     0.001
+CEBALLOS_TARGETS_OF_TP53_AND_MYC_DN           0.001     0.001
+ODONNELL_TARGETS_OF_MYC_AND_TFRC_DN           0.002     0.002
+BILD_MYC_ONCOGENIC_SIGNATURE                  0.001     0.001
+KIM_MYC_AMPLIFICATION_TARGETS_DN              0.001     0.001
+DANG_MYC_TARGETS_DN                           0.001     0.001
+YU_MYC_TARGETS_UP                             0.002     0.002
+ALFANO_MYC_TARGETS                            0.001     0.001
 </code></pre>
 <pre class="output"><code>                                    NGenes  PropDown     PropUp Direction
-PID_WNT_NONCANONICAL_PATHWAY            31 0.4516129 0.09677419      Down
 LABBE_WNT3A_TARGETS_UP                 104 0.2307692 0.49038462        Up
+PID_WNT_NONCANONICAL_PATHWAY            31 0.4516129 0.09677419      Down
 WILLERT_WNT_SIGNALING                   22 0.2272727 0.54545455        Up
 SANSOM_WNT_PATHWAY_REQUIRE_MYC          53 0.1886792 0.45283019        Up
 PID_WNT_CANONICAL_PATHWAY               19 0.4736842 0.21052632      Down
 REACTOME_SIGNALING_BY_WNT               62 0.1290323 0.50000000        Up
 BIOCARTA_WNT_PATHWAY                    24 0.2500000 0.33333333        Up
 KEGG_WNT_SIGNALING_PATHWAY             131 0.3740458 0.25190840      Down
-ST_WNT_BETA_CATENIN_PATHWAY             32 0.3125000 0.34375000        Up
 LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP    100 0.3400000 0.38000000        Up
+ST_WNT_BETA_CATENIN_PATHWAY             32 0.3125000 0.34375000        Up
 PID_WNT_SIGNALING_PATHWAY               23 0.3043478 0.30434783        Up
 LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN     90 0.2555556 0.40000000        Up
 ST_WNT_CA2_CYCLIC_GMP_PATHWAY           14 0.2857143 0.35714286        Up
 LABBE_WNT3A_TARGETS_DN                  65 0.2615385 0.27692308        Up
 WNT_SIGNALING                           75 0.3600000 0.30666667      Down
                                     PValue        FDR PValue.Mixed
-PID_WNT_NONCANONICAL_PATHWAY        0.0001 0.00075000       0.0006
-LABBE_WNT3A_TARGETS_UP              0.0002 0.00112500       0.0002
-WILLERT_WNT_SIGNALING               0.0008 0.00375000       0.0007
-SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0020 0.00731250       0.0001
-PID_WNT_CANONICAL_PATHWAY           0.0169 0.04387500       0.0001
-REACTOME_SIGNALING_BY_WNT           0.0176 0.04387500       0.0037
-BIOCARTA_WNT_PATHWAY                0.0377 0.08067857       0.0005
-KEGG_WNT_SIGNALING_PATHWAY          0.0512 0.08741667       0.0001
-ST_WNT_BETA_CATENIN_PATHWAY         0.0525 0.08741667       0.0001
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0646 0.09682500       0.0001
-PID_WNT_SIGNALING_PATHWAY           0.0953 0.12988636       0.0001
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.1601 0.20006250       0.0001
-ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.2657 0.30651923       0.0003
-LABBE_WNT3A_TARGETS_DN              0.5064 0.54251786       0.0003
-WNT_SIGNALING                       0.8812 0.88120000       0.0001
-                                       FDR.Mixed
-PID_WNT_NONCANONICAL_PATHWAY        0.0006346154
-LABBE_WNT3A_TARGETS_UP              0.0002500000
-WILLERT_WNT_SIGNALING               0.0007000000
-SANSOM_WNT_PATHWAY_REQUIRE_MYC      0.0001000000
-PID_WNT_CANONICAL_PATHWAY           0.0001000000
-REACTOME_SIGNALING_BY_WNT           0.0037000000
-BIOCARTA_WNT_PATHWAY                0.0005625000
-KEGG_WNT_SIGNALING_PATHWAY          0.0001000000
-ST_WNT_BETA_CATENIN_PATHWAY         0.0001000000
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP 0.0001000000
-PID_WNT_SIGNALING_PATHWAY           0.0001000000
-LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN 0.0001000000
-ST_WNT_CA2_CYCLIC_GMP_PATHWAY       0.0003409091
-LABBE_WNT3A_TARGETS_DN              0.0003409091
-WNT_SIGNALING                       0.0001000000
+LABBE_WNT3A_TARGETS_UP               0.001 0.00375000        0.001
+PID_WNT_NONCANONICAL_PATHWAY         0.001 0.00375000        0.002
+WILLERT_WNT_SIGNALING                0.002 0.00562500        0.001
+SANSOM_WNT_PATHWAY_REQUIRE_MYC       0.002 0.00562500        0.002
+PID_WNT_CANONICAL_PATHWAY            0.009 0.02550000        0.001
+REACTOME_SIGNALING_BY_WNT            0.018 0.04375000        0.004
+BIOCARTA_WNT_PATHWAY                 0.040 0.08464286        0.002
+KEGG_WNT_SIGNALING_PATHWAY           0.057 0.09525000        0.001
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP  0.063 0.09525000        0.001
+ST_WNT_BETA_CATENIN_PATHWAY          0.064 0.09525000        0.001
+PID_WNT_SIGNALING_PATHWAY            0.090 0.12204545        0.001
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN  0.160 0.19937500        0.001
+ST_WNT_CA2_CYCLIC_GMP_PATHWAY        0.274 0.31557692        0.001
+LABBE_WNT3A_TARGETS_DN               0.519 0.55553571        0.001
+WNT_SIGNALING                        0.891 0.89100000        0.001
+                                    FDR.Mixed
+LABBE_WNT3A_TARGETS_UP                  0.001
+PID_WNT_NONCANONICAL_PATHWAY            0.002
+WILLERT_WNT_SIGNALING                   0.001
+SANSOM_WNT_PATHWAY_REQUIRE_MYC          0.002
+PID_WNT_CANONICAL_PATHWAY               0.001
+REACTOME_SIGNALING_BY_WNT               0.004
+BIOCARTA_WNT_PATHWAY                    0.002
+KEGG_WNT_SIGNALING_PATHWAY              0.001
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_UP     0.001
+ST_WNT_BETA_CATENIN_PATHWAY             0.001
+PID_WNT_SIGNALING_PATHWAY               0.001
+LABBE_TARGETS_OF_TGFB1_AND_WNT3A_DN     0.001
+ST_WNT_CA2_CYCLIC_GMP_PATHWAY           0.001
+LABBE_WNT3A_TARGETS_DN                  0.001
+WNT_SIGNALING                           0.001
 </code></pre>
 <p>Notes</p>
 <ul>
@@ -1775,11 +1742,11 @@ WNT_SIGNALING                       0.0001000000
 </code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))
 <span class="co"># barcode plot with logFCs</span>
-<span class="kw">barcodeplot</span>(fit.cont$coeff[,<span class="dv">1</span>], <span class="dt">index=</span>c2.ind[[<span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>]], <span class="dt">main=</span><span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>)</code></pre></div>
-<p><img src="fig-06/unnamed-chunk-77-1.png" title="plot of chunk unnamed-chunk-77" alt="plot of chunk unnamed-chunk-77" style="display: block; margin: auto;" /></p>
+<span class="kw">barcodeplot</span>(fit.cont$coeff[,<span class="dv">1</span>], <span class="dt">index=</span>c2.ind[[<span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>]], <span class="dt">main=</span><span class="st">&quot;LogFC: MENSSEN_MYC_TARGETS&quot;</span>)</code></pre></div>
+<p><img src="fig-06/unnamed-chunk-78-1.png" title="plot of chunk unnamed-chunk-78" alt="plot of chunk unnamed-chunk-78" style="display: block; margin: auto;" /></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># barcode plot using t-statistics</span>
-<span class="kw">barcodeplot</span>(fit.cont$t[,<span class="dv">1</span>], <span class="dt">index=</span>c2.ind[[<span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>]], <span class="dt">main=</span><span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>)</code></pre></div>
-<p><img src="fig-06/unnamed-chunk-77-2.png" title="plot of chunk unnamed-chunk-77" alt="plot of chunk unnamed-chunk-77" style="display: block; margin: auto;" /></p>
+<span class="kw">barcodeplot</span>(fit.cont$t[,<span class="dv">1</span>], <span class="dt">index=</span>c2.ind[[<span class="st">&quot;MENSSEN_MYC_TARGETS&quot;</span>]], <span class="dt">main=</span><span class="st">&quot;T-statistic: MENSSEN_MYC_TARGETS&quot;</span>)</code></pre></div>
+<p><img src="fig-06/unnamed-chunk-78-2.png" title="plot of chunk unnamed-chunk-78" alt="plot of chunk unnamed-chunk-78" style="display: block; margin: auto;" /></p>
 <p>Here, genes are represented by bars and are ranked from left to right by decreasing log-fold change or t-statistic. This forms the barcode-like pattern. The line above the barcode shows the relative local enrichment of the vertical bars in each part of the plot. The barcodeplot shows that the genes in this gene set tend to be up-regulated between pregnant and lactating in basal cells.</p>
 <section class="challenge panel panel-success">
 <div class="panel-heading">
@@ -1793,7 +1760,7 @@ WNT_SIGNALING                       0.0001000000
 </ol>
 </div>
 </section>
-<p><img src="fig-06/unnamed-chunk-78-1.png" title="plot of chunk unnamed-chunk-78" alt="plot of chunk unnamed-chunk-78" style="display: block; margin: auto;" /><img src="fig-06/unnamed-chunk-78-2.png" title="plot of chunk unnamed-chunk-78" alt="plot of chunk unnamed-chunk-78" style="display: block; margin: auto;" /><img src="fig-06/unnamed-chunk-78-3.png" title="plot of chunk unnamed-chunk-78" alt="plot of chunk unnamed-chunk-78" style="display: block; margin: auto;" /></p>
+<p><strong>Solution</strong> <img src="fig-06/unnamed-chunk-79-1.png" title="plot of chunk unnamed-chunk-79" alt="plot of chunk unnamed-chunk-79" style="display: block; margin: auto;" /><img src="fig-06/unnamed-chunk-79-2.png" title="plot of chunk unnamed-chunk-79" alt="plot of chunk unnamed-chunk-79" style="display: block; margin: auto;" /><img src="fig-06/unnamed-chunk-79-3.png" title="plot of chunk unnamed-chunk-79" alt="plot of chunk unnamed-chunk-79" style="display: block; margin: auto;" /></p>
 <h1 id="record-package-and-version-info-with-sessioninfo">Record package and version info with sessionInfo()</h1>
 <p>The session information describes the versions of R and of the packages that were used in the analysis. This is useful for record-keeping purposes, and ensures that an analysis can be reproduced even when the software is updated over time.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sessionInfo</span>()</code></pre></div>
