@@ -19,8 +19,7 @@ opts_chunk$set(fig.path = "fig-09/")
 * counts_Drosophila.txt
 * targetsD.txt
 
-Available from [https://figshare.com/s/f5d63d8c265a05618137](https://figshare.com/s/f5d63d8c265a05618137)
-(you will already have downloaded it with the rest of the Day 2 data)
+Available from [https://figshare.com/s/e08e71c42f118dbe8be6](https://figshare.com/s/e08e71c42f118dbe8be6).
 
 ## Libraries needed
 
