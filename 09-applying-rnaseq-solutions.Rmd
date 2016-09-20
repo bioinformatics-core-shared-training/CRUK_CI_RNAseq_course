@@ -12,6 +12,7 @@ minutes: 15
 ```{r, include=FALSE}
 source("tools/chunk-options.R")
 opts_chunk$set(fig.path = "fig-09/")
+
 ```
 
 ## Data files needed
@@ -136,29 +137,37 @@ First, check the library sizes:
 barplot(y$samples$lib.size)
 ```
 
-Next check the distribution of the counts using an relative log expression plot:
+Next check the distribution of the counts using a boxplot:
 
 ```{r}
-plotRLE(y$counts)
-```
-
-It's a bit hard to see what's going on so we can zoom in to the y axis
-
-```{r}
-plotRLE(y$counts,ylim=c(-1,1))
+par(mfrow=c(1,1))
+# Get log2 counts per million
+logcpm <- cpm(y$counts,log=TRUE)
+# Check distributions of samples using boxplots
+boxplot(logcpm, xlab="", ylab="Log2 counts per million",las=2,outline=FALSE)
+# Let's add a blue horizontal line that corresponds to the median logCPM
+abline(h=median(logcpm),col="blue")
+title("Boxplots of logCPMs (unnormalised)")
 ```
 
 We can colour by our groups, or by the different library prep.
 
 ```{r}
-par(mfrow=c(1,2))
+par(mfrow=c(1,2),oma=c(2,0,0,0))
 group.col <- c("red","blue")[targets$Group]
-plotRLE(y$counts,ylim=c(-1,1),col=group.col)
+boxplot(logcpm, xlab="", ylab="Log2 counts per million",las=2,col=group.col,
+        pars=list(cex.lab=0.8,cex.axis=0.8))
+abline(h=median(logcpm),col="blue")
+title("Boxplots of logCPMs\n(coloured by groups)",cex.main=0.8)
+
 lib.col <- c("light pink","light green")[targets$Library]
-plotRLE(y$counts,ylim=c(-1,1),col=lib.col)
+boxplot(logcpm, xlab="", ylab="Log2 counts per million",las=2, col=lib.col,
+        pars=list(cex.lab=0.8,cex.axis=0.8))
+abline(h=median(logcpm),col="blue")
+title("Boxplots of logCPMs\n(coloured by library prep)",cex.main=0.8)
 ```
 
-Looks like some bias going on!
+It doesn't look like there are any large biases in the data.
 
 Finally, let's check our MDS plots.
 
@@ -174,6 +183,8 @@ legend("topright",legend=levels(targets$Group),fill=c("red","blue"))
 plotMDS(y,col=lib.col)
 legend("topleft",legend=levels(targets$Library),fill=c("light pink","light green"))
 ```
+
+It looks like there is some variability in the data due to library type e.g. single end or paired end.
 
 ## Hierarchical clustering with heatmap.2
 
