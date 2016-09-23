@@ -21,13 +21,16 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 - Mouse mammary data (counts): [https://figshare.com/s/1d788fd384d33e913a2a](https://figshare.com/s/1d788fd384d33e913a2a)
 - Drosophila data (counts): [https://figshare.com/s/e08e71c42f118dbe8be6](https://figshare.com/s/e08e71c42f118dbe8be6)
 
-## Topics
-
-### RNAseq anlaysis in R
+## RNAseq anlaysis in R
 
 - [R for RNAseq](00-r-rstudio-intro.html)
 - [Quality control, differential expression, and gene set testing](06-rnaseq-day1.html)
 - [Applying RNAseq](08-applying-rnaseq.html) ([solutions](09-applying-rnaseq-solutions.html))
+
+### Lecture slides
+
+- [RNASeq basics](slides/01-RNASeq_basics.pdf)
+- [Differential expression](slides/02-Differential_expression.pdf)
 
 ### Supplementary lessons
 
