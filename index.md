@@ -3,6 +3,12 @@ layout: page
 title: RNAseq analysis in R
 ---
 
+## Acknowledgements
+
+This course is based on the course [RNAseq analysis in R](http://combine-australia.github.io/2016-05-11-RNAseq/) prepared by [Combine Australia](https://combine.org.au/) and delivered on May 11/12th 2016 in Carlton. We are extremely grateful to the authors for making their materials available.
+
+## Outline
+
 In this workshop, you will be learning how to analyse RNA-seq count data, using R. This will include reading the data into R, quality control and performing differential expression analysis and gene set testing, with a focus on the limma-voom analysis workflow. You will learn how to generate common plots for analysis and visualisation of gene expression data, such as boxplots and heatmaps. You will also be learning how alignment and counting of raw RNA-seq data can be performed in R. This workshop is aimed at biologists interested in learning how to perform differential expression analysis of RNA-seq data when reference genomes are available.
 
 > ## Prerequisites {.prereq}
@@ -11,9 +17,9 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 > If you are not familiar with the R statistical programming language we
 > strongly encourage you to work through an introductory R course before
 > attempting these materials.
-> We recommend the Software Carpentry
-> [R for Reproducible Scientific Analysis](http://swcarpentry.github.io/r-novice-gapminder/)
-> lessons up to and including vectorisation.
+> We recommend reading our R crash course
+> [R crash course](https://bioinformatics-core-shared-training.github.io/r-crash-course/)
+> before attending
 >
 
 ## Data
@@ -21,27 +27,22 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 - Mouse mammary data (counts): [https://figshare.com/s/1d788fd384d33e913a2a](https://figshare.com/s/1d788fd384d33e913a2a)
 - Drosophila data (counts): [https://figshare.com/s/e08e71c42f118dbe8be6](https://figshare.com/s/e08e71c42f118dbe8be6)
 
-## RNAseq anlaysis in R
+## RNAseq analysis in R tutorials
 
 - [R for RNAseq](00-r-rstudio-intro.html)
 - [Quality control, differential expression, and gene set testing](06-rnaseq-day1.html)
-- [Applying RNAseq](08-applying-rnaseq.html) ([solutions](09-applying-rnaseq-solutions.html))
+<!--- [Applying RNAseq](08-applying-rnaseq.html) ([solutions](09-applying-rnaseq-solutions.html))-->
 
 ### Lecture slides
 
-- [RNASeq basics](slides/01-RNASeq_basics.pdf)
-- [Differential expression](slides/02-Differential_expression.pdf)
-- [Gene set testing](slides/03-Gene_set_testing.pdf)
+- [RNASeq basics]()
+- [Linear Model and Statistics for Differential Expression]()
 
 ### Supplementary lessons
 
 Introductory R materials:
 
-- [Project management with RStudio](01-rstudio-intro.html)
-- [Seeking help](02-seeking-help.html)
-- [Data structures](03-data-structures-part1.html)
-- [Data frames and reading in data](04-data-structures-part2.html)
-- [Subsetting data](05-data-subsetting.html)
+- [R Crash Course](https://bioinformatics-core-shared-training.github.io/r-crash-course/
 
 Additional RNAseq materials:
 
