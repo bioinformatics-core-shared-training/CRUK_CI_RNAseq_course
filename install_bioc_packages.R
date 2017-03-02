@@ -1,0 +1,10 @@
+source("http://www.bioconductor.org/biocLite.R")
+biocLite("limma", 
+         "edgeR", 
+         "gplots", 
+         "org.Mm.eg.db", 
+         "RColorBrewer", 
+         "Glimma",
+         "ggplot2",
+         "SRAdb",
+         "Rsubread")
