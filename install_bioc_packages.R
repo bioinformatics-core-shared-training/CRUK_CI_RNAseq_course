@@ -1,5 +1,5 @@
 source("http://www.bioconductor.org/biocLite.R")
-biocLite("limma", 
+biocLite(c("limma", 
          "edgeR", 
          "gplots", 
          "org.Mm.eg.db", 
@@ -7,4 +7,4 @@ biocLite("limma",
          "Glimma",
          "ggplot2",
          "SRAdb",
-         "Rsubread")
+         "Rsubread"))
