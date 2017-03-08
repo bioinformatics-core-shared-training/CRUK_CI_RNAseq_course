@@ -34,10 +34,17 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 
 ## RNAseq analysis in R tutorials
 
-- [R for RNAseq](00-r-rstudio-intro.html)
-- [Quality control, differential expression, and gene set testing](06-rnaseq-day1.html)
-<!--- [Applying RNAseq](08-applying-rnaseq.html) ([solutions](09-applying-rnaseq-solutions.html))-->
-
+- [Alignment and Counting](align-and-count.nb.html)
+    + [source file](align-and-count.Rmd)
+- [RNA-seq Pre-processing](rna-seq-preprocessing.nb.html)
+    + [source file](rna-seq-preprocessing.Rmd)
+- [Differential Expression for RNA-seq](rna-seq-de.nb.html)
+    + [source file](rna-seq-de.Rmd)
+- [Annotation and Visualisation of RNA-seq results](rna-seq-annotation-visualisation.nb.html)
+    + [source file](rna-seq-annotation-visualisation.Rmd)
+- [Gene-set testing](rna-seq-gene-set-testing.nb.html)
+    + [source file](rna-seq-gene-set-testing.Rmd)
+    
 ### Lecture slides
 
 - [RNASeq basics]()
@@ -51,7 +58,7 @@ Introductory R materials:
 
 Additional RNAseq materials:
 
-- [Alignment and feature counting](07-rnaseq-day2.html)
+- [Downloading files from SRA and aligning](getting-raw-reads.Rmd)
 
 Data: Mouse mammary data (fastq files): [https://figshare.com/s/f5d63d8c265a05618137](https://figshare.com/s/f5d63d8c265a05618137)
 

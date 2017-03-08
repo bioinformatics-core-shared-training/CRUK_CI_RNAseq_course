@@ -1,5 +1,6 @@
 ---
-title: "Pre-processsing RNA-seq data"
+title: "RNA-seq Analysis in R"
+subtitle: "Annotation and Visualisation of RNA-seq results"
 author: "Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:

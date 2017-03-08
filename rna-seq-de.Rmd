@@ -1,5 +1,6 @@
 ---
-title: "Differential Expression of RNA-seq data"
+title: "RNA-seq analysis in R"
+subtitle: "Differential Expression of RNA-seq data"
 author: "Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:

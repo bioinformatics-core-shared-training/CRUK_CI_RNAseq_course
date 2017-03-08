@@ -1,16 +1,17 @@
 ---
-title: "Pre-processsing RNA-seq data"
+title: "RNA-seq analysis in R"
 author: "Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
-  html_document:
+  html_notebook:
     toc: yes
     toc_float: yes
-  html_notebook:
+  html_document:
     toc: yes
     toc_float: yes
 minutes: 300
 layout: page
+subtitle: Pre-processsing RNA-seq data
 bibliography: ref.bib
 ---
 
