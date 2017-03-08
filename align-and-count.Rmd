@@ -1,11 +1,18 @@
 ---
-layout: page
 title: "RNA-seq analysis in R"
-subtitle: "Alignment and feature counting"
-author: "Belinda Phipson, Maria Doyle, Harriet Dashnow"
-date: "11-12 May 2016"
+subtitle: "Alignment and Counting"
+author: "Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle"
+date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
+output:
+  html_notebook:
+    toc: yes
+    toc_float: yes
+  html_document:
+    toc: yes
+    toc_float: yes
+minutes: 300
+layout: page
 bibliography: ref.bib
-minutes: 60
 ---
 
 **Authors: Belinda Phipson, Maria Doyle, Harriet Dashnow**

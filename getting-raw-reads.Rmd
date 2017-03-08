@@ -1,0 +1,90 @@
+---
+title: "Obtaining and aligning raw RNA-seq reads"
+author: "Mark Dunning"
+date: "1 March 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,eval=FALSE)
+```
+
+## Running through docker
+
+
+## Set up a database of SRA runs
+
+```{r}
+library(SRAdb)
+sqlfile <-'SRAmetadb.sqlite'
+if(!file.exists('SRAmetadb.sqlite')) sqlfile <<- getSRAdbFile()
+sra_con <- dbConnect(SQLite(),sqlfile)
+```
+
+## Obtain information for a particular experiment
+
+```{r}
+sraInf <- getSRAinfo("SRP045534",sra_con, sraType="sra")
+sraInf
+```
+
+## Download the set of sra files
+
+```{r}
+sapply(sraInf$run, function(x) try(getSRAfile(x,sra_con, fileType="sra"),silent=TRUE))
+```
+
+## Extracting fastq files
+
+Using the [sra-toolkit](https://www.ncbi.nlm.nih.gov/sra) command-line utility from NCBI we can generate the `fastq` files from these archive files. We can do this within a Terminal (i.e. not within RStudio) with the following:-
+
+```{bash}
+
+for sra in *.sra
+do
+fastq-dump $sra
+done
+
+```
+
+After each fastq file has been extracted, you should see a message to report have many reads (spots) are contained in the file
+
+
+## Quality assessment of reads
+
+The [fastqc](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) is recommened for a preliminary assessment of the read quality
+
+```{bash cache=TRUE,eval=l}
+for fq in *.fastq
+do
+fastqc $fq
+done
+
+```
+
+## Downloading the reference genome
+
+```{bash eval=FALSE}
+wget --timestamping 'ftp://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/chromFa.tar.gz' -O chromFa.tar.gz
+gunzip chromFa.tar.gz
+tar xvf chromFa.tar
+cat *.fa > mm10.fa
+rm chr*.fa
+rm chromFa.tar.gz
+```
+
+
+
+## Alignment using bowtie
+
+
+
+## Alignment using Rsubread
+
+```{r eval=FALSE}
+library(Rsubread)
+buildindex("mm10",reference="mm10.fa")
+fastqfiles <- list.files(pattern=".fastq")
+align("mm10",readfile1=fastqfiles)
+```
+

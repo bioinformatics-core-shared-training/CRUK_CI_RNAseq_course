@@ -7,4 +7,5 @@ biocLite(c("limma",
          "Glimma",
          "ggplot2",
          "SRAdb",
-         "Rsubread"))
+         "Rsubread",
+         "BiasedUrn"))

@@ -1,0 +1,226 @@
+---
+title: "Differential Expression of RNA-seq data"
+author: "Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle"
+date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
+output:
+  html_notebook:
+    toc: yes
+    toc_float: yes
+  html_document:
+    toc: yes
+    toc_float: yes
+minutes: 300
+layout: page
+bibliography: ref.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Original Authors: Belinda Phipson, Anna Trigos, Matt Ritchie, Maria Doyle, Harriet Dashnow, Charity Law**
+Based on the course [RNAseq analysis in R](http://combine-australia.github.io/2016-05-11-RNAseq/) delivered on May 11/12th 2016
+
+## Resources and data files
+
+This material has been created using the following resources:  
+http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf [@Lun2016]  
+http://monashbioinformaticsplatform.github.io/RNAseq-DE-analysis-with-R/99-RNAseq_DE_analysis_with_R.html  
+
+Data files downloaded from:  
+ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE60nnn/GSE60450/suppl/GSE60450_Lactation-GenewiseCounts.txt.gz
+http://bioinf.wehi.edu.au/software/MSigDB/mouse_c2_v5.rdata
+http://bioinf.wehi.edu.au/software/MSigDB/mouse_H_v5.rdata
+
+Data files:  
+sampleinfo.txt  
+GSE60450_Lactation-GenewiseCounts.txt  
+mouse_c2_v5.rdata  
+mouse_H_v5.rdata
+
+Data files available from: [https://figshare.com/s/1d788fd384d33e913a2a](https://figshare.com/s/1d788fd384d33e913a2a)
+You should download these files and place them in your `/data` directory.
+
+## Differential expression with limma-voom
+
+Now that we are happy that we have normalised the data and that the quality looks good, we can continue to testing for differentially expressed genes. There are a number of packages to analyse RNA-Seq data. The *limma* package [@Ritchie2015] (since version 3.16.0) offers the `voom` function, which transforms the read counts into logCPMs while taking into account the mean-variance relationship in the data [@Law2014]. After vooming, users can apply a linear model to the voom transformed data to test for differentially expressed genes, using standard *limma* commands.
+
+**First make sure we have all the objects loaded from the previous section**
+
+```{r}
+library(edgeR)
+library(limma)
+library(Glimma)
+library(gplots)
+library(org.Mm.eg.db)
+library(RColorBrewer)
+# Read the data into R
+seqdata <- read.delim("data/GSE60450_Lactation-GenewiseCounts.txt", stringsAsFactors = FALSE)
+# Read the sample information into R
+sampleinfo <- read.delim("data/SampleInfo.txt")
+countdata <- seqdata[,-(1:2)]
+# Store EntrezGeneID as rownames
+rownames(countdata) <- seqdata[,1]
+colnames(countdata) <- substr(colnames(countdata),start=1,stop=7)
+# Obtain CPMs
+myCPM <- cpm(countdata)
+
+# Which values in myCPM are greater than 0.5?
+thresh <- myCPM > 0.5
+# This produces a logical matrix with TRUEs and FALSEs
+
+# we would like to keep genes that have at least 2 TRUES in each row of thresh
+keep <- rowSums(thresh) >= 2
+# Subset the rows of countdata to keep the more highly expressed genes
+counts.keep <- countdata[keep,]
+y <- DGEList(counts.keep)
+y <- calcNormFactors(y)
+logcounts <- cpm(y,log=TRUE)
+labels <- paste(sampleinfo$SampleName, sampleinfo$CellType, sampleinfo$Status)
+group <- paste(sampleinfo$CellType,sampleinfo$Status,sep=".")
+group <- factor(group)
+```
+
+
+### Create the design matrix
+
+First we need to create a design matrix for the groups (see the excellent [limma user guide](https://bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf) for more information on design matrices). There are many different ways to set up your design matrix, and it is dictated by what comparisons you would like to test. We will follow the set-up from pg 43 of the limma vignette ("Interaction models: 2X2 factorial designs").
+
+In this analysis let's assume that we will be testing differences in status in the different cell types separately. For example, we want to know which genes are differentially expressed between pregnant and lactating in basal cells only. We have previously codedthe `group` variable, which is a concatenation of cell type and status. Coding the cell type and status in this way allows us to be flexible in specifying which comparisons we are interested in.
+
+```{r}
+# Look at group variable again
+group
+# Specify a design matrix without an intercept term
+design <- model.matrix(~ 0 + group)
+design
+## Make the column names of the design matrix a bit nicer
+colnames(design) <- levels(group)
+design
+```
+
+Each column of the design matrix tells us which samples correspond to each group. The samples which come from basal cells from a lactating mouse correspond to columns 5 and 6 in the counts matrix, i.e. the samples which have 1s.
+
+### Voom transform the data
+
+Once we have our design matrix ready to go, we can perform our voom transformation. Voom will automatically adjust the library sizes using the `norm.factors` already calculated. The voom transformation uses the experiment design matrix, and produces an `EList` object. We can add `plot=TRUE` to generate a plot of the mean-variance trend. This plot can also tell us if there are any genes that look really variable in our data, and if we've filtered the low counts adequately.
+
+```{r}
+par(mfrow=c(1,1))
+v <- voom(y,design,plot = TRUE)
+```
+
+The voom normalised log2 counts can be found in v$E.
+Take a look at what is in the voom object.
+
+```{r}
+v
+# What is contained in this object?
+names(v)
+```
+
+> ## Challenge {.challenge}
+>
+> 1. What is in the `targets` slot of `v` and what does it correspond to in `y`?
+> 1. What are the dimensions of the `weights` slot in `v`?
+>
+
+We can repeat the box plots for the normalised data to compare to before normalisation. The expression values in `v$E` are already log2 values so we don't need to log-transform.
+
+```{r,fig.height=5,fig.width=10}
+par(mfrow=c(1,2))
+boxplot(logcounts, xlab="", ylab="Log2 counts per million",las=2,main="Unnormalised logCPM")
+## Let's add a blue horizontal line that corresponds to the median logCPM
+abline(h=median(logcounts),col="blue")
+boxplot(v$E, xlab="", ylab="Log2 counts per million",las=2,main="Voom transformed logCPM")
+## Let's add a blue horizontal line that corresponds to the median logCPM
+abline(h=median(v$E),col="blue")
+```
+
+Compare these box plots to the box plots we generated before performing the normalisation. Can you see any differences?
+
+### Testing for differential expression
+
+Now that we have the voom transformed data we can use *limma* to test for differential expression. First we fit a linear model for each gene using the `lmFit` function in *limma*. `lmFit` needs the voom object and the design matrix that we have already specified, which is stored within the voom object.
+
+```{r}
+# Fit the linear model
+fit <- lmFit(v)
+names(fit)
+```
+
+`lmFit` estimates group means according to the design matrix, as well as gene-wise variances. There are a number of items stored in the `fit` object, most of which are specific to the statistical testing, and we won't be discussing these in detail today.
+
+Since we are interested in differences between groups, we need to specify which comparisons we want to test. The comparison of interest can be specified using the `makeContrasts` function. Here, we are interested in knowing which genes are differentially expressed between the pregnant and lactating group in the basal cells. This is done by defining the null hypothesis as basal.pregnant - basal.lactate = 0 for each gene. Note that the group names must exactly match the column names of the design matrix.
+
+```{r}
+cont.matrix <- makeContrasts(B.PregVsLac=basal.pregnant - basal.lactate,levels=design)
+```
+
+Take a look at the contrast matrix. The contrast matrix tells *limma* which columns of the design matrix we are interested in testing our comparison. Note that here we have specified only one comparison to test, but we can specify as many as we want in one go.
+
+```{r}
+cont.matrix
+```
+
+Now we can apply the contrasts matrix to the `fit` object to get the statistics and estimated parameters of our comparison that we are interested in. Here we call the `contrasts.fit` function in *limma*.
+
+```{r}
+fit.cont <- contrasts.fit(fit, cont.matrix)
+```
+
+The final step is to call the `eBayes` function, which performs empirical Bayes shrinkage on the variances, and estimates moderated t-statistics and the associated p-values.
+
+```{r}
+fit.cont <- eBayes(fit.cont)
+```
+
+Check the dimensions of the fit object
+
+```{r}
+dim(fit.cont)
+```
+
+We can use the *limma* `decideTests` function to generate a quick summary of DE genes for the contrasts.
+
+```{r}
+summa.fit <- decideTests(fit.cont)
+summary(summa.fit)
+```
+
+> ## Challenge {.challenge}
+>
+> 1. Add another contrast to the contrasts matrix: `L.PregVsLac = luminal.pregnant - luminal.lactate` and re-run the code above. You should have two comparisons in `fit.cont` now.
+> 1. Check out the `vennDiagram` function
+> (HINT: type `?vennDiagram`).
+> Can you show the overlap of differentially expressed genes between the two comparisons? How many genes are commonly differentially expressed?
+>
+
+**Solution**
+```{r,echo=FALSE}
+# Solution
+cont.matrix <- makeContrasts(B.PregVsLac=basal.pregnant - basal.lactate,
+                             L.PregVsLac=luminal.pregnant - luminal.lactate,
+                             levels=design)
+fit.cont <- contrasts.fit(fit, cont.matrix)
+fit.cont <- eBayes(fit.cont)
+summa.fit <- decideTests(fit.cont)
+summary(summa.fit)
+
+# Venn diagram
+par(mfrow=c(1,1))
+vennDiagram(summa.fit,include=c("up", "down"),counts.col=c("purple", "black"),
+    circle.col = c("blue", "green3"))
+```
+
+
+The *limma* `topTable` function summarises the output in a table format. Significant DE genes for a particular comparison can be identified by selecting genes with a p-value smaller than a chosen cut-off value and/or a fold change greater than a chosen value in this table. By default the table will be sorted by the B statistic, which is the log-odds of differential expression. Usually the B statistic and p-value ranking will be the same, but this is not always the case. We will explicitly rank by p-value, which we can specify with the `sort.by` argument.
+
+The `topTable` command will always output the top 10 genes by default, even if they are not statistically significant. We can specify the coefficient we are interested in by the name we used in the contrast matrix ("B.PregVsLac"), or by the column number.
+
+```{r}
+topTable(fit.cont,coef="B.PregVsLac",sort.by="p")
+## This will give the same output
+topTable(fit.cont,coef=1,sort.by="p")
+```
+
