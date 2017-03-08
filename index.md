@@ -47,8 +47,8 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
     
 ### Lecture slides
 
-- [RNASeq basics]()
-- [Linear Model and Statistics for Differential Expression]()
+- [RNASeq basics](RNA-seq-Intro.pdf)
+- [Linear Model and Statistics for Differential Expression](LinearModels.pdf)
 
 ### Supplementary lessons
 
