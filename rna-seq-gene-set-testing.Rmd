@@ -25,40 +25,7 @@ Based on the course [RNAseq analysis in R](http://combine-australia.github.io/20
 
 ```{r}
 library(edgeR)
-seqdata <- read.delim("data/GSE60450_Lactation-GenewiseCounts.txt", stringsAsFactors = FALSE)
-# Read the sample information into R
-sampleinfo <- read.delim("data/SampleInfo.txt")
-countdata <- seqdata[,-(1:2)]
-# Store EntrezGeneID as rownames
-rownames(countdata) <- seqdata[,1]
-colnames(countdata) <- substr(colnames(countdata),start=1,stop=7)
-# Obtain CPMs
-myCPM <- cpm(countdata)
-
-# Which values in myCPM are greater than 0.5?
-thresh <- myCPM > 0.5
-# This produces a logical matrix with TRUEs and FALSEs
-
-# we would like to keep genes that have at least 2 TRUES in each row of thresh
-keep <- rowSums(thresh) >= 2
-# Subset the rows of countdata to keep the more highly expressed genes
-counts.keep <- countdata[keep,]
-y <- DGEList(counts.keep)
-y <- calcNormFactors(y)
-labels <- paste(sampleinfo$SampleName, sampleinfo$CellType, sampleinfo$Status)
-group <- paste(sampleinfo$CellType,sampleinfo$Status,sep=".")
-group <- factor(group)
-design <- model.matrix(~ 0 + group)
-## Make the column names of the design matrix a bit nicer
-colnames(design) <- levels(group)
-v <- voom(y,design)
-fit <- lmFit(v)
-cont.matrix <- makeContrasts(B.PregVsLac=basal.pregnant - basal.lactate,
-                             L.PregVsLac=luminal.pregnant - luminal.lactate,
-                             levels=design)
-fit.cont <- contrasts.fit(fit, cont.matrix)
-fit.cont <- eBayes(fit.cont)
-summa.fit <- decideTests(fit.cont)
+load("Robjects/DE.Rdata")
 ```
 
 
@@ -105,6 +72,9 @@ topTable(fit.treat,coef=1,sort.by="p")
 An interactive version of the mean-difference plots is possible via the `glMDPlot` function in the *Glimma* package.
 
 ```{r}
+library(Glimma)
+group2 <- group
+levels(group2) <- c("basal.lactate","basal.preg","basal.virgin","lum.lactate", "lum.preg", "lum.virgin")
 glMDPlot(fit.treat, coef=1, counts=y$counts, groups=group2,
         status=res.treat, id.column="ENTREZID", main="B.PregVsLac",
         folder="md")
@@ -338,41 +308,5 @@ gores <- goseq(pwf, "mm10","knownGene")
 ##goTable <- data.frame(Gene=rep(names(gocats),times=lapply(gocats,length)),Category = unlist(gocats))
 ##write.table(goTable, "my.mouse.go.cats.txt",sep="\t")
 
-```
-
-
-## Using the EGSEA package
-
-Need some msigDB objects from the WEHI
-```{r}
-download.file("http://bioinf.wehi.edu.au/software/MSigDB/mouse_H_v5p2.rdata")
-download.file("http://bioinf.wehi.edu.au/software/MSigDB/mouse_c2_v5p2.rdata")
-download.file("http://bioinf.wehi.edu.au/software/MSigDB/mouse_c3_v5p2.rdata")
-download.file("http://bioinf.wehi.edu.au/software/MSigDB/mouse_c4_v5p2.rdata")
-download.file("http://bioinf.wehi.edu.au/software/MSigDB/mouse_c5_v5p2.rdata")
-download.file("http://bioinf.wehi.edu.au/software/MSigDB/mouse_c6_v5p2.rdata")
-download.file("http://bioinf.wehi.edu.au/software/MSigDB/mouse_c7_v5p2.rdata")
-```
-
-
-```{r}
-## EGSEA (experimental) 
-## Using EGSEA vignette
-
-library(EGSEA)
-gs.annots <- buildIdx(entrezIDs = rownames(v$E), species="mouse",
-                      msigdb.gsets = "c5",kegg.exclude = c("Metabolism"))
-baseMethods <- egsea.base()[-c(2,12)]
-baseMethods
-```
-
-```{r}
-egsea.sort()
-```
-
-```{r echo=FALSE}
-gsa = egsea(voom.results = v, contrasts = cont.matrix, gs.annots = gs.annots,
-symbolsMap = v$genes, baseGSEAs = baseMethods, egsea.dir = "egsea-report",
-sort.by = "avg.rank", num.threads = 4, report = TRUE)
 ```
 

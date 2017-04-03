@@ -46,7 +46,7 @@ You should download these files and place them in your `/data` directory.
 
 Now that we are happy that we have normalised the data and that the quality looks good, we can continue to testing for differentially expressed genes. There are a number of packages to analyse RNA-Seq data. The *limma* package [@Ritchie2015] (since version 3.16.0) offers the `voom` function, which transforms the read counts into logCPMs while taking into account the mean-variance relationship in the data [@Law2014]. After vooming, users can apply a linear model to the voom transformed data to test for differentially expressed genes, using standard *limma* commands.
 
-**First make sure we have all the objects loaded from the previous section**
+**First make sure we have all the objects and libraries loaded from the previous section**
 
 ```{r}
 library(edgeR)
@@ -54,32 +54,7 @@ library(limma)
 library(Glimma)
 library(gplots)
 library(org.Mm.eg.db)
-library(RColorBrewer)
-# Read the data into R
-seqdata <- read.delim("data/GSE60450_Lactation-GenewiseCounts.txt", stringsAsFactors = FALSE)
-# Read the sample information into R
-sampleinfo <- read.delim("data/SampleInfo.txt")
-countdata <- seqdata[,-(1:2)]
-# Store EntrezGeneID as rownames
-rownames(countdata) <- seqdata[,1]
-colnames(countdata) <- substr(colnames(countdata),start=1,stop=7)
-# Obtain CPMs
-myCPM <- cpm(countdata)
-
-# Which values in myCPM are greater than 0.5?
-thresh <- myCPM > 0.5
-# This produces a logical matrix with TRUEs and FALSEs
-
-# we would like to keep genes that have at least 2 TRUES in each row of thresh
-keep <- rowSums(thresh) >= 2
-# Subset the rows of countdata to keep the more highly expressed genes
-counts.keep <- countdata[keep,]
-y <- DGEList(counts.keep)
-y <- calcNormFactors(y)
-logcounts <- cpm(y,log=TRUE)
-labels <- paste(sampleinfo$SampleName, sampleinfo$CellType, sampleinfo$Status)
-group <- paste(sampleinfo$CellType,sampleinfo$Status,sep=".")
-group <- factor(group)
+load("Robjects/preprocessing.Rdata")
 ```
 
 
@@ -224,4 +199,22 @@ topTable(fit.cont,coef="B.PregVsLac",sort.by="p")
 ## This will give the same output
 topTable(fit.cont,coef=1,sort.by="p")
 ```
+
+```{r}
+topDE <- order(fit.cont$p.value[,1])[1:50]
+fit.cont$p.value[topDE]
+rownames(fit.cont)
+countMatrix <- data.frame(Gene = rownames(fit.cont)[topDE], logcounts[topDE,])
+head(countMatrix)
+library(tidyr)
+df <- gather(countMatrix, Sample,Value,-Gene)
+write.table(countMatrix, file="counts-for-heatmap.txt",sep="\t",quote=FALSE)
+getwd()
+
+```
+
+```{r}
+save(fit.cont,v,group,seqdata,file="Robjects/DE.Rdata")
+```
+
 
