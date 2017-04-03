@@ -8,4 +8,5 @@ biocLite(c("limma",
          "ggplot2",
          "SRAdb",
          "Rsubread",
-         "BiasedUrn"))
+         "BiasedUrn",
+         "TxDb.Mmusculus.UCSC.mm10.knownGene"))

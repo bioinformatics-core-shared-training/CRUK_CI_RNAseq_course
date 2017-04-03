@@ -152,3 +152,193 @@ glXYPlot(x=fit.cont$coefficients[,1], y=fit.cont$lods[,1],
 
 
 This function creates an html page (./volcano/XY-Plot.html) with a volcano plot on the left and a plot showing the log-CPM per sample for a selected gene on the right. A search bar is available to search for genes of interest.
+
+
+
+## Genomic Locations
+
+
+```{r}
+library(TxDb.Mmusculus.UCSC.mm10.knownGene)
+tx <- TxDb.Mmusculus.UCSC.mm10.knownGene
+exo <- exonsBy(tx,"gene")
+
+```
+
+## Exporting tracks
+
+It is also possible to save the results of a Bioconductor analysis in a browser to enable interactive analysis
+and integration with other data types, or sharing with collaborators. For instance, we might want a
+browser track to indicate where our differentially-expressed genes are located. We shall use the bed
+format to display these locations.
+
+At the moment, we have a GenomicFeatures object that represents every exon. However, we do not
+need this level of granularity for the bed output
+
+Select the names of the statistically significant genes from the edgeR output in the usual
+manner.
+
+```{r}
+tt <- topTable(fit.cont,coef="B.PregVsLac",n=Inf)
+sigGenes <- tt[tt$adj.P.Val < 0.05,]
+sigGenes
+```
+Use the range function to obtain a single range for every gene. Get the genomic intervals that correspond to these DE genes.
+
+```{r}
+exoRanges <- unlist(range(exo))
+sigRegions <- exoRanges[na.omit(match(sigGenes$ENTREZID, names(exoRanges)))]
+sigRegions
+```
+
+Rather than just representing the genomic locations, the .bed format is also able to colour each range
+according to some property of the analysis (e.g. direction and magnitude of change) to help highlight
+particular regions of interest. A score can also be displayed when a particular region is clicked-on.
+A useful propery of GenomicRanges is that we can attach metadata to each range using the mcols
+function. The metadata can be supplied in the form of a data frame.
+
+```{r}
+mcols(sigRegions) <- sigGenes[match(names(sigRegions), sigGenes[,1]),]
+sigRegions
+```
+
+```{r}
+seqlevels(sigRegions)
+sigRegions <- keepSeqlevels(sigRegions, paste0("chr", c(1:19,"X","Y")))
+```
+
+Create a score from the p-values that will displayed under each region, and colour scheme
+for the regions based on the fold-change. For convenience, restrict the fold changes to be within the
+region -3 to 3.
+
+```{r}
+sigRegions
+Score <- -log10(sigRegions$adj.P.Val)
+rbPal <-colorRampPalette(c("red", "blue"))
+logfc <- pmax(sigRegions$logFC, -3)
+logfc <- pmin(logfc , 3)
+Col <- rbPal(10)[as.numeric(cut(logfc, breaks = 10))]
+```
+
+The colours and score can be saved in the GRanges object and score and itemRgb columns respectively
+and will be used to construct the track when exporting. The rtracklayer function can be used to import
+and export browsers tracks.
+
+ Export the signifcant results from the DE analysis as a .bed track using rtracklayer. You
+can load the resulting file in IGV, if you wish.
+```{r}
+mcols(sigRegions)$score <- Score
+mcols(sigRegions)$itemRgb <- Col
+library(rtracklayer)
+export(sigRegions , con = "topHits.bed")
+```
+
+## Extracting Reads
+
+
+```{r}
+library(GenomicAlignments)
+```
+
+```{r}
+generegion <- exo[["12992"]]
+getwd()
+bam <- readGAlignments(file="bam/MCL1.DG.bam",
+                       param=ScanBamParam(which=generegion))
+bam
+```
+
+
+
+### An aside - Acessing Genome Sequence
+
+## Brief Introduction to ggplot2
+
+
+```{r}
+library(ggplot2)
+
+top200 <- tt[1:200,]
+
+ggplot(tt, aes(x = logFC, y=B)) + geom_point(alpha=0.4) + scale_color_manual(values=c("black","red")) + geom_text(data=top200, aes(x=logFC,y=B,label=SYMBOL),col="blue",alpha=0.4)
+
+```
+
+
+> ## Challenge {.challenge}
+>
+> Use ggplot2 to re-construct the MA- plot from above.
+>
+
+**Solution**
+
+```{r,echo=FALSE}
+# Soution
+tt <- topTable(fit.cont,coef="B.PregVsLac",n=Inf)
+ggplot(tt, aes(x = AveExpr, y=logFC)) + geom_point()
+
+```
+
+
+## Composing plots with ggbio
+
+We will now take a brief look at one of the visualisation packages in Bioconductor that takes advantage
+of the GenomicRanges and GenomicFeatures object-types. In this section we will show a worked
+example of how to combine several types of genomic data on the same plot. The documentation for
+ggbio is very extensive and contains lots of examples.
+
+http://www.tengfei.name/ggbio/docs/
+
+The Gviz package is another Bioconductor package that specialising in genomic visualisations, but we
+will not explore this package in the course.
+
+The Manhattan plot is a common way of visualising genome-wide results, and this is implemented as the
+`plotGrandLinear` function. We have to supply a value to display on the y-axis, typically this is some
+measure of significance. Changing this variable displayed on the y-axis is done by using the aes function,
+which is inherited from ggplot2. The positioning of points on the x-axis is handled automatically by
+ggbio, using the ranges information to get the genomic coordinates of the ranges of interest.
+
+```{r}
+library(ggbio)
+plotGrandLinear(sigRegions , aes(y = score))
+mcols(sigRegions)$Up <- logfc > 0
+plotGrandLinear(sigRegions, aes(y = logFC, col = Up))
+```
+
+A useful function within ggbio is autoplot, which will construct an appropriate plot based on the
+object-type of the input. For example, ggbio is able to plot the structure of genes according to a
+particular model represented by a GenomicFeatures object.
+
+
+```{r}
+autoplot(tx, which=exo[["24117"]])
+```
+
+We can even plot the location of sequencing reads if they have been imported using readGAlignments
+function (or similar).
+
+```{r}
+myreg <- flank(reduce(exo[["24117"]]), 1000, both = T)
+bam <- readGAlignments(file="bam/MCL1.DG.bam",
+                       param=ScanBamParam(which=myreg),use.names = TRUE)
+
+autoplot(bam,which=myreg)
+```
+
+```{r}
+autoplot(bam , stat = "coverage")
+```
+Like ggplot2, ggbio plots can be saved as objects that can later be modified, or combined together to
+form more complicated plots. If saved in this way, the plot will only be displayed on a plotting device
+when we query the object. This strategy is useful when we want to add a common element (such as
+an ideogram) to a plot composition and don’t want to repeat the code to generate the plot every time.
+
+```{r}
+#idPlot <- plotIdeogram(genome = "mm10")
+#idPlot
+geneMod <- autoplot(tx, which = myreg)
+reads1 <- autoplot(bam, stat = "coverage")
+tracks(geneMod ,reads1)
+```
+
+
