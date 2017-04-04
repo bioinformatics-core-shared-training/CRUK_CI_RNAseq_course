@@ -250,7 +250,7 @@ bam
 
 
 
-### An aside - Acessing Genome Sequence
+## An aside - Acessing Genome Sequence
 
 ## Brief Introduction to ggplot2
 
@@ -275,7 +275,7 @@ ggplot(tt, aes(x = logFC, y=B)) + geom_point(alpha=0.4) + scale_color_manual(val
 ```{r,echo=FALSE}
 # Soution
 tt <- topTable(fit.cont,coef="B.PregVsLac",n=Inf)
-ggplot(tt, aes(x = AveExpr, y=logFC)) + geom_point()
+ggplot(tt, aes(x = AveExpr, y=logFC,col=adj.P.Val < 0.05)) + geom_point() + scale_color_manual(values=c("black","red")) 
 
 ```
 
