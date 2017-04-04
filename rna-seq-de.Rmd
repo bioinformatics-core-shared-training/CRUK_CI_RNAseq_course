@@ -214,7 +214,7 @@ getwd()
 ```
 
 ```{r}
-save(fit.cont,v,group,seqdata,file="Robjects/DE.Rdata")
+save(fit.cont,v,group,seqdata,summa.fit,file="Robjects/DE.Rdata")
 ```
 
 

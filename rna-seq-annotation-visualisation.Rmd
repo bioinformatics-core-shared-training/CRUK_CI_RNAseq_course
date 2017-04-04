@@ -31,21 +31,49 @@ load("Robjects/DE.Rdata")
 
 ## Adding annotation and saving the results
 
-We have a list of significantly differentially expressed genes, but the only annotation we can see is the Entrez Gene ID, which is not very informative. We would like to add some annotation information. There are a number of ways to do this. We will demonstrate how to do this using the *org.Mm.eg.db* package.
+We have a list of significantly differentially expressed genes, but the only annotation we can see is the Entrez Gene ID, which is not very informative. 
 
-First we need to decide what information we want. In order to see what we can extract we can run the `columns` function on the annotation database.
+```{r}
+topTable(fit.cont)
+```
+
+We would like to add some annotation information. There are a number of ways to do this. We will demonstrate how to do this using the *org.Mm.eg.db* package.
 
 ```{r}
 library(org.Mm.eg.db)
+```
+
+
+First we need to decide what information we want. In order to see what we can extract we can run the `columns` function on the annotation database.
+
+- point to different `org.db` packages
+- show different keytypes
+- maybe small example of one gene
+
+```{r}
 columns(org.Mm.eg.db)
 ```
+
+We also need to identify what type of key we have. Valid names can be retrieved with the `keytypes` function.
+
+```{r}
+keytypes(org.Mm.eg.db)
+```
+
+```{r}
+## Build up the query step-by-step
+keys <- c("12992", "13358","20531")
+#select(org.Mm.eg.db,)
+```
+
+
 
 We definitely want gene symbols and perhaps the full gene name. Let's build up our annotation information in a separate data frame using the `select` function.
 
 ```{r}
 ann <- select(org.Mm.eg.db,keys=rownames(fit.cont),columns=c("ENTREZID","SYMBOL","GENENAME"))
 # Have a look at the annotation
-head(ann)
+ann
 ```
 
 Let's double check that the `ENTREZID` column matches exactly to our `fit.cont` rownames.
@@ -54,7 +82,7 @@ Let's double check that the `ENTREZID` column matches exactly to our `fit.cont` 
 table(ann$ENTREZID==rownames(fit.cont))
 ```
 
-We can slot in the annotation information into the `genes` slot of `fit.cont`. (Please note that if the `select` function returns a 1:many mapping then you can't just append the annotation to the fit object. An alternative way to get annotation will be discussed tomorrow during the analysis of the second dataset.)
+We can slot in the annotation information into the `genes` slot of `fit.cont`. (Please note that if the `select` function returns a 1:many mapping then you can't just append the annotation to the fit object.)
 
 ```{r}
 fit.cont$genes <- ann
@@ -80,7 +108,7 @@ write.csv(limma.res,file="B.PregVsLacResults.csv",row.names=FALSE)
 
 **A note about deciding how many genes are significant**: In order to decide which genes are differentially expressed, we usually take a cut-off of 0.05 on the adjusted p-value, NOT the raw p-value. This is because we are testing more than 15000 genes, and the chances of finding differentially expressed genes is very high when you do that many tests. Hence we need to control the false discovery rate, which is the adjusted p-value column in the results table. What this means is that if 100 genes are significant at a 5\% false discovery rate, we are willing to accept that 5 will be false positives. Note that the `decideTests` function displays significant genes at 5\% FDR.
 
-### Plots after testing for DE
+### Diagnostic plots after testing for DE
 
 Let's do a few plots to make sure everything looks good and that we haven't made a mistake in the analysis. Genome-wide plots that are useful for checking are MAplots (or MDplots) and volcano plots. There are functions in limma for plotting these with `fit.cont` as input.
 
@@ -157,13 +185,32 @@ This function creates an html page (./volcano/XY-Plot.html) with a volcano plot 
 
 ## Genomic Locations
 
+It might seem natural to add genomic locations to our annotation table, and possibly a bit odd that the `org.Mm.eg.db` package does not supply such mappings. In fact, there is a whole suite of package for performing such queries. 
+
+
+- workflow to add genomic locations to the annotation table
+- export tracks
+- plot locations
 
 ```{r}
 library(TxDb.Mmusculus.UCSC.mm10.knownGene)
 tx <- TxDb.Mmusculus.UCSC.mm10.knownGene
-exo <- exonsBy(tx,"gene")
+columns(tx)
+```
+
+```{r}
+keys <- c("12992", "13358","20531")
+select(tx, keys=keys,
+       keytype = "GENEID",
+       columns=c("EXONID","EXONSTART","EXONEND"))
 
 ```
+
+
+```{r}
+exo <- exonsBy(tx,"gene")
+```
+
 
 ## Exporting tracks
 
