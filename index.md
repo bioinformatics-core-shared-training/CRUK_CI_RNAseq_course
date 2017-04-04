@@ -22,9 +22,8 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 > If you are not familiar with the R statistical programming language we
 > strongly encourage you to work through an introductory R course before
 > attempting these materials.
-> We recommend reading our R crash course
-> [R crash course](https://bioinformatics-core-shared-training.github.io/r-crash-course/)
-> before attending
+> We recommend reading our [R crash course](https://bioinformatics-core-shared-training.github.io/r-crash-course/)
+> before attending, which should take around 1 hour
 >
 
 ## Data
@@ -47,8 +46,8 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
     
 ### Lecture slides
 
-- [RNASeq basics](RNA-seq-Intro.pdf)
-- [Linear Model and Statistics for Differential Expression](LinearModels.pdf)
+- [RNASeq basics](slides/RNA-seq-Intro.pdf)
+- [Linear Model and Statistics for Differential Expression](slides/LinearModels.pdf)
 
 ### Supplementary lessons
 
