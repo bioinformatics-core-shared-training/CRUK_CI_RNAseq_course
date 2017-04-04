@@ -53,7 +53,7 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 
 Introductory R materials:
 
-- [R Crash Course](https://bioinformatics-core-shared-training.github.io/r-crash-course/
+- [R Crash Course](https://bioinformatics-core-shared-training.github.io/r-crash-course/)
 
 Additional RNAseq materials:
 
