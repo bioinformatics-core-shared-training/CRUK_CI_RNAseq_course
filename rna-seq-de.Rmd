@@ -149,8 +149,8 @@ Suppose we want to find differentially expressed genes between pregnant and virg
 
 ```{r}
 PvsV <- makeContrasts(statuspregnant-statusvirgin, levels=design)
-lrt <- glmLRT(fit, contrast=PvsV)
-topTags(lrt)
+lrt.pVsV <- glmLRT(fit, contrast=PvsV)
+topTags(lrt.pVsV)
 ```
 
 
