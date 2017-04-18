@@ -249,7 +249,7 @@ select(tx, keys=keys,
 
 One of the real strengths of the `txdb..` packages is the ability of interface with `GenomicRanges`, which is the object type used throughout Bioconductor [to manipulate Genomic Intervals](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3738458/pdf/pcbi.1003118.pdf). 
 
-These object types permit us to perform a
+These object types permit us to perform common operations on intervals such as overlapping and counting.
 ```{r}
 library(GenomicRanges)
 my.range <-GRanges("chr1", IRanges(start=1000,end=2000))
@@ -261,7 +261,6 @@ Let's try some dummy intervals with random chromsome assignments and start posit
 ```{r}
 set.seed(10042017)
 chrs <- sample(paste0("chr",1:19),100,replace=TRUE)
-chrs
 startPos <- sample(1:5e6,100,replace=TRUE)
 my.rangesA <- GRanges(chrs, IRanges(start=startPos,width=1000))
 my.rangesA
@@ -287,10 +286,19 @@ my.rangesB <- resize(my.rangesB,width =sample(1:1000,100,replace = TRUE))
 my.rangesB
 ```
 
+It is quite straightforward to translate the output of a `select` query into a `GenomicFeatures` object. However, several convenience functions exist to retrieve the structure of every gene for a given organism in one object. 
+
+The output of `exonsBy` is a list, where each item in the list is the exon co-ordinates of a particular gene. 
 
 ```{r}
 exo <- exonsBy(tx,"gene")
 exo
+```
+
+To access the structure of a particular gene, we can use the `[[` syntax with the name of the gene (Entrez gene ID) within quote marks.
+
+```{r}
+exo[["12992"]]
 ```
 
 
@@ -312,7 +320,8 @@ tt <- topTable(fit.cont,coef="B.PregVsLac",n=Inf)
 sigGenes <- tt[tt$adj.P.Val < 0.05,]
 sigGenes
 ```
-Use the range function to obtain a single range for every gene. Get the genomic intervals that correspond to these DE genes.
+
+Use the `range` function to obtain a single range for every gene and then get the genomic intervals that correspond to these DE genes.
 
 ```{r}
 exoRanges <- unlist(range(exo))
@@ -353,7 +362,7 @@ The colours and score can be saved in the GRanges object and score and itemRgb c
 and will be used to construct the track when exporting. The rtracklayer function can be used to import
 and export browsers tracks.
 
- Export the signifcant results from the DE analysis as a .bed track using rtracklayer. You
+ Export the signifcant results from the DE analysis as a `.bed` track using `rtracklayer`. You
 can load the resulting file in IGV, if you wish.
 ```{r}
 mcols(sigRegions)$score <- Score
@@ -364,6 +373,7 @@ export(sigRegions , con = "topHits.bed")
 
 ## Extracting Reads
 
+We haven't discussed much 
 
 ```{r}
 library(GenomicAlignments)
@@ -380,6 +390,10 @@ bam
 
 
 ## An aside - Acessing Genome Sequence
+
+```{r}
+
+```
 
 ## Brief Introduction to ggplot2
 
@@ -423,20 +437,28 @@ will not explore this package in the course.
 
 The Manhattan plot is a common way of visualising genome-wide results, and this is implemented as the
 `plotGrandLinear` function. We have to supply a value to display on the y-axis, typically this is some
-measure of significance. Changing this variable displayed on the y-axis is done by using the aes function,
+measure of significance. Changing this variable displayed on the y-axis is done by using the `aes` function,
 which is inherited from ggplot2. The positioning of points on the x-axis is handled automatically by
 ggbio, using the ranges information to get the genomic coordinates of the ranges of interest.
 
 ```{r}
 library(ggbio)
 plotGrandLinear(sigRegions , aes(y = score))
+
+```
+
+As we discussed, an appealing feature of `ggplot2` is the ability to map properties of your plot to variables present in your data. For example, we could create a variable to distinguish between up- and down-regulated genes. The variables used for aesthetic mapping must be present in the `mcols` section of your ranges object.
+
+```{r}
 mcols(sigRegions)$Up <- logfc > 0
 plotGrandLinear(sigRegions, aes(y = logFC, col = Up))
 ```
 
-A useful function within ggbio is autoplot, which will construct an appropriate plot based on the
+
+
+A useful function within ggbio is `autoplot`, which will construct an appropriate plot based on the
 object-type of the input. For example, ggbio is able to plot the structure of genes according to a
-particular model represented by a GenomicFeatures object.
+particular model represented by a `GenomicFeatures` object.
 
 
 ```{r}
