@@ -41,7 +41,9 @@ load("Robjects/DE.Rdata")
 We have a list of significantly differentially expressed genes, but the only annotation we can see is the Entrez Gene ID, which is not very informative. For data exploration and visualisation purposes, we want to bring in names that are more-recognisable.
 
 ```{r}
-topTable(fit.cont)
+results <- as.data.frame(topTags(lrt,n = Inf))
+results
+
 ```
 
 We would like to add some annotation information. There are a number of ways to do this, but we will demonstrate how to do this using the *org.Mm.eg.db* package. This package is one of several *organism-level* packages which are re-built every 6 months. These packages are listed on the [annotation section](http://bioconductor.org/packages/release/BiocViews.html#___AnnotationData) of the Bioconductor, and are installed in the same way as regular Bioconductor packages. An alternative approachj is to use `biomaRt`, an interface to the [BioMart](http://www.biomart.org/) resource. BioMart is much more comprehensive, but the organism package fit better into the Bioconductor workflow.
@@ -83,7 +85,7 @@ It is a useful sanity check to make sure that the keys you want to use are all v
 
 ```{r}
 ## Build up the query step-by-step
-my.keys <- c("12992", "13358","20531")
+my.keys <- c("50916", "110308","12293")
 my.keys %in% keys(org.Mm.eg.db, keytype="ENTREZID")
 all(my.keys %in% keys(org.Mm.eg.db, keytype="ENTREZID"))
 ```
@@ -102,7 +104,7 @@ select(org.Mm.eg.db,
 To annotate our results, we definitely want gene symbols and perhaps the full gene name. Let's build up our annotation information in a separate data frame using the `select` function.
 
 ```{r}
-ann <- select(org.Mm.eg.db,keys=rownames(fit.cont),columns=c("ENTREZID","SYMBOL","GENENAME"))
+ann <- select(org.Mm.eg.db,keys=rownames(results),columns=c("ENTREZID","SYMBOL","GENENAME"))
 # Have a look at the annotation
 ann
 ```
@@ -110,31 +112,21 @@ ann
 Let's double check that the `ENTREZID` column matches exactly to our `fit.cont` rownames.
 
 ```{r}
-table(ann$ENTREZID==rownames(fit.cont))
+table(ann$ENTREZID==rownames(results))
 ```
 
 We can slot in the annotation information into the `genes` slot of `fit.cont`. (Please note that if the `select` function returns a 1:many mapping then you can't just append the annotation to the fit object.)
 
 ```{r}
-fit.cont$genes <- ann
+results.annotated <- cbind(results, ann)
+results.annotated
 ```
 
-Now when we run the `topTable` command, the annotation information should be included in the output.
-
-```{r}
-topTable(fit.cont,coef="B.PregVsLac",sort.by="p")
-```
-
-To get the full table (i.e. the information for all genes, not just the top 10) we can specify `n="Inf"`.
-
-```{r}
-limma.res <- topTable(fit.cont,coef="B.PregVsLac",sort.by="p",n="Inf")
-```
 
 We can save the results table using the `write.csv` function, which writes the results out to a csv file that you can open in excel.
 
 ```{r}
-write.csv(limma.res,file="B.PregVsLacResults.csv",row.names=FALSE)
+write.csv(results.annotated,file="B.PregVsLacResults.csv",row.names=FALSE)
 ```
 
 **A note about deciding how many genes are significant**: In order to decide which genes are differentially expressed, we usually take a cut-off of 0.05 on the adjusted p-value, NOT the raw p-value. This is because we are testing more than 15000 genes, and the chances of finding differentially expressed genes is very high when you do that many tests. Hence we need to control the false discovery rate, which is the adjusted p-value column in the results table. What this means is that if 100 genes are significant at a 5\% false discovery rate, we are willing to accept that 5 will be false positives. Note that the `decideTests` function displays significant genes at 5\% FDR.
