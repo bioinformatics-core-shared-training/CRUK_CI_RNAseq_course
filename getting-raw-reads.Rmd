@@ -1,8 +1,18 @@
 ---
-title: "Obtaining and aligning raw RNA-seq reads"
-author: "Mark Dunning"
-date: "1 March 2017"
-output: html_document
+title: "RNA-seq analysis in R"
+author: "Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle"
+date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
+output:
+  html_notebook:
+    toc: yes
+    toc_float: yes
+  html_document:
+    toc: yes
+    toc_float: yes
+minutes: 300
+layout: page
+subtitle: Obtaining and aligning RNA-seq reads from public repositories
+bibliography: ref.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -15,6 +25,7 @@ knitr::opts_chunk$set(echo = TRUE,eval=FALSE)
 ## Set up a database of SRA runs
 
 ```{r}
+setwd("/media/dunnin01/Seagate Backup Plus Drive/datasets/combine-rnaseq/")
 library(SRAdb)
 sqlfile <-'SRAmetadb.sqlite'
 if(!file.exists('SRAmetadb.sqlite')) sqlfile <<- getSRAdbFile()
@@ -54,7 +65,7 @@ After each fastq file has been extracted, you should see a message to report hav
 
 The [fastqc](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) is recommened for a preliminary assessment of the read quality
 
-```{bash cache=TRUE,eval=l}
+```{bash cache=TRUE,eval=FALSE}
 for fq in *.fastq
 do
 fastqc $fq
@@ -77,6 +88,102 @@ rm chromFa.tar.gz
 
 ## Alignment using bowtie
 
+```{bash eval=FALSE}
+bowtie2 -x mm10 -U SRR1552444.fastq -S SRR1552444.sam
+samtools view -bS SRR1552444.sam > SRR1552444.bam
+samtools sort SRR1552444.bam -o SRR1552444.sorted.bam
+samtools index SRR1552444.sorted.bam
+
+bowtie2 -x mm10 -U SRR1552445.fastq -S SRR1552445.sam
+samtools view -bS SRR1552445.sam > SRR1552445.bam
+samtools sort SRR1552445.bam -o SRR1552445.sorted.bam
+samtools index SRR1552445.sorted.bam
+
+bowtie2 -x mm10 -U SRR1552446.fastq -S SRR1552446.sam
+samtools view -bS SRR1552446.sam > SRR1552446.bam
+samtools sort SRR1552446.bam -o SRR1552446.sorted.bam
+samtools index SRR1552446.sorted.bam
+
+bowtie2 -x mm10 -U SRR1552447.fastq -S SRR1552447.sam
+samtools view -bS SRR1552447.sam > SRR1552447.bam
+samtools sort SRR1552447.bam -o SRR1552447.sorted.bam
+samtools index SRR1552447.sorted.bam
+
+bowtie2 -x mm10 -U SRR1552448.fastq -S SRR1552448.sam
+samtools view -bS SRR1552448.sam > SRR1552448.bam
+samtools sort SRR1552448.bam -o SRR1552448.sorted.bam
+samtools index SRR1552448.sorted.bam
+
+bowtie2 -x mm10 -U SRR1552449.fastq -S SRR1552449.sam
+samtools view -bS SRR1552449.sam > SRR1552449.bam
+samtools sort SRR1552449.bam -o SRR1552449.sorted.bam
+samtools index SRR1552449.sorted.bam
+
+bowtie2 -x mm10 -U SRR1552450.fastq -S SRR1552450.sam
+samtools view -bS SRR1552450.sam > SRR1552450.bam
+samtools sort SRR1552450.bam -o SRR1552450.sorted.bam
+samtools index SRR1552450.sorted.bam
+
+bowtie2 -x mm10 -U SRR1552451.fastq -S SRR1552451.sam
+samtools view -bS SRR1552451.sam > SRR1552451.bam
+samtools sort SRR1552451.bam -o SRR1552451.sorted.bam
+samtools index SRR1552451.sorted.bam
+
+bowtie2 -x mm10 -U SRR1552452.fastq -S SRR1552452.sam
+samtools view -bS SRR1552452.sam > SRR1552452.bam
+samtools sort SRR1552452.bam -o SRR1552452.sorted.bam
+samtools index SRR1552452.sorted.bam
+
+bowtie2 -x mm10 -U SRR1552453.fastq -S SRR1552453.sam
+samtools view -bS SRR1552453.sam > SRR1552453.bam
+samtools sort SRR1552453.bam -o SRR1552453.sorted.bam
+samtools index SRR1552453.sorted.bam
+
+bowtie2 -x mm10 -U SRR1552454.fastq -S SRR1552454.sam
+samtools view -bS SRR1552454.sam SRR1552454.bam
+samtools sort SRR1552454.bam -o SRR1552454.sorted.bam
+samtools index SRR1552454.sorted.bam
+
+bowtie2 -x mm10 -U SRR1552455.fastq -S SRR1552455.sam
+samtools view -bS SRR1552455.sam > SRR1552455.bam
+samtools sort SRR1552455.bam -o SRR1552455.sorted.bam
+samtools index SRR1552455.sorted.bam
+```
+
+## Renaming to be consistent with GEO
+
+```{r}
+
+alignedFiles <- paste0(sraInf$run, ".sorted.bam")
+library(GEOquery)
+tmp <- getGEO("GSE60450")
+gseInf <- pData(tmp[[1]])
+
+
+```
+
+```{r}
+library(dplyr)
+sraInf <- mutate(sraInf, bam=paste0(run, ".sorted.bam"))
+
+gseInf <- mutate(gseInf, experiment = basename(as.character(supplementary_file_2)),
+                 newbam = gsub("Sample name: ","", description),
+                 newbam = gsub("-",".",newbam,fixed=TRUE),
+                 newbam = paste0(newbam, ".bam"))
+
+combinedInf <- left_join(gseInf, sraInf, by="experiment")
+combinedInf %>% select(description,description.1,experiment,bam,newbam)
+```
+
+```{r}
+for(i in seq_along(combinedInf$bam)){
+  
+  file.symlink(combinedInf$bam[i], combinedInf$newbam[i])
+  file.symlink(paste0(combinedInf$bam[i],".bai"), paste0(combinedInf$newbam[i],".bai"))
+  
+}
+list.files()
+```
 
 
 ## Alignment using Rsubread
