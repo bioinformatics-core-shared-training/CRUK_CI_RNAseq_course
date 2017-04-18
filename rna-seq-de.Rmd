@@ -130,18 +130,14 @@ head(coef(fit))
 ```
 Conduct likelihood ratio tests for luminal vs basal and show the top genes:
 ```{r}
-lrt <- glmLRT(fit, coef=2)
-topTags(lrt)
+lrt.BvsL <- glmLRT(fit, coef=2)
+topTags(lrt.BvsL)
+
 ```
 Conduct likelihood ratio tests for virgin vs lactate and show the top genes.
 
 
-Plot log-fold change against log-counts per million, with DE genes highlighted:
-```{r}
-summary(de <- decideTestsDGE(lrt))
-detags <- rownames(dgeObj)[as.logical(de)]
-plotSmear(lrt, de.tags=detags)
-```
+
 
 ### Contrasts
 
@@ -174,6 +170,6 @@ topTags(lrt3)
 ```
 
 ```{r}
-save(lrt,dgeObj,group,file="Robjects/DE.Rdata")
+save(lrt.BvsL,dgeObj,group,file="Robjects/DE.Rdata")
 ```
 

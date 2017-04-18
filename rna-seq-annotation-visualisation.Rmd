@@ -41,9 +41,16 @@ load("Robjects/DE.Rdata")
 We have a list of significantly differentially expressed genes, but the only annotation we can see is the Entrez Gene ID, which is not very informative. For data exploration and visualisation purposes, we want to bring in names that are more-recognisable.
 
 ```{r}
-results <- as.data.frame(topTags(lrt,n = Inf))
+results <- as.data.frame(topTags(lrt.BvsL,n = Inf))
 results
 
+```
+
+Plot log-fold change against log-counts per million, with DE genes highlighted:
+```{r}
+summary(de <- decideTestsDGE(lrt.BvsL))
+detags <- rownames(dgeObj)[as.logical(de)]
+plotSmear(lrt.BvsL, de.tags=detags)
 ```
 
 We would like to add some annotation information. There are a number of ways to do this, but we will demonstrate how to do this using the *org.Mm.eg.db* package. This package is one of several *organism-level* packages which are re-built every 6 months. These packages are listed on the [annotation section](http://bioconductor.org/packages/release/BiocViews.html#___AnnotationData) of the Bioconductor, and are installed in the same way as regular Bioconductor packages. An alternative approachj is to use `biomaRt`, an interface to the [BioMart](http://www.biomart.org/) resource. BioMart is much more comprehensive, but the organism package fit better into the Bioconductor workflow.
@@ -109,13 +116,13 @@ ann <- select(org.Mm.eg.db,keys=rownames(results),columns=c("ENTREZID","SYMBOL",
 ann
 ```
 
-Let's double check that the `ENTREZID` column matches exactly to our `fit.cont` rownames.
+Let's double check that the `ENTREZID` column matches exactly to our `results` rownames.
 
 ```{r}
 table(ann$ENTREZID==rownames(results))
 ```
 
-We can slot in the annotation information into the `genes` slot of `fit.cont`. (Please note that if the `select` function returns a 1:many mapping then you can't just append the annotation to the fit object.)
+We can bind in the annotation information to the `results` data frame. (Please note that if the `select` function returns a 1:many mapping then you can't just append the annotation to the fit object.)
 
 ```{r}
 results.annotated <- cbind(results, ann)
@@ -131,7 +138,7 @@ write.csv(results.annotated,file="B.PregVsLacResults.csv",row.names=FALSE)
 
 **A note about deciding how many genes are significant**: In order to decide which genes are differentially expressed, we usually take a cut-off of 0.05 on the adjusted p-value, NOT the raw p-value. This is because we are testing more than 15000 genes, and the chances of finding differentially expressed genes is very high when you do that many tests. Hence we need to control the false discovery rate, which is the adjusted p-value column in the results table. What this means is that if 100 genes are significant at a 5\% false discovery rate, we are willing to accept that 5 will be false positives. Note that the `decideTests` function displays significant genes at 5\% FDR.
 
-
+<!--
 ### Plots after testing for DE
 
 Let's do a few plots to make sure everything looks good and that we haven't made a mistake in the analysis. Genome-wide plots that are useful for checking are MAplots (or MDplots) and volcano plots. There are functions in limma for plotting these with `fit.cont` as input.
@@ -158,34 +165,24 @@ plotMD(fit.cont,coef=2,status=summa.fit[,"L.PregVsLac"])
 volcanoplot(fit.cont,coef=2,highlight=200,names=fit.cont$genes$SYMBOL)
 ```
 
+-->
 
-Before following up on the DE genes with further lab work, it is recommended to have a look at the expression levels of the individual samples for the genes of interest. We can quickly look at grouped expression using `stripchart`. We can use the normalised log expression values in the voom object (`v$E`).
+Before following up on the DE genes with further lab work, it is recommended to have a look at the expression levels of the individual samples for the genes of interest. We can quickly look at grouped expression using `stripchart`. We can use the normalised log expression values in the  `dgeCounts` object (`dgeCounts$counts`).
 
 ```{r,fig.width=12,fig.height=5}
 library(RColorBrewer)
 par(mfrow=c(1,3))
+normCounts <- dgeObj$counts
 # Let's look at the first gene in the topTable, Wif1, which has a rowname 24117
-stripchart(v$E["24117",]~group)
+stripchart(normCounts["24117",]~group)
 # This plot is ugly, let's make it better
-stripchart(v$E["24117",]~group,vertical=TRUE,las=2,cex.axis=0.8,pch=16,col=1:6,method="jitter")
+stripchart(normCounts["24117",]~group,vertical=TRUE,las=2,cex.axis=0.8,pch=16,col=1:6,method="jitter")
 # Let's use nicer colours
 nice.col <- brewer.pal(6,name="Dark2")
-stripchart(v$E["24117",]~group,vertical=TRUE,las=2,cex.axis=0.8,pch=16,cex=1.3,col=nice.col,method="jitter",ylab="Normalised log2 expression",main="Wif1")
+stripchart(normCounts["24117",]~group,vertical=TRUE,las=2,cex.axis=0.8,pch=16,cex=1.3,col=nice.col,method="jitter",ylab="Normalised log2 expression",main="Wif1")
 ```
 
 Notice anything interesting about the expression of this gene?
-
-> ## Challenge {.challenge}
->
-> Take the top gene from the L.PregVsLactate comparison and make a stripchart of grouped expression as above. (Don't forget to change the title of the plot.)
->
-
-**Solution**
-```{r,echo=FALSE}
-# Soution
-topTable(fit.cont,coef=2,sort.by="p")
-stripchart(v$E["12992",]~group,vertical=TRUE,las=2,cex.axis=0.8,pch=16,cex=1.3,col=nice.col,method="jitter",ylab="Normalised log2 expression",main="Csn1s2b")
-```
 
 An interactive version of the volcano plot above that includes the raw per sample values in a separate panel is possible via the `glXYPlot` function in the *Glimma* package.
 
@@ -194,10 +191,10 @@ An interactive version of the volcano plot above that includes the raw per sampl
 library(Glimma)
 group2 <- group
 levels(group2) <- c("basal.lactate","basal.preg","basal.virgin","lum.lactate", "lum.preg", "lum.virgin")
-glXYPlot(x=fit.cont$coefficients[,1], y=fit.cont$lods[,1],
+glXYPlot(x=results$logFC, y=-log10(results$FDR),
          xlab="logFC", ylab="B", main="B.PregVsLac",
-         counts=y$counts, groups=group2, status=summa.fit[,1],
-         anno=fit.cont$genes, id.column="ENTREZID", folder="volcano")
+         counts=normCounts, groups=group2, status=de,
+         anno=ann, id.column="ENTREZID", folder="volcano")
 ```
 
 
