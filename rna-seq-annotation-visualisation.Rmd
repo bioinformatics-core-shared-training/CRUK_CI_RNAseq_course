@@ -42,7 +42,7 @@ We have a list of significantly differentially expressed genes, but the only ann
 ```{r}
 results <- as.data.frame(topTags(lrt.BvsL,n = Inf))
 results
-
+dim(results)
 ```
 
 `edgeR` provides a function `plotSmear` that allows us to visualise the results of a DE analysis. In a similar manner to the [*MA-plot* for microarray data](https://en.wikipedia.org/wiki/MA_plot), this plot shows the log-fold change against log-counts per million, with DE genes highlighted:
@@ -133,6 +133,7 @@ We can bind in the annotation information to the `results` data frame. (Please n
 ```{r}
 results.annotated <- cbind(results, ann)
 results.annotated
+
 ```
 
 
@@ -175,13 +176,13 @@ Before following up on the DE genes with further lab work, a recommended *sanity
 library(RColorBrewer)
 par(mfrow=c(1,3))
 normCounts <- dgeObj$counts
-# Let's look at the first gene in the topTable, Irx4, which has a rowname 50916
-stripchart(normCounts["50916",]~group)
+# Let's look at the first gene in the topTable, Krt5, which has a rowname 50916
+stripchart(normCounts["110308",]~group)
 # This plot is ugly, let's make it better
-stripchart(normCounts["50916",]~group,vertical=TRUE,las=2,cex.axis=0.8,pch=16,col=1:6,method="jitter")
+stripchart(normCounts["110308",]~group,vertical=TRUE,las=2,cex.axis=0.8,pch=16,col=1:6,method="jitter")
 # Let's use nicer colours
 nice.col <- brewer.pal(6,name="Dark2")
-stripchart(normCounts["50916",]~group,vertical=TRUE,las=2,cex.axis=0.8,pch=16,cex=1.3,col=nice.col,method="jitter",ylab="Normalised log2 expression",main="	Irx4")
+stripchart(normCounts["110308",]~group,vertical=TRUE,las=2,cex.axis=0.8,pch=16,cex=1.3,col=nice.col,method="jitter",ylab="Normalised log2 expression",main="	Krt5")
 ```
 
 An interactive version of the volcano plot above that includes the raw per sample values in a separate panel is possible via the `glXYPlot` function in the *Glimma* package.
@@ -231,7 +232,7 @@ The `select` function is used in the same manner as the `org.Mm.eg.db` packages.
 
 > ## Challenge {.challenge}
 >
-> Use the TxDb.Mmusculus.UCSC.mm10.knownGene package to retrieve the exon coordinates for the genes `50916`, `110308`, `12293`
+> Use the TxDb.Mmusculus.UCSC.mm10.knownGene package to retrieve the exon coordinates for the genes `50916`, `110308`, `12293` 
 >
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
@@ -513,7 +514,7 @@ when we query the object. This strategy is useful when we want to add a common e
 an ideogram) to a plot composition and don’t want to repeat the code to generate the plot every time.
 
 ```{r}
-#idPlot <- plotIdeogram(genome = "mm10")
+#idPlot <- plotIdeogram(genome = "mm10",subchr = "chr1")
 #idPlot
 geneMod <- autoplot(tx, which = myreg)
 reads1 <- autoplot(bam, stat = "coverage")
