@@ -65,11 +65,16 @@ The previous section walked-through the pre-processing and transformation of the
 ```{r eval=FALSE}
 ## Read the counts from the downloaded data
 seqdata <- read.delim("data/GSE60450_Lactation-GenewiseCounts.txt", stringsAsFactors = FALSE)
-## Discard the gene name and length columns
-countdata <- seqdata[,-(1:2)]
-## Transform the column names to something more meaningful
+#
+# Remove first two columns from seqdata
 
+countdata <- seqdata[,-(1:2)]
+
+# Store EntrezGeneID as rownames
+rownames(countdata) <- seqdata[,1]
+countdata
 colnames(countdata) <- substr(colnames(countdata), 1, 7)
+countdata
 ## Calculate the Counts Per Million measure
 myCPM <- cpm(countdata)
 ## Identify genes with at least 0.5 cpm in at least 2 samples
