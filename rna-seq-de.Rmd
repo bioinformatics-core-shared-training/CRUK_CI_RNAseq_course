@@ -46,7 +46,7 @@ You should download these files and place them in your `/data` directory.
 
 Now that we are happy that we have normalised the data and that the quality looks good, we can continue to testing for differentially expressed genes. There are a number of packages to analyse RNA-Seq data. Most people use DESEQ2 or edgeR. We will use edgeR for the rest of this practical.
 
-**First make sure we have all the objects and libraries loaded from the previous section**
+**First make sure we have all the objects and libraries loaded*
 
 ```{r}
 library(edgeR)
@@ -55,6 +55,36 @@ library(Glimma)
 library(gplots)
 library(org.Mm.eg.db)
 load("Robjects/preprocessing.Rdata")
+```
+
+
+### Recap of pre-processing
+
+The previous section walked-through the pre-processing and transformation of the count data. Here, for completeness, we list the minimal steps required to process the data prior to differential expression analysis.
+
+```{r eval=FALSE}
+## Read the counts from the downloaded data
+seqdata <- read.delim("data/GSE60450_Lactation-GenewiseCounts.txt", stringsAsFactors = FALSE)
+## Discard the gene name and length columns
+countdata <- seqdata[,-(1:2)]
+## Transform the column names to something more meaningful
+
+colnames(countdata) <- substr(colnames(countdata), 1, 7)
+## Calculate the Counts Per Million measure
+myCPM <- cpm(countdata)
+## Identify genes with at least 0.5 cpm in at least 2 samples
+thresh <- myCPM > 0.5
+keep <- rowSums(thresh) >= 2
+# Subset the rows of countdata to keep the more highly expressed genes
+counts.keep <- countdata[keep,]
+## Convert to an edgeR object
+dgeObj <- DGEList(counts.keep)
+## Perform TMM normalisation
+dgeObj <- calcNormFactors(dgeObj)
+## Obtain corrected sample information
+sampleinfo <- read.delim("data/SampleInfo_Corrected.txt")
+group <- paste(sampleinfo$CellType,sampleinfo$Status,sep=".")
+group
 ```
 
 
@@ -76,25 +106,7 @@ design
 ```
 
 
-### Filtering
-First, we will filter out very lowly expressed tags, keeping only genes that are expressed at a reasonable level in at least
-one treatment condition.
-```{r}
-keep <- rowSums(cpm(dgeObj)>1) >= 6
-dgeObj <- dgeObj[keep,]
-dim(dgeObj)
-```
-Re-compute the library sizes:
-```{r}
-dgeObj$samples$lib.size <- colSums(dgeObj$counts)
-```
 
-### Normalisation
-Now we compute effective library sizes using TMM normalization:
-```{r}
-dgeObj <- calcNormFactors(dgeObj)
-dgeObj$samples
-```
 ### Data exploration
 An MDS plot shows distances, in terms of biological coefficient of variation (BCV), between samples. What do you think of the quality of the data? Can you anticipate if the interaction term will be important?
 ```{r}
@@ -134,8 +146,14 @@ lrt.BvsL <- glmLRT(fit, coef=2)
 topTags(lrt.BvsL)
 
 ```
-Conduct likelihood ratio tests for virgin vs lactate and show the top genes.
 
+
+> ## Challenge {.challenge}
+> Conduct likelihood ratio tests for virgin vs lactate and show the top genes.
+
+```{r}
+
+```
 
 
 

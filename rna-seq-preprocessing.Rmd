@@ -489,5 +489,5 @@ abline(h=0,col="grey")
 **We need to save a few data objects to use for Day 2 so we don't have to rerun everything**
 
 ```{r}
-save(group,dgeObj,logcounts,sampleinfo,file="Robjects/preprocessing.Rdata")
+save(group,dgeObj,sampleinfo,file="Robjects/preprocessing.Rdata")
 ```
