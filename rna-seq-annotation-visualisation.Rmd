@@ -38,22 +38,23 @@ load("Robjects/DE.Rdata")
 
 ## Adding annotation and saving the results
 
-We have a list of significantly differentially expressed genes, but the only annotation we can see is the Entrez Gene ID, which is not very informative. For data exploration and visualisation purposes, we want to bring in names that are more-recognisable.
-
+We have a list of significantly differentially expressed genes, but the only annotation we can see is the Entrez Gene ID, which is not very informative. 
 ```{r}
 results <- as.data.frame(topTags(lrt.BvsL,n = Inf))
 results
 
 ```
 
-Plot log-fold change against log-counts per million, with DE genes highlighted:
+`edgeR` provides a function `plotSmear` that allows us to visualise the results of a DE analysis. In a similar manner to the [*MA-plot* for microarray data](https://en.wikipedia.org/wiki/MA_plot), this plot shows the log-fold change against log-counts per million, with DE genes highlighted:
+
 ```{r}
 summary(de <- decideTestsDGE(lrt.BvsL))
 detags <- rownames(dgeObj)[as.logical(de)]
 plotSmear(lrt.BvsL, de.tags=detags)
 ```
+However, on such a plot it would be nice to add labels to highlight the genes with most evidence for being DE, or our favourite genes. To perform such a task we need to map between the identifiers we have in the `edgeR` output and more familiar names.
 
-We would like to add some annotation information. There are a number of ways to do this, but we will demonstrate how to do this using the *org.Mm.eg.db* package. This package is one of several *organism-level* packages which are re-built every 6 months. These packages are listed on the [annotation section](http://bioconductor.org/packages/release/BiocViews.html#___AnnotationData) of the Bioconductor, and are installed in the same way as regular Bioconductor packages. An alternative approachj is to use `biomaRt`, an interface to the [BioMart](http://www.biomart.org/) resource. BioMart is much more comprehensive, but the organism package fit better into the Bioconductor workflow.
+There are a number of ways to add annotation, but we will demonstrate how to do this using the *org.Mm.eg.db* package. This package is one of several *organism-level* packages which are re-built every 6 months. These packages are listed on the [annotation section](http://bioconductor.org/packages/release/BiocViews.html#___AnnotationData) of the Bioconductor, and are installed in the same way as regular Bioconductor packages. An alternative approach is to use `biomaRt`, an interface to the [BioMart](http://www.biomart.org/) resource. BioMart is much more comprehensive, but the organism package fit better into the Bioconductor workflow.
 
 
 ```{r eval=FALSE}
@@ -138,51 +139,45 @@ write.csv(results.annotated,file="B.PregVsLacResults.csv",row.names=FALSE)
 
 **A note about deciding how many genes are significant**: In order to decide which genes are differentially expressed, we usually take a cut-off of 0.05 on the adjusted p-value, NOT the raw p-value. This is because we are testing more than 15000 genes, and the chances of finding differentially expressed genes is very high when you do that many tests. Hence we need to control the false discovery rate, which is the adjusted p-value column in the results table. What this means is that if 100 genes are significant at a 5\% false discovery rate, we are willing to accept that 5 will be false positives. Note that the `decideTests` function displays significant genes at 5\% FDR.
 
-<!--
-### Plots after testing for DE
-
-Let's do a few plots to make sure everything looks good and that we haven't made a mistake in the analysis. Genome-wide plots that are useful for checking are MAplots (or MDplots) and volcano plots. There are functions in limma for plotting these with `fit.cont` as input.
-
-```{r,fig.height=5,fig.width=10}
-# We want to highlight the significant genes. We can get this from decideTests.
-par(mfrow=c(1,2))
-plotMD(fit.cont,coef=1,status=summa.fit[,"B.PregVsLac"])
-
-# For the volcano plot we have to specify how many of the top genes to hightlight.
-# We can also specify that we want to plot the gene symbol for the highlighted genes.
-# let's highlight the top 100 most DE genes
-volcanoplot(fit.cont,coef=1,highlight=100,names=fit.cont$genes$SYMBOL)
-```
-
 > ## Challenge {.challenge}
 >
-> Look at the MD plot and volcano plot for the second comparison, `L.PregVsLac`. Change the number of highlighted genes to 200 in the volcano plot.
+> Re-visit the `plotSmear` plot from above and use the `text` function to add labels for the names of the top 200 most DE genes
 >
 
 ```{r,echo=FALSE,fig.height=5,fig.width=10}
-par(mfrow=c(1,2))
-plotMD(fit.cont,coef=2,status=summa.fit[,"L.PregVsLac"])
-volcanoplot(fit.cont,coef=2,highlight=200,names=fit.cont$genes$SYMBOL)
+
+plotSmear(lrt.BvsL, de.tags=detags)
+
+N <- 200
+
+text(results.annotated$logCPM[1:N],results.annotated$logFC[1:N],labels = results.annotated$SYMBOL[1:N],col="blue")
 ```
 
--->
 
-Before following up on the DE genes with further lab work, it is recommended to have a look at the expression levels of the individual samples for the genes of interest. We can quickly look at grouped expression using `stripchart`. We can use the normalised log expression values in the  `dgeCounts` object (`dgeCounts$counts`).
+Another common visualisation is the [*volcano plot*](https://en.wikipedia.org/wiki/Volcano_plot_(statistics)) which display a measure of significance on the y-axis and fold-change on the x-axis. 
+
+```{r,fig.height=5,fig.width=10}
+signif <- -log10(results.annotated$FDR)
+plot(results.annotated$logFC,signif,pch=16)
+points(results.annotated[detags,"logFC"],-log10(results.annotated[detags,"FDR"]),pch=16,col="red")
+
+```
+
+
+Before following up on the DE genes with further lab work, a recommended *sanity check* is to have a look at the expression levels of the individual samples for the genes of interest. We can quickly look at grouped expression using `stripchart`. We can use the normalised log expression values in the  `dgeCounts` object (`dgeCounts$counts`).
 
 ```{r,fig.width=12,fig.height=5}
 library(RColorBrewer)
 par(mfrow=c(1,3))
 normCounts <- dgeObj$counts
-# Let's look at the first gene in the topTable, Wif1, which has a rowname 24117
-stripchart(normCounts["24117",]~group)
+# Let's look at the first gene in the topTable, Irx4, which has a rowname 50916
+stripchart(normCounts["50916",]~group)
 # This plot is ugly, let's make it better
-stripchart(normCounts["24117",]~group,vertical=TRUE,las=2,cex.axis=0.8,pch=16,col=1:6,method="jitter")
+stripchart(normCounts["50916",]~group,vertical=TRUE,las=2,cex.axis=0.8,pch=16,col=1:6,method="jitter")
 # Let's use nicer colours
 nice.col <- brewer.pal(6,name="Dark2")
-stripchart(normCounts["24117",]~group,vertical=TRUE,las=2,cex.axis=0.8,pch=16,cex=1.3,col=nice.col,method="jitter",ylab="Normalised log2 expression",main="Wif1")
+stripchart(normCounts["50916",]~group,vertical=TRUE,las=2,cex.axis=0.8,pch=16,cex=1.3,col=nice.col,method="jitter",ylab="Normalised log2 expression",main="	Irx4")
 ```
-
-Notice anything interesting about the expression of this gene?
 
 An interactive version of the volcano plot above that includes the raw per sample values in a separate panel is possible via the `glXYPlot` function in the *Glimma* package.
 
