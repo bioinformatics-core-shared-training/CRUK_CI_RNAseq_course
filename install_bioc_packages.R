@@ -9,4 +9,5 @@ biocLite(c("limma",
          "SRAdb",
          "Rsubread",
          "BiasedUrn",
-         "TxDb.Mmusculus.UCSC.mm10.knownGene"))
+         "TxDb.Mmusculus.UCSC.mm10.knownGene",
+         "GEOquery"))

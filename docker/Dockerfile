@@ -19,4 +19,12 @@ RUN wget https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.8.1-3/sratoolkit.2.8.1-3-u
 RUN gunzip sratoolkit.2.8.1-3-ubuntu64.tar.gz
 RUN tar xvf sratoolkit.2.8.1-3-ubuntu64.tar
 RUN ln -s /tmp/sratoolkit.2.8.1-3-ubuntu64/bin/* /usr/bin/
-WORKDIR /home/rstudio
+RUN apt-get install unzip
+RUN wget https://ndownloader.figshare.com/articles/3219673?private_link=f5d63d8c265a05618137 -O fastq.zip
+RUN unzip fastq.zip -d /home/participant/Course_Materials/data/
+RUN rm fastq.zip
+RUN wget https://ndownloader.figshare.com/articles/3219685?private_link=1d788fd384d33e913a2a -O raw.zip
+RUN unzip raw.zip -d /home/participant/Course_Materials/data/
+RUN rm raw.zip
+RUN chown rstudio /home/participant/Course_Materials/
+WORKDIR /home//participant/Course_Materials/
