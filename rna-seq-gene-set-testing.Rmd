@@ -288,25 +288,75 @@ barcodeplot(fit.cont$coeff[,2], index=c2.ind[["LABBE_WNT3A_TARGETS_UP"]], index2
 ## goseq analysis
 
 ```{r}
+results <- as.data.frame(topTags(lrt.BvsL,n = Inf))
+results
 library(goseq)
-genes <- fit.cont$p.value[,1] < 0.01
-names(genes) <- rownames(v$E)
+genes <- results$FDR < 0.01
+names(genes) <- rownames(results)
 
 
+
+
+```
+
+
+
+```{r}
+supportedGeneIDs()
+supportedGenomes()
 pwf <- nullp(genes, "mm10","knownGene")
-gores <- goseq(pwf, "mm10","knownGene")
+```
 
-## create some tables to test our Galaxy tool
-## deTable <- data.frame(Gene = names(genes), DE = genes)
-## write.table(deTable,"my.mouse.de.txt",sep="\t")
+```{r}
+go.results <- goseq(pwf, "mm10","knownGene")
+go.results
+```
 
-##genLen <- getlength(names(genes),"mm10","knownGene")
-##lenTable <- data.frame(Gene = names(genes), Length=genLen)
-##write.table(lenTable, "my.mouse.genLen.txt",sep="\t")
 
-##gocats <- getgo(names(genes),"mm10","knownGene")
-##goTable <- data.frame(Gene=rep(names(gocats),times=lapply(gocats,length)),Category = unlist(gocats))
-##write.table(goTable, "my.mouse.go.cats.txt",sep="\t")
+## fgsea analysis
 
+```{r}
+library(fgsea)
+
+```
+
+Loading ranks:
+
+```{r}
+ranks <- results$logFC
+names(ranks) <- rownames(results)
+```
+
+Load the pathways
+
+```{r}
+load("data/mouse_H_v5.rdata")
+pathways <- Mm.H
+```
+
+
+```{r}
+fgseaRes <- fgsea(pathways, ranks, minSize=15,maxSize = 500,nperm=1000)
+fgseaRes
+```
+
+```{r}
+head(fgseaRes[order(pval), ])
+```
+
+```{r}
+plotEnrichment(pathways[["HALLMARK_MYOGENESIS"]],
+               ranks)
+```
+
+
+Select top pathways and make the plot
+
+```{r}
+topPathwaysUp <- fgseaRes[ES > 0][head(order(pval), n=10), pathway]
+topPathwaysDown <- fgseaRes[ES < 0][head(order(pval), n=10), pathway]
+topPathways <- c(topPathwaysUp, rev(topPathwaysDown))
+plotGseaTable(pathways[topPathways], ranks, fgseaRes, 
+              gseaParam = 0.5)
 ```
 

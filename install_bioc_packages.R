@@ -10,4 +10,6 @@ biocLite(c("limma",
          "Rsubread",
          "BiasedUrn",
          "TxDb.Mmusculus.UCSC.mm10.knownGene",
-         "GEOquery"))
+         "GEOquery",
+         "goseq",
+         "fgsea"))
