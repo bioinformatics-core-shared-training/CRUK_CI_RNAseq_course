@@ -1,6 +1,5 @@
 ---
 title: "RNA-seq analysis in R"
-subtitle: "Alignment and Counting"
 author: "Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
@@ -12,6 +11,7 @@ output:
     toc_float: yes
 minutes: 300
 layout: page
+subtitle: Alignment and Counting
 bibliography: ref.bib
 ---
 
@@ -50,8 +50,6 @@ We have provided the index files for chromosome 1 for the mouse genome build mm1
 
 For the purpose of this workshop, we are going to be working with a small part of the mouse reference genome (chromosome 1) to demonstrate how to do read alignment and counting using R. Mapping reads to the genome is a very important task, and many different aligners are available, such as bowtie [@Langmead2012], topHat [@trapnell2009tophat], STAR [@Dobin2013] and Rsubread [@liao2013subread]. Rsubread is the only aligner that can run in R. Most alignment tools are run in a linux environment, and they are very computationally intensive. Most mapping tasks require larger computers than an average laptop, so usually read mapping is done on a server in a linux-like environment. Here we are only going to be mapping 1000 reads from each sample from our mouse lactation dataset [@Fu2015], and we will only be mapping to chromosome 1. This is so that everyone can have a go at alignment and counting on their laptops using RStudio.
 
-*Don't forget to open a new project specifying the directory where you have saved all the data files for day 2*
-
 First, let's load the Rsubread package into R.
 
 ```{r}
@@ -75,10 +73,11 @@ fastq.files
 
 Read sequences are stored in compressed (gzipped) FASTQ files. Before the differential expression analysis can proceed, these reads must be aligned to the mouse genome and counted into annotated genes. This can be achieved with functions in the Rsubread package.
 
-The first step in performing the alignment is to build an index. In order to build an index you need to have the fasta file (.fa), which can be downloaded from the UCSC genome browser. Here we are building the index just for chromosome 1. This may take several minutes to run. Building the full index using the whole mouse genome usually takes about 30 minutes to an hr on a server. We won't be building the index in the workshop due to time constraints, we have provided the index files for you. The command below assumes the chr1 genome information for mm10 is stored in the "chr1.fa" file.
+The first step in performing the alignment is to build an index. In order to build an index you need to have the fasta file (.fa), which can be downloaded from the UCSC genome browser. Here we are building the index just for chromosome 1. This may take several minutes to run. Building the full index using the whole mouse genome usually takes about 30 minutes to an hr on a server. *We won't be building the index in the workshop due to time constraints, we have provided the index files for you*. The command below assumes the chr1 genome information for mm10 is stored in the "chr1.fa" file.
 
-```{r,results="hide"}
-# buildindex(basename="chr1_mm10",reference="chr1.fa")
+```{r,eval=FALSE}
+# See above paragraph: "we have provided the index files for you". You do not need to run command below.
+buildindex(basename="chr1_mm10",reference="chr1.fa")
 ```
 
 The above command will generate the index files in the working directory. In this example, the prefix for the index files is chr1_mm10. You can see the additional files generated using the `dir` command, which will list every file in your current working directory.
@@ -162,9 +161,9 @@ boxplot(qs)
 
 Now that we have figured out where each read comes from in the genome, we need to summarise the information across genes or exons. The alignment produces a set of BAM files, where each file contains the read alignments for each library. In the BAM file, there is a chromosomal location for every read that mapped uniquely. The mapped reads can be counted across mouse genes by using the `featureCounts` function. `featureCounts` contains built-in annotation for mouse (mm9, mm10) and human (hg19) genome assemblies (NCBI refseq annotation).
 
-The code below uses the exon intervals defined in the NCBI refseq annotation of the mm10 genome. Reads that map to exons of genes are added together to obtain the count for each gene, with some care taken with reads that span exon-exon boundaries. `featureCounts` takes all the BAM files as input, and outputs an object which includes the count matrix, similar to the count matrix we have been working with on Day 1. Each sample is a separate column, each row is a gene.
+The code below uses the exon intervals defined in the NCBI refseq annotation of the mm10 genome. Reads that map to exons of genes are added together to obtain the count for each gene, with some care taken with reads that span exon-exon boundaries. `featureCounts` takes all the BAM files as input, and outputs an object which includes the count matrix. Each sample is a separate column, each row is a gene.
 
-```{r,results="hide"}
+```{r, eval=FALSE}
 fc <- featureCounts(bam.files, annot.inbuilt="mm10")
 ```
 
@@ -173,7 +172,7 @@ fc <- featureCounts(bam.files, annot.inbuilt="mm10")
 names(fc)
 ```
 
-The statistics of the read mapping can be seen with fc$stats. This reports the numbers of unassigned reads and the reasons why they are not assigned (eg. ambiguity, multi-mapping, secondary alignment, mapping quality, fragment length, chimera, read duplicate, non-junction and so on), in addition to the number of successfully assigned reads for each library. (We know the real reason why the majority of the reads aren't mapping - they're not from chr 1!)
+The statistics of the read mapping can be seen with fc$stats. This reports the numbers of unassigned reads and the reasons why they are not assigned (eg. ambiguity, multi-mapping, secondary alignment, mapping quality, fragment length, chimera, read duplicate, non-junction and so on), in addition to the number of successfully assigned reads for each library. See [subread documentation](http://bioinf.wehi.edu.au/subread-package/SubreadUsersGuide.pdf) ('Program output' section). (We know the real reason why the majority of the reads aren't mapping - they're not from chr 1!)
 
 ```{r}
 ## Take a look at the featurecounts stats
