@@ -557,7 +557,7 @@ tracks(mm10=geneMod, MCL1.DG=reads.MCL1.DG )
 
 > ## Challenge {.challenge}
 >
-> Re-visit the `plotSmear` plot from above and use the `text` function to add labels for the names of the top 200 most DE genes
+> Create tracks to compare the coverage of the gene Krt5 for the samples MCL1.DG, MCL1.DH, MCL1.LA and MCL1.LB
 >
 
 ```{r,echo=FALSE,fig.height=5,fig.width=10}
