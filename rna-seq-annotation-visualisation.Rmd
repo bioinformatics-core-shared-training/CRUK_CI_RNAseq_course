@@ -152,11 +152,6 @@ write.csv(results.annotated,file="B.PregVsLacResults.csv",row.names=FALSE)
 
 ```{r,echo=FALSE,fig.height=5,fig.width=10}
 
-plotSmear(lrt.BvsL, de.tags=detags)
-
-N <- 200
-
-text(results.annotated$logCPM[1:N],results.annotated$logFC[1:N],labels = results.annotated$SYMBOL[1:N],col="blue")
 ```
 
 
@@ -236,11 +231,7 @@ The `select` function is used in the same manner as the `org.Mm.eg.db` packages.
 >
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
-keys <- c("50916","110308","12293")
-select(tx, keys=keys,
-       keytype = "GENEID",
-       columns=c("EXONCHROM","EXONSTART","EXONEND")
-      )
+
 
 ```
 
@@ -557,29 +548,11 @@ tracks(mm10=geneMod, MCL1.DG=reads.MCL1.DG )
 
 > ## Challenge {.challenge}
 >
-> Re-visit the `plotSmear` plot from above and use the `text` function to add labels for the names of the top 200 most DE genes
+> Create tracks to compare the coverage of the gene Krt5 for the samples MCL1.DG, MCL1.DH, MCL1.LA and MCL1.LB
 >
 
 ```{r,echo=FALSE,fig.height=5,fig.width=10}
-bam <- readGAlignments(file="bam/MCL1.DG.bam",
-                       param=ScanBamParam(which=myreg),use.names = TRUE)
-reads.MCL1.DG <- autoplot(bam, stat = "coverage")
 
-bam <- readGAlignments(file="bam/MCL1.DH.bam",
-                       param=ScanBamParam(which=myreg),use.names = TRUE)
-reads.MCL1.DH <- autoplot(bam, stat = "coverage")
-
-
-bam <- readGAlignments(file="bam/MCL1.LA.bam",
-                       param=ScanBamParam(which=myreg),use.names = TRUE)
-reads.MCL1.LA <- autoplot(bam, stat = "coverage")
-
-bam <- readGAlignments(file="bam/MCL1.LB.bam",
-                       param=ScanBamParam(which=myreg),use.names = TRUE)
-reads.MCL1.LB <- autoplot(bam, stat = "coverage")
-
-
-tracks(mm10=geneMod, MCL1.DG=reads.MCL1.DG, MCL1.Dh=reads.MCL1.DH, MCL1.LA=reads.MCL1.LA, MCL1.LB=reads.MCL1.LB) 
 
 ```
 

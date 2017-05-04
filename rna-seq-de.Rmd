@@ -182,14 +182,7 @@ topTags(lrt.pVsV)
 **Solution**
 ```{r,echo=FALSE}
 # Solution
-design2 <- model.matrix(~ type * status)
-fit2 <- glmFit(dgeObj, design2)
-names(fit2)
-head(coef(fit2))
-lrt2 <- glmLRT(fit2, coef=5)
-topTags(lrt2)
-lrt3 <- glmLRT(fit2, coef=6)
-topTags(lrt3)
+
 ```
 
 ```{r}

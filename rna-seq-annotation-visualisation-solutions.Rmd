@@ -1,0 +1,585 @@
+---
+title: "RNA-seq Analysis in R"
+subtitle: "Annotation and Visualisation of RNA-seq results"
+author: "Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle"
+date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
+output:
+  html_notebook:
+    toc: yes
+    toc_float: yes
+  html_document:
+    toc: yes
+    toc_float: yes
+minutes: 300
+layout: page
+bibliography: ref.bib
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Original Authors: Belinda Phipson, Anna Trigos, Matt Ritchie, Maria Doyle, Harriet Dashnow, Charity Law**
+Based on the course [RNAseq analysis in R](http://combine-australia.github.io/2016-05-11-RNAseq/) delivered on May 11/12th 2016
+
+Before starting this section, we will make sure we have all the relevant objects from the Differential Expression analysis present.
+
+```{r}
+suppressPackageStartupMessages(library(edgeR))
+load("Robjects/DE.Rdata")
+```
+
+# Overview
+
+- Visualising DE results
+- Getting annotation
+- Retrieving gene models
+- Exporting browser traecks
+- Visualising results with respect to genomic location
+
+
+
+We have a list of significantly differentially expressed genes, but the only annotation we can see is the Entrez Gene ID, which is not very informative. 
+```{r}
+results <- as.data.frame(topTags(lrt.BvsL,n = Inf))
+results
+dim(results)
+```
+
+`edgeR` provides a function `plotSmear` that allows us to visualise the results of a DE analysis. In a similar manner to the [*MA-plot* for microarray data](https://en.wikipedia.org/wiki/MA_plot), this plot shows the log-fold change against log-counts per million, with DE genes highlighted:
+
+```{r}
+summary(de <- decideTestsDGE(lrt.BvsL))
+detags <- rownames(dgeObj)[as.logical(de)]
+plotSmear(lrt.BvsL, de.tags=detags)
+```
+However, on such a plot it would be nice to add labels to highlight the genes with most evidence for being DE, or our favourite genes. To perform such a task we need to map between the identifiers we have in the `edgeR` output and more familiar names.
+
+Finally, we will look at sophisticated visualisations that allow us to incorporate information about the structure of a gene, level of sequencing coverage.
+
+## Adding annotation to the edgeR results
+
+There are a number of ways to add annotation, but we will demonstrate how to do this using the *org.Mm.eg.db* package. This package is one of several *organism-level* packages which are re-built every 6 months. These packages are listed on the [annotation section](http://bioconductor.org/packages/release/BiocViews.html#___AnnotationData) of the Bioconductor, and are installed in the same way as regular Bioconductor packages. An alternative approach is to use `biomaRt`, an interface to the [BioMart](http://www.biomart.org/) resource. BioMart is much more comprehensive, but the organism packages fit better into the Bioconductor workflow.
+
+
+```{r eval=FALSE}
+source("http://www.bioconductor.org/biocLite.R")
+biocLite("org.Mm.eg.db")
+# For Human
+biocLite("org.Hs.eg.db")
+```
+
+The packages are larger in size that Bioconductor software pacakges, but essentially they are databases that can be used to make *offline* queries. 
+
+```{r message=FALSE}
+library(org.Mm.eg.db)
+```
+
+
+First we need to decide what information we want. In order to see what we can extract we can run the `columns` function on the annotation database.
+
+```{r}
+columns(org.Mm.eg.db)
+```
+
+We are going to filter the database by a key or set of keys in order to extract the information we want. Valid names for the key can be retrieved with the `keytypes` function.
+
+```{r}
+keytypes(org.Mm.eg.db)
+```
+
+We should see `ENTREZID`, which is the type of key we are going to use in this case. If we are unsure what values are acceptable for the key, we can check what keys are valid with `keys`
+
+```{r}
+keys(org.Mm.eg.db, keytype="ENTREZID")[1:10]
+```
+
+It is a useful sanity check to make sure that the keys you want to use are all valid. We could use `%in%` in this case.
+
+```{r}
+## Build up the query step-by-step
+my.keys <- c("50916", "110308","12293")
+my.keys %in% keys(org.Mm.eg.db, keytype="ENTREZID")
+all(my.keys %in% keys(org.Mm.eg.db, keytype="ENTREZID"))
+```
+
+Let's build up the query step by step.
+
+```{r eval=FALSE}
+## to be filled-in interactively during the class.
+select(org.Mm.eg.db,
+
+
+```
+
+
+
+To annotate our results, we definitely want gene symbols and perhaps the full gene name. Let's build up our annotation information in a separate data frame using the `select` function.
+
+```{r}
+ann <- select(org.Mm.eg.db,keys=rownames(results),columns=c("ENTREZID","SYMBOL","GENENAME"))
+# Have a look at the annotation
+ann
+
+```
+
+Let's double check that the `ENTREZID` column matches exactly to our `results` rownames.
+
+```{r}
+table(ann$ENTREZID==rownames(results))
+```
+
+We can bind in the annotation information to the `results` data frame. (Please note that if the `select` function returns a 1:many mapping then you can't just append the annotation to the fit object.)
+
+```{r}
+results.annotated <- cbind(results, ann)
+results.annotated
+
+```
+
+
+We can save the results table using the `write.csv` function, which writes the results out to a csv file that you can open in excel.
+
+```{r}
+write.csv(results.annotated,file="B.PregVsLacResults.csv",row.names=FALSE)
+```
+
+**A note about deciding how many genes are significant**: In order to decide which genes are differentially expressed, we usually take a cut-off of 0.05 on the adjusted p-value, NOT the raw p-value. This is because we are testing more than 15000 genes, and the chances of finding differentially expressed genes is very high when you do that many tests. Hence we need to control the false discovery rate, which is the adjusted p-value column in the results table. What this means is that if 100 genes are significant at a 5\% false discovery rate, we are willing to accept that 5 will be false positives. Note that the `decideTests` function displays significant genes at 5\% FDR.
+
+> ## Challenge {.challenge}
+>
+> Re-visit the `plotSmear` plot from above and use the `text` function to add labels for the names of the top 200 most DE genes
+>
+
+```{r,echo=FALSE,fig.height=5,fig.width=10}
+
+plotSmear(lrt.BvsL, de.tags=detags)
+
+N <- 200
+
+text(results.annotated$logCPM[1:N],results.annotated$logFC[1:N],labels = results.annotated$SYMBOL[1:N],col="blue")
+```
+
+
+Another common visualisation is the [*volcano plot*](https://en.wikipedia.org/wiki/Volcano_plot_(statistics)) which display a measure of significance on the y-axis and fold-change on the x-axis. 
+
+```{r,fig.height=5,fig.width=10}
+signif <- -log10(results.annotated$FDR)
+plot(results.annotated$logFC,signif,pch=16)
+points(results.annotated[detags,"logFC"],-log10(results.annotated[detags,"FDR"]),pch=16,col="red")
+
+```
+
+
+Before following up on the DE genes with further lab work, a recommended *sanity check* is to have a look at the expression levels of the individual samples for the genes of interest. We can quickly look at grouped expression using `stripchart`. We can use the normalised log expression values in the  `dgeCounts` object (`dgeCounts$counts`).
+
+```{r,fig.width=12,fig.height=5}
+library(RColorBrewer)
+par(mfrow=c(1,3))
+normCounts <- dgeObj$counts
+# Let's look at the first gene in the topTable, Krt5, which has a rowname 110308
+stripchart(normCounts["110308",]~group)
+# This plot is ugly, let's make it better
+stripchart(normCounts["110308",]~group,vertical=TRUE,las=2,cex.axis=0.8,pch=16,col=1:6,method="jitter")
+# Let's use nicer colours
+nice.col <- brewer.pal(6,name="Dark2")
+stripchart(normCounts["110308",]~group,vertical=TRUE,las=2,cex.axis=0.8,pch=16,cex=1.3,col=nice.col,method="jitter",ylab="Normalised log2 expression",main="	Krt5")
+```
+
+An interactive version of the volcano plot above that includes the raw per sample values in a separate panel is possible via the `glXYPlot` function in the *Glimma* package.
+
+
+```{r}
+library(Glimma)
+group2 <- group
+levels(group2) <- c("basal.lactate","basal.preg","basal.virgin","lum.lactate", "lum.preg", "lum.virgin")
+glXYPlot(x=results$logFC, y=-log10(results$FDR),
+         xlab="logFC", ylab="B", main="B.PregVsLac",
+         counts=normCounts, groups=group2, status=de,
+         anno=ann, id.column="ENTREZID", folder="volcano")
+```
+
+
+This function creates an html page (./volcano/XY-Plot.html) with a volcano plot on the left and a plot showing the log-CPM per sample for a selected gene on the right. A search bar is available to search for genes of interest.
+
+
+
+## Retrieving Genomic Locations
+
+
+It might seem natural to add genomic locations to our annotation table, and possibly a bit odd that the `org.Mm.eg.db` package does not supply such mappings. In fact, there is a whole suite of package for performing this, and more-advanced queries that relate to the location of genes. These are listed on the Bioconductor [annotation page](http://bioconductor.org/packages/release/BiocViews.html#___AnnotationData) and have the prefix `TxDb.`
+
+The package we will be using is `TxDb.Mmusculus.UCSC.mm10.knownGene`. Packages are available for other organisms and genome builds. It is even possible to *build your own database* if one does not exist. See `vignette("GenomicFeatures")` for details
+
+```{r eval=FALSE}
+source("http://www.bioconductor.org/biocLite.R")
+biocLite("TxDb.Mmusculus.UCSC.mm10.knownGene")
+
+## For Humans
+biocLite("TxDb.Hsapiens.UCSC.hg19.knownGene")
+
+```
+
+We load the library in the usual fashion and create a new object to save some typing. As with the `org.` packages, we can query what columns are available with `columns`,
+
+```{r message=FALSE}
+library(TxDb.Mmusculus.UCSC.mm10.knownGene)
+tx <- TxDb.Mmusculus.UCSC.mm10.knownGene
+columns(tx)
+```
+
+The `select` function is used in the same manner as the `org.Mm.eg.db` packages. 
+
+
+> ## Challenge {.challenge}
+>
+> Use the TxDb.Mmusculus.UCSC.mm10.knownGene package to retrieve the exon coordinates for the genes `50916`, `110308`, `12293` 
+>
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+keys <- c("50916","110308","12293")
+select(tx, keys=keys,
+       keytype = "GENEID",
+       columns=c("EXONCHROM","EXONSTART","EXONEND")
+      )
+
+```
+
+### Overview of GenomicRanges
+
+One of the real strengths of the `txdb..` packages is the ability of interface with `GenomicRanges`, which is the object type used throughout Bioconductor [to manipulate Genomic Intervals](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3738458/pdf/pcbi.1003118.pdf). 
+
+These object types permit us to perform common operations on intervals such as overlapping and counting. We can define the chromosome, start and end position of each region (also strand too, but not shown here).
+
+```{r}
+library(GenomicRanges)
+simple.range <-GRanges("1", IRanges(start=1000,end=2000))
+simple.range
+
+```
+
+We don't have to have all our ranges located on the same chromosome
+```{r}
+chrs <- c("chr13", "chr15","chr5")
+start <- c(73000000, 101000000, 15000000)
+end <- c(74000000,102000000, 16000000)
+
+my.ranges <- GRanges(rep(chrs,3), 
+                     IRanges(start=rep(start,each=3),
+                             end = rep(end,each=3))
+)
+
+```
+
+There are a number of useful functions for calculating properties of the data (such as *coverage* or sorting). Not so much for RNA-seq analysis, but `GenomicRanges` are used throughout Bioconductor for the analysis of NGS data. 
+
+For instance, we can quickly identify overlapping regions between two `GenomicRanges`. However, we have to pay attention to the naming convention used for each object. `seqlevelsStyle` can 
+
+```{r}
+keys <- c("50916","110308","12293")
+genePos <- select(tx, keys=keys,
+       keytype = "GENEID",
+       columns=c("EXONCHROM","EXONSTART","EXONEND")
+      )
+geneRanges <- GRanges(genePos$EXONCHROM, IRanges(genePos$EXONSTART,genePos$EXONEND), GENEID=genePos$GENEID)
+geneRanges
+
+findOverlaps(my.ranges,geneRanges)
+seqlevelsStyle(geneRanges)
+seqlevelsStyle(simple.range)
+
+```
+
+
+## Retrieving Gene Coordinates as GenomicRanges
+
+As we saw above, it is quite straightforward to translate the output of a `select` query into a `GenomicFeatures` object. However, several convenience functions exist to retrieve the structure of every gene for a given organism in one object. 
+
+The output of `exonsBy` is a list, where each item in the list is the exon co-ordinates of a particular gene. 
+
+```{r}
+exo <- exonsBy(tx,"gene")
+exo
+```
+
+To access the structure of a particular gene, we can use the `[[` syntax with the name of the gene (Entrez gene ID) within quote marks. If we wanted to whole region that the gene spans we could use the `range` function.
+
+```{r}
+exo[["110308"]]
+range(exo[["110308"]])
+```
+
+
+## Exporting tracks
+
+It is also possible to save the results of a Bioconductor analysis in a browser to enable interactive analysis and integration with other data types, or sharing with collaborators. For instance, we might want a browser track to indicate where our differentially-expressed genes are located. We shall use the `bed` format to display these locations. We will annotate the ranges with information from our analysis such as the fold-change and significance.
+
+First we create a data frame for just the DE genes.
+```{r}
+sigGenes <- results.annotated[detags,]
+sigGenes
+```
+
+At the moment, we have a GenomicFeatures object that represents every exon. However, we do not
+need this level of granularity for the bed output, so we will collapse to a single region for each gene. First we the `range` function to obtain a single range for every gene and tranform to a more convenient object with `unlist`.
+```{r}
+exoRanges <- unlist(range(exo))
+sigRegions <- exoRanges[na.omit(match(sigGenes$ENTREZID, names(exoRanges)))]
+sigRegions
+```
+
+Rather than just representing the genomic locations, the .bed format is also able to colour each range
+according to some property of the analysis (e.g. direction and magnitude of change) to help highlight
+particular regions of interest. A score can also be displayed when a particular region is clicked-on.
+A useful propery of GenomicRanges is that we can attach *metadata* to each range using the `mcols`
+function. The metadata can be supplied in the form of a data frame.
+
+```{r}
+mcols(sigRegions) <- sigGenes[match(names(sigRegions), rownames(sigGenes)),]
+sigRegions
+```
+
+The metadata we have added can also by used as a means to interrogate the ranges; as if the data were contained in a data frame.
+
+```{r}
+sigRegions[order(sigRegions$LR,decreasing = TRUE)]
+```
+
+For visualisation purposes, we are going to restrict the data to genes that are located on chromosomes 1 to 19 and the sex chromosomes. This can be done with the `keepSeqLevels` function.
+
+```{r}
+seqlevels(sigRegions)
+sigRegions <- keepSeqlevels(sigRegions, paste0("chr", c(1:19,"X","Y")))
+```
+
+We will now create a score from the p-values that will displayed under each region, and colour scheme
+for the regions based on the fold-change. For the score we can use the $-log_{10}$ of the adjusted p-value as before
+
+
+
+```{r}
+Score <- -log10(sigRegions$FDR)
+```
+
+`colorRampPalette` is a useful function in base R for constructing a palette between two extremes. **When choosing colour palettes, make sure they are colour blind friendly**. The red / green colour scheme traditionally-applied to microarrays is a ***bad*** choice.
+
+We will also truncate the fold-changes to between -5 and 5 to and divide this range into 10 equal bins
+
+```{r}
+rbPal <-colorRampPalette(c("red", "blue"))
+logfc <- pmax(sigRegions$logFC, -5)
+logfc <- pmin(logfc , 5)
+
+Col <- rbPal(10)[as.numeric(cut(logfc, breaks = 10))]
+```
+
+The colours and score have to be saved in the GRanges object as `score` and `itemRgb` columns respectively, and will be used to construct the browser track. The rtracklayer package can be used to import and export browsers tracks.
+
+Now we can export the signifcant results from the DE analysis as a `.bed` track using `rtracklayer`. You can load the resulting file in IGV, if you wish.
+```{r}
+mcols(sigRegions)$score <- Score
+mcols(sigRegions)$itemRgb <- Col
+sigRegions
+library(rtracklayer)
+export(sigRegions , con = "topHits.bed")
+```
+
+## Extracting Reads
+
+As we have been using counts as our starting point, we haven't investigated the aligned reads from our experiment, and how they are represented. As you may be aware, aligned reads are usually stored in a *bam* file that can be manipulated with open-source command-line tools such as [*samtools*](http://www.htslib.org/) and [*picard*](https://broadinstitute.github.io/picard/). Bioconductor provide a low-level interface to bam/sam files in the form of the `Rsamtools` package. The `GenomicAlignments` package can also be used to retrieve the reads mapping to a particular genomic region in an efficient manner.
+
+```{r message=FALSE}
+library(GenomicAlignments)
+```
+
+In the directory `bam` there should be `.bam` files for each of the samples in the example study. The workflow to produce these files is described in a [supplmentary page](getting-raw-reads.nb.html) for the course. In brief, the raw reads (`fastq`) were downloaded from the Short Read Archive (SRA) and aligned with `bowtie2`. Each bam file was named according to the file name in SRA, but we have renamed the files according to their name in the study. An index file (`.bai`) has been generated for each bam file.
+
+
+```{r}
+list.files("bam/")
+```
+
+The `readGAlignments` function provides a simple interface to interrogate the aligned reads for a particular sample. It can also utilise the *index* file in order to retrieve only the reads that correspond to a specific region in an efficient manner. The output includes the genomic location of each aligned read and the CIGAR (**C**ompact **I**diosyncratic **G**apped **A**lignment **R**eport); where *M* denotes an match to the genome and *I*, *D* correspond to insertions and deletions.
+
+```{r}
+generegion <- exo[["110308"]]
+
+my.reads <- readGAlignments(file="bam/MCL1.DG.bam",
+                       param=ScanBamParam(which=generegion))
+my.reads
+```
+
+It is possible to tweak the function to retrieve other potentially-useful information from the bam file, such as the mapping quality and flag.
+
+
+
+```{r}
+my.reads <- readGAlignments(file="bam/MCL1.DG.bam",
+                       param=ScanBamParam(which=generegion,
+                                          what=c("seq","mapq","flag")))
+my.reads
+```
+
+The flag can represent useful QC information. e.g.
+
+  + Read is unmapped
+  + Read is paired / unpaired
+  + Read failed QC
+  + Read is a PCR duplicate (see later)
+
+The combination of any of these properties is used to derive a numeric value, as illustrated in this useful [resource](https://broadinstitute.github.io/picard/explain-flags.html)
+
+Particular attributes of the reads can be extracted and visualised
+
+```{r}
+hist(mcols(my.reads)$mapq)
+```
+
+However, there are more-sophisticated visualisation options for aligned reads and range data. We will use the `ggbio` package, which first requires some discussion of the `ggplot2` plotting package.
+
+
+## Brief Introduction to ggplot2
+
+The [`ggplot2`](http://ggplot2.tidyverse.org/) package has emerged as an attractive alternative to the traditional plots provided by base R. A full overview of all capabilities of the package is available from the [cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf).
+
+A simple scatter plot, equivalent to `plotSmear` from before, can be generated as follows:-
+
+```{r,fig.width=12,fig.height=5}
+library(ggplot2)
+ggplot(results, aes(x = logCPM, y=logFC)) + geom_point() 
+
+```
+
+In brief:-
+
+- `results` is our data frame containing the variables we wish to plot
+- `aes` creates a mpping between the variables in our data frame to the *aes*thetic proprties of the plot
+    + the x-axis is mapped to `logCPM`, y-axis is mapped to `logFC`
+- `geom_point` specifies the particular type of plot we want (in this case a scatter plot)
+    + see [the cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf) for other plot types
+
+The real advantage of `ggplot2` is the ability to change the appearance of our plot by mapping other variables to aspects of the plot. For example, we could colour the points based on a p-value cut-off. The colours are automatically chosen by `ggplot2`, but we can specifiy particular values.
+
+```{r,fig.width=12,fig.height=5}
+ggplot(results, aes(x = logCPM, y=logFC,col=FDR < 0.05)) + geom_point()
+
+ggplot(results, aes(x = logCPM, y=logFC,col=FDR < 0.05)) + geom_point(alpha=0.4) + scale_colour_manual(values=c("black","red"))
+```
+
+The volcano plot can be constructed in a similar manner
+
+```{r,fig.width=12,fig.height=5}
+ggplot(results, aes(x = logFC, y=-log10(FDR))) + geom_point()
+```
+
+
+## Composing plots with ggbio
+
+We will now take a brief look at one of the visualisation packages in Bioconductor that takes advantage
+of the GenomicRanges and GenomicFeatures object-types. In this section we will show a worked
+example of how to combine several types of genomic data on the same plot. The documentation for
+ggbio is very extensive and contains lots of examples.
+
+http://www.tengfei.name/ggbio/docs/
+
+The `Gviz` package is another Bioconductor package that specialising in genomic visualisations, but we
+will not explore this package in the course.
+
+The Manhattan plot is a common way of visualising genome-wide results, especially when one is concerned with the results of a GWAS study and identifying strongly-associated hits. 
+
+The profile is supposed to resemble the Manhattan skyline with particular skyscrapers towering about the lower level buildings.
+
+![](https://upload.wikimedia.org/wikipedia/commons/1/12/Manhattan_Plot.png)
+This type of plot is implemented as the `plotGrandLinear` function. We have to supply a value to display on the y-axis using the `aes` function,
+which is inherited from ggplot2. The positioning of points on the x-axis is handled automatically by
+ggbio, using the ranges information to get the genomic coordinates of the ranges of interest.
+
+To stop the plots from being too cluttered we will consider the top 200 genes only.
+
+```{r,fig.width=12,fig.height=5}
+library(ggbio)
+top200 <- sigRegions[order(sigRegions$LR,decreasing = TRUE)[1:200]]
+
+plotGrandLinear(top200 , aes(y = logFC))
+
+```
+
+`ggbio` has alternated the colours of the chromosomes. However, an appealing feature of `ggplot2` is the ability to map properties of your plot to variables present in your data. For example, we could create a variable to distinguish between up- and down-regulated genes. The variables used for aesthetic mapping must be present in the `mcols` section of your ranges object.
+
+```{r,fig.width=12,fig.height=5}
+mcols(top200)$UpRegulated <- mcols(top200)$logFC > 0
+
+plotGrandLinear(top200, aes(y = logFC, col = UpRegulated))
+```
+
+`plotGrandLinear` is a special function in `ggbio` with preset options for the manhattan style of plot. More often, users will call the `autoplot` function and `ggbio` will choose the most appropriate layout. One such layout is the *karyogram*. 
+
+```{r,fig.width=12,fig.height=5}
+
+autoplot(top200,layout="karyogram",aes(color=UpRegulated,
+                                       fill=UpRegulated))
+
+```
+
+
+
+`ggbio` is also able to plot the structure of genes according to a particular model represented by a `GenomicFeatures` object, such as the object we created earlier with the exon coordinates for each gene in the mm10 genome.
+
+
+```{r}
+autoplot(tx, which=exo[["110308"]])
+```
+
+We can even plot the location of sequencing reads if they have been imported using readGAlignments function (or similar). We can also add some flanking region around the gene if we wish.
+
+```{r}
+myreg <- flank(reduce(exo[["110308"]]), 1000, both = T)
+bam <- readGAlignments(file="bam/MCL1.DG.bam",
+                       param=ScanBamParam(which=myreg),use.names = TRUE)
+
+autoplot(bam,which=myreg)
+```
+
+```{r}
+autoplot(bam , stat = "coverage")
+```
+Like ggplot2, ggbio plots can be saved as objects that can later be modified, or combined together to
+form more complicated plots. If saved in this way, the plot will only be displayed on a plotting device
+when we query the object. This strategy is useful when we want to add a common element (such as
+an ideogram) to a plot composition and don’t want to repeat the code to generate the plot every time.
+
+```{r}
+#idPlot <- plotIdeogram(genome = "mm10",subchr = "chr1")
+#idPlot
+geneMod <- autoplot(tx, which = myreg)
+reads.MCL1.DG <- autoplot(bam, stat = "coverage") + labs(title="MCL1.DG")
+tracks(mm10=geneMod, MCL1.DG=reads.MCL1.DG ) 
+```
+
+> ## Challenge {.challenge}
+>
+> Create tracks to compare the coverage of the gene Krt5 for the samples MCL1.DG, MCL1.DH, MCL1.LA and MCL1.LB
+>
+
+```{r,echo=FALSE,fig.height=5,fig.width=10}
+bam <- readGAlignments(file="bam/MCL1.DG.bam",
+                       param=ScanBamParam(which=myreg),use.names = TRUE)
+reads.MCL1.DG <- autoplot(bam, stat = "coverage")
+
+bam <- readGAlignments(file="bam/MCL1.DH.bam",
+                       param=ScanBamParam(which=myreg),use.names = TRUE)
+reads.MCL1.DH <- autoplot(bam, stat = "coverage")
+
+
+bam <- readGAlignments(file="bam/MCL1.LA.bam",
+                       param=ScanBamParam(which=myreg),use.names = TRUE)
+reads.MCL1.LA <- autoplot(bam, stat = "coverage")
+
+bam <- readGAlignments(file="bam/MCL1.LB.bam",
+                       param=ScanBamParam(which=myreg),use.names = TRUE)
+reads.MCL1.LB <- autoplot(bam, stat = "coverage")
+
+
+tracks(mm10=geneMod, MCL1.DG=reads.MCL1.DG, MCL1.Dh=reads.MCL1.DH, MCL1.LA=reads.MCL1.LA, MCL1.LB=reads.MCL1.LB) 
+
+```
+

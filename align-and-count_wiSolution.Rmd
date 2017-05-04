@@ -94,7 +94,9 @@ We can specify the output files, or we can let `Rsubread` choose the output file
 
 Now we can align our 12 fastq.gz files using the `align` command.
 
-```{r,results="hide"}
+
+```{r,eval=FALSE}
+
 align(index="data/chr1_mm10",readfile1=fastq.files)
 ```
 
@@ -136,13 +138,15 @@ props
 
 ```{r, eval=FALSE}
 
-# make vector for output file names:
+
+# make vector for output file names
 
 bam.files.multi <- gsub(".fastq.gz", ".multi.bam", as.character(fastq.files))
 
-# use the align() function:
+# use the align() function
 # allow for multi-mapping: 'unique = FALSE'
-# allow for up to 6 "best" locations to be reported: `nBestLocations = 6`
+# allowing for up to 6 "best" locations to be reported: `nBestLocations = 6`
+
 
 align(index="data/chr1_mm10",
 	readfile1=fastq.files,
@@ -286,9 +290,8 @@ head(fc.exon$counts)
 ```{r}
 # count over exons, not genes: `useMetaFeatures = FALSE`
 
-fc.exon.multimap <- featureCounts(bam.files.multi, annot.inbuilt="mm10",
-			useMetaFeatures = FALSE,
-		    )
+
+fc.exon.multimap <- featureCounts(bam.files.multi, annot.inbuilt="mm10",useMetaFeatures = FALSE,countMultiMappingReads = TRUE)
 
 ## Take a look at the dimensions to see the number of genes
 dim(fc.exon.multimap$counts)
