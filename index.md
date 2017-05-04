@@ -29,7 +29,6 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 ## Data
 
 - Mouse mammary data (counts): [https://figshare.com/s/1d788fd384d33e913a2a](https://figshare.com/s/1d788fd384d33e913a2a)
-- Drosophila data (counts): [https://figshare.com/s/e08e71c42f118dbe8be6](https://figshare.com/s/e08e71c42f118dbe8be6)
 
 ## RNAseq analysis in R tutorials
 
@@ -46,7 +45,7 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
     
 ### Lecture slides
 
-- [RNASeq basics](slides/RNA-seq-Intro.pdf)
+- [RNASeq basics](slides/rnaSeq_May2017.pdf)
 - [Linear Model and Statistics for Differential Expression](slides/LinearModels.pdf)
 
 ### Supplementary lessons
@@ -57,7 +56,7 @@ Introductory R materials:
 
 Additional RNAseq materials:
 
-- [Downloading files from SRA and aligning](getting-raw-reads.Rmd)
+- [Downloading files from SRA and aligning](getting-raw-reads.nb.html)
 
 Data: Mouse mammary data (fastq files): [https://figshare.com/s/f5d63d8c265a05618137](https://figshare.com/s/f5d63d8c265a05618137)
 
