@@ -276,6 +276,26 @@ abline(h=c(-1, 1), col="blue")
 > HINT: what is the corresponding logFC value of 50\% fold change? Assume basal.pregnant is 50\% higher than basal.lactate
 >
 
+## Challenge 1 solution
+
+```{r,echo=FALSE}
+#Solution
+
+# Set log FC cutoff:
+cutoff<-log2(1.5)
+
+# Conduct TREAT analysis:
+res.treat.tlum.fcCutoff <- glmTreat(fit, "typeluminal", contrast = NULL, lfc = cutoff, null = "interval")
+
+# Check number of DEGs in both change directions:
+tmpDec.fcCutoff <- decideTestsDGE(res.treat.tlum.fcCutoff)
+summary(tmpDec.fcCutoff)
+
+# Draw MD plot: 
+edgeR::plotMD.DGELRT(res.treat.tlum.fcCutoff, status=tmpDec.fcCutoff)
+abline(h=c(-cutoff, cutoff), col="blue")
+```
+
 # Gene Set Testing
 
 Sometimes there is quite a long list of differentially expressed genes to interpret after a differential expression analysis, and it is usually infeasible to go through the list one gene at a time trying to understand its biological function. A common downstream procedure is gene set testing, which aims to understand which pathways/gene networks the differentially expressed genes are implicated in.
@@ -496,6 +516,16 @@ write.csv(gst.camera,file="gst_BPregVsLac.csv")
 > You will need to load in the hallmark gene sets, and the object will be called `Mm.H` in R.
 >
 
+## Challenge 2 solution
+
+```{r,echo=FALSE}
+load("data/mouse_H_v5.rdata")
+H.ind <- ids2indices(Mm.H, rownames(dgeObj$counts))
+H.camera <- camera(dgeObj,index=H.ind,design=design,contrast = 2,inter.gene.cor=0.05)
+table(H.camera$FDR < 0.05)
+H.camera[1:10,]
+```
+
 ## Gene Set Testing - self-contained gene set tests
 
 ### ROAST gene set testing
@@ -532,6 +562,20 @@ Each row corresponds to a single gene set. The NGenes column gives the number of
 > 1. Test whether the MYC signalling pathways tend to be differentially expressed between luminal pregnant vs lactating (the second contrast).
 > 1. Look for gene sets containing "WNT" in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.
 >
+
+## Challenge 3 solution
+
+```{r,echo=FALSE}
+colnames(design)
+#Solution 1
+myc.rst2 <- roast.DGEList(dgeObj,index=c2.ind[myc],design=design,contrast=3,nrot=999)
+myc.rst2[1:15,]
+
+#Solution 2
+wnt <- grep("WNT",names(c2.ind))
+wnt.rst <- roast.DGEList(dgeObj,index=c2.ind[wnt],design=design,contrast=3,nrot=999)
+wnt.rst[1:15,]
+```
 
 Notes
 

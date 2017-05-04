@@ -28,15 +28,15 @@ library(edgeR)
 load("Robjects/DE.Rdata")
 ```
 
-# Testing relative to a threshold (TREAT)
+
+
+## Testing relative to a threshold (TREAT)
 
 When there is a lot of differential expression, sometimes we may want to cut-off on a fold change threshold as well as a p-value threshold so that we follow up on the most biologically significant genes. However, it is not recommended to simply rank by p-value and then discard genes with small logFC's, as this has been shown to increase the false discovery rate. In other words, you are not controlling the false discovery rate at 5\% anymore.
 
 The test performed above tests the null hypothesis that gene expression is the same in classes compared in the contrast of interest, i.e. that fold change is 1 (and log2(FC) is 0). Rather than ranking genes per p-values and then filter on logFC, one should instead test the null hypothesis that the difference in level of expression between classes in the contrast is lower than a given threshold.
 
 See ["Testing significance relative to a fold-change threshold is a TREAT"](https://academic.oup.com/bioinformatics/article/25/6/765/251641/Testing-significance-relative-to-a-fold-change)
-
-## Fit the linear model
 
 Remember how the linear model was fit in the previous section:
 
@@ -138,9 +138,7 @@ round(cpm(dgeObj)[o[1:10],])
 barplot(cpm(dgeObj)[o[1],])
 ```
 
-## MD plot
-
-Create mean-difference plot to show log fold changes (differences) versus average log values (means):
+# Create mean-difference plot to show log fold changes (differences) versus average log values (means):
 
 ```{r}
 # Create mean-difference ('MD') plot to show log fold changes (differences) versus average log values (means)
@@ -174,7 +172,7 @@ decideTestsDGE(lrt)
 summary(decideTestsDGE(lrt, lfc=1))
 ```
 
-## Testing relative to a threshold (TREAT) with edgeR
+### Testing relative to a threshold (TREAT) with edgeR
 
 Read the manual on glmTreat() to "Conduct genewise statistical tests for a given coefficient or contrast relative to a specified fold-change threshold."
 
@@ -194,9 +192,9 @@ Read the manual on glmTreat() to "Conduct genewise statistical tests for a given
 ?glmTreat
 ```
 
-We will use the "output from ‘glmFit’" created above.
+We will use the output from ‘glmFit’ created above.
 
-### Test for abs(logFC) > 0
+#### Test for abs(logFC) > 0
 
 Let's test for abs(logFC) > 0:
 
@@ -226,7 +224,7 @@ edgeR::plotMD.DGELRT(res.treat.tlum.fc0, status=tmpDec.fc0)
 abline(h=c(-1, 1), col="blue")
 ```
 
-### Test for abs(logFC) > 1
+#### Test for abs(logFC) > 1
 
 Let's test for abs(logFC) > 1:
 
@@ -248,7 +246,7 @@ edgeR::plotMD.DGELRT(res.treat.tlum.fc1, status=tmpDec.fc1)
 abline(h=c(-1, 1), col="blue")
 ```
 
-### Visualise effect of TREAT on DEG list
+#### Visualise effect of TREAT on DEG list
 
 You may have noticed that fewer genes are highlighted in the MAplot for 'abs(logFC) > 1'  than for 'abs(logFC) > 0'.
 
@@ -267,6 +265,8 @@ table(tmpDec.inFc0outFc1)
 
 edgeR::plotMD.DGELRT(res.treat.tlum.fc1, status=tmpDec.inFc0outFc1)
 abline(h=c(-1, 1), col="blue")
+
+
 ```
 
 > ## Challenge {.challenge}
@@ -276,7 +276,27 @@ abline(h=c(-1, 1), col="blue")
 > HINT: what is the corresponding logFC value of 50\% fold change? Assume basal.pregnant is 50\% higher than basal.lactate
 >
 
-# Gene Set Testing
+## Challenge 1 solution
+
+```{r,echo=FALSE}
+#Solution
+
+# Set log FC cutoff:
+cutoff<-log2(1.5)
+
+# Conduct TREAT analysis:
+res.treat.tlum.fcCutoff <- glmTreat(fit, "typeluminal", contrast = NULL, lfc = cutoff, null = "interval")
+
+# Check number of DEGs in both change directions:
+tmpDec.fcCutoff <- decideTestsDGE(res.treat.tlum.fcCutoff)
+summary(tmpDec.fcCutoff)
+
+# Draw MD plot: 
+edgeR::plotMD.DGELRT(res.treat.tlum.fcCutoff, status=tmpDec.fcCutoff)
+abline(h=c(-cutoff, cutoff), col="blue")
+```
+
+## Gene Set Testing
 
 Sometimes there is quite a long list of differentially expressed genes to interpret after a differential expression analysis, and it is usually infeasible to go through the list one gene at a time trying to understand its biological function. A common downstream procedure is gene set testing, which aims to understand which pathways/gene networks the differentially expressed genes are implicated in.
 
@@ -288,11 +308,11 @@ Competitive gene set tests, such as those implemented in `goana` and `camera` as
 
 These different questions use different statistical methodology.
 
-## Gene Set Testing - competitive gene set tests
+### Gene Set Testing - competitive gene set tests
 
-### goseq analysis
+#### goseq analysis
 
-From the goseq [vignette](https://www.bioconductor.org/packages/release/bioc/vignettes/goseq/inst/doc/goseq.pdf): "goseq first needs to quantify the length bias present in the dataset under consideration.  This is done by calculating a Probability Weighting Function or PWF which can be thought of as a function which gives the probability that a gene will be differentially expressed (DE), based on its length alone.  The PWF is calculated by fitting a monotonic spline to the binary data series of differential expression (1=DE, 0=Not DE) as a function of gene length.  The PWF is used to weight the chance of selecting each gene when forming a null distribution for GO category membership.  The fact that the PWF is calculated directly from the dataset under consideration makes this approach robust, only correcting for the length bias present in the data."
+From the goseq vignette: "goseq first needs to quantify the length bias present in the dataset under consideration.  This is done by calculating a Probability Weighting Function or PWF which can be thought of as a function which gives the probability that a gene will be differentially expressed (DE), based on its length alone.  The PWF is calculated by fitting a monotonic spline to the binary data series of differential expression (1=DE, 0=Not DE) as a function of gene length.  The PWF is used to weight the chance of selecting each gene when forming a null distribution for GO category membership.  The fact that the PWF is calculated directly from the dataset under consideration makes this approach robust, only correcting for the length bias present in the data."
 
 "GO analysis of RNA-seq data requires the use of random sampling in order to generate a suitable null distribution for GO category membership and calculate each categories significance for over representation amongst DE genes. ... In  most  cases,  the  Wallenius
 distribution can be used to approximate the true null distribution, without any significant loss in accuracy.  The goseq package implements this approximation as its default option"
@@ -314,62 +334,82 @@ library(goseq)
 supportedGeneIDs()
 supportedGenomes()
 
-
 if(FALSE)
 {
-	TxDb.Mmusculus.UCSC.mm10.knownGene
+TxDb.Mmusculus.UCSC.mm10.knownGene
 
-	txdb <- TxDb.Mmusculus.UCSC.mm10.knownGene
-	GRList <- transcriptsBy(txdb, by = "gene")
-	tmp <- lapply(GRList, width) # slow
-	tmp2 <- unlist(lapply(tmp,median)) # vector
+txdb <- TxDb.Mmusculus.UCSC.mm10.knownGene
+		GRList <- transcriptsBy(txdb, by = "gene")
+		tmp <- lapply(GRList, width) # slow
+		#tmp2 <- lapply(tmp,max)
+		#tmp2 <- lapply(tmp,median) # list
+		tmp2 <- unlist(lapply(tmp,median)) # vector
 
-	print("Got gene length: transcript median length.")
-	print(summary(tmp2))
-	print(head(tmp2))
-	# Make df:
-	geneLengthMedianDf <- as.data.frame(tmp2)
-	colnames(geneLengthMedianDf) = "medianLength"
-	geneLengthMedianDf$geneId <- rownames(geneLengthMedianDf)
-	#save(geneLengthMedianDf, file=tmpFileName.med)
+		print("Got gene length: transcript median length.")
+		print(summary(tmp2))
+		print(head(tmp2))
+		# Make df:
+		geneLengthMedianDf <- as.data.frame(tmp2)
+		colnames(geneLengthMedianDf) = "medianLength"
+		geneLengthMedianDf$geneId <- rownames(geneLengthMedianDf)
+		#save(geneLengthMedianDf, file=tmpFileName.med)
 
-	# read DEG table in:
-	allDf <- read.table(tmpFileName, header=T, stringsAsFactor=F, sep=",")
-	allDf <- results
-	print(dim(allDf))
-	print(head(allDf))
+
+
+			# read DEG table in:
+			allDf <- read.table(tmpFileName, header=T, stringsAsFactor=F, sep=",")
+			allDf <- results
+			print(dim(allDf))
+			print(head(allDf))
+#next
+			# remember that table aso keep location and thus that length can be derived
+			# but that would be the maximum transcript length, not the median length 
+
+			# mind that some genes have NA padj
+
+			# genes: boolean vector
 			
-	allDfToUse <- allDf
+			# remove gene with NA for padj
+			#tmpBoolNonNa <- !is.na(allDf$padj)
+			#allDfToUse <- allDf[tmpBoolNonNa,]
+
+			allDfToUse <- allDf
 			
-	# identify DEG, using lfc and padj:
-	lfcthd <- 0
-	fdrthd <- 0.05
-	# make boolean into 0 for F and 1 for T, to get tutorial 'genes'
-	tmpBoolLfc <- abs(allDfToUse$logFC) > lfcthd
-	tmpBoolFdr <- allDfToUse$FDR<fdrthd
-	tmpBoolDeg <- tmpBoolLfc & tmpBoolFdr
-	table(tmpBoolDeg)
+			# identify DEG, using lfc and padj:
+			lfcthd <- 0
+			fdrthd <- 0.05
+			# make boolean into 0 for F and 1 for T, to get tutorial 'genes'
+      tmpBoolLfc <- abs(allDfToUse$logFC) > lfcthd
+			#tmpBoolPadj <- allDfToUse$padj<padjthd
+      tmpBoolFdr <- allDfToUse$FDR<fdrthd
+
+			#tmpBoolDeg <- tmpBoolLfc & tmpBoolPadj
+			tmpBoolDeg <- tmpBoolLfc & tmpBoolFdr
+      table(tmpBoolDeg)
 			
-	# flag DEGs,
-	boolDeg <- as.numeric(tmpBoolDeg) 
+			# flag DEGs,
+			#boolDeg <- as.numeric(allDfToUse$padj<0.05) # wo lfc filter
+			boolDeg <- as.numeric(tmpBoolDeg) # wi lfc filter
 
-	names(boolDeg) <- rownames(allDfToUse) 
-	#print(table(boolDeg))
-	#print(head(boolDeg))
+			names(boolDeg) <- rownames(allDfToUse) 
+			#print(table(boolDeg))
+			#print(head(boolDeg))
 
-	# make df
-	boolDegDf <- as.data.frame(boolDeg)
-	boolDegDf$geneId <- rownames(boolDegDf)
-	print(head(boolDegDf))
+			# make df
+			boolDegDf <- as.data.frame(boolDeg)
+			boolDegDf$geneId <- rownames(boolDegDf)
+			print(head(boolDegDf))
 
-	boolDegDf2 <- merge(boolDegDf, geneLengthMedianDf, by="geneId", all=F, sort=F)
-	print(head(boolDegDf2))
+			#boolDegDf2 <- merge(boolDegDf, geneLengthMedianDf, by="ensGeneId", all.x=T, sort=F)
+			boolDegDf2 <- merge(boolDegDf, geneLengthMedianDf, by="geneId", all=F, sort=F)
+			print(head(boolDegDf2))
 
-	#  Fitting the Probability Weighting Function (PWF)
-	boolDegVec <- boolDegDf2$boolDeg
-	names(boolDegVec) <- boolDegDf2$geneId
-	pwf=nullp(boolDegVec,"mm10","knownGene", bias.data=boolDegDf2$medianLength)
-	print(head(pwf))
+			#  Fitting the Probability Weighting Function (PWF)
+			#pwf=nullp(boolDegDf2$boolDeg,"hg38","ensGene", bias.data=boolDegDf2$medianLength)
+			boolDegVec <- boolDegDf2$boolDeg
+			names(boolDegVec) <- boolDegDf2$geneId
+			pwf=nullp(boolDegVec,"mm10","knownGene", bias.data=boolDegDf2$medianLength)
+			print(head(pwf))
 }
 
 pwf <- nullp(genes, "mm10","knownGene")
@@ -382,15 +422,7 @@ go.results <- goseq(pwf, "mm10","knownGene")
 go.results
 ```
 
-### fgsea analysis
-
-From the fgsea [vignette](http://www.bioconductor.org/packages/release/bioc/vignettes/fgsea/inst/doc/fgsea-tutorial.html) "fast preranked gene set enrichment analysis (GSEA)". The article describing the original software is available [here](https://www.ncbi.nlm.nih.gov/pubmed/16199517).
-
-"This analysis is performed by
-- (i) ranking all genes in the data set based on their correlation to the chosen phenotype,
-- (ii) identifying the rank positions of all members of the gene set, and 
-- (iii) calculating an enrichment score (ES) that represents the difference between the observed rankings and that which would be expected assuming a random rank distribution (see figure 1 A and B in ref. 1).
-After establishing the ES for each gene set across the phenotype, GSEA reiteratively randomizes the sample labels and retests for enrichment across the random classes. By performing repeated class label randomizations, the ES for each gene set across the true classes can be compared to the ES distribution from the random classes. Those gene sets that significantly outperform iterative random class permutations are considered significant." [commentary on GSEA](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1266131/).
+#### fgsea analysis
 
 ```{r}
 library(fgsea)
@@ -440,7 +472,7 @@ plotGseaTable(pathways[topPathways], ranks, fgseaRes,
               gseaParam = 0.5)
 ```
 
-### CAMERA gene set testing using the Broad's curated gene sets
+#### CAMERA gene set testing using the Broad's curated gene sets
 
 Other databases of gene sets that are available come from the Broad Institute's Molecular Signatures Database ([MSigDB](http://software.broadinstitute.org/gsea/msigdb)). CAMERA is good option for testing a very large number of gene sets such as the MSigDB sets, as it is very fast. CAMERA is known as a competitive gene set test, however it has the advantage that it can take into account inter-gene correlation within each gene set [@wu2012camera]. It also works seemlessly with a `voom` object, taking into account the mean-variance relationship in RNA-Seq data.
 
@@ -496,9 +528,18 @@ write.csv(gst.camera,file="gst_BPregVsLac.csv")
 > You will need to load in the hallmark gene sets, and the object will be called `Mm.H` in R.
 >
 
-## Gene Set Testing - self-contained gene set tests
+**Solution**
+```{r,echo=FALSE}
+load("data/mouse_H_v5.rdata")
+H.ind <- ids2indices(Mm.H, rownames(dgeObj$counts))
+H.camera <- camera(dgeObj,index=H.ind,design=design,contrast = 2,inter.gene.cor=0.05)
+table(H.camera$FDR < 0.05)
+H.camera[1:10,]
+```
 
-### ROAST gene set testing
+### Gene Set Testing - self-contained gene set tests
+
+#### ROAST gene set testing
 
 ROAST is an example of a self-contained gene set test [@wu2010roast]. It asks the question, "Do the genes in my set tend to be differentially expressed between my conditions of interest?". ROAST doesn't care about what the other genes in the experiment are doing, which is different to `camera` and `goana`. ROAST is a good option for when you're interested in a specific set, or a few sets. It is not really used to test thousands of sets at one time.
 
@@ -533,11 +574,23 @@ Each row corresponds to a single gene set. The NGenes column gives the number of
 > 1. Look for gene sets containing "WNT" in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.
 >
 
+**Solution**
+```{r,echo=FALSE}
+colnames(design)
+#Solution 1
+myc.rst2 <- roast.DGEList(dgeObj,index=c2.ind[myc],design=design,contrast=3,nrot=999)
+myc.rst2[1:15,]
+
+#Solution 2
+wnt <- grep("WNT",names(c2.ind))
+wnt.rst <- roast.DGEList(dgeObj,index=c2.ind[wnt],design=design,contrast=3,nrot=999)
+wnt.rst[1:15,]
+```
+
+
 Notes
 
 * A common application of ROAST is to use a set of DE genes that was defined from an analysis of an independent data set. ROAST can then determine whether similar changes are observed in the contrast of interest for the current data set.
 * Even for GO-defined gene sets, goana and ROAST have different behaviours. In goana, the significance of differential expression for a GO term is determined relative to other DE genes that are not annotated with that term. In ROAST, only differential expression for the genes in the set are relevant to the significance of that set and its corresponding term. goana depends on a significance cutoff to choose DE genes, whereas ROAST does not require a cutoff and evaluates all genes in the set.
 * ROAST estimates p-values by simulation, so the results may change slightly between runs. More precise p-values can be obtained by increasing the number of rotations, albeit at the cost of increased computational time.
 * The smallest p-value that can be reported is 1/(2nrot + 1) where nrot is the number of rotations. This lower bound can be decreased by increasing nrot.
-
-References
