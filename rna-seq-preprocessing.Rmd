@@ -18,7 +18,7 @@ bibliography: ref.bib
 **Original Authors: Belinda Phipson, Anna Trigos, Matt Ritchie, Maria Doyle, Harriet Dashnow, Charity Law**
 Based on the course [RNAseq analysis in R](http://combine-australia.github.io/2016-05-11-RNAseq/) delivered on May 11/12th 2016
 
-```{r setup, include=FALSE}
+```{r knitrOpts, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -71,7 +71,7 @@ There are many steps involved in analysing an RNA-Seq experiment. Analysing an R
 
 First, let's load all the packages we will need to analyse the data.
 
-```{r, message = FALSE}
+```{r setup, message = FALSE}
 library(edgeR)
 library(limma)
 library(Glimma)
@@ -88,7 +88,7 @@ This study examines the expression profiles of basal stem-cell enriched cells (B
 
 The sampleinfo file contains basic information about the samples that we will need for the analysis today.
 
-```{r}
+```{r loadSampleInfo}
 # Read the sample information into R
 sampleinfo <- read.delim("data/SampleInfo.txt")
 View(sampleinfo)
@@ -101,7 +101,7 @@ We will first use the counts file as a starting point for our analysis. This dat
 
 Let's take a look at the data. You can use the `head` command to see the first 6 lines. In RStudio the `View` command will open the dataframe in a new tab. The `dim` command will tell you how many rows and columns the data frame has.
 
-```{r}
+```{r loadData}
 # Read the data into R
 seqdata <- read.delim("data/GSE60450_Lactation-GenewiseCounts.txt", stringsAsFactors = FALSE)
 head(seqdata)
@@ -115,9 +115,15 @@ The `seqdata` object contains information about genes (one gene per row), the fi
 
 We will be manipulating and reformating the counts matrix into a suitable format for downstream analysis. The first two columns in the `seqdata` dataframe contain annotation information. We need to make a new matrix containing only the counts, but we can store the gene identifiers (the `EntrezGeneID` column) as rownames. We will add more annotation information about each gene later on in the workshop.
 
+```{r rowNames}
+head(seqdata)
+rownames(seqdata)[1:10]
+```
+
+
 Let's create a new data object, `countdata`, that contains only the counts for the 12 samples.  
 
-```{r}
+```{r createCountMatrix}
 # Remove first two columns from seqdata
 countdata <- seqdata[,-(1:2)]
 
@@ -125,28 +131,30 @@ countdata <- seqdata[,-(1:2)]
 rownames(countdata) <- seqdata[,1]
 
 View(countdata)
-head(countdata)
 ```
 
 Now take a look at the column names
 
-```{r}
+```{r colNames}
 colnames(countdata)
 ```
 
 These are the sample names which are pretty long so we'll shorten these to contain only the relevant information about each sample. We will use the `substr` command to extract the first 7 characters and use these as the colnames.
 
-```{r}
+```{r modifyColNames}
 substr("ThisIsAString", start=1, stop=5)
-# using substr, you extract the characters starting at position 1 and stopping at position 7 of the colnames
+# using substr, you can extract the samplename:
 colnames(countdata) <- substr(colnames(countdata), 1, 7)
 View(countdata)
+colnames(countdata)
 ```
 
 Note that the column names are now the same as `SampleName` in the `sampleinfo` file. This is good because it means our sample information in `sampleinfo` is in the same order as the columns in `countdata`.
 
-```{r}
-table(colnames(countdata)==sampleinfo$SampleName)
+```{r compareNames}
+colnames(countdata)==sampleinfo$SampleName
+
+all(colnames(countdata)==sampleinfo$SampleName)
 ```
 
 
@@ -156,17 +164,24 @@ Genes with very low counts across all libraries provide little evidence for diff
 
 There are a few ways to filter out lowly expressed genes. When there are biological replicates in each group, in this case we have a sample size of 2 in each group, we favour filtering on a minimum counts per million threshold present in at least 2 samples. Two represents the smallest sample size for each group in our experiment. In this dataset, we choose to retain genes if they are expressed at a counts-per-million (CPM) above 0.5 in at least two samples.
 
+```{r librarySizes}
+colSums(countdata)
+```
+
 We'll use the `cpm` function from the *edgeR* library [@robinson2010edgeR] to generate the CPM values and then filter. Note that by converting to CPMs we are normalising for the different sequencing depths for each sample.
 
-```{r}
+```{r getCPM}
 # Obtain CPMs
 myCPM <- cpm(countdata)
 # Have a look at the output
 head(myCPM)
+
+col1sum <- sum(countdata[,1])/1000000
+countdata[1,1]/col1sum
 ```
 
 
-```{r}
+```{r subsetThreshold}
 # Which values in myCPM are greater than 0.5?
 thresh <- myCPM > 0.5
 # This produces a logical matrix with TRUEs and FALSEs
@@ -174,33 +189,45 @@ head(thresh)
 ```
 
 
-```{r}
-
+```{r countPass}
 # Summary of how many TRUEs there are in each row
 # There are 11433 genes that have TRUEs in all 12 samples.
+rowSums(head(thresh))
 table(rowSums(thresh))
+```
 
+```{r subsetMatrix}
 # we would like to keep genes that have at least 2 TRUES in each row of thresh
 keep <- rowSums(thresh) >= 2
+summary(keep)
+```
+
+```{r subsetData}
 # Subset the rows of countdata to keep the more highly expressed genes
 counts.keep <- countdata[keep,]
-summary(keep)
+dim(countdata)
 dim(counts.keep)
 ```
 
 A CPM of 0.5 is used as it corresponds to a count of 10-15 for the library sizes in this data set. If the count is any smaller, it is considered to be very low, indicating that the associated gene is not expressed in that sample. A requirement for expression in two or more libraries is used as each group contains two replicates. This ensures that a gene will be retained if it is only expressed in one group. Smaller CPM thresholds are usually appropriate for larger libraries. As a general rule, a good threshold can be chosen by identifying the CPM that corresponds to a count of 10, which in this case is about 0.5. You should filter with CPMs rather than filtering on the counts directly, as the latter does not account for differences in library sizes between samples.
 
-```{r}
+```{r plotCPMThreshold}
 # Let's have a look and see whether our threshold of 0.5 does indeed correspond to a count of about 10-15
 # We will look at the first sample
-plot(myCPM[,1],countdata[,1])
+plot(myCPM[,1], countdata[,1], xlab="CPM", ylab="Raw Count", main=colnames(myCPM)[1])
+# Add a vertical line at 0.5 CPM
+abline(v=0.5)
+
+
+
 # Let us limit the x and y-axis so we can actually look to see what is happening at the smaller counts
-plot(myCPM[,1],countdata[,1],ylim=c(0,50),xlim=c(0,3))
+plot(myCPM[,1],countdata[,1], xlab="CPM", ylab="Raw Count", main=colnames(myCPM)[1], 
+     ylim=c(0,50), xlim=c(0,3))
 # Add a vertical line at 0.5 CPM
 abline(v=0.5)
 ```
 
-> ## Challenge {.challenge}
+> ## Challenge 1 {.challenge}
 >
 > 1. Plot the counts-per-million versus counts for the second sample.
 > 1. Add a vertical line at 0.5 and a horizontal line at 10.
@@ -210,21 +237,22 @@ abline(v=0.5)
 >
 
 **Solution**
-```{r,echo=FALSE}
+```{r solutionChallenge1, echo=FALSE}
 
 ```
-Note: When in doubt, a threshold of 1 CPM in at least *minimum* group sample size is a good rule of thumb.
 
 ## Convert counts to DGEList object
 
 Next we'll create a `DGEList` object. This is an object used by *edgeR* to store count data. It has a number of slots for storing various parameters about the data.
 
-```{r}
+```{r makeDGEObj}
 dgeObj <- DGEList(counts.keep)
 # have a look at dgeObj
 dgeObj
 # See what slots are stored in dgeObj
 names(dgeObj)
+# Look at the structure of the list
+str(dgeObj)
 # Library size information is stored in the samples slot
 dgeObj$samples
 ```
@@ -237,30 +265,32 @@ Now that we have got rid of the lowly expressed genes and have our counts stored
 
 First, we can check how many reads we have for each sample in the `dgeObj`.
 
-```{r}
-dgeObj$samples$lib.size
+```{r dgeLibrarySizes}
+dgeObj$samples[,2]
+dgeObj$samples[,"lib.size"]
+
 ```
 
 We can also plot the library sizes as a barplot to see whether there are any major discrepanies between the samples more easily.
 
-```{r}
+```{r plotLibrarySizes}
+
 # The names argument tells the barplot to use the sample names on the x-axis
 # The las argument rotates the axis names
-barplot(dgeObj$samples$lib.size, names=colnames(dgeObj), las=2)
-# Add a title to the plot
-title("Barplot of library sizes")
+barplot(dgeObj$samples$lib.size, names=colnames(dgeObj), las=2, main="Barplot of library sizes")
+abline(h=20e6, lty=2)
+
 ```
 
 Count data is not normally distributed, so if we want to examine the distributions of the raw counts we need to log the counts. Next we'll use box plots to check the distribution of the read counts on the log2 scale. We can use the `cpm` function to get log2 counts per million, which are corrected for the different library sizes. The `cpm` function also adds a small offset to avoid taking log of zero.  
 
-```{r}
+```{r plotLogCounts}
 # Get log2 counts per million
 logcounts <- cpm(dgeObj,log=TRUE)
 # Check distributions of samples using boxplots
 boxplot(logcounts, xlab="", ylab="Log2 counts per million",las=2)
 # Let's add a blue horizontal line that corresponds to the median logCPM
-abline(h=median(logcounts),col="blue")
-title("Boxplots of logCPMs (unnormalised)")
+abline(h=median(logcounts), col="blue", main="Boxplots of logCPMs (unnormalised)")
 ```
 
 From the boxplots we see that overall the density distributions of raw log-intensities are not identical but still not very different. If a sample is really far above or below the blue horizontal line we may need to investigate that sample further.
@@ -275,36 +305,39 @@ From the boxplots we see that overall the density distributions of raw log-inten
 
 By far, one of the most important plots we make when we analyse RNA-Seq data are MDSplots. An MDSplot is a visualisation of a principle components analysis, which determines the greatest sources of variation in the data. A principle components analysis is an example of an unsupervised analysis, where we don't need to specify the groups. If your experiment is well controlled and has worked well, what we hope to see is that the greatest sources of variation in the data are the treatments/groups we are interested in. It is also an incredibly useful tool for quality control and checking for outliers. We can use the `plotMDS` function to create the MDS plot.
 
-```{r}
+```{r plotMDSbasic}
 plotMDS(dgeObj)
 ```
 
 It is a bit difficult to see exactly what is going on with the default plot, although we do see samples grouping together in pairs. To make this plot more informative, we can colour the samples according to the grouping information. We can also change the labels, or instead of labels we can have points.
 
-```{r,fig.height=5,fig.width=10}
-# We specify the option to let us plot two plots side-by-sde
-par(mfrow=c(1,2))
+```{r setPlotParams}
 # Let's set up colour schemes for CellType
 # How many cell types and in what order are they stored?
 levels(sampleinfo$CellType)
 ## Let's choose purple for basal and orange for luminal
 col.cell <- c("purple","orange")[sampleinfo$CellType]
 data.frame(sampleinfo$CellType,col.cell)
-
-# Redo the MDS with cell type colouring
-plotMDS(dgeObj,col=col.cell)
-# Let's add a legend to the plot so we know which colours correspond to which cell type
-legend("topleft",fill=c("purple","orange"),legend=levels(sampleinfo$CellType))
-# Add a title
-title("Cell type")
+col.cell
+sampleinfo$CellType
 
 # Similarly for status
 levels(sampleinfo$Status)
 col.status <- c("blue","red","dark green")[sampleinfo$Status]
 col.status
-plotMDS(dgeObj,col=col.status)
-legend("topleft",fill=c("blue","red","dark green"),legend=levels(sampleinfo$Status),cex=0.8)
-title("Status")
+```
+
+```{r plotMDScolored, fig.height=5, fig.width=10}
+# We specify the option to let us plot two plots side-by-sde
+par(mfrow=c(1,2))
+# Redo the MDS with cell type colouring
+plotMDS(dgeObj,col=col.cell, main="Cell type", cex=2, cex.lab=2, cex.axis=2, cex.main=2)
+# Let's add a legend to the plot so we know which colours correspond to which cell type
+legend("topleft",fill=c("purple","orange"),legend=levels(sampleinfo$CellType), cex=2)
+
+plotMDS(dgeObj,col=col.status, main="Status", cex=2, cex.lab=2, cex.axis=2, cex.main=2)
+legend("topleft",fill=c("blue","red","dark green"),legend=levels(sampleinfo$Status), cex=2)
+
 ```
 
 > ## Discussion {.challenge}
@@ -314,7 +347,7 @@ title("Status")
 > Identify the two samples that don't appear to be in the right place.
 >
 
-```{r}
+```{r correctSampleSheet}
 # There is a sample info corrected file in your data directory
 # Old sampleinfo
 sampleinfo
@@ -323,17 +356,17 @@ sampleinfo <- read.delim("data/SampleInfo_Corrected.txt")
 sampleinfo
 ```
 
-```{r,fig.height=5,fig.width=10}
+```{r plotMDSfixed, fig.height=5, fig.width=10}
 # Redo the MDSplot with corrected information
 par(mfrow=c(1,2))
 col.cell <- c("purple","orange")[sampleinfo$CellType]
 col.status <- c("blue","red","dark green")[sampleinfo$Status]
-plotMDS(dgeObj,col=col.cell)
-legend("topleft",fill=c("purple","orange"),legend=levels(sampleinfo$CellType))
-title("Cell type")
-plotMDS(dgeObj,col=col.status)
-legend("topleft",fill=c("blue","red","dark green"),legend=levels(sampleinfo$Status),cex=0.8)
-title("Status")
+
+plotMDS(dgeObj,col=col.cell, main="Cell type", cex=2, cex.lab=2, cex.axis=2, cex.main=2)
+legend("topleft",fill=c("purple","orange"),legend=levels(sampleinfo$CellType), cex=2)
+
+plotMDS(dgeObj,col=col.status, main="Status", cex=2, cex.lab=2, cex.axis=2, cex.main=2)
+legend("topleft",fill=c("blue","red","dark green"),legend=levels(sampleinfo$Status), cex=2)
 ```
 
 > ## Discussion {.challenge}
@@ -342,16 +375,17 @@ title("Status")
 > What is the second greatest source of variation in the data?
 >
 
-> ## Challenge {.challenge}
+> ## Challenge 2 {.challenge}
 >
 > 1. Redo the plots choosing your own colours.
-> 1. Change the plotting character to a symbol instead of the column names  
+> 2. Change the plotting character to a symbol instead of the column names  
 > HINT: use `pch` (**p**lotting **ch**aracters) argument. Try `pch=16` and see what happens.
-> 1. Change the plotting characters such that basal samples have the value `1` and luminal samples have the value `4` and colour the points by status (lactate, pregnant, virgin)
+> 3. Change the plotting characters such that basal samples have the value `1` and luminal samples have the value `4` and colour the points by status (lactate, pregnant, virgin)
 >
 
 **Solution**
-```{r echo=FALSE}
+```{r solutionChallenge2, echo=FALSE}
+
 ```
 
 
@@ -364,15 +398,16 @@ Notes
 
 `plotMDS` plots the first two dimensions as a default, however you can plot higher dimensions using the `dim` argument.
 
-```{r}
+```{r plotMDS3and4}
 # Dimension 3 appears to separate pregnant samples from the rest. Dim4?
-plotMDS(dgeObj,dim=c(3,4))
+plotMDS(dgeObj,dim=c(3,4), col=col.status)
+legend("topleft",fill=c("blue","red","dark green"),legend=levels(sampleinfo$Status))
 ```
 
 
 Another alternative is to generate an interactive MDS plot using the *Glimma* package. This allows the user to interactively explore the different dimensions.
 
-```{r}
+```{r glimmaMDS}
 labels <- paste(sampleinfo$SampleName, sampleinfo$CellType, sampleinfo$Status)
 group <- paste(sampleinfo$CellType,sampleinfo$Status,sep=".")
 group <- factor(group)
@@ -391,7 +426,7 @@ Note:The `png` function will create a png file to save the plots created straigh
 
 Let's select data for the 500 most variable genes and plot the heatmap
 
-```{r}
+```{r getHMData}
 # We estimate the variance for each row in the logcounts matrix
 var_genes <- apply(logcounts, 1, var)
 head(var_genes)
@@ -402,9 +437,12 @@ head(select_var)
 highly_variable_lcpm <- logcounts[select_var,]
 dim(highly_variable_lcpm)
 head(highly_variable_lcpm)
+```
 
+```{r plotHM}
 ## Get some nicer colours
 mypalette <- brewer.pal(11,"RdYlBu")
+## http://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3
 morecols <- colorRampPalette(mypalette)
 # Set up colour vector for celltype variable
 col.cell <- c("purple","orange")[sampleinfo$CellType]
@@ -418,11 +456,16 @@ heatmap.2(highly_variable_lcpm,
 
 # Save the heatmap
 png(file="High_var_genes.heatmap.png")
-heatmap.2(highly_variable_lcpm,col=rev(morecols(50)),trace="none", main="Top 500 most variable genes\nacross samples",ColSideColors=col.cell,scale="row")
+heatmap.2(highly_variable_lcpm, 
+          col=rev(morecols(50)), 
+          trace="none", 
+          main="Top 500 most variable genes\nacross samples", 
+          ColSideColors=col.cell, 
+          scale="row")
 dev.off()
 ```
 
-> ## Challenge {.challenge}
+> ## Challenge 3 {.challenge}
 >
 > 1. Change the colour scheme to "PiYG" and redo the heatmap. Try `?RColorBrewer` and see what other colour schemes are available.
 > 1. Change the sample names to `group` using the `labCol` argument
@@ -430,7 +473,7 @@ dev.off()
 >
 
 **Solution**
-```{r,echo=FALSE, fig.height=8, fig.width=6}
+```{r solutionChallenge3,echo=FALSE, fig.height=8, fig.width=6}
 
 ```
 
@@ -441,14 +484,14 @@ dev.off()
 
 The trimmed mean of M-values normalization method (TMM) is performed to eliminate composition biases between libraries [@robinson2010tmm]. This generates a set of normalization factors, where the product of these factors and the library sizes defines the effective library size. The `calcNormFactors` function in `edgeR` calculates the normalization factors between libraries. TMM normalisation (and most scaling normalisation methods) scale relative to one sample.
 
-```{r}
+```{r calcNormFactors}
 # Apply normalisation to DGEList object
 dgeObj <- calcNormFactors(dgeObj)
 ```
 
 This will update the normalisation factors in the `DGEList` object (their default values are 1). Take a look at the normalisation factors for these samples.
 
-```{r}
+```{r vizNormFactors}
 dgeObj$samples
 ```
 
@@ -457,7 +500,7 @@ The normalization factors multiply to unity across all libraries. A normalizatio
 
 The last two samples have much smaller normalisation factors, and MCL1.LA and MCL1.LB have the largest. If we plot mean difference plots using the `plotMD` function for these samples, we should be able to see the composition bias problem. We will use the `logcounts`, which have been normalised for library size, but not for composition bias.
 
-```{r,fig.height=5,fig.width=10}
+```{r plotRawMD, fig.height=5, fig.width=10}
 par(mfrow=c(1,2))
 plotMD(logcounts,column = 7)
 abline(h=0,col="grey")
@@ -468,7 +511,7 @@ abline(h=0,col="grey")
 The mean-difference plots show average expression (mean: x-axis) against log-fold-changes (difference: y-axis).
 Because our `DGEList` object contains the normalisation factors, if we redo these plots using `dgeObj`, we should see the composition bias problem has been solved.
 
-```{r,fig.height=5,fig.width=10}
+```{r plotNormedMD, fig.height=5, fig.width=10}
 par(mfrow=c(1,2))
 plotMD(dgeObj,column = 7)
 abline(h=0,col="grey")
@@ -476,18 +519,18 @@ plotMD(dgeObj,column = 11)
 abline(h=0,col="grey")
 ```
 
-> ## Challenge {.challenge}
+> ## Challenge 4 {.challenge}
 >
 > Plot the biased and unbiased MD plots side by side for the same sample to see the before and after TMM normalisation effect.
 >
 
 **Solution**
-```{r,echo=FALSE,fig.height=5,fig.width=10}
+```{r solutionChallenge4, echo=FALSE, fig.height=5, fig.width=10}
 
 ```
 
 **We need to save a few data objects to use for Day 2 so we don't have to rerun everything**
 
-```{r}
+```{r saveData}
 save(group,dgeObj,sampleinfo,file="Robjects/preprocessing.Rdata")
 ```
