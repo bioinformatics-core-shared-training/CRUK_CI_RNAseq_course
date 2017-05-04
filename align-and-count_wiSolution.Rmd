@@ -284,9 +284,7 @@ head(fc.exon$counts)
 ```{r}
 # count over exons, not genes: `useMetaFeatures = FALSE`
 
-fc.exon.multimap <- featureCounts(bam.files.multi, annot.inbuilt="mm10",
-			useMetaFeatures = FALSE,
-		    )
+fc.exon.multimap <- featureCounts(bam.files.multi, annot.inbuilt="mm10",useMetaFeatures = FALSE,countMultiMappingReads = TRUE)
 
 ## Take a look at the dimensions to see the number of genes
 dim(fc.exon.multimap$counts)
