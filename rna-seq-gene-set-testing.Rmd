@@ -224,13 +224,14 @@ summary(decideTestsDGE(lrt, lfc=1))
 
 Read the manual on glmTreat() to "Conduct genewise statistical tests for a given coefficient or contrast relative to a specified fold-change threshold."
 
-"‘glmTreat’ implements a test for differential expression relative
+- "‘glmTreat’ implements a test for differential expression relative
      to a minimum required fold-change threshold. Instead of testing
      for genes which have log-fold-changes different from zero, it
      tests whether the log2-fold-change is greater than ‘lfc’ in
      absolute value. ‘glmTreat’ is analogous to the TREAT approach
      developed by McCarthy and Smyth (2009) for microarrays."
-"‘glmTreat’ detects whether ‘glmfit’ was produced by ‘glmFit’ or
+     
+- "‘glmTreat’ detects whether ‘glmfit’ was produced by ‘glmFit’ or
      ‘glmQLFit’. In the former case, it conducts a modified likelihood
      ratio test (LRT) against the fold-change threshold. In the latter
      case, it conducts a quasi-likelihood (QL) F-test against the
@@ -412,7 +413,7 @@ This analysis is performed by:
 - (ii) identifying the rank positions of all members of the gene set, and 
 - (iii) calculating an enrichment score (ES) that represents the difference between the observed rankings and that which would be expected assuming a random rank distribution.
 
-"After establishing the ES for each gene set across the phenotype, GSEA reiteratively randomizes the sample labels and retests for enrichment across the random classes. By performing repeated class label randomizations, the ES for each gene set across the true classes can be compared to the ES distribution from the random classes. Those gene sets that significantly outperform iterative random class permutations are considered significant." [commentary on GSEA](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1266131/). The article describing the original software is available [here](https://www.ncbi.nlm.nih.gov/pubmed/16199517).
+"After establishing the ES for each gene set across the phenotype, GSEA reiteratively randomizes the sample labels and retests for enrichment across the random classes. By performing repeated class label randomizations, the ES for each gene set across the true classes can be compared to the ES distribution from the random classes. Those gene sets that significantly outperform iterative random class permutations are considered significant." [commentary on GSEA](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1266131/). The article describing the original software is available [here](http://www.pnas.org/content/102/43/15545.long).
 
 ```{r}
 library(fgsea)
@@ -421,7 +422,10 @@ library(fgsea)
 Create ranks:
 
 ```{r}
-ranks <- results$logFC
+
+results.ord <- results[ order(results[,"logFC"]), ]
+head(results.ord)
+ranks <- results.ord$logFC
 names(ranks) <- rownames(results)
 head(ranks)
 ```
@@ -436,9 +440,11 @@ pathways <- Mm.H
 Conduct analysis:
 
 ```{r}
+?fgsea
 fgseaRes <- fgsea(pathways, ranks, minSize=15, maxSize = 500, nperm=1000)
 class(fgseaRes)
 dim(fgseaRes)
+head(fgseaRes)
 ```
 
 Glance at results:
@@ -454,6 +460,8 @@ plotEnrichment(pathways[["HALLMARK_MYOGENESIS"]],
                ranks)
 ```
 
+Remember to check the [GSEA article](http://www.pnas.org/content/102/43/15545.full) for the complete explanation.
+
 Select top pathways and plot outcome for all these:
 
 ```{r}
@@ -462,11 +470,12 @@ topPathwaysDown <- fgseaRes[ES < 0][head(order(pval), n=10), pathway]
 topPathways <- c(topPathwaysUp, rev(topPathwaysDown))
 plotGseaTable(pathways[topPathways], ranks, fgseaRes, 
               gseaParam = 0.5)
+?plotGseaTable
 ```
 
 ### CAMERA gene set testing using the Broad's curated gene sets
 
-Other databases of gene sets that are available come from the Broad Institute's Molecular Signatures Database ([MSigDB](http://software.broadinstitute.org/gsea/msigdb)). CAMERA is good option for testing a very large number of gene sets such as the MSigDB sets, as it is very fast. CAMERA is known as a competitive gene set test, however it has the advantage that it can take into account inter-gene correlation within each gene set [@wu2012camera].
+Other databases of gene sets that are available come from the Broad Institute's Molecular Signatures Database ([MSigDB](http://software.broadinstitute.org/gsea/msigdb)). [CAMERA](https://academic.oup.com/nar/article/40/17/e133/2411151/Camera-a-competitive-gene-set-test-accounting-for) is good option for testing a very large number of gene sets such as the MSigDB sets, as it is very fast. It has the advantage of accounting for inter-gene correlation within each gene set [@wu2012camera].
 
 Here we will be using the C2 gene sets for mouse, available as .rdata files from the WEHI bioinformatics page [http://bioinf.wehi.edu.au/software/MSigDB/index.html](http://bioinf.wehi.edu.au/software/MSigDB/index.html). The C2 gene sets contain 4725 curated gene sets collected from a variety of places: BioCarta, KEGG, Pathway Interaction Database, Reactome as well as some published studies. It doesn't include GO terms.
 
@@ -534,7 +543,7 @@ write.csv(gst.camera,file="gst_LacLumVsBas.csv")
 
 ### ROAST gene set testing
 
-ROAST is an example of a self-contained gene set test [@wu2010roast]. It asks the question, "Do the genes in my set tend to be differentially expressed between my conditions of interest?". ROAST doesn't care about what the other genes in the experiment are doing, which is different to `camera`. ROAST is a good option for when you're interested in a specific set, or a few sets. It is not really used to test thousands of sets at one time.
+[ROAST](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btq401) is an example of a self-contained gene set test [@wu2010roast]. It asks the question, "Do the genes in my set tend to be differentially expressed between my conditions of interest?". ROAST does not use information on the other genes in the experiment, unlike `camera`. ROAST is a good option for when you're interested in a specific set, or a few sets. It is not really used to test thousands of sets at one time.
 
 From the Hallmark gene sets, two MYC pathways were most significant.
 
