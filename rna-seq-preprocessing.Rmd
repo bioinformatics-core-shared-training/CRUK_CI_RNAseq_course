@@ -331,12 +331,12 @@ col.status
 # We specify the option to let us plot two plots side-by-sde
 par(mfrow=c(1,2))
 # Redo the MDS with cell type colouring
-plotMDS(dgeObj,col=col.cell, main="Cell type", cex=2, cex.lab=2, cex.axis=2, cex.main=2)
+plotMDS(dgeObj,col=col.cell, main="Cell type")
 # Let's add a legend to the plot so we know which colours correspond to which cell type
-legend("topleft",fill=c("purple","orange"),legend=levels(sampleinfo$CellType), cex=2)
+legend("topleft",fill=c("purple","orange"),legend=levels(sampleinfo$CellType))
 
-plotMDS(dgeObj,col=col.status, main="Status", cex=2, cex.lab=2, cex.axis=2, cex.main=2)
-legend("topleft",fill=c("blue","red","dark green"),legend=levels(sampleinfo$Status), cex=2)
+plotMDS(dgeObj,col=col.status, main="Status")
+legend("topleft",fill=c("blue","red","dark green"),legend=levels(sampleinfo$Status))
 
 ```
 
@@ -362,11 +362,11 @@ par(mfrow=c(1,2))
 col.cell <- c("purple","orange")[sampleinfo$CellType]
 col.status <- c("blue","red","dark green")[sampleinfo$Status]
 
-plotMDS(dgeObj,col=col.cell, main="Cell type", cex=2, cex.lab=2, cex.axis=2, cex.main=2)
-legend("topleft",fill=c("purple","orange"),legend=levels(sampleinfo$CellType), cex=2)
+plotMDS(dgeObj,col=col.cell, main="Cell type")
+legend("topleft",fill=c("purple","orange"),legend=levels(sampleinfo$CellType))
 
-plotMDS(dgeObj,col=col.status, main="Status", cex=2, cex.lab=2, cex.axis=2, cex.main=2)
-legend("topleft",fill=c("blue","red","dark green"),legend=levels(sampleinfo$Status), cex=2)
+plotMDS(dgeObj,col=col.status, main="Status")
+legend("topleft",fill=c("blue","red","dark green"),legend=levels(sampleinfo$Status))
 ```
 
 > ## Discussion {.challenge}
