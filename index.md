@@ -34,14 +34,18 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 
 - [Alignment and Counting](align-and-count.nb.html)
     + [source file](align-and-count.Rmd)
+    + [with solutions](align-and-count_wiSolution.Rmd)
 - [RNA-seq Pre-processing](rna-seq-preprocessing.nb.html)
     + [source file](rna-seq-preprocessing.Rmd)
+    + [with solutions](rna-seq-preprocessing_wiSolution.Rmd)
 - [Differential Expression for RNA-seq](rna-seq-de.nb.html)
     + [source file](rna-seq-de.Rmd)
 - [Annotation and Visualisation of RNA-seq results](rna-seq-annotation-visualisation.nb.html)
     + [source file](rna-seq-annotation-visualisation.Rmd)
+    + [with solutions](rna-seq-annotation-visualisation-solutions.Rmd)
 - [Gene-set testing](rna-seq-gene-set-testing.nb.html)
     + [source file](rna-seq-gene-set-testing.Rmd)
+    + [with solutions](rna-seq-gene-set-testing_wiSolution.Rmd)
     
 ### Lecture slides
 
