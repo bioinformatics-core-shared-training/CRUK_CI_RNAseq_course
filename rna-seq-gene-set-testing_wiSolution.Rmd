@@ -36,7 +36,7 @@ Based on the course [RNAseq analysis in R](http://combine-australia.github.io/20
 - Six groups (3 conditions x 2 cell types) with 2 biological replicates per group
 - As described in:
 	- ['EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival' (Fu et al. 2015)](https://www.ncbi.nlm.nih.gov/pubmed/25730472) published in Nature Cell Biology, with both sequence and counts available from Gene Expression Omnibus database (GEO) under accession number [GSE60450](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60450)
-	- [A DE-licious a recipe for differential expression analyses of RNA-seq](http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf)
+	- [A DE-licious recipe for differential expression analyses of RNA-seq](http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf)
 
 # Testing relative to a threshold (TREAT)
 
@@ -159,24 +159,6 @@ barplot(cpm(dgeObj)[o[1],])
 
 Create mean-difference plot to show log fold changes (differences) versus average log values (means):
 
-```{r, results='hide'}
-# lfc threshold: abs(logFC > 0)
-
-# Create mean-difference ('MD') plot to show log fold changes (differences) versus average log values (means)
-# Differentially exressed genes (DEGs) may be color-coded using the 'status' argument.
-# Let's color genes according to the outcome of the LRT test.
-
-# Classify the differential expression statistics as up, down or not significant using decideTestsDGE()
-# ?decideTestsDGE
-tmpDec <- decideTestsDGE(lrt.BvsL, lfc=0)
-
-# Show the number of genes in each of the three classes:
-summary(tmpDec)
-
-# Create MD plot, with extra blue lines to show log fold-change threshold:
-edgeR::plotMD.DGELRT(lrt.BvsL, status=tmpDec); abline(h=c(-1, 1), col="blue")
-```
-
 ```{r}
 # lfc threshold: abs(logFC > 1)
 
@@ -193,31 +175,6 @@ summary(tmpDec)
 
 # Create MD plot with extra blue lines to show log fold-change threshold:
 edgeR::plotMD.DGELRT(lrt.BvsL, status=tmpDec); abline(h=c(-1, 1), col="blue")
-```
-
-```{r, results='hide'}
-tmpDec0 <- as.logical(decideTestsDGE(lrt.BvsL, lfc=0))
-tmpDec1 <- as.logical(decideTestsDGE(lrt.BvsL, lfc=1))
-ftable(tmpDec0, tmpDec1)
-```
-
-<!--
-Mind that glmLRT() called without 'coef' value uses the last contrast in the design matrix
--->
-
-```{r, results='hide'}
-# glmLRT() called without 'coef' value uses the last contrast in the design matrix
-# ?glmLRT
-
-# Conduct likelihood ratio tests for last contrast
-lrt <- glmLRT(fit)
-# class(lrt) #  "DGELRT"
-lrt$comparison
-# colnames(design)
-
-topTags(lrt)
-decideTestsDGE(lrt)
-summary(decideTestsDGE(lrt, lfc=1))
 ```
 
 ## Testing relative to a threshold (TREAT) with edgeR
@@ -310,7 +267,7 @@ summary(tmpDec.noTreat.fc1)
 # compare decisions between the two tests:
 ftable(as.vector(tmpDec.noTreat.fc1), as.vector(tmpDec.fc1), exclude=c())
 
-# Identify genes 'in the abs-FC>0 set but not in the abs-FC>1 set':
+# Identify genes 'in the abs(FC)>0 set but not in the abs(FC)>1 set':
 tmpDec.diff <- as.logical(tmpDec.noTreat.fc1) & ! as.logical(tmpDec.fc1)
 table(tmpDec.diff)
 
@@ -442,12 +399,18 @@ Create ranks:
 
 ```{r}
 
-results.ord <- results[ order(results[,"logFC"]), ]
+results.ord <- results[ order(-results[,"logFC"]), ]
 head(results.ord)
 ranks <- results.ord$logFC
-names(ranks) <- rownames(results)
+names(ranks) <- rownames(results.ord)
 head(ranks)
 ```
+
+```{r}
+#plot(ranks)
+barplot(ranks)
+```
+
 
 Load the pathways:
 
@@ -473,6 +436,26 @@ head(fgseaRes[order(padj), ])
 ```
 
 Plot outcome for the 'HALLMARK_MYOGENESIS' pathway:
+
+First find rank of the 'HALLMARK_MYOGENESIS' pathway genes in the sorted genes:
+
+```{r}
+
+# We will create a barplot of logFC for the sorted genes and add one vertical red bar for each gene in the 'HALLMARK_MYOGENESIS' pathway
+
+#pathways[["HALLMARK_MYOGENESIS"]]
+
+tmpInd <- match(pathways[["HALLMARK_MYOGENESIS"]],names(ranks))
+tmpInd <- tmpInd[!is.na(tmpInd)]
+
+tmpInd
+
+barplot(ranks)
+abline(v=tmpInd, col="red")
+
+```
+
+Create enrichment score plot:
 
 ```{r}
 plotEnrichment(pathways[["HALLMARK_MYOGENESIS"]],
