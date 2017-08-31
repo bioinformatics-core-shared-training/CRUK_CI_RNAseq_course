@@ -14,7 +14,7 @@ This course is based on the course [RNAseq analysis in R](http://combine-austral
 
 ## Outline
 
-In this workshop, you will be learning how to analyse RNA-seq count data, using R. This will include reading the data into R, quality control and performing differential expression analysis and gene set testing, with a focus on the limma-voom analysis workflow. You will learn how to generate common plots for analysis and visualisation of gene expression data, such as boxplots and heatmaps. You will also be learning how alignment and counting of raw RNA-seq data can be performed in R. This workshop is aimed at biologists interested in learning how to perform differential expression analysis of RNA-seq data when reference genomes are available.
+In this workshop, you will be learning how to analyse RNA-seq count data, using R. This will include reading the data into R, quality control and performing differential expression analysis and gene set testing, with a focus on the edgeR analysis workflow. You will learn how to generate common plots for analysis and visualisation of gene expression data, such as boxplots and heatmaps. You will also be learning how alignment and counting of raw RNA-seq data can be performed in R. This workshop is aimed at biologists interested in learning how to perform differential expression analysis of RNA-seq data when reference genomes are available.
 
 > ## Prerequisites {.prereq}
 >
@@ -29,24 +29,27 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 ## Data
 
 - Mouse mammary data (counts): [https://figshare.com/s/1d788fd384d33e913a2a](https://figshare.com/s/1d788fd384d33e913a2a)
-- Drosophila data (counts): [https://figshare.com/s/e08e71c42f118dbe8be6](https://figshare.com/s/e08e71c42f118dbe8be6)
 
 ## RNAseq analysis in R tutorials
 
 - [Alignment and Counting](align-and-count.nb.html)
     + [source file](align-and-count.Rmd)
+    + [with solutions](align-and-count_wiSolution.Rmd)
 - [RNA-seq Pre-processing](rna-seq-preprocessing.nb.html)
     + [source file](rna-seq-preprocessing.Rmd)
+    + [with solutions](rna-seq-preprocessing_wiSolution.Rmd)
 - [Differential Expression for RNA-seq](rna-seq-de.nb.html)
     + [source file](rna-seq-de.Rmd)
 - [Annotation and Visualisation of RNA-seq results](rna-seq-annotation-visualisation.nb.html)
     + [source file](rna-seq-annotation-visualisation.Rmd)
+    + [with solutions](rna-seq-annotation-visualisation-solutions.Rmd)
 - [Gene-set testing](rna-seq-gene-set-testing.nb.html)
     + [source file](rna-seq-gene-set-testing.Rmd)
+    + [with solutions](rna-seq-gene-set-testing_wiSolution.Rmd)
     
 ### Lecture slides
 
-- [RNASeq basics](slides/RNA-seq-Intro.pdf)
+- [RNASeq basics](slides/rnaSeq_May2017.pdf)
 - [Linear Model and Statistics for Differential Expression](slides/LinearModels.pdf)
 
 ### Supplementary lessons
@@ -57,7 +60,7 @@ Introductory R materials:
 
 Additional RNAseq materials:
 
-- [Downloading files from SRA and aligning](getting-raw-reads.Rmd)
+- [Downloading files from SRA and aligning](getting-raw-reads.nb.html)
 
 Data: Mouse mammary data (fastq files): [https://figshare.com/s/f5d63d8c265a05618137](https://figshare.com/s/f5d63d8c265a05618137)
 

@@ -105,7 +105,7 @@ Let's start with the model with only main effects, that is no interaction. The m
 group <- as.character(group)
 type <- sapply(strsplit(group, ".", fixed=T), function(x) x[1])
 status <- sapply(strsplit(group, ".", fixed=T), function(x) x[2])
-# Specify a design matrix without an intercept term
+# Specify a design matrix with an intercept term
 design <- model.matrix(~ type + status)
 design
 ```
