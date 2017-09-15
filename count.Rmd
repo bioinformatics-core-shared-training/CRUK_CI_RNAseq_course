@@ -11,19 +11,16 @@ output:
     toc_float: yes
 minutes: 300
 layout: page
-subtitle: Alignment and Counting
+subtitle: Counting
 bibliography: ref.bib
 ---
 
-**Authors: Belinda Phipson, Maria Doyle, Harriet Dashnow**
-
-## Downloading genome files
-
-???????????????????????????????????????????????????????
 
 ## Introduction and data import
 
-For the purpose of this workshop, we are going to be working with a small part of the mouse reference genome (chromosome 1) to demonstrate how to do read counting using Subread.
+For the purpose of this workshop, we are going to be working with a small part of the mouse reference genome (chromosome 1) to demonstrate how to do read counting using `Subread`.
+
+Earlier we put all the sequencing read data (`.fastq.gz` files) in the `data` directory. Only 1000 reads are included in the files, so for convenience we then aligned using the `Rsubread` Bioconductor package. For real-world data, we would recommend using one of the aligners we learnt about yesterday.
 
 ## Counting
 
@@ -35,7 +32,7 @@ GTF/GFF files define genomic regions covered by different types of genomic featu
 Lets have a quick look at the top of a GTF file so we can see what data it contains and what **feature type** and **attribute type** mean:
 
 ```
-head <<GTF_FILE>>
+head mmu.mm10.gtf
 ```
 
 The code below uses **`featureCounts`** to count reads in a bam file against a GTF for the GRCh38 genome assembly.
@@ -82,3 +79,4 @@ Notes
 FASTQ format using the fastq-dump utility from the SRA Toolkit. See http:
 //www.ncbi.nlm.nih.gov/books/NBK158900 for how to download and use the
 SRA Toolkit.  
+* Whole-genome `.bam` files have also been provided in the `data` folder (`MCL1.*.bam`) aligned using the `bowtie2` aligner. Feel free to explore these files in your own time.
