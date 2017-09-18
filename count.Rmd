@@ -89,4 +89,4 @@ Notes
 FASTQ format using the fastq-dump utility from the SRA Toolkit. See http:
 //www.ncbi.nlm.nih.gov/books/NBK158900 for how to download and use the
 SRA Toolkit.  
-* Whole-genome `.bam` files have also been provided in the `data` folder (`MCL1.*.bam`) aligned using the `bowtie2` aligner. Feel free to explore these files in your own time.
+
