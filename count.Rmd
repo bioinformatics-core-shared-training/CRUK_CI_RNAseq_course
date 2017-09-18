@@ -20,7 +20,7 @@ bibliography: ref.bib
 
 For the purpose of this workshop, we are going to be working with a small part of the mouse reference genome (chromosome 1) to demonstrate how to do read counting using `Subread`.
 
-Earlier we put all the sequencing read data (`.fastq.gz` files) in the `data` directory. Only 1000 reads are included in the files, so for convenience we then aligned using the `Rsubread` Bioconductor package. For real-world data, we would recommend using one of the aligners we learnt about yesterday.
+The raw reads, in fastq files, have been aligned using Bowtie2. The bam files containing the aligned reads can be found in the **`RNAseq/data directory`** under the **`Course_Matrerials`**.
 
 ## Counting
 
@@ -32,20 +32,22 @@ GTF/GFF files define genomic regions covered by different types of genomic featu
 Lets have a quick look at the top of a GTF file so we can see what data it contains and what **feature type** and **attribute type** mean:
 
 ```
+cd RNASeq/data
+  
 head mmu.mm10.gtf
 ```
 
 The code below uses **`featureCounts`** to count reads in a bam file against a GTF for the GRCh38 genome assembly.
 
 ```
-featureCounts \
-    --primary \
-    -C \ 
-    -t exon \ 
-    -g gene_id \
-    -a <<GTF_FILE>> \ 
-    -o <<OUTPUT-FILE>> \ 
-    <<BAMFILE>>
+  featureCounts \
+      --primary \
+      -C \
+      -t exon \
+      -g gene_id \
+      -a mmu.mm10.gtf \
+      -o MCL1.DJ.featureCounts \
+      MCL1.DJ.bam
 ```
 * **`--primary`** - only count primary alignment
 * **`-C`** - do not count reads where the pairs are mapped to different chromosomes
@@ -58,11 +60,11 @@ featureCounts \
 featureCounts --help
 ```
 
-Running featureCounts generates two output file. A summary statistics table and a full table of counts for each feature (gene in this case).
+Running featureCounts generates two output file. A summary statistics table (**`MCL1.DJ.featureCounts.summary`**) and a full table of counts (**`MCL1.DJ.featureCounts`**) for each feature (gene in this case).
 
 The summary table reports the numbers of unassigned reads and the reasons why they are not assigned (eg. ambiguity, multi-mapping, secondary alignment, mapping quality, fragment length, chimera, read duplicate, non-junction and so on), in addition to the number of successfully assigned reads for each library. See [subread documentation](http://bioinf.wehi.edu.au/subread-package/SubreadUsersGuide.pdf) ('Program output' section).
 
-The full results table begins with a line containing the command used to generate the counts. It then has a table of 7 columns. The first column is the gene identifier, this will vary depending on the GTF file used, in our case this is a <<ENSEMBL_GENE_ID??>>. The second to fifth columns describe the genes location, and the sixth column is the length of the gene. The final column contains the number of reads assigned to the gene. Note that **`featureCounts`** outputs a row for every gene in the GTF, even the ones with no reads assigned, and the row order is determined by the order in the GTF. This means that if featureCounts is used on mutliple samples with same GTF file, the separate files can be combined easily as the rows always refer to the same gene.
+The full results table begins with a line containing the command used to generate the counts. It then has a table of 7 columns. The first column is the gene identifier, this will vary depending on the GTF file used, in our case this is a UCSC gene id. The second to fifth columns describe the genes location, and the sixth column is the length of the gene. The final column contains the number of reads assigned to the gene. Note that **`featureCounts`** outputs a row for every gene in the GTF, even the ones with no reads assigned, and the row order is determined by the order in the GTF. This means that if featureCounts is used on mutliple samples with same GTF file, the separate files can be combined easily as the rows always refer to the same gene.
 
 
 > ## Challenge {.challenge}
