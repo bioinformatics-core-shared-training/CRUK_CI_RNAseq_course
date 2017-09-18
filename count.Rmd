@@ -63,7 +63,7 @@ featureCounts --help
 Running featureCounts generates two output file. A summary statistics table (**`MCL1.DJ.featureCounts.summary`**) and a full table of counts (**`MCL1.DJ.featureCounts`**) for each feature (gene in this case). Let take a look at each file.
 
 ```
-cat MCL1.DJ.featureCounts.summary
+head MCL1.DJ.featureCounts.summary
 ```
 
 The summary table reports the numbers of unassigned reads and the reasons why they are not assigned (eg. ambiguity, multi-mapping, secondary alignment, mapping quality, fragment length, chimera, read duplicate, non-junction and so on), in addition to the number of successfully assigned reads for each library. See [subread documentation](http://bioinf.wehi.edu.au/subread-package/SubreadUsersGuide.pdf) ('Program output' section).
