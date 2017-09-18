@@ -63,13 +63,13 @@ featureCounts --help
 Running featureCounts generates two output file. A summary statistics table (**`MCL1.DJ.featureCounts.summary`**) and a full table of counts (**`MCL1.DJ.featureCounts`**) for each feature (gene in this case). Let take a look at each file.
 
 ```
-head MCL1.DJ.featureCounts.summary
+cat MCL1.DJ.featureCounts.summary
 ```
 
 The summary table reports the numbers of unassigned reads and the reasons why they are not assigned (eg. ambiguity, multi-mapping, secondary alignment, mapping quality, fragment length, chimera, read duplicate, non-junction and so on), in addition to the number of successfully assigned reads for each library. See [subread documentation](http://bioinf.wehi.edu.au/subread-package/SubreadUsersGuide.pdf) ('Program output' section).
 
 ```
-cat MCL1.DJ.featureCounts
+head MCL1.DJ.featureCounts
 ```
 
 The full results table begins with a line containing the command used to generate the counts. It then has a table of 7 columns. The first column is the gene identifier, this will vary depending on the GTF file used, in our case this is a UCSC gene id. The second to fifth columns describe the genes location, and the sixth column is the length of the gene. The final column contains the number of reads assigned to the gene. Note that **`featureCounts`** outputs a row for every gene in the GTF, even the ones with no reads assigned, and the row order is determined by the order in the GTF. This means that if featureCounts is used on mutliple samples with same GTF file, the separate files can be combined easily as the rows always refer to the same gene.
