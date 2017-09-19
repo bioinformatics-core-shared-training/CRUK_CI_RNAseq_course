@@ -19,6 +19,10 @@ bibliography: ref.bib
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r}
+library(edgeR)
+```
+
 **Original Authors: Belinda Phipson, Anna Trigos, Matt Ritchie, Maria Doyle, Harriet Dashnow, Charity Law**
 Based on the course [RNAseq analysis in R](http://combine-australia.github.io/2016-05-11-RNAseq/) delivered on May 11/12th 2016
 
@@ -38,293 +42,25 @@ Based on the course [RNAseq analysis in R](http://combine-australia.github.io/20
 	- ['EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival' (Fu et al. 2015)](https://www.ncbi.nlm.nih.gov/pubmed/25730472) published in Nature Cell Biology, with both sequence and counts available from Gene Expression Omnibus database (GEO) under accession number [GSE60450](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60450)
 	- [A DE-licious recipe for differential expression analyses of RNA-seq](http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf)
 
-# Testing relative to a threshold (TREAT)
-
-When there is a lot of differential expression, sometimes we may want to cut-off on a fold change threshold as well as a p-value threshold so that we follow up on the most biologically significant genes. However, it is not recommended to simply rank by p-value and then discard genes with small logFC's, as this has been shown to increase the false discovery rate. In other words, you are not controlling the false discovery rate at 5\% anymore.
-
-The test performed above tests the null hypothesis that gene expression is the same in classes compared in the contrast of interest, i.e. that fold change is 1 (and log2(FC) is 0). Rather than ranking genes per p-values and then filter on logFC, one should instead test the null hypothesis that the difference in level of expression between classes in the contrast is lower than a given threshold.
-
-See ["Testing significance relative to a fold-change threshold is a TREAT"](https://academic.oup.com/bioinformatics/article/25/6/765/251641/Testing-significance-relative-to-a-fold-change)
-
-## Fit the linear model
-
-Remember how the linear model was fitted in the previous section:
-
-```{r}
-fit <- glmFit(dgeObj, design)
-```
-
-Load the DGEList object dgeObj saved in the previous session.
-
-```{r}
-library(edgeR)
-load("Robjects/DE.Rdata")
-```
-
-Let's fit the model again:
-
-```{r}
-## Read the counts from the downloaded data
-seqdata <- read.delim("data/GSE60450_Lactation-GenewiseCounts.txt", stringsAsFactors = FALSE)
-
-# Remove first two columns from seqdata
-countdata <- seqdata[,-(1:2)]
-
-# Store EntrezGeneID as rownames
-rownames(countdata) <- seqdata[,1]
-countdata
-colnames(countdata) <- substr(colnames(countdata), 1, 7)
-countdata
-
-## Calculate the Counts Per Million measure
-myCPM <- cpm(countdata)
-
-## Identify genes with at least 0.5 cpm in at least 2 samples
-thresh <- myCPM > 0.5
-keep <- rowSums(thresh) >= 2
-
-# Subset the rows of countdata to keep the more highly expressed genes
-counts.keep <- countdata[keep,]
-
-## Convert to an edgeR object
-dgeObj <- DGEList(counts.keep)
-
-## Perform TMM normalisation
-dgeObj <- calcNormFactors(dgeObj)
-
-# Estimate dispersion:
-dgeObj <- estimateCommonDisp(dgeObj)
-dgeObj <- estimateGLMTrendedDisp(dgeObj)
-dgeObj <- estimateTagwiseDisp(dgeObj)
-plotBCV(dgeObj)
-
-# Create design matrix:
-# Obtain sample information
-sampleinfo <- read.delim("data/SampleInfo_Corrected.txt")
-group <- paste(sampleinfo$CellType,sampleinfo$Status,sep=".")
-group
-# Create the two variables
-group <- as.character(group)
-type <- sapply(strsplit(group, ".", fixed=T), function(x) x[1])
-status <- sapply(strsplit(group, ".", fixed=T), function(x) x[2])
-ftable(type, status, exclude=c())
-
-# Specify a design matrix without an intercept term:
-design <- model.matrix(~ type + status)
-design
-#colnames(design)
-
-# Fit model:
-fit <- glmFit(dgeObj, design)
-names(fit)
-head(coef(fit))
-```
-
-Conduct likelihood ratio tests for the luminal vs basal contrast and show the top genes:
-
-```{r}
-# Conduct likelihood ratio tests for luminal vs basal and show the top genes:
-# Remember that contrast names are kept in
-# - the coef(), see head(coef(fit)),
-# - the design matrix, see colnames(design)
-
-lrt.BvsL <- glmLRT(fit, coef=2) 
-#class((lrt.BvsL)) # "DGELRT"
-lrt.BvsL$comparison
-
-# Show top genes:
-topTags(lrt.BvsL)
-
-# Access test results kept in the 'table' slot:
-head(lrt.BvsL$table)
-```
-
-Check counts per million for the most significant genes:
-
-```{r}
-# Check counts per million for the most significant genes:
-
-# Order genes by increasing order of p-value
-o <- order(lrt.BvsL$table$PValue)
-
-# Show counts per million for the top 10 genes for all samples
-round(cpm(dgeObj)[o[1:10],])
-# Remember the 'sampleinfo' dataframe keeps samples description
-
-# Maybe plot counts per million for the top gene
-barplot(cpm(dgeObj)[o[1],])
-```
-
-## MD plot
-
-Create mean-difference plot to show log fold changes (differences) versus average log values (means):
-
-```{r}
-# lfc threshold: abs(logFC > 1)
-
-# Create mean-difference ('MD') plot to show log fold changes (differences) versus average log values (means)
-# Differentially exressed genes (DEGs) may be color-coded using the 'status' argument.
-# Let's color genes according to the outcome of the LRT test.
-
-# Classify the differential expression statistics as up, down or not significant using decideTestsDGE()
-# ?decideTestsDGE
-tmpDec <- decideTestsDGE(lrt.BvsL, lfc=1)
-
-# Show the number of genes in each of the three classes:
-summary(tmpDec)
-
-# Create MD plot with extra blue lines to show log fold-change threshold:
-edgeR::plotMD.DGELRT(lrt.BvsL, status=tmpDec); abline(h=c(-1, 1), col="blue")
-```
-
-## Testing relative to a threshold (TREAT) with edgeR
-
-Read the manual on glmTreat() to "Conduct genewise statistical tests for a given coefficient or contrast relative to a specified fold-change threshold."
-
-- "‘glmTreat’ implements a test for differential expression relative
-     to a minimum required fold-change threshold. Instead of testing
-     for genes which have log-fold-changes different from zero, it
-     tests whether the log2-fold-change is greater than ‘lfc’ in
-     absolute value. ‘glmTreat’ is analogous to the TREAT approach
-     developed by McCarthy and Smyth (2009) for microarrays."
-     
-- "‘glmTreat’ detects whether ‘glmfit’ was produced by ‘glmFit’ or
-     ‘glmQLFit’. In the former case, it conducts a modified likelihood
-     ratio test (LRT) against the fold-change threshold. In the latter
-     case, it conducts a quasi-likelihood (QL) F-test against the
-     threshold."
-     
-```{r}
-?glmTreat
-```
-
-We will use the "output from ‘glmFit’" created above.
-
-### Test for abs(logFC) > 0
-
-Let's test for abs(logFC) > 0:
-
-```{r}
-# > colnames(design)
-#[1] "(Intercept)"    "typeluminal"    "statuspregnant" "statusvirgin"  
-
-res.treat.tlum.fc0 <- glmTreat(fit, "typeluminal", contrast = NULL, lfc = 0, null = "interval")
-topTags(res.treat.tlum.fc0)
-#coef(res.treat.tlum.fc0)
-#class(res.treat.tlum.fc0$table)
-#colnames(res.treat.tlum.fc0$table)
-head(res.treat.tlum.fc0$table)
-```
-
-Number of genes either up- or down-regulated, or not showing significant difference in expression between the two groups:
-
-```{r}
-summary(decideTestsDGE(res.treat.tlum.fc0))
-```
-
-Draw MD plot: 
-
-```{r}
-tmpDec.fc0 <- decideTestsDGE(res.treat.tlum.fc0)
-edgeR::plotMD.DGELRT(res.treat.tlum.fc0, status=tmpDec.fc0)
-abline(h=c(-1, 1), col="blue")
-```
-
-### Test for abs(logFC) > 1
-
-Let's test for abs(logFC) > 1:
-
-```{r}
-# > colnames(design)
-#[1] "(Intercept)"    "typeluminal"    "statuspregnant" "statusvirgin"  
-
-res.treat.tlum.fc1 <- glmTreat(fit, "typeluminal", contrast = NULL, lfc = 1, null = "interval")
-
-# Glance at the top genes:
-topTags(res.treat.tlum.fc1)
-
-# Number of genes either up- or down-regulated, or not showing significant difference in expression between the two groups:
-tmpDec.fc1 <- decideTestsDGE(res.treat.tlum.fc1)
-summary(tmpDec.fc1)
-
-# Draw MD plot: 
-edgeR::plotMD.DGELRT(res.treat.tlum.fc1, status=tmpDec.fc1)
-abline(h=c(-1, 1), col="blue")
-```
-
-### Visualise effect of TREAT on DEG list
-
-You may have noticed that fewer genes are highlighted in the MAplot for 'abs(logFC) > 1'  than for 'abs(logFC) > 0'.
-
-Let's identify genes flagged as DEG with 'abs(logFC) > 0 then abs(logFC)>1' but not 'abs(logFC) > 1'.
-
-```{r}
-
-# Draw list of DEGs with standard abs(logFC) > 0 followed by logFC filtering:
-tmpDec.noTreat.fc1 <- decideTestsDGE(lrt.BvsL, lfc=1)
-summary(tmpDec.noTreat.fc1)
-
-# compare decisions between the two tests:
-ftable(as.vector(tmpDec.noTreat.fc1), as.vector(tmpDec.fc1), exclude=c())
-
-# Identify genes 'in the abs(FC)>0 set but not in the abs(FC)>1 set':
-tmpDec.diff <- as.logical(tmpDec.noTreat.fc1) & ! as.logical(tmpDec.fc1)
-table(tmpDec.diff)
-
-edgeR::plotMD.DGELRT(res.treat.tlum.fc1, status=tmpDec.diff)
-abline(h=c(-1, 1), col="blue")
-```
-
-
-```{r, results='hide'}
-
-# compare decisions between the two tests:
-ftable(as.vector(tmpDec.fc0), as.vector(tmpDec.fc1), exclude=c())
-
-# Identify genes 'in the abs-FC>0 set but not in the abs-FC>1 set':
-
-tmpDec.inFc0outFc1 <- as.logical(tmpDec.fc0) & ! as.logical(tmpDec.fc1)
-table(tmpDec.inFc0outFc1)
-
-edgeR::plotMD.DGELRT(res.treat.tlum.fc1, status=tmpDec.inFc0outFc1)
-abline(h=c(-1, 1), col="blue")
-```
-
-> ## Challenge {.challenge}
->
-> Change the cut-off so that we are interested in genes that change at least 50\% on the fold change scale.
->
-> HINT: what is the corresponding logFC value of 50\% fold change? Assume basal.pregnant is 50\% higher than basal.lactate
->
-
-## Challenge 1 solution
-
-```{r}
-
-# Set log FC cutoff:
-cutoff<-log2(1.5)
-
-# Conduct TREAT analysis:
-res.treat.tlum.fcCutoff <- glmTreat(fit, "typeluminal", contrast = NULL, lfc = cutoff, null = "interval")
-
-# Check number of DEGs in both change directions:
-tmpDec.fcCutoff <- decideTestsDGE(res.treat.tlum.fcCutoff)
-summary(tmpDec.fcCutoff)
-
-# Draw MD plot: 
-edgeR::plotMD.DGELRT(res.treat.tlum.fcCutoff, status=tmpDec.fcCutoff)
-abline(h=c(-cutoff, cutoff), col="blue")
-```
-
 # Gene Set Testing
 
-Sometimes there is quite a long list of differentially expressed genes to interpret after a differential expression analysis, and it is usually infeasible to go through the list one gene at a time trying to understand its biological function. A common downstream procedure is gene set testing, which aims to understand which pathways/gene networks the differentially expressed genes are implicated in.
+The list of differentially expressed genes is sometimes so long that its interpretation becomes cumbersome and time consuming. A common downstream procedure is gene set testing. It aims to understand which pathways or gene networks the differentially expressed genes are implicated in.
 
-There are a number of different ways to go about testing for enrichment of biological pathways, and the test you choose usually depends on the question you're asking. There are two kinds of tests: competitive and self-contained gene set tests.
+Various ways exist to test for enrichment of biological pathways. Two types of test answer two different questions: competitive and self-contained gene set tests.
 
-Competitive gene set tests, such as those implemented in `GOseq` and `camera` ask the question whether the differentially expressed genes tend to be over-represented in the gene set, compared to all the other genes in the experiment.
+Competitive gene set tests, such as those implemented in `GOseq` and `camera`, ask the question whether the differentially expressed genes tend to be over-represented in the gene set, compared to all the other genes in the experiment.
 
 Self-contained tests, which include the `ROAST` procedure, ask the question "Are the genes in the set/pathway differentially expressed as a whole?"
+
+```{r}
+# load DE.Rdata from Robjects/
+getwd()
+#load("Robjects/DE.Rdata")
+setwd("Robjects/")
+dir()
+load("DE.Rdata")
+ls()
+```
 
 ## Gene Set Testing - competitive gene set tests
 
@@ -347,16 +83,17 @@ Create list of DEGs:
 
 ```{r}
 
-# Retrieve list of all genes tested:
+#??Retrieve list of all genes tested:
 results <- as.data.frame(topTags(lrt.BvsL, n = Inf))
-results
+print(head(results))
 
-# Derive list of DEGs by filtering on FDR:
+#??Derive list of DEGs by filtering on FDR:
 genes <- results$FDR < 0.01
 
-# Add gene names to that list:
+#??Add gene names to that list:
 names(genes) <- rownames(results)
 
+print(head(genes))
 ```
 
 Fit the Probability Weighting Function (PWF):
@@ -364,8 +101,8 @@ Fit the Probability Weighting Function (PWF):
 ```{r}
 library(goseq)
 
-supportedGeneIDs()
-supportedGenomes()
+#print(supportedGeneIDs())
+#print(supportedGenomes())
 
 pwf <- nullp(genes, "mm10","knownGene")
 
@@ -374,7 +111,7 @@ pwf <- nullp(genes, "mm10","knownGene")
 Conduct gene set enrichment analysis:
 
 ```{r}
-?goseq
+#?goseq
 go.results <- goseq(pwf, "mm10","knownGene")
 go.results
 ```
@@ -411,8 +148,7 @@ head(ranks)
 barplot(ranks)
 ```
 
-
-Load the pathways:
+Load pathways:
 
 ```{r}
 load("data/mouse_H_v5.rdata")
@@ -426,7 +162,7 @@ Conduct analysis:
 fgseaRes <- fgsea(pathways, ranks, minSize=15, maxSize = 500, nperm=1000)
 class(fgseaRes)
 dim(fgseaRes)
-head(fgseaRes)
+#head(fgseaRes)
 ```
 
 Glance at results:
@@ -448,11 +184,12 @@ First find rank of the 'HALLMARK_MYOGENESIS' pathway genes in the sorted genes:
 tmpInd <- match(pathways[["HALLMARK_MYOGENESIS"]],names(ranks))
 tmpInd <- tmpInd[!is.na(tmpInd)]
 
-tmpInd
+#tmpInd
 
-barplot(ranks)
-abline(v=tmpInd, col="red")
+ranks2 <- rep(0,length(ranks))
+ranks2[tmpInd] <- ranks[tmpInd]
 
+barplot(ranks2)
 ```
 
 Create enrichment score plot:
@@ -483,7 +220,7 @@ Here we will be using the C2 gene sets for mouse, available as .rdata files from
 
 ```{r}
 
-# ?camera.DGEList
+#???camera.DGEList
 
 # Load in the mouse c2 gene sets
 # The R object is called Mm.c2
@@ -507,12 +244,17 @@ CAMERA takes as input the DGEList object `dgeObj`, the indexed list of gene sets
 
 ```{r}
 
-# Conduct analysis for the luminal-vs-basal contrast:
+#??Conduct analysis for the luminal-vs-basal contrast:
+group <- as.character(group)
+type <- sapply(strsplit(group, ".", fixed=T), function(x) x[1])
+status <- sapply(strsplit(group, ".", fixed=T), function(x) x[2])
+# Specify a design matrix without an intercept term
+design <- model.matrix(~ type + status)
 
-# Check contrasts:
-colnames(design)
+#??Check contrasts:
+print(colnames(design))
 
-# Run analysis:
+#??Run analysis:
 gst.camera <- camera.DGEList(dgeObj,index=c2.ind,design=design,contrast=2,inter.gene.cor=0.05)
 ```
 
@@ -531,17 +273,17 @@ table(gst.camera$FDR < 0.05)
 You can write out the camera results to a csv file to open in excel.
 
 ```{r}
-write.csv(gst.camera,file="gst_LacLumVsBas.csv")
+write.csv(gst.camera,file="gst_LumVsBas.csv")
 ```
 
-> ## Challenge {.challenge}
+> ## Challenge 1 {.challenge}
 >
 > 1. Run `camera` on the pregnant vs lactating contrast.
 > 1. Run `camera` on a different set of MSigDB gene sets, the hallmark datasets, `mouse_H_v5.rdata`.
 > You will need to load in the hallmark gene sets, and the object will be called `Mm.H` in R.
 >
 
-## Challenge 2 solution
+## Challenge 1 solution
 
 ```{r}
 
@@ -561,10 +303,10 @@ load("data/mouse_H_v5.rdata")
 H.ind <- ids2indices(Mm.H, rownames(dgeObj$counts))
 
 # Check contrasts:
-colnames(design)
+print(colnames(design))
 
 # Run analysis:
-H.camera <- camera(dgeObj,index=H.ind,design=design,contrast = 3,inter.gene.cor=0.05)
+H.camera <- camera.DGEList(dgeObj,index=H.ind,design=design,contrast=3,inter.gene.cor=0.05)
 table(H.camera$FDR < 0.05)
 H.camera[1:10,]
 ```
@@ -575,7 +317,7 @@ H.camera[1:10,]
 
 [ROAST](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btq401) is an example of a self-contained gene set test [@wu2010roast]. It asks the question, "Do the genes in my set tend to be differentially expressed between my conditions of interest?". ROAST does not use information on the other genes in the experiment, unlike `camera`. ROAST is a good option for when you're interested in a specific set, or a few sets. It is not really used to test thousands of sets at one time.
 
-From the Hallmark gene sets, two MYC pathways were most significant.
+From the Hallmark gene sets, two MYC pathways were most significant for the pregnant vs lactating contrast.
 
 ```{r}
 H.camera[1:10,]
@@ -608,17 +350,19 @@ The PropDown and PropUp columns contain the proportions of genes in the set that
 
 The net direction of change is determined from the significance of changes in each direction, and is shown in the Direction column.
 
-The PValue provides evidence for whether the majority of genes in the set are DE in the specified direction, whereas the PValue.Mixed tests for differential expression in any direction.
+The PValue provides evidence for whether the majority of genes in the set are DE in the specified direction
+
+The PValue.Mixed provides evidence for whether the majority of genes in the set are DE in any direction.
 
 FDRs are computed from the corresponding p-values across all sets.
 
-> ## Challenge {.challenge}
+> ## Challenge 2 {.challenge}
 >
 > 1. Test whether the MYC signalling pathways tend to be differentially expressed between basal virgin vs lactating.
 > 1. Look for gene sets containing "WNT" in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.
 >
 
-## Challenge 3 solution
+## Challenge 2 solution
 
 ```{r}
 colnames(design)
@@ -635,7 +379,6 @@ wnt.rst[1:15,]
 Notes
 
 * A common application of ROAST is to use a set of DE genes that was defined from an analysis of an independent data set. ROAST can then determine whether similar changes are observed in the contrast of interest for the current data set.
-* Even for GO-defined gene sets, goana and ROAST have different behaviours. In goana, the significance of differential expression for a GO term is determined relative to other DE genes that are not annotated with that term. In ROAST, only differential expression for the genes in the set are relevant to the significance of that set and its corresponding term. goana depends on a significance cutoff to choose DE genes, whereas ROAST does not require a cutoff and evaluates all genes in the set.
 * ROAST estimates p-values by simulation, so the results may change slightly between runs. More precise p-values can be obtained by increasing the number of rotations, albeit at the cost of increased computational time.
 * The smallest p-value that can be reported is 1/(2nrot + 1) where nrot is the number of rotations. This lower bound can be decreased by increasing nrot.
 
