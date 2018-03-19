@@ -1,6 +1,6 @@
 ---
+title: "RNAseq analysis in R"
 layout: page
-title: RNAseq analysis in R
 ---
 
 ![](images/CRUK_Cambridge_Major Centre logo.jpg)
@@ -11,6 +11,30 @@ title: RNAseq analysis in R
 This course is based on the course [RNAseq analysis in R](http://combine-australia.github.io/2016-05-11-RNAseq/) prepared by [Combine Australia](https://combine.org.au/) and delivered on May 11/12th 2016 in Carlton. We are extremely grateful to the authors for making their materials available; Maria Doyle, Belinda Phipson, Matt Ritchie, Anna Trigos, Harriet Dashnow, Charity Law.
 
 ![](images/combine_banner.png)
+
+## Timetable (slightly revised from advertised)
+
+_Day 1_
+
+9:30-10:30 - Introduction to RNAseq - Stephane
+
+10:30-11:15 Counting for RNA-seq - Stephane
+
+11:15-12:30 Importing and QC of RNA-seq data - Ashley Sawle
+
+12:30 - 13:30 - Lunch    
+
+13:30 - 17:00 - Linear Models and Statistics for Differential Expression - Oscar Rueda
+
+_Day 2_
+
+9:30-12:00 Differential Expression - Ashley Sawle
+
+12:00- 13:00 Lunch
+
+13:00-15:00 Annotation and Visualistaion - Stephane
+
+15:00-17:00 Gene set analysis and Gene ontology testing - Stephane
 
 ## Outline
 
