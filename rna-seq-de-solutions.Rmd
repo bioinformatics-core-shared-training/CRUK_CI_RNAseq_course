@@ -46,7 +46,7 @@ You should download these files and place them in your `/data` directory.
 
 Now that we are happy that we have normalised the data and that the quality looks good, we can continue to testing for differentially expressed genes. There are a number of packages to analyse RNA-Seq data. Most people use DESEQ2 or edgeR. We will use edgeR for the rest of this practical.
 
-**First make sure we have all the objects and libraries loaded*
+**First make sure we have all the objects and libraries loaded**
 
 ```{r}
 library(edgeR)
@@ -88,8 +88,6 @@ dgeObj <- DGEList(counts.keep)
 dgeObj <- calcNormFactors(dgeObj)
 ## Obtain corrected sample information
 sampleinfo <- read.delim("data/SampleInfo_Corrected.txt")
-group <- paste(sampleinfo$CellType,sampleinfo$Status,sep=".")
-group
 ```
 
 
@@ -102,12 +100,12 @@ Let's start with the model with only main effects, that is no interaction. The m
 
 ```{r}
 # Create the two variables
-group <- as.character(group)
-type <- sapply(strsplit(group, ".", fixed=T), function(x) x[1])
-status <- sapply(strsplit(group, ".", fixed=T), function(x) x[2])
-# Specify a design matrix without an intercept term
+type <- sampleinfo$CellType
+status <- sampleinfo$Status
+# Specify a design matrix with an intercept term
 design <- model.matrix(~ type + status)
 design
+colnames(design)[1] <- "Intercept"
 ```
 
 
@@ -117,6 +115,7 @@ An MDS plot shows distances, in terms of biological coefficient of variation (BC
 ```{r}
 plotMDS(dgeObj, labels=group, cex=0.75, xlim=c(-4, 5))
 ```
+
 ### Estimating the dispersion
 
 The common dispersion estimates the overall BCV of the dataset, averaged over all genes:
@@ -129,6 +128,7 @@ Then we estimate gene-wise dispersion estimates, allowing a possible trend with 
 dgeObj <- estimateGLMTrendedDisp(dgeObj)
 dgeObj <- estimateTagwiseDisp(dgeObj)
 ```
+
 Plot the estimated dispersions:
 ```{r}
 plotBCV(dgeObj)
@@ -145,6 +145,7 @@ fit <- glmFit(dgeObj, design)
 names(fit)
 head(coef(fit))
 ```
+
 Conduct likelihood ratio tests for luminal vs basal and show the top genes:
 ```{r}
 lrt.BvsL <- glmLRT(fit, coef=2)
@@ -157,7 +158,8 @@ topTags(lrt.BvsL)
 > Conduct likelihood ratio tests for virgin vs lactate and show the top genes.
 
 ```{r}
-
+lrt.BvsL <- glmLRT(fit, coef=4)
+topTags(lrt.BvsL)
 ```
 
 
