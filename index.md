@@ -14,13 +14,14 @@ This course is based on the course [RNAseq analysis in R](http://combine-austral
 
 ## Timetable (slightly revised from advertised)
 
+
 _Day 1_
 
 9:30-10:30 - Introduction to RNAseq - Stephane
 
 10:30-11:15 Counting for RNA-seq - Stephane
 
-11:15-12:30 Importing and QC of RNA-seq data - Ashley Sawle
+11:15-12:30 Importing and QC of RNA-seq data - Stephane
 
 12:30 - 13:30 - Lunch    
 
@@ -34,7 +35,7 @@ _Day 2_
 
 13:00-15:00 Annotation and Visualistaion - Stephane
 
-15:00-17:00 Gene set analysis and Gene ontology testing - Stephane
+15:00-17:00 Gene set analysis and Gene ontology testing - Ashley Sawle
 
 ## Outline
 
