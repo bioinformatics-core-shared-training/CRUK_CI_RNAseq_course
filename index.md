@@ -43,7 +43,7 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 
 > ## Prerequisites {.prereq}
 >
-> Some basic R knowledge is assumed.
+> Some basic R knowledge is assumed (and is essential). Without it, you will struggle on this course.
 > If you are not familiar with the R statistical programming language we
 > strongly encourage you to work through an introductory R course before
 > attempting these materials.
