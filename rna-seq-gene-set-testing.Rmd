@@ -54,12 +54,7 @@ Self-contained tests, which include the `ROAST` procedure, ask the question "Are
 
 ```{r}
 # load DE.Rdata from Robjects/
-getwd()
-#load("Robjects/DE.Rdata")
-setwd("Robjects/")
-dir()
-load("DE.Rdata")
-ls()
+load("Robjects/DE.Rdata")
 ```
 
 ## Gene Set Testing - competitive gene set tests
@@ -201,11 +196,14 @@ Remember to check the [GSEA article](http://www.pnas.org/content/102/43/15545.fu
 Select top pathways and plot outcome for all these:
 
 ```{r}
-topPathwaysUp <- fgseaRes[ES > 0][head(order(pval), n=10), pathway]
-topPathwaysDown <- fgseaRes[ES < 0][head(order(pval), n=10), pathway]
+pathwaysUp <- fgseaRes[ES > 0]
+topPathwaysUp <- head( pathwaysUp$pathway[ order(pathwaysUp$pval) ], n=10 )
+pathwaysDown <- fgseaRes[ES < 0]
+topPathwaysDown <- head( pathwaysDown$pathway[ order( pathwaysDown$pval ) ], n=10 )
 topPathways <- c(topPathwaysUp, rev(topPathwaysDown))
-plotGseaTable(pathways[topPathways], ranks, fgseaRes, 
-              gseaParam = 0.5)
+
+
+plotGseaTable(pathways[topPathways], ranks, fgseaRes, gseaParam = 0.5)
 ?plotGseaTable
 ```
 
@@ -221,9 +219,7 @@ Here we will be using the C2 gene sets for mouse, available as .rdata files from
 
 # Load in the mouse c2 gene sets
 # The R object is called Mm.c2
-#load("data/mouse_c2_v5.rdata")
-setwd("./data")
-load("mouse_c2_v5.rdata")
+load("data/mouse_c2_v5.rdata")
 
 # Have a look at the first few gene sets
 names(Mm.c2)[1:5]
@@ -243,9 +239,9 @@ CAMERA takes as input the DGEList object `dgeObj`, the indexed list of gene sets
 ```{r}
 
 # Conduct analysis for the luminal-vs-basal contrast:
-group <- as.character(group)
-type <- sapply(strsplit(group, ".", fixed=T), function(x) x[1])
-status <- sapply(strsplit(group, ".", fixed=T), function(x) x[2])
+sample_info <- read.delim("data/SampleInfo_Corrected.txt")
+type <- sample_info$CellType
+status <- sample_info$Status
 # Specify a design matrix without an intercept term
 design <- model.matrix(~ type + status)
 #design
