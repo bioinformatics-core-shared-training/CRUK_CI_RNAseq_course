@@ -57,9 +57,8 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 
 ## RNAseq analysis in R tutorials
 
-- [Alignment and Counting](align-and-count.nb.html)
-    + [source file](align-and-count.Rmd)
-    + [with solutions](align-and-count_wiSolution.Rmd)
+- [Alignment and Counting](count.nb.html)
+    + [source file](count.Rmd)
 - [RNA-seq Pre-processing](rna-seq-preprocessing.nb.html)
     + [source file](rna-seq-preprocessing.Rmd)
     + [with solutions](rna-seq-preprocessing_wiSolution.Rmd)
