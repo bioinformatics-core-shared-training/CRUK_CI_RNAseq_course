@@ -384,7 +384,7 @@ export(sigRegions , con = "topHits.bed")
 
 ## Extracting Reads
 
-As we have been using counts as our starting point, we haven't investigated the aligned reads from our experiment, and how they are represented. As you may be aware, aligned reads are usually stored in a *bam* file that can be manipulated with open-source command-line tools such as [*samtools*](http://www.htslib.org/) and [*picard*](https://broadinstitute.github.io/picard/). Bioconductor provide a low-level interface to bam/sam files in the form of the `Rsamtools` package. The `GenomicAlignments` package can also be used to retrieve the reads mapping to a particular genomic region in an efficient manner.
+As we have been using counts as our starting point, we haven't investigated the aligned reads from our experiment, and how they are represented. As you may be aware, aligned reads are usually stored in a *bam* file that can be manipulated with open-source command-line tools such as [*samtools*](http://www.htslib.org/) and [*picard*](https://broadinstitute.github.io/picard/). Bioconductor provide a low-level interface to data/bam/sam files in the form of the `Rsamtools` package. The `GenomicAlignments` package can also be used to retrieve the reads mapping to a particular genomic region in an efficient manner.
 
 ```{r message=FALSE}
 library(GenomicAlignments)
@@ -394,7 +394,7 @@ In the directory `bam` there should be `.bam` files for each of the samples in t
 
 
 ```{r}
-list.files("bam/")
+list.files("data/bam/")
 ```
 
 The `readGAlignments` function provides a simple interface to interrogate the aligned reads for a particular sample. It can also utilise the *index* file in order to retrieve only the reads that correspond to a specific region in an efficient manner. The output includes the genomic location of each aligned read and the CIGAR (**C**ompact **I**diosyncratic **G**apped **A**lignment **R**eport); where *M* denotes an match to the genome and *I*, *D* correspond to insertions and deletions.
@@ -402,7 +402,7 @@ The `readGAlignments` function provides a simple interface to interrogate the al
 ```{r}
 generegion <- exo[["110308"]]
 
-my.reads <- readGAlignments(file="bam/MCL1.DG.bam",
+my.reads <- readGAlignments(file="data/bam/MCL1.DG.bam",
                        param=ScanBamParam(which=generegion))
 my.reads
 ```
@@ -412,7 +412,7 @@ It is possible to tweak the function to retrieve other potentially-useful inform
 
 
 ```{r}
-my.reads <- readGAlignments(file="bam/MCL1.DG.bam",
+my.reads <- readGAlignments(file="data/bam/MCL1.DG.bam",
                        param=ScanBamParam(which=generegion,
                                           what=c("seq","mapq","flag")))
 my.reads
@@ -532,7 +532,7 @@ We can even plot the location of sequencing reads if they have been imported usi
 
 ```{r}
 myreg <- flank(reduce(exo[["110308"]]), 1000, both = T)
-bam <- readGAlignments(file="bam/MCL1.DG.bam",
+bam <- readGAlignments(file="data/bam/MCL1.DG.bam",
                        param=ScanBamParam(which=myreg),use.names = TRUE)
 
 autoplot(bam,which=myreg)
