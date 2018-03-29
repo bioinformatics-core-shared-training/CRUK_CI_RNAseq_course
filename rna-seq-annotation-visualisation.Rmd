@@ -62,10 +62,10 @@ There are a number of ways to add annotation, but we will demonstrate how to do 
 
 
 ```{r eval=FALSE}
-source("http://www.bioconductor.org/biocLite.R")
-biocLite("org.Mm.eg.db")
+# source("http://www.bioconductor.org/biocLite.R")
+# biocLite("org.Mm.eg.db")
 # For Human
-biocLite("org.Hs.eg.db")
+# biocLite("org.Hs.eg.db")
 ```
 
 The packages are larger in size that Bioconductor software pacakges, but essentially they are databases that can be used to make *offline* queries. 
@@ -214,11 +214,11 @@ It might seem natural to add genomic locations to our annotation table, and poss
 The package we will be using is `TxDb.Mmusculus.UCSC.mm10.knownGene`. Packages are available for other organisms and genome builds. It is even possible to *build your own database* if one does not exist. See `vignette("GenomicFeatures")` for details
 
 ```{r eval=FALSE}
-source("http://www.bioconductor.org/biocLite.R")
-biocLite("TxDb.Mmusculus.UCSC.mm10.knownGene")
+# source("http://www.bioconductor.org/biocLite.R")
+# biocLite("TxDb.Mmusculus.UCSC.mm10.knownGene")
 
 ## For Humans
-biocLite("TxDb.Hsapiens.UCSC.hg19.knownGene")
+# biocLite("TxDb.Hsapiens.UCSC.hg19.knownGene")
 
 ```
 
