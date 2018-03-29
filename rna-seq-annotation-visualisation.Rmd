@@ -97,7 +97,7 @@ It is a useful sanity check to make sure that the keys you want to use are all v
 
 ```{r}
 ## Build up the query step-by-step
-my.keys <- c("50916", "110308","12293")
+my.keys <- rownames(results)[1:10]
 my.keys %in% keys(org.Mm.eg.db, keytype="ENTREZID")
 all(my.keys %in% keys(org.Mm.eg.db, keytype="ENTREZID"))
 ```
@@ -106,7 +106,7 @@ Let's build up the query step by step.
 
 ```{r eval=FALSE}
 ## to be filled-in interactively during the class.
-select(org.Mm.eg.db,
+#select(org.Mm.eg.db,
 
 
 ```
@@ -167,17 +167,22 @@ points(results.annotated[detags,"logFC"],-log10(results.annotated[detags,"FDR"])
 
 Before following up on the DE genes with further lab work, a recommended *sanity check* is to have a look at the expression levels of the individual samples for the genes of interest. We can quickly look at grouped expression using `stripchart`. We can use the normalised log expression values in the  `dgeCounts` object (`dgeCounts$counts`).
 
-```{r,fig.width=12,fig.height=5}
-library(RColorBrewer)
-par(mfrow=c(1,3))
+```{r,fig.width=5,fig.height=5}
 normCounts <- dgeObj$counts
 # Let's look at the first gene in the topTable, Krt5, which has a rowname 110308
 stripchart(normCounts["110308",]~group)
-# This plot is ugly, let's make it better
-stripchart(normCounts["110308",]~group,vertical=TRUE,las=2,cex.axis=0.8,pch=16,col=1:6,method="jitter")
-# Let's use nicer colours
-nice.col <- brewer.pal(6,name="Dark2")
-stripchart(normCounts["110308",]~group,vertical=TRUE,las=2,cex.axis=0.8,pch=16,cex=1.3,col=nice.col,method="jitter",ylab="Normalised log2 expression",main="	Krt5")
+```
+
+This plot is ugly, let's make it better
+
+```{r,fig.width=5,fig.height=5}
+stripchart(normCounts["110308",]~group,
+           vertical=TRUE,
+           las=2,
+           pch=16,
+           col=1:6,
+           cex=2,
+           method="jitter")
 ```
 
 An interactive version of the volcano plot above that includes the raw per sample values in a separate panel is possible via the `glXYPlot` function in the *Glimma* package.
@@ -187,10 +192,13 @@ An interactive version of the volcano plot above that includes the raw per sampl
 library(Glimma)
 group2 <- group
 levels(group2) <- c("basal.lactate","basal.preg","basal.virgin","lum.lactate", "lum.preg", "lum.virgin")
+ann.mod <- ann
+colnames(ann.mod)[1] <- "GeneID"
+de <- as.numeric(results$FDR<=0.01)
 glXYPlot(x=results$logFC, y=-log10(results$FDR),
          xlab="logFC", ylab="B", main="B.PregVsLac",
          counts=normCounts, groups=group2, status=de,
-         anno=ann, id.column="ENTREZID", folder="volcano")
+         anno=ann.mod, id.column="ENTREZID", folder="volcano")
 ```
 
 
@@ -255,15 +263,15 @@ start <- c(73000000, 101000000, 15000000)
 end <- c(74000000,102000000, 16000000)
 
 my.ranges <- GRanges(rep(chrs,3), 
-                     IRanges(start=rep(start,each=3),
-                             end = rep(end,each=3))
-)
+                     IRanges(start = rep(start,each=3),
+                             end   = rep(end,each=3))
+                     )
 
 ```
 
 There are a number of useful functions for calculating properties of the data (such as *coverage* or sorting). Not so much for RNA-seq analysis, but `GenomicRanges` are used throughout Bioconductor for the analysis of NGS data. 
 
-For instance, we can quickly identify overlapping regions between two `GenomicRanges`. However, we have to pay attention to the naming convention used for each object. `seqlevelsStyle` can 
+For instance, we can quickly identify overlapping regions between two `GenomicRanges`. However, we have to pay attention to the naming convention used for each object. `seqlevelsStyle` can help.
 
 ```{r}
 keys <- c("50916","110308","12293")
@@ -339,7 +347,7 @@ For visualisation purposes, we are going to restrict the data to genes that are 
 
 ```{r}
 seqlevels(sigRegions)
-sigRegions <- keepSeqlevels(sigRegions, paste0("chr", c(1:19,"X","Y")))
+sigRegions <- keepSeqlevels(sigRegions, paste0("chr", c(1:19,"X","Y")), pruning.mode = "tidy")
 ```
 
 We will now create a score from the p-values that will displayed under each region, and colour scheme
