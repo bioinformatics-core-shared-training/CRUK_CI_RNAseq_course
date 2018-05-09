@@ -3,7 +3,7 @@ title: "RNAseq analysis in R"
 layout: page
 ---
 
-![](images/CRUK_Cambridge_Major Centre logo_small.jpg)
+![](images/ CenCRUK_Cambridge_logo_small.jpg)
 
 
 ## Acknowledgements
