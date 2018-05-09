@@ -1,0 +1,102 @@
+%Contents of listings-setup.tex
+\usepackage[svgnames]{xcolor}
+\usepackage{forloop}
+\usepackage{wrapfig}
+\usepackage{graphics}
+\usepackage{datetime}
+\usepackage{graphicx}
+
+\newcounter{ct}
+\makeatletter
+% Since we don't want an initial comma in the list, we use \@gobble
+\def\optionslist{\@gobble}
+%  Using the counter ct, range its value from 0 to 191
+\forloop{ct}{0}{\value{ct} < 27}{%
+    % \edef expands the definition before it actually 
+    % binds the two.  Thus, \rlist expands like a chameleon's tongue.
+    \edef\optionslist{\optionslist,-\alph{ct}, -\Alph{ct}}
+  }
+
+
+\makeatother
+\def\listwithrs#1\relax{%
+	\lstdefinelanguage{ngs}{alsoletter={--,-,.,>,&},    % also: alsoletter
+				keywords=[1]{cd,head,ls,help,sort,awk,wc,R,less,python,
+					fastx_trimmer,fastq_quality_trimmer,fastx_clipper,java,-jar,
+					bowtie-build,bowtie,samtools,view,index,bedGraphToBigWig,
+					genomeCoverageBed,igv,macs14,macs,macs2,bedtools,genomecov,intersect,
+					randsample,callpeak,print,
+					closest,getfasta,mysql,tophat,tophat2,cufflinks,igv.sh,cuffdiff,cuffcompare,htseq-count},
+				keywords=[2]{#1,--help,--phred33-quals,--phred33-quals,--phred64-quals,
+					--solexa-quals,--solexa1.3-quals,--integer-quals,--format,-bSo,-bg,
+					-ibam,--diag,--wig,--gsize,--tsize,--name,--format,--outdir,--pvalue,--call-summits,--user,--host,-fi,
+					-bed,-fo,-k4,>,-k5,&,--library-type,-b,-u,--mode,--stranded,--paired,--type,--idattr,-no}
+}}
+\expandafter\listwithrs\optionslist\relax
+
+\usepackage{listings}
+\usepackage{upquote} %to force Latex not substitute ' by `
+
+\lstset{
+language=ngs,
+basicstyle=\ttfamily,
+keywordstyle=\color[rgb]{0.13,0.29,0.53}\bfseries,
+keywordstyle=[2]\color[rgb]{0.56,0.35,0.01}\bfseries,
+stringstyle=\color[rgb]{0.31,0.60,0.02},
+commentstyle=\color[rgb]{0.56,0.35,0.01}\itshape,
+numberstyle=\footnotesize,
+stepnumber=1,
+numbersep=5pt,
+backgroundcolor=\color[RGB]{248,248,248},
+showspaces=false,
+showstringspaces=false,
+showtabs=false,
+tabsize=2,
+captionpos=b,
+breaklines=true,
+breakatwhitespace=true,
+breakautoindent=true,
+escapeinside={\%*}{*)},
+linewidth=0.9\textwidth,
+basewidth=0.5em,
+columns=fullflexible
+}
+
+
+
+\newdateformat{monthyeardate}{\monthname[\THEMONTH], \THEYEAR}
+\newcommand*{\customrule}[1]{\textcolor{#1}{\rule{\textwidth}{1.5pt}}\par}
+
+\newcommand*{\titleAT}{%
+\begingroup 
+\newlength{\drop}
+\drop=0.1\textheight % White sapce generated is 10% of the total text height
+
+\customrule{MidnightBlue}
+
+\vspace{\drop} 
+\centering 
+\textcolor{Maroon}{{\Huge RNA-seq Data Analysis}\\[0.5\baselineskip]} 
+
+\vspace{0.25\drop} 
+\rule{0.3\textwidth}{0.4pt}\par % Short horizontal line under the title
+\vspace{\drop}
+
+{\large 
+%Myrto Kostadima \href{mailto:kostadim@ebi.ac.uk}{$<kostadim@ebi.ac.uk>$}
+%\\Maria Xenophontos \href{mailto:mxenoph@ebi.ac.uk}{$<mxenoph@ebi.ac.uk>$}
+%\\ Steven Wilder \href{mailto:swilder@ebi.ac.uk}{$<swilder@ebi.ac.uk>$}
+%\\ Gabriella Rustici \href{mailto:gr231@cam.ac.uk}{$<gr231@cam.ac.uk>$}
+%\\ 
+%Romina Petersen \href{mailto:rp520@medschl.cam.ac.uk}{$<rp520@medschl.cam.ac.uk>$}
+Luigi Grassi \href{mailto:lg490@medschl.cam.ac.uk}{$<lg490@medschl.cam.ac.uk>$}
+}\par
+
+\vfill 
+{\large \textsc{RNA-Seq analysis \\ Part I/III \\ 
+\monthyeardate\today }}\par % Publisher
+
+\vspace*{\drop} 
+\customrule{MidnightBlue}
+\endgroup}
+
