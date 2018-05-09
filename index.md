@@ -1,7 +1,4 @@
----
-title: "RNAseq analysis in R"
-layout: page
----
+
 
 ![](images/CRUK_Cambridge_logo_small.jpg)
 
