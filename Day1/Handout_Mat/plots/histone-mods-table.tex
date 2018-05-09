@@ -1,0 +1,51 @@
+\documentclass[a4paper, 11pt]{article}
+
+\usepackage{fullpage}
+\usepackage{graphicx}
+\usepackage{pdflscape}
+\clubpenalty = 10000
+\widowpenalty = 10000 \displaywidowpenalty = 10000
+
+\newcommand{\specialcell}[2][c]{%
+\begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+
+\begin{document}
+
+\begin{landscape}
+
+\begin{table}
+\centering
+\begin{tabular}{ccc}
+\hline
+Histone modification or variant & Peak or Region & Putative functions \\
+\hline
+H2A.Z   & Peak & \specialcell{Histone protein variant (H2A.Z) associated \\ with regulatory elements with dynamic chromatin} \\
+\hline
+H3K4me1 & Peak/Region & \specialcell{Mark of regulatory elements associated with enhancers and other \\ distal elements, but also enriched downstream of transcription starts} \\
+\hline
+H3K4me2 & Peak & \specialcell{Mark of regulatory elements associated with promoters and enhancers} \\
+\hline
+H3K4me3 & Peak & \specialcell{Mark of regulatory elements primarily associated with promoters/transcription starts} \\
+\hline
+H3K9ac  & Peak & \specialcell{Mark of activate regulatory elements with preference for promoters} \\
+\hline
+H3K9me1 & Region & \specialcell{Loosely associated with transcription, with preference for 5’ end of genes} \\
+\hline
+H3K9me3 & Peak/Region & \specialcell{Repressive mark associated with constitutive heterochromatin, \\ repetitive elements and certain broad repressive domains} \\
+\hline
+H3K27ac & Peak & \specialcell{Mark of active regulatory elements; may distinguish active enhancers \\ and promoters from their inactive counterparts} \\
+\hline
+H3K27me3 & Region & \specialcell{Repressive mark established by polycomb complex activity associated \\ with repressive domains and silent developmental genes} \\
+\hline
+H3K36me3 & Region & \specialcell{Elongation mark associated with transcribed portions of genes, \\ with preference for 3’ regions after intron 1}\\
+\hline
+H3K79me2 & Region & \specialcell{Transcription-associated mark, with preference for 5’ end of genes} \\
+\hline
+H4K20me1 & Region & \specialcell{Loosely associated with transcription, with preference for 5’ end of genes} \\
+\hline
+\end{tabular}
+\end{table}
+
+\end{landscape}
+
+\end{document}
