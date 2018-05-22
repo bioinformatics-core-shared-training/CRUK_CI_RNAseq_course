@@ -51,6 +51,11 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 ## Data
 
 - Mouse mammary data (counts): [https://figshare.com/s/1d788fd384d33e913a2a](https://figshare.com/s/1d788fd384d33e913a2a)
+- If you are using these materials on your own machine (and not using the Docker Image) and want to do the alignment
+yourself in Hisat2 then you will need the raw data obtainable by isuing:
+wget https://ndownloader.figshare.com/articles/3219673?private_link=f5d63d8c265a05618137 -O fastq.zip
+wget https://ndownloader.figshare.com/articles/3219685?private_link=1d788fd384d33e913a2a -O raw.zip
+and then unpacking the zip files into your data directory.
 
 ## RNAseq analysis in R tutorials
 
