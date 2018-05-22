@@ -252,7 +252,7 @@ The PValue.Mixed provides evidence for whether the majority of genes in the set 
 
 FDRs are computed from the corresponding p-values across all sets.
 
-> ## Challenge 2 {.challenge}
+> ## Challenge 1 {.challenge}
 >
 > 1. Test whether the MYC signalling pathways tend to be differentially expressed between basal virgin vs lactating.
 > 1. Look for gene sets containing "WNT" in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.
@@ -266,6 +266,8 @@ Notes
 
 References
 
+Supplementary Material - CAMERA
+===============================
 
 ### CAMERA gene set testing using the Broad's curated gene sets
 
@@ -293,8 +295,7 @@ The gene identifiers are Entrez Gene ID, as are the rownames of our DGEList obje
 ```{r}
 c2.ind <- ids2indices(Mm.c2, rownames(dgeObj$counts))
 ```
-Supplementary Material - CAMERA
-===============================
+
 CAMERA takes as input the DGEList object `dgeObj`, the indexed list of gene sets `c2.ind`, the design matrix, the contrast being tested, as well as some other arguments. By default, CAMERA can estimate the correlation for each gene set separately. However, in practise, it works well to set a small inter-gene correlation of about 0.05 using the `inter.gene.cor` argument.
 
 ```{r}
@@ -332,7 +333,7 @@ You can write out the camera results to a csv file to open in excel.
 write.csv(gst.camera,file="gst_LumVsBas.csv")
 ```
 
-> ## Challenge 1 {.challenge}
+> ## Challenge 2 {.challenge}
 >
 > 1. Run `camera` on the pregnant vs lactating contrast.
 > 1. Run `camera` on a different set of MSigDB gene sets, the hallmark datasets, `mouse_H_v5.rdata`.
