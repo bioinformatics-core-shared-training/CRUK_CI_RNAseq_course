@@ -9,18 +9,17 @@ This course is based on the course [RNAseq analysis in R](http://combine-austral
 
 ![](images/combine_banner_small.png)
 
-## Timetable (slightly revised from advertised)
+## Timetable (for Part 2 )
 
+_Day 1 (p.m.)_
 
-_Day 1_
+12:30 - 13:30 - Lunch    
 
 9:30-10:30 - Introduction to RNAseq - Stephane
 
 10:30-11:15 Counting for RNA-seq - Stephane
 
 11:15-12:30 Importing and QC of RNA-seq data - Stephane
-
-12:30 - 13:30 - Lunch    
 
 13:30 - 17:00 - Linear Models and Statistics for Differential Expression - Oscar Rueda
 
