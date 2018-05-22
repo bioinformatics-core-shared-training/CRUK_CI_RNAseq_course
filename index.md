@@ -11,7 +11,7 @@ This course is based on the course [RNAseq analysis in R](http://combine-austral
 
 ## Timetable (for Part 2 )
 
-_Day 1 (p.m.)_
+_Day 2 (p.m.)_
 
 12:30 - 13:30 - Lunch    
 
@@ -23,7 +23,7 @@ _Day 1 (p.m.)_
 
 13:30 - 17:00 - Linear Models and Statistics for Differential Expression - Oscar Rueda
 
-_Day 2_
+_Day 3_
 
 9:30-12:00 Differential Expression - Ashley Sawle
 
