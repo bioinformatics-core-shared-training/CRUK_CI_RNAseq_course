@@ -47,6 +47,11 @@ In this workshop, you will be learning how to analyse RNA-seq count data, using 
 > before attending, which should take around 1 hour
 >
 
+## Running these materials on your own computer.
+- You can of course start from a base R & Rstudio setup but you may find it easier to pull a Docker
+container image onto your Linux, Mac or Windows machine (You will need to install [Docker](https://www.docker.com/community-edition) and for Win & Mac we also recommend the [Kitematic](https://github.com/docker/kitematic ) graphical interface to Docker. The image is pullable using 'docker pull mfernandes61/crukci_rnaseq_course'
+or searching for 'mfernandes61/crukci_rnaseq_course' in Kitematic.
+
 ## Data
 
 - Mouse mammary data (counts): [https://figshare.com/s/1d788fd384d33e913a2a](https://figshare.com/s/1d788fd384d33e913a2a)
