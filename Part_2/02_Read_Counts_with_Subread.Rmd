@@ -72,7 +72,7 @@ head MCL1.DJ.featureCounts
 
 The full results table begins with a line containing the command used to generate the counts. It then has a table of 7 columns. The first column is the gene identifier, this will vary depending on the GTF file used, in our case this is a UCSC gene id. The second to fifth columns describe the genes location, and the sixth column is the length of the gene. The final column contains the number of reads assigned to the gene. Note that **`featureCounts`** outputs a row for every gene in the GTF, even the ones with no reads assigned, and the row order is determined by the order in the GTF. This means that if featureCounts is used on mutliple samples with same GTF file, the separate files can be combined easily as the rows always refer to the same gene.
 
-In fact we can have **`featureCounts`** do this for us by running all of our libraries together in one command. 
+In fact we can have **`featureCounts`** do this for us by running all of our libraries together in one command. To save time for this we will use versions of our BAM files that only include alignments to chromosome 8. You can find these in **`smallBams`** directory.
 
 ```
   featureCounts \
@@ -97,8 +97,6 @@ head MCL1.DJ.featureCounts
 > 2. Redo the counting over genes, allowing for multimapping reads. Compare the results to our intial counts.
 >
 
-
-For the purpose of this workshop, we are going to be working with a small part of the mouse reference genome (chromosome 1) to demonstrate how to do read counting using `Subread`.
 
 Notes
 
