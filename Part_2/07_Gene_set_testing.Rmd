@@ -207,77 +207,6 @@ plotGseaTable(pathways[topPathways], ranks, fgseaRes, gseaParam = 0.5)
 ?plotGseaTable
 ```
 
-### CAMERA gene set testing using the Broad's curated gene sets
-
-Other databases of gene sets that are available come from the Broad Institute's Molecular Signatures Database ([MSigDB](http://software.broadinstitute.org/gsea/msigdb)). [CAMERA](https://academic.oup.com/nar/article/40/17/e133/2411151/Camera-a-competitive-gene-set-test-accounting-for) is good option for testing a very large number of gene sets such as the MSigDB sets, as it is very fast. It has the advantage of accounting for inter-gene correlation within each gene set [@wu2012camera].
-
-Here we will be using the C2 gene sets for mouse, available as .rdata files from the WEHI bioinformatics page [http://bioinf.wehi.edu.au/software/MSigDB/index.html](http://bioinf.wehi.edu.au/software/MSigDB/index.html). The C2 gene sets contain 4725 curated gene sets collected from a variety of places: BioCarta, KEGG, Pathway Interaction Database, Reactome as well as some published studies. It doesn't include GO terms.
-
-```{r}
-
-# ?camera.DGEList
-
-# Load in the mouse c2 gene sets
-# The R object is called Mm.c2
-load("data/mouse_c2_v5.rdata")
-
-# Have a look at the first few gene sets
-names(Mm.c2)[1:5]
-
-# Number of gene sets in C2
-length(Mm.c2)
-```
-
-The gene identifiers are Entrez Gene ID, as are the rownames of our DGEList object 'dgeObj'. We need to map the Entrez gene ids between the list of gene sets and our DGEList object. We can do this using the `ids2indices` function.
-
-```{r}
-c2.ind <- ids2indices(Mm.c2, rownames(dgeObj$counts))
-```
-
-CAMERA takes as input the DGEList object `dgeObj`, the indexed list of gene sets `c2.ind`, the design matrix, the contrast being tested, as well as some other arguments. By default, CAMERA can estimate the correlation for each gene set separately. However, in practise, it works well to set a small inter-gene correlation of about 0.05 using the `inter.gene.cor` argument.
-
-```{r}
-
-# Conduct analysis for the luminal-vs-basal contrast:
-sample_info <- read.delim("data/SampleInfo_Corrected.txt")
-type <- sample_info$CellType
-status <- sample_info$Status
-# Specify a design matrix without an intercept term
-design <- model.matrix(~ type + status)
-#design
-
-# Check contrasts:
-print(colnames(design))
-
-# Run analysis:
-gst.camera <- camera.DGEList(dgeObj,index=c2.ind,design=design,contrast=2,inter.gene.cor=0.05)
-```
-
-CAMERA outputs a dataframe of the resulting statistics, with each row denoting a different gene set. The output is ordered by p-value so that the most significant should be at the top. Let's look at the top 5 gene sets:
-
-```{r}
-gst.camera[1:5,]
-```
-
-The total number of significant gene sets at 5\% FDR is:
-
-```{r}
-table(gst.camera$FDR < 0.05)
-```
-
-You can write out the camera results to a csv file to open in excel.
-
-```{r}
-write.csv(gst.camera,file="gst_LumVsBas.csv")
-```
-
-> ## Challenge 1 {.challenge}
->
-> 1. Run `camera` on the pregnant vs lactating contrast.
-> 1. Run `camera` on a different set of MSigDB gene sets, the hallmark datasets, `mouse_H_v5.rdata`.
-> You will need to load in the hallmark gene sets, and the object will be called `Mm.H` in R.
->
-
 ## Gene Set Testing - self-contained gene set tests
 
 ### ROAST gene set testing
@@ -336,3 +265,76 @@ Notes
 * The smallest p-value that can be reported is 1/(2nrot + 1) where nrot is the number of rotations. This lower bound can be decreased by increasing nrot.
 
 References
+
+
+### CAMERA gene set testing using the Broad's curated gene sets
+
+Other databases of gene sets that are available come from the Broad Institute's Molecular Signatures Database ([MSigDB](http://software.broadinstitute.org/gsea/msigdb)). [CAMERA](https://academic.oup.com/nar/article/40/17/e133/2411151/Camera-a-competitive-gene-set-test-accounting-for) is good option for testing a very large number of gene sets such as the MSigDB sets, as it is very fast. It has the advantage of accounting for inter-gene correlation within each gene set [@wu2012camera].
+
+Here we will be using the C2 gene sets for mouse, available as .rdata files from the WEHI bioinformatics page [http://bioinf.wehi.edu.au/software/MSigDB/index.html](http://bioinf.wehi.edu.au/software/MSigDB/index.html). The C2 gene sets contain 4725 curated gene sets collected from a variety of places: BioCarta, KEGG, Pathway Interaction Database, Reactome as well as some published studies. It doesn't include GO terms.
+
+```{r}
+
+# ?camera.DGEList
+
+# Load in the mouse c2 gene sets
+# The R object is called Mm.c2
+load("data/mouse_c2_v5.rdata")
+
+# Have a look at the first few gene sets
+names(Mm.c2)[1:5]
+
+# Number of gene sets in C2
+length(Mm.c2)
+```
+
+The gene identifiers are Entrez Gene ID, as are the rownames of our DGEList object 'dgeObj'. We need to map the Entrez gene ids between the list of gene sets and our DGEList object. We can do this using the `ids2indices` function.
+
+```{r}
+c2.ind <- ids2indices(Mm.c2, rownames(dgeObj$counts))
+```
+Supplementary Material - CAMERA
+===============================
+CAMERA takes as input the DGEList object `dgeObj`, the indexed list of gene sets `c2.ind`, the design matrix, the contrast being tested, as well as some other arguments. By default, CAMERA can estimate the correlation for each gene set separately. However, in practise, it works well to set a small inter-gene correlation of about 0.05 using the `inter.gene.cor` argument.
+
+```{r}
+
+# Conduct analysis for the luminal-vs-basal contrast:
+sample_info <- read.delim("data/SampleInfo_Corrected.txt")
+type <- sample_info$CellType
+status <- sample_info$Status
+# Specify a design matrix without an intercept term
+design <- model.matrix(~ type + status)
+#design
+
+# Check contrasts:
+print(colnames(design))
+
+# Run analysis:
+gst.camera <- camera.DGEList(dgeObj,index=c2.ind,design=design,contrast=2,inter.gene.cor=0.05)
+```
+
+CAMERA outputs a dataframe of the resulting statistics, with each row denoting a different gene set. The output is ordered by p-value so that the most significant should be at the top. Let's look at the top 5 gene sets:
+
+```{r}
+gst.camera[1:5,]
+```
+
+The total number of significant gene sets at 5\% FDR is:
+
+```{r}
+table(gst.camera$FDR < 0.05)
+```
+
+You can write out the camera results to a csv file to open in excel.
+
+```{r}
+write.csv(gst.camera,file="gst_LumVsBas.csv")
+```
+
+> ## Challenge 1 {.challenge}
+>
+> 1. Run `camera` on the pregnant vs lactating contrast.
+> 1. Run `camera` on a different set of MSigDB gene sets, the hallmark datasets, `mouse_H_v5.rdata`.
+> You will need to load in the hallmark gene sets, and the object will be called `Mm.H` in R.
+>
