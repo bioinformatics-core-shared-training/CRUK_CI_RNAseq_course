@@ -28,7 +28,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This material has been created using the following resources:  
 http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf [@Lun2016]  
-http://monashbioinformaticsplatform.github.io/RNAseq-DE-analysis-with-R/99-RNAseq_DE_analysis_with_R.html  
+https://github.com/MonashBioinformaticsPlatform/RNAseq-DE-analysis-with-R
 
 Data files downloaded from:  
 ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE60nnn/GSE60450/suppl/GSE60450_Lactation-GenewiseCounts.txt.gz
