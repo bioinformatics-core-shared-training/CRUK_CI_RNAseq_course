@@ -8,3 +8,5 @@ Materials have been adapted for University of Cambridge
 
 Updated for March presentation of this course prior to being merged with othermaterials to make new UoC 3-day
 RNAseq course
+
+Updated and restructured in May Hackathon
