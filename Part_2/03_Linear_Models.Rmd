@@ -1,6 +1,18 @@
 ---
-title: "LinearModels"
-output: html_document
+title: "RNA-seq analysis in R"
+author: "Oscar"
+date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
+output:
+  html_notebook:
+    toc: yes
+    toc_float: yes
+  html_document:
+    toc: yes
+    toc_float: yes
+minutes: 300
+layout: page
+subtitle: Linear Models
+bibliography: ref.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -10,26 +22,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 Based on the course [RNAseq analysis in R](http://combine-australia.github.io/2016-05-11-RNAseq/) delivered on May 11/12th 2016
-
-## Resources and data files
-
-This material has been created using the following resources:  
-http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf [@Lun2016]  
-http://monashbioinformaticsplatform.github.io/RNAseq-DE-analysis-with-R/99-RNAseq_DE_analysis_with_R.html  
-
-Data files downloaded from:  
-ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE60nnn/GSE60450/suppl/GSE60450_Lactation-GenewiseCounts.txt.gz
-http://bioinf.wehi.edu.au/software/MSigDB/mouse_c2_v5.rdata
-http://bioinf.wehi.edu.au/software/MSigDB/mouse_H_v5.rdata
-
-Data files:  
-sampleinfo.txt  
-GSE60450_Lactation-GenewiseCounts.txt  
-mouse_c2_v5.rdata  
-mouse_H_v5.rdata
-
-Data files available from: [https://figshare.com/s/1d788fd384d33e913a2a](https://figshare.com/s/1d788fd384d33e913a2a)
-You should download these files and place them in your `/data` directory.
 
 ## Simulating linear models
 
