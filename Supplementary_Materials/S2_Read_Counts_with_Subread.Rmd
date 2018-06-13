@@ -3,15 +3,11 @@ title: "RNA-seq analysis in R"
 author: "Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle, Abbi Edwards"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
-  html_notebook:
-    toc: yes
-    toc_float: yes
   html_document:
     toc: yes
 minutes: 300
 layout: page
 subtitle: Counting
-bibliography: ref.bib
 ---
 
 
