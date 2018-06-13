@@ -133,7 +133,6 @@ plotMDS(dgeObj,col=col.status, main="Status", pch=16)
 legend("topleft",fill=statusCols, legend=levels(sampleinfo$Status))
 
 #3
-dev.off()
 pch.cell <- c(24, 25)[sampleinfo$CellType]
 plotMDS(dgeObj, col=col.status, pch=pch.cell, main="Cell type")
 legend("bottom", col=statusCols, pch=rep(c(24, 25), each=3), legend=paste(rep(levels(sampleinfo$Status), 2), rep(levels(sampleinfo$CellType), each=3)))
