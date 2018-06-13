@@ -18,14 +18,21 @@ bibliography: ref.bib
 knitr::opts_chunk$set(echo = TRUE,eval=FALSE)
 ```
 
+## Introduction
+
+Analysing an RNAseq experiment begins with sequencing reads. These are aligned to a reference genome, then the number of reads mapped to each gene can be counted. This results in a table of counts, which is what we perform statistical analyses on in R. This tutorial explains how to download the raw data files from the [NCBI Sequence Read Archive](https://trace.ncbi.nlm.nih.gov/Traces/sra/) public repository, how to QC the reads with [FASTQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) and finally how to align the reads to the reference genome.
+
+## Mouse mammary gland dataset
+
+The data for this course comes from a Nature Cell Biology paper, [*EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival*](http://www.ncbi.nlm.nih.gov/pubmed/25730472) [@Fu2015]. Both the raw data (sequence reads) can be downloaded from SRA under [SRP045534](https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?study=SRP045534)and processed data (counts) can be downloaded from Gene Expression Omnibus database (GEO) under accession number [GSE60450](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60450).
+
 ## Set up a database of SRA runs
 
-Raw reads from NGS experiments tend to be distributed through the Short Read Archive (SRA). The `SRAdb` Bioconductor package can be used to query and download files that are hosted in SRA. More information can be found in the [package vignette](http://bioconductor.org/packages/release/bioc/vignettes/SRAdb/inst/doc/SRAdb.pdf). 
+Raw reads from NGS experiments tend to be distributed through the Sequence Read Archive (SRA). SRA provide command line tools for downloading and processing the archive files as the [SRA toolkit](https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=software#header-global). In addition the `SRAdb` Bioconductor package can be used to query and download files that are hosted in SRA. More information can be found in the [package vignette](http://bioconductor.org/packages/release/bioc/vignettes/SRAdb/inst/doc/SRAdb.pdf). 
 
 ```{r eval=FALSE}
 vignette("SRAdb")
 ```
-
 
 Firstly, we need to download a database file. This is a large file and could take some time (`r round(file.size("SRAmetadb.sqlite")/1000000000,2)` )Gb.
 
@@ -57,7 +64,7 @@ sapply(sraInf$run, function(x) try(getSRAfile(x,sra_con, fileType="sra"),silent=
 
 ## Extracting fastq files
 
-Using the [sra-toolkit](https://www.ncbi.nlm.nih.gov/sra) command-line utility from NCBI we can generate the `fastq` files from these archive files. We can do this within a Terminal (i.e. not within RStudio) with the following, making sure your working directory contains the `.sra` files.
+Using the [SRA Toolkit](https://www.ncbi.nlm.nih.gov/sra) command-line utility from NCBI we can generate the `fastq` files from these archive files. We can do this within a Terminal (i.e. not within RStudio) with the following, making sure your working directory contains the `.sra` files.
 
 ```{bash}
 for sra in *.sra
