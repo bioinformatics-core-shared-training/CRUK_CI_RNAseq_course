@@ -210,7 +210,7 @@ topTags(lrt_pVsV)
 
 ```{r saveObjects}
 
-save(lrt_BvsL, dgeObj, file="Robjects/DE.Rdata")
+save(lrt_BvsL, dgeObj, sampleinfo, file="Robjects/DE.Rdata")
 
 ```
 
