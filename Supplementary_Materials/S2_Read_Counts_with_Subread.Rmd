@@ -77,14 +77,14 @@ In fact we can have **`featureCounts`** do this for us by running all of our lib
       -t exon \
       -g gene_id \
       -a mmu.mm10.gtf \
-      -o MCL1.DJ.featureCounts \
+      -o Chr8.all_bams.featureCounts \
       *.bam
 ```
 
 This gives us a combined counts table as an output with the first 6 columns as before but now the folowing columns contain the counts for all of the samples.
 
 ```
-head MCL1.DJ.featureCounts
+head Chr8.all_bams.featureCounts
 ```
 
 > ## Challenge {.challenge}
