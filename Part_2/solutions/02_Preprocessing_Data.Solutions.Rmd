@@ -1,0 +1,188 @@
+---
+title: "RNA-seq analysis in R"
+author: "Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle"
+date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
+output:
+  html_notebook:
+    toc: yes
+    toc_float: yes
+  html_document:
+    toc: yes
+    toc_float: yes
+layout: page
+subtitle: Pre-processsing RNA-seq data - Challenge Solutions
+---
+
+```{r knitrOpts, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data 
+
+```{r setup, message = FALSE}
+library(edgeR)
+library(limma)
+library(Glimma)
+library(gplots)
+library(org.Mm.eg.db)
+library(RColorBrewer)
+```
+
+```{r prepareData}
+# Read the sample information into R
+sampleinfo <- read.delim("data/SampleInfo.txt")
+# Read the data into R
+seqdata <- read.delim("data/GSE60450_Lactation-GenewiseCounts.txt", stringsAsFactors = FALSE)
+# Remove first two columns from seqdata
+countdata <- seqdata[,-(1:2)]
+# Store EntrezGeneID as rownames
+rownames(countdata) <- seqdata[,1]
+# Obtain CPMs
+myCPM <- cpm(countdata)
+# Which values in myCPM are greater than 0.5?
+thresh <- myCPM > 0.5
+# we would like to keep genes that have at least 2 TRUES in each row of thresh
+keep <- rowSums(thresh) >= 2
+# Subset the rows of countdata to keep the more highly expressed genes
+counts.keep <- countdata[keep,]
+# DGE list
+dgeObj <- DGEList(counts.keep)
+# Get log2 counts per million
+logcounts <- cpm(dgeObj, log=TRUE)
+# Apply normalisation to DGEList object
+dgeObj <- calcNormFactors(dgeObj)
+
+```
+
+> ## Challenge 1 {.challenge}
+> The file `data/Challenge_1_counts.txt` contains data from a different experiment.
+> Replace `"<<YourCodeHere>>"` in the following code block to:
+> 1. Load the data
+> 2. Turn it into a counts matrix
+> 3. Generate a counts per million table
+
+```{r solutionChallenge1}
+# load data
+seq_c1 <- read.delim("data/Challenge_1_counts.txt")
+
+# turn data into a counts matrix
+counts_c1 <- seq_c1[,3:8]
+
+# add rownames
+rownames(counts_c1) <- seq_c1[,1]
+
+# calculate counts per million
+cpm_c1 <- cpm(counts_c1)
+
+```
+
+> ## Additional Challenge 1a {.challenge}
+> 1. Calculate the total counts for each sample and estimate the CPM cutoff for 10 reads
+> 1. For one sample, plot the Raw counts versus the CPM with a veritcal line showing
+> your CPM cutoff
+> 1. Add a horizontal line at 10 reads in a different colour (hit use the `col` parameter)
+
+**Solution**
+```{r solutionChallenge1a}
+colSums(counts_c1)
+mean(colSums(counts_c1)) # --> ~30 million reads per sample
+# --> 10 reads / 30 --> CPM of ~0.33
+plot(cpm_c1[,1],
+     counts_c1[,1], 
+     xlab="CPM", 
+     ylab="Raw Count", 
+     main=colnames(counts_c1)[1], 
+     ylim=c(0,50), 
+     xlim=c(0,3))
+# Add a vertical line at 0.5 CPM
+abline(v=0.33)
+abline(h=10, col="green")
+```
+
+> ## Challenge 2 {.challenge}
+>
+> 1. Redo the plots choosing your own colours.
+> 2. Change the plotting character to a symbol instead of the column names  
+> HINT: use `pch` (**p**lotting **ch**aracters) argument. Try `pch=16` and see what happens.
+> 3. Change the plotting characters such that basal samples have the value `1` and luminal samples have the value `4` and colour the points by status (lactate, pregnant, virgin)
+>
+
+**Solutions**
+```{r solutionChallenge2, fig.with=10, fig.height=5}
+
+cellCols <- c("dark blue","pink")
+statusCols <- c("cyan","dark green","dark red")
+
+#1
+par(mfrow=c(1,2))
+col.cell <- cellCols[sampleinfo$CellType]
+col.status <- statusCols[sampleinfo$Status]
+
+plotMDS(dgeObj,col=col.cell, main="Cell type")
+legend("topleft",fill=cellCols,legend=levels(sampleinfo$CellType))
+
+plotMDS(dgeObj,col=col.status, main="Status")
+legend("topleft",fill=statusCols,legend=levels(sampleinfo$Status))
+
+#2 
+par(mfrow=c(1,2))
+plotMDS(dgeObj,col=col.cell, main="Cell type", pch=16)
+legend("topleft",fill=cellCols,legend=levels(sampleinfo$CellType))
+
+plotMDS(dgeObj,col=col.status, main="Status", pch=16)
+legend("topleft",fill=statusCols, legend=levels(sampleinfo$Status))
+
+#3
+dev.off()
+pch.cell <- c(24, 25)[sampleinfo$CellType]
+plotMDS(dgeObj, col=col.status, pch=pch.cell, main="Cell type")
+legend("bottom", col=statusCols, pch=rep(c(24, 25), each=3), legend=paste(rep(levels(sampleinfo$Status), 2), rep(levels(sampleinfo$CellType), each=3)))
+```
+
+> ## Challenge 3 {.challenge}
+>
+> Redo the heatmap using the top 500 LEAST variable genes.
+> Change the colour scheme to "PiYG" and redo the heatmap. Try `?RColorBrewer` and see what other colour schemes are available.
+> Change the sample names to `group` using the `labCol` argument
+> Remove the gene names from the righthand side of the plot using `labRow`
+
+**Solution**
+```{r solutionChallenge3, fig.height=10, fig.width=10}
+
+# Get the gene names for the top 500 least variable genes
+select_var <- names(sort(var_genes))[1:500]
+# Subset logcounts matrix
+lowly_variable_lcpm <- logcounts[select_var,]
+
+## Get some nicer colours
+mypalette <- brewer.pal(11,"PiYG")
+## http://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3
+morecols <- colorRampPalette(mypalette)
+# Set up colour vector for celltype variable
+col.cell <- c("purple","orange")[sampleinfo$CellType]
+
+# Plot the heatmap
+heatmap.2(lowly_variable_lcpm, 
+          col=rev(morecols(50)),
+          trace="none", 
+          main="Top 500 most variable genes across samples",
+          ColSideColors=col.cell,scale="row",
+          labCol=sampleinfo$Status, 
+          labRow = NA)
+
+```
+
+> ## Challenge 4 {.challenge}
+>
+> Plot the biased and unbiased MD plots side by side for the same sample to see the before and after TMM normalisation effect.
+>
+
+**Solution**
+```{r solutionChallenge4, fig.height=5, fig.width=10}
+par(mfrow=c(1,2))
+sampleName <- sampleinfo$SampleName[7]
+plotMD(logcounts,column = 7, main=paste(sampleName, "- Raw Log Counts"))
+abline(h=0,col="grey")
+plotMD(dgeObj,column = 7, main=paste(sampleName, "- Normalized Counts"))
+abline(h=0,col="grey")
+```

@@ -30,27 +30,10 @@ This material has been created using the following resources:
 http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf [@Lun2016]  
 https://github.com/MonashBioinformaticsPlatform/RNAseq-DE-analysis-with-R
 
-Data files downloaded from:  
-ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE60nnn/GSE60450/suppl/GSE60450_Lactation-GenewiseCounts.txt.gz
-http://bioinf.wehi.edu.au/software/MSigDB/mouse_c2_v5.rdata
-http://bioinf.wehi.edu.au/software/MSigDB/mouse_H_v5.rdata
-
 Data files:  
-sampleinfo.txt  
-GSE60450_Lactation-GenewiseCounts.txt  
-mouse_c2_v5.rdata  
-mouse_H_v5.rdata
-
-Data files available from: [https://figshare.com/s/1d788fd384d33e913a2a](https://figshare.com/s/1d788fd384d33e913a2a)
-You should download these files and place them in your `/data` directory.
-
-Packages used:
-limma,
-edgeR,
-gplots,
-org.Mm.eg.db,
-RColorBrewer,
-Glimma
+https://figshare.com/s/1d788fd384d33e913a2a :
+    SampleInfo.txt
+    GSE60450_Lactation-GenewiseCounts.txt
 
 ## Overview
 
@@ -58,7 +41,6 @@ Glimma
 * Filtering lowly expressed genes
 * Quality control
 * Normalisation for composition bias
-
 
 ## Introduction
 
@@ -82,7 +64,7 @@ library(RColorBrewer)
 
 ### Mouse mammary gland dataset
 
-The data for this tutorial comes from a Nature Cell Biology paper, [*EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival*](http://www.ncbi.nlm.nih.gov/pubmed/25730472) [@Fu2015]. Both the raw data (sequence reads) and processed data (counts) can be downloaded from Gene Expression Omnibus database (GEO) under accession number [GSE60450](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60450).
+The data for this tutorial comes from a Nature Cell Biology paper, [*EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival*](http://www.ncbi.nlm.nih.gov/pubmed/25730472) [@Fu2015]. Both the raw data (sequence reads) can be downloaded from SRA under [SRP045534](https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?study=SRP045534)and processed data (counts) can be downloaded from Gene Expression Omnibus database (GEO) under accession number [GSE60450](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60450). Please see Supplementary material for instructions on downloading raw files, aligning fastq and generating a gene count matrix.
 
 This study examines the expression profiles of basal stem-cell enriched cells (B) and committed luminal cells (L) in the mammary gland of virgin, pregnant and lactating mice. Six groups are present, with one for each combination of cell type and mouse status. Each group contains two biological replicates.
 
@@ -91,7 +73,6 @@ The sampleinfo file contains basic information about the samples that we will ne
 ```{r loadSampleInfo}
 # Read the sample information into R
 sampleinfo <- read.delim("data/SampleInfo.txt")
-View(sampleinfo)
 sampleinfo
 ```
 
@@ -104,7 +85,6 @@ Let's take a look at the data. You can use the `head` command to see the first 6
 ```{r loadData}
 # Read the data into R
 seqdata <- read.delim("data/GSE60450_Lactation-GenewiseCounts.txt", stringsAsFactors = FALSE)
-head(seqdata)
 View(seqdata)
 dim(seqdata)
 ```
@@ -115,48 +95,54 @@ The `seqdata` object contains information about genes (one gene per row), the fi
 
 We will be manipulating and reformating the counts matrix into a suitable format for downstream analysis. The first two columns in the `seqdata` dataframe contain annotation information. We need to make a new matrix containing only the counts, but we can store the gene identifiers (the `EntrezGeneID` column) as rownames. We will add more annotation information about each gene later on in the workshop.
 
-```{r rowNames}
-head(seqdata)
-rownames(seqdata)[1:10]
-```
-
-
-Let's create a new data object, `countdata`, that contains only the counts for the 12 samples.  
+Let's create a counts matrix data object, `countdata`, that contains only the counts for the 12 samples.  
 
 ```{r createCountMatrix}
 # Remove first two columns from seqdata
-countdata <- seqdata[,-(1:2)]
+countdata <- as.matrix(seqdata[,-(1:2)])
+```
 
+The rownames of the count matrix need to be the Gene IDs.
+
+```{r addRownames}
 # Store EntrezGeneID as rownames
 rownames(countdata) <- seqdata[,1]
 
 View(countdata)
 ```
 
-Now take a look at the column names
+The column names of the count matrix need to be the sample names and need to
+match the sample names in the `sampleinfo` table. Let's check this.
 
 ```{r colNames}
 colnames(countdata)
+colnames(countdata) == sampleinfo$SampleName
+all(colnames(countdata) == sampleinfo$SampleName)
 ```
 
-These are the sample names which are pretty long so we'll shorten these to contain only the relevant information about each sample. We will use the `substr` command to extract the first 7 characters and use these as the colnames.
+If the column names are not the same as in the sampleinfo table you can use 
+various commands to alter the strings. It is better to do this in R rather than
+editing the file in a spreadsheet as this is less likely to results in mistakes.
+
+R has a lot of base functions for manipulating strings (text), e.g. `substr` 
+and `paste` as shown in the chunk below. In addition the `stringr` package is 
+worth investigating as it has many more useful commands.
 
 ```{r modifyColNames}
-substr("ThisIsAString", start=1, stop=5)
-# using substr, you can extract the samplename:
-colnames(countdata) <- substr(colnames(countdata), 1, 7)
-View(countdata)
-colnames(countdata)
+sample_name <- "SampleName.UnwantedSuffix"
+
+# substr (subset string) can be used to extract a subset of the sample name
+sample_name <- substr(sample_name, start=1, stop=10)
+sample_name
+
+# paste can be used to add to the sample name
+sample_name <- paste(sample_name, "AdditionalSuffix", sep=".")
+sample_name
 ```
 
-Note that the column names are now the same as `SampleName` in the `sampleinfo` file. This is good because it means our sample information in `sampleinfo` is in the same order as the columns in `countdata`.
-
-```{r compareNames}
-colnames(countdata)==sampleinfo$SampleName
-
-all(colnames(countdata)==sampleinfo$SampleName)
-```
-
+If the samples are not in the same order you can use the `match` command to 
+reorder the columns of the `countdata` or the rows of the `sampleinfo`. Use
+`?match` to view the help document for this command.
 
 ## Filtering to remove lowly expressed genes
 
@@ -175,11 +161,7 @@ We'll use the `cpm` function from the *edgeR* library [@robinson2010edgeR] to ge
 myCPM <- cpm(countdata)
 # Have a look at the output
 head(myCPM)
-
-col1sum <- sum(countdata[,1])/1000000
-countdata[1,1]/col1sum
 ```
-
 
 ```{r subsetThreshold}
 # Which values in myCPM are greater than 0.5?
@@ -188,11 +170,9 @@ thresh <- myCPM > 0.5
 head(thresh)
 ```
 
-
 ```{r countPass}
 # Summary of how many TRUEs there are in each row
 # There are 11433 genes that have TRUEs in all 12 samples.
-rowSums(head(thresh))
 table(rowSums(thresh))
 ```
 
@@ -211,33 +191,63 @@ dim(counts.keep)
 
 A CPM of 0.5 is used as it corresponds to a count of 10-15 for the library sizes in this data set. If the count is any smaller, it is considered to be very low, indicating that the associated gene is not expressed in that sample. A requirement for expression in two or more libraries is used as each group contains two replicates. This ensures that a gene will be retained if it is only expressed in one group. Smaller CPM thresholds are usually appropriate for larger libraries. As a general rule, a good threshold can be chosen by identifying the CPM that corresponds to a count of 10, which in this case is about 0.5. You should filter with CPMs rather than filtering on the counts directly, as the latter does not account for differences in library sizes between samples.
 
+Let's have a look and see whether our threshold of 0.5 does indeed correspond to a count of about 10-15.
+
 ```{r plotCPMThreshold}
-# Let's have a look and see whether our threshold of 0.5 does indeed correspond to a count of about 10-15
 # We will look at the first sample
-plot(myCPM[,1], countdata[,1], xlab="CPM", ylab="Raw Count", main=colnames(myCPM)[1])
+plot(myCPM[,1], 
+     countdata[,1], 
+     xlab="CPM", 
+     ylab="Raw", 
+     main=colnames(myCPM)[1])
 # Add a vertical line at 0.5 CPM
 abline(v=0.5)
 
-
-
 # Let us limit the x and y-axis so we can actually look to see what is happening at the smaller counts
-plot(myCPM[,1],countdata[,1], xlab="CPM", ylab="Raw Count", main=colnames(myCPM)[1], 
-     ylim=c(0,50), xlim=c(0,3))
+plot(myCPM[,1],
+     countdata[,1], 
+     xlab="CPM", 
+     ylab="Raw Count", 
+     main=colnames(myCPM)[1], 
+     ylim=c(0,50), 
+     xlim=c(0,3))
 # Add a vertical line at 0.5 CPM
 abline(v=0.5)
 ```
 
 > ## Challenge 1 {.challenge}
+> The file `data/Challenge_1_counts.txt` contains data from a different experiment.
+> Replace `"<<YourCodeHere>>"` in the following code block to:
 >
-> 1. Plot the counts-per-million versus counts for the second sample.
-> 1. Add a vertical line at 0.5 and a horizontal line at 10.
-> 1. Add the lines again, colouring them blue
->
-> HINT: use the `col` parameter.
->
+> 1. Load the data
+> 2. Turn it into a counts matrix
+> 3. Generate a counts per million table
+
+```{r solutionChallenge1}
+# (1) load data
+seq_c1 <- read.delim("<<YourCodeHere>>")
+
+# (2) turn data into a counts matrix
+counts_c1 <- seq_c1[,"<<YourCodeHere>>"]
+
+# add rownames
+"<<YourCodeHere>>"(counts_c1) <- seq_c1[,1]
+
+# (3) calculate counts per million
+cpm_c1 <- "<<YourCodeHere>>"(counts_c1)
+```
+
+> ## Additional Challenge 1a {.challenge}
+> 1. Calculate the total counts for each sample and estimate the CPM cutoff for 10 reads
+> 1. For one sample, plot the Raw counts versus the CPM with a veritcal line showing
+> your CPM cutoff
+> 1. Add a horizontal line at 10 reads in a different colour (hit use the `col` parameter)
 
 **Solution**
-```{r solutionChallenge1, echo=FALSE}
+```{r solutionChallenge1a, echo=FALSE}
+
+
+
 
 ```
 
@@ -266,8 +276,8 @@ Now that we have got rid of the lowly expressed genes and have our counts stored
 First, we can check how many reads we have for each sample in the `dgeObj`.
 
 ```{r dgeLibrarySizes}
-dgeObj$samples[,2]
-dgeObj$samples[,"lib.size"]
+
+dgeObj$samples$lib.size
 
 ```
 
@@ -286,20 +296,17 @@ Count data is not normally distributed, so if we want to examine the distributio
 
 ```{r plotLogCounts}
 # Get log2 counts per million
-logcounts <- cpm(dgeObj,log=TRUE)
+logcounts <- cpm(dgeObj, log=TRUE)
 # Check distributions of samples using boxplots
-boxplot(logcounts, xlab="", ylab="Log2 counts per million",las=2)
+boxplot(logcounts, 
+        xlab="", 
+        ylab="Log2 counts per million",
+        las=2)
 # Let's add a blue horizontal line that corresponds to the median logCPM
-abline(h=median(logcounts), col="blue", main="Boxplots of logCPMs (unnormalised)")
+abline(h=median(logcounts), col="blue")
 ```
 
 From the boxplots we see that overall the density distributions of raw log-intensities are not identical but still not very different. If a sample is really far above or below the blue horizontal line we may need to investigate that sample further.
-
-> ## Discussion {.challenge}
->
-> Do any samples appear to be different compared to the others?
->
-
 
 ### Multidimensional scaling plots
 
@@ -317,7 +324,7 @@ It is a bit difficult to see exactly what is going on with the default plot, alt
 levels(sampleinfo$CellType)
 ## Let's choose purple for basal and orange for luminal
 col.cell <- c("purple","orange")[sampleinfo$CellType]
-data.frame(sampleinfo$CellType,col.cell)
+data.frame(sampleinfo$CellType, col.cell)
 col.cell
 sampleinfo$CellType
 
@@ -330,14 +337,19 @@ col.status
 ```{r plotMDScolored, fig.height=5, fig.width=10}
 # We specify the option to let us plot two plots side-by-sde
 par(mfrow=c(1,2))
+
 # Redo the MDS with cell type colouring
-plotMDS(dgeObj,col=col.cell, main="Cell type")
+plotMDS(dgeObj, col=col.cell, main="Cell type")
+
 # Let's add a legend to the plot so we know which colours correspond to which cell type
-legend("topleft",fill=c("purple","orange"),legend=levels(sampleinfo$CellType))
+legend("topleft",
+       fill=c("purple","orange"), 
+       legend=levels(sampleinfo$CellType))
 
 plotMDS(dgeObj,col=col.status, main="Status")
-legend("topleft",fill=c("blue","red","dark green"),legend=levels(sampleinfo$Status))
-
+legend("topleft",
+       fill=c("blue","red","dark green"), 
+       legend=levels(sampleinfo$Status))
 ```
 
 > ## Discussion {.challenge}
@@ -348,9 +360,7 @@ legend("topleft",fill=c("blue","red","dark green"),legend=levels(sampleinfo$Stat
 >
 
 ```{r correctSampleSheet}
-# There is a sample info corrected file in your data directory
-# Old sampleinfo
-sampleinfo
+# There is a corrected sample info file in your data directory
 # I'm going to write over the sampleinfo object with the corrected sample info
 sampleinfo <- read.delim("data/SampleInfo_Corrected.txt")
 sampleinfo
@@ -376,15 +386,21 @@ legend("topleft",fill=c("blue","red","dark green"),legend=levels(sampleinfo$Stat
 >
 
 > ## Challenge 2 {.challenge}
->
+> Rather than plotting the sample name we could use a symbol using the `pch` 
+> argument. If we use a different symbol for each of the cell types we could
+> have a single plot with both the cell type and status information represented.
+> 
 > 1. Redo the plots choosing your own colours.
 > 2. Change the plotting character to a symbol instead of the column names  
 > HINT: use `pch` (**p**lotting **ch**aracters) argument. Try `pch=16` and see what happens.
-> 3. Change the plotting characters such that basal samples have the value `1` and luminal samples have the value `4` and colour the points by status (lactate, pregnant, virgin)
+> 3. Change the plotting characters such that basal samples have the value `24` and luminal samples have the value `25` and colour the points by status (lactate, pregnant, virgin)
 >
 
 **Solution**
 ```{r solutionChallenge2, echo=FALSE}
+
+
+
 
 ```
 
@@ -398,12 +414,13 @@ Notes
 
 `plotMDS` plots the first two dimensions as a default, however you can plot higher dimensions using the `dim` argument.
 
-```{r plotMDS3and4}
+```{r plotMDS3and4, fig.width=5, fig.height=5}
 # Dimension 3 appears to separate pregnant samples from the rest. Dim4?
 plotMDS(dgeObj,dim=c(3,4), col=col.status)
 legend("topleft",fill=c("blue","red","dark green"),legend=levels(sampleinfo$Status))
 ```
 
+#### Interactive MDS Plot with Glimma [optional]
 
 Another alternative is to generate an interactive MDS plot using the *Glimma* package. This allows the user to interactively explore the different dimensions.
 
@@ -439,9 +456,9 @@ dim(highly_variable_lcpm)
 head(highly_variable_lcpm)
 ```
 
-```{r plotHM}
+```{r plotHM, fig.width=10, fig.height=10}
 ## Get some nicer colours
-mypalette <- brewer.pal(11,"RdYlBu")
+mypalette <- brewer.pal(11, "RdYlBu")
 ## http://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3
 morecols <- colorRampPalette(mypalette)
 # Set up colour vector for celltype variable
@@ -453,27 +470,20 @@ heatmap.2(highly_variable_lcpm,
           trace="column", 
           main="Top 500 most variable genes across samples",
           ColSideColors=col.cell,scale="row")
-
-# Save the heatmap
-png(file="High_var_genes.heatmap.png")
-heatmap.2(highly_variable_lcpm, 
-          col=rev(morecols(50)), 
-          trace="none", 
-          main="Top 500 most variable genes\nacross samples", 
-          ColSideColors=col.cell, 
-          scale="row")
-dev.off()
 ```
 
-> ## Challenge 3 {.challenge}
+> ## Additional Challenge 3 {.challenge}
 >
-> 1. Change the colour scheme to "PiYG" and redo the heatmap. Try `?RColorBrewer` and see what other colour schemes are available.
-> 1. Change the sample names to `group` using the `labCol` argument
-> 1. Redo the heatmap using the top 500 LEAST variable genes.
->
+> Redo the heatmap using the top 500 LEAST variable genes.  
+> Change the colour scheme to "PiYG" and redo the heatmap. Try `?RColorBrewer` and see what other colour schemes are available.  
+> Change the sample names to `group` using the `labCol` argument  
+> Remove the gene names from the righthand side of the plot using `labRow`  
 
 **Solution**
-```{r solutionChallenge3,echo=FALSE, fig.height=8, fig.width=6}
+```{r solutionChallenge3, echo=FALSE, fig.height=8, fig.width=6}
+
+
+
 
 ```
 
@@ -502,9 +512,9 @@ The last two samples have much smaller normalisation factors, and MCL1.LA and MC
 
 ```{r plotRawMD, fig.height=5, fig.width=10}
 par(mfrow=c(1,2))
-plotMD(logcounts,column = 7)
+plotMD(logcounts, column = 7)
 abline(h=0,col="grey")
-plotMD(logcounts,column = 11)
+plotMD(logcounts, column = 11)
 abline(h=0,col="grey")
 ```
 
@@ -527,10 +537,13 @@ abline(h=0,col="grey")
 **Solution**
 ```{r solutionChallenge4, echo=FALSE, fig.height=5, fig.width=10}
 
+
+
+
 ```
 
 **We need to save a few data objects to use for Day 2 so we don't have to rerun everything**
 
 ```{r saveData}
-save(group,dgeObj,sampleinfo,file="Robjects/preprocessing.Rdata")
+save(dgeObj, sampleinfo, file="Robjects/preprocessing.Rdata")
 ```
