@@ -16,31 +16,21 @@ bibliography: ref.bib
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-```{r}
 library(edgeR)
 ```
 
 **Original Authors: Belinda Phipson, Anna Trigos, Matt Ritchie, Maria Doyle, Harriet Dashnow, Charity Law**
 Based on the course [RNAseq analysis in R](http://combine-australia.github.io/2016-05-11-RNAseq/) delivered on May 11/12th 2016
+## Resources and data files
 
-# Data set
+This material has been created using the following resources:  
+http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf [@Lun2016]  
+https://github.com/MonashBioinformaticsPlatform/RNAseq-DE-analysis-with-R
 
-- Organism: mouse
-- Tissue: mammary gland
-- Three conditions:
-    - virgin
-    - pregnant
-    - lactating
-- Two cell types:
-    - basal stem-cell enriched cells (B)
-    - committed luminal  cells  (L)
-- Six groups (3 conditions x 2 cell types) with 2 biological replicates per group
-- As described in:
-	- ['EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival' (Fu et al. 2015)](https://www.ncbi.nlm.nih.gov/pubmed/25730472) published in Nature Cell Biology, with both sequence and counts available from Gene Expression Omnibus database (GEO) under accession number [GSE60450](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60450)
-	- [A DE-licious recipe for differential expression analyses of RNA-seq](http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf)
+Data files:  
+https://figshare.com/s/1d788fd384d33e913a2a :
+    mouse_c2_v5.rdata
+    mouse_H_v5.rdata
 
 # Gene Set Testing
 
@@ -52,8 +42,7 @@ Competitive gene set tests, such as those implemented in `GOseq` and `camera`, a
 
 Self-contained tests, which include the `ROAST` procedure, ask the question "Are the genes in the set/pathway differentially expressed as a whole?"
 
-```{r}
-# load DE.Rdata from Robjects/
+```{r loadData}
 load("Robjects/DE.Rdata")
 ```
 
@@ -78,7 +67,7 @@ Create list of DEGs:
 ```{r}
 
 # Retrieve list of all genes tested:
-results <- as.data.frame(topTags(lrt.BvsL, n = Inf))
+results <- as.data.frame(topTags(lrt_BvsL, n = Inf))
 print(head(results))
 
 # Derive list of DEGs by filtering on FDR:
@@ -90,14 +79,15 @@ names(genes) <- rownames(results)
 print(head(genes))
 ```
 
-Fit the Probability Weighting Function (PWF):
-
-```{r}
+```{r goSeqPackage}
 library(goseq)
 
 #print(supportedGeneIDs())
 #print(supportedGenomes())
+```
 
+Fit the Probability Weighting Function (PWF):
+```{r pwFunction}
 pwf <- nullp(genes, "mm10","knownGene")
 ```
 
@@ -213,16 +203,31 @@ plotGseaTable(pathways[topPathways], ranks, fgseaRes, gseaParam = 0.5)
 
 [ROAST](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btq401) is an example of a self-contained gene set test [@wu2010roast]. It asks the question, "Do the genes in my set tend to be differentially expressed between my conditions of interest?". ROAST does not use information on the other genes in the experiment, unlike `camera`. ROAST is a good option for when you're interested in a specific set, or a few sets. It is not really used to test thousands of sets at one time.
 
-From the Hallmark gene sets, two MYC pathways were most significant for the pregnant vs lactating contrast.
+Here we will be using the C2 gene sets for mouse, available as .rdata files from the WEHI bioinformatics page [http://bioinf.wehi.edu.au/software/MSigDB/index.html](http://bioinf.wehi.edu.au/software/MSigDB/index.html). The C2 gene sets contain 4725 curated gene sets collected from a variety of places: BioCarta, KEGG, Pathway Interaction Database, Reactome as well as some published studies. It doesn't include GO terms.
 
 ```{r}
-H.camera[1:10,]
+# Load in the mouse c2 gene sets
+# The R object is called Mm.c2
+load("data/mouse_c2_v5.rdata")
+
+# Have a look at the first few gene sets
+names(Mm.c2)[1:5]
+
+# Number of gene sets in C2
+length(Mm.c2)
 ```
+
+The gene identifiers are Entrez Gene ID, as are the rownames of our DGEList object 'dgeObj'. We need to map the Entrez gene ids between the list of gene sets and our DGEList object. We can do this using the `ids2indices` function.
+
+```{r}
+c2.ind <- ids2indices(Mm.c2, rownames(dgeObj$counts))
+```
+
 
 Let's see if there are any MYC signalling pathways in MsigDB C2 collection. We can do this with the `grep` command on the names of the gene sets.
 
 ```{r}
-grep("MYC_",names(c2.ind))
+grep("MYC_", names(c2.ind))
 
 # Let's save these so that we can subset c2.ind to test all gene sets with MYC in the name
 myc <- grep("MYC_",names(c2.ind))
@@ -234,7 +239,14 @@ names(c2.ind)[myc]
 Let's use ROAST to see if these MYC related gene sets tend to be differentially expressed. Note that the syntax for `camera` and `roast` is almost identical.
 
 ```{r}
-myc.rst <- roast(dgeObj,index=c2.ind[myc],design=design,contrast=3,nrot=999)
+# Specify a design matrix without an intercept term
+design <- model.matrix(~ CellType + Status, data = sampleinfo)
+# Run ROAST
+myc.rst <- roast(dgeObj,
+                 index=c2.ind[myc],
+                 design=design,
+                 contrast=3,
+                 nrot=999)
 myc.rst[1:15,]
 ```
 
@@ -258,6 +270,11 @@ FDRs are computed from the corresponding p-values across all sets.
 > 1. Look for gene sets containing "WNT" in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.
 >
 
+```{r solutionChallenge1}
+
+
+```
+
 Notes
 
 * A common application of ROAST is to use a set of DE genes that was defined from an analysis of an independent data set. ROAST can then determine whether similar changes are observed in the contrast of interest for the current data set.
@@ -273,39 +290,11 @@ Supplementary Material - CAMERA
 
 Other databases of gene sets that are available come from the Broad Institute's Molecular Signatures Database ([MSigDB](http://software.broadinstitute.org/gsea/msigdb)). [CAMERA](https://academic.oup.com/nar/article/40/17/e133/2411151/Camera-a-competitive-gene-set-test-accounting-for) is good option for testing a very large number of gene sets such as the MSigDB sets, as it is very fast. It has the advantage of accounting for inter-gene correlation within each gene set [@wu2012camera].
 
-Here we will be using the C2 gene sets for mouse, available as .rdata files from the WEHI bioinformatics page [http://bioinf.wehi.edu.au/software/MSigDB/index.html](http://bioinf.wehi.edu.au/software/MSigDB/index.html). The C2 gene sets contain 4725 curated gene sets collected from a variety of places: BioCarta, KEGG, Pathway Interaction Database, Reactome as well as some published studies. It doesn't include GO terms.
-
-```{r}
-
-# ?camera.DGEList
-
-# Load in the mouse c2 gene sets
-# The R object is called Mm.c2
-load("data/mouse_c2_v5.rdata")
-
-# Have a look at the first few gene sets
-names(Mm.c2)[1:5]
-
-# Number of gene sets in C2
-length(Mm.c2)
-```
-
-The gene identifiers are Entrez Gene ID, as are the rownames of our DGEList object 'dgeObj'. We need to map the Entrez gene ids between the list of gene sets and our DGEList object. We can do this using the `ids2indices` function.
-
-```{r}
-c2.ind <- ids2indices(Mm.c2, rownames(dgeObj$counts))
-```
-
 CAMERA takes as input the DGEList object `dgeObj`, the indexed list of gene sets `c2.ind`, the design matrix, the contrast being tested, as well as some other arguments. By default, CAMERA can estimate the correlation for each gene set separately. However, in practise, it works well to set a small inter-gene correlation of about 0.05 using the `inter.gene.cor` argument.
 
 ```{r}
-
-# Conduct analysis for the luminal-vs-basal contrast:
-sample_info <- read.delim("data/SampleInfo_Corrected.txt")
-type <- sample_info$CellType
-status <- sample_info$Status
 # Specify a design matrix without an intercept term
-design <- model.matrix(~ type + status)
+design <- model.matrix(~ CellType + Status, data = sampleinfo)
 #design
 
 # Check contrasts:
@@ -339,3 +328,9 @@ write.csv(gst.camera,file="gst_LumVsBas.csv")
 > 1. Run `camera` on a different set of MSigDB gene sets, the hallmark datasets, `mouse_H_v5.rdata`.
 > You will need to load in the hallmark gene sets, and the object will be called `Mm.H` in R.
 >
+
+
+```{r solutionChallenge2}
+
+
+```

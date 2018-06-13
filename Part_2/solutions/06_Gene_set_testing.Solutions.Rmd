@@ -11,281 +11,54 @@ output:
     toc_float: yes
 minutes: 300
 layout: page
-subtitle: Gene Set Testing for RNA-seq
-bibliography: ref.bib
+subtitle: Gene Set Testing for RNA-seq - Solutions
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-```{r}
 library(edgeR)
 ```
 
-**Original Authors: Belinda Phipson, Anna Trigos, Matt Ritchie, Maria Doyle, Harriet Dashnow, Charity Law**
-Based on the course [RNAseq analysis in R](http://combine-australia.github.io/2016-05-11-RNAseq/) delivered on May 11/12th 2016
-
-# Data set
-
-- Organism: mouse
-- Tissue: mammary gland
-- Three conditions:
-    - virgin
-    - pregnant
-    - lactating
-- Two cell types:
-    - basal stem-cell enriched cells (B)
-    - committed luminal  cells  (L)
-- Six groups (3 conditions x 2 cell types) with 2 biological replicates per group
-- As described in:
-	- ['EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival' (Fu et al. 2015)](https://www.ncbi.nlm.nih.gov/pubmed/25730472) published in Nature Cell Biology, with both sequence and counts available from Gene Expression Omnibus database (GEO) under accession number [GSE60450](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60450)
-	- [A DE-licious recipe for differential expression analyses of RNA-seq](http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf)
-
-# Gene Set Testing
-
-The list of differentially expressed genes is sometimes so long that its interpretation becomes cumbersome and time consuming. A common downstream procedure is gene set testing. It aims to understand which pathways or gene networks the differentially expressed genes are implicated in.
-
-Various ways exist to test for enrichment of biological pathways. Two types of test answer two different questions: competitive and self-contained gene set tests.
-
-Competitive gene set tests, such as those implemented in `GOseq` and `camera`, ask the question whether the differentially expressed genes tend to be over-represented in the gene set, compared to all the other genes in the experiment.
-
-Self-contained tests, which include the `ROAST` procedure, ask the question "Are the genes in the set/pathway differentially expressed as a whole?"
-
-```{r}
-# load DE.Rdata from Robjects/
-getwd()
-#load("Robjects/DE.Rdata")
-setwd("Robjects/")
-dir()
-load("DE.Rdata")
-ls()
-```
-
-## Gene Set Testing - competitive gene set tests
-
-### GOseq analysis
-
-GOseq is a method to conduct Gene Ontology (GO) analysis suitable for RNA-seq data as it accounts for the gene length bias in detection of over-representation ([GOseq article](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2010-11-2-r14))
-
-From the [GOseq vignette](https://www.bioconductor.org/packages/release/bioc/vignettes/goseq/inst/doc/goseq.pdf):
-
-- GOseq first needs to quantify the length bias present in the dataset under consideration.
-- This is done by calculating a Probability Weighting Function or PWF which can be thought of as a function which gives the probability that a gene will be differentially expressed (DE), based on its length alone.
-- The PWF is calculated by fitting a monotonic spline to the binary data series of differential expression (1=DE, 0=Not DE) as a function of gene length.
-- The PWF is used to weight the chance of selecting each gene when forming a null distribution for GO category membership.
-- The fact that the PWF is calculated directly from the dataset under consideration makes this approach robust, only correcting for the length bias present in the data.
-
-"GO analysis of RNA-seq data requires the use of random sampling in order to generate a suitable null distribution for GO category membership and calculate each category's significance for over representation amongst DE genes. ... In  most  cases,  the  Wallenius
-distribution can be used to approximate the true null distribution, without any significant loss in accuracy.  The goseq package implements this approximation as its default option."
-
-Create list of DEGs:
-
-```{r}
-
-#??Retrieve list of all genes tested:
-results <- as.data.frame(topTags(lrt.BvsL, n = Inf))
-print(head(results))
-
-#??Derive list of DEGs by filtering on FDR:
-genes <- results$FDR < 0.01
-
-#??Add gene names to that list:
-names(genes) <- rownames(results)
-
-print(head(genes))
-```
-
-Fit the Probability Weighting Function (PWF):
-
-```{r}
-library(goseq)
-
-#print(supportedGeneIDs())
-#print(supportedGenomes())
-
-pwf <- nullp(genes, "mm10","knownGene")
-
-```
-
-Conduct gene set enrichment analysis:
-
-```{r}
-#?goseq
-go.results <- goseq(pwf, "mm10","knownGene")
-go.results
-```
-
-### fgsea analysis
-
-From the fgsea [vignette](http://www.bioconductor.org/packages/release/bioc/vignettes/fgsea/inst/doc/fgsea-tutorial.html) "fast preranked gene set enrichment analysis (GSEA)":
-
-This analysis is performed by:
-
-- (i) ranking all genes in the data set based on their correlation to the chosen phenotype,
-- (ii) identifying the rank positions of all members of the gene set, and 
-- (iii) calculating an enrichment score (ES) that represents the difference between the observed rankings and that which would be expected assuming a random rank distribution.
-
-"After establishing the ES for each gene set across the phenotype, GSEA reiteratively randomizes the sample labels and retests for enrichment across the random classes. By performing repeated class label randomizations, the ES for each gene set across the true classes can be compared to the ES distribution from the random classes. Those gene sets that significantly outperform iterative random class permutations are considered significant." [commentary on GSEA](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1266131/). The article describing the original software is available [here](http://www.pnas.org/content/102/43/15545.long).
-
-```{r}
-library(fgsea)
-```
-
-Create ranks:
-
-```{r}
-
-results.ord <- results[ order(-results[,"logFC"]), ]
-head(results.ord)
-ranks <- results.ord$logFC
-names(ranks) <- rownames(results.ord)
-head(ranks)
-```
-
-```{r}
-#plot(ranks)
-barplot(ranks)
-```
-
-Load pathways:
-
-```{r}
-load("data/mouse_H_v5.rdata")
-pathways <- Mm.H
-```
-
-Conduct analysis:
-
-```{r}
-?fgsea
-fgseaRes <- fgsea(pathways, ranks, minSize=15, maxSize = 500, nperm=1000)
-class(fgseaRes)
-dim(fgseaRes)
-#head(fgseaRes)
-```
-
-Glance at results:
-
-```{r}
-head(fgseaRes[order(padj), ])
-```
-
-Plot outcome for the 'HALLMARK_MYOGENESIS' pathway:
-
-First find rank of the 'HALLMARK_MYOGENESIS' pathway genes in the sorted genes:
-
-```{r}
-
-# We will create a barplot of logFC for the sorted genes and add one vertical red bar for each gene in the 'HALLMARK_MYOGENESIS' pathway
-
-#pathways[["HALLMARK_MYOGENESIS"]]
-
-tmpInd <- match(pathways[["HALLMARK_MYOGENESIS"]],names(ranks))
-tmpInd <- tmpInd[!is.na(tmpInd)]
-
-#tmpInd
-
-ranks2 <- rep(0,length(ranks))
-ranks2[tmpInd] <- ranks[tmpInd]
-
-barplot(ranks2)
-```
-
-Create enrichment score plot:
-
-```{r}
-plotEnrichment(pathways[["HALLMARK_MYOGENESIS"]],
-               ranks)
-```
-
-Remember to check the [GSEA article](http://www.pnas.org/content/102/43/15545.full) for the complete explanation.
-
-Select top pathways and plot outcome for all these:
-
-```{r}
-topPathwaysUp <- fgseaRes[ES > 0][head(order(pval), n=10), pathway]
-topPathwaysDown <- fgseaRes[ES < 0][head(order(pval), n=10), pathway]
-topPathways <- c(topPathwaysUp, rev(topPathwaysDown))
-plotGseaTable(pathways[topPathways], ranks, fgseaRes, 
-              gseaParam = 0.5)
-?plotGseaTable
-```
-
-### CAMERA gene set testing using the Broad's curated gene sets
-
-Other databases of gene sets that are available come from the Broad Institute's Molecular Signatures Database ([MSigDB](http://software.broadinstitute.org/gsea/msigdb)). [CAMERA](https://academic.oup.com/nar/article/40/17/e133/2411151/Camera-a-competitive-gene-set-test-accounting-for) is good option for testing a very large number of gene sets such as the MSigDB sets, as it is very fast. It has the advantage of accounting for inter-gene correlation within each gene set [@wu2012camera].
-
-Here we will be using the C2 gene sets for mouse, available as .rdata files from the WEHI bioinformatics page [http://bioinf.wehi.edu.au/software/MSigDB/index.html](http://bioinf.wehi.edu.au/software/MSigDB/index.html). The C2 gene sets contain 4725 curated gene sets collected from a variety of places: BioCarta, KEGG, Pathway Interaction Database, Reactome as well as some published studies. It doesn't include GO terms.
-
-```{r}
-
-#???camera.DGEList
-
+```{r prepareData}
+load("../Robjects/DE.Rdata")
+results <- as.data.frame(topTags(lrt_BvsL, n = Inf))
 # Load in the mouse c2 gene sets
 # The R object is called Mm.c2
-load("data/mouse_c2_v5.rdata")
-
-# Have a look at the first few gene sets
-names(Mm.c2)[1:5]
-
-# Number of gene sets in C2
-length(Mm.c2)
-
-```
-
-The gene identifiers are Entrez Gene ID, as are the rownames of our DGEList object 'dgeObj'. We need to map the Entrez gene ids between the list of gene sets and our DGEList object. We can do this using the `ids2indices` function.
-
-```{r}
+load("../data/mouse_c2_v5.rdata")
 c2.ind <- ids2indices(Mm.c2, rownames(dgeObj$counts))
-```
-
-CAMERA takes as input the DGEList object `dgeObj`, the indexed list of gene sets `c2.ind`, the design matrix, the contrast being tested, as well as some other arguments. By default, CAMERA can estimate the correlation for each gene set separately. However, in practise, it works well to set a small inter-gene correlation of about 0.05 using the `inter.gene.cor` argument.
-
-```{r}
-
-#??Conduct analysis for the luminal-vs-basal contrast:
-group <- as.character(group)
-type <- sapply(strsplit(group, ".", fixed=T), function(x) x[1])
-status <- sapply(strsplit(group, ".", fixed=T), function(x) x[2])
+# all gene sets with MYC in the name
+myc <- grep("MYC_",names(c2.ind))
 # Specify a design matrix without an intercept term
-design <- model.matrix(~ type + status)
-
-#??Check contrasts:
-print(colnames(design))
-
-#??Run analysis:
-gst.camera <- camera.DGEList(dgeObj,index=c2.ind,design=design,contrast=2,inter.gene.cor=0.05)
-```
-
-CAMERA outputs a dataframe of the resulting statistics, with each row denoting a different gene set. The output is ordered by p-value so that the most significant should be at the top. Let's look at the top 5 gene sets:
-
-```{r}
-gst.camera[1:5,]
-```
-
-The total number of significant gene sets at 5\% FDR is:
-
-```{r}
-table(gst.camera$FDR < 0.05)
-```
-
-You can write out the camera results to a csv file to open in excel.
-
-```{r}
-write.csv(gst.camera,file="gst_LumVsBas.csv")
+design <- model.matrix(~ CellType + Status, data = sampleinfo)
 ```
 
 > ## Challenge 1 {.challenge}
+>
+> 1. Test whether the MYC signalling pathways tend to be differentially expressed between basal virgin vs lactating.
+> 1. Look for gene sets containing "WNT" in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.
+>
+
+```{r solutionChallenge1}
+colnames(design)
+#Solution 1
+myc.rst2 <- roast.DGEList(dgeObj,index=c2.ind[myc],design=design,contrast=4,nrot=999)
+myc.rst2[1:15,]
+
+#Solution 2
+wnt <- grep("WNT",names(c2.ind))
+wnt.rst <- roast.DGEList(dgeObj,index=c2.ind[wnt],design=design,contrast=3,nrot=999)
+wnt.rst[1:15,]
+```
+
+
+> ## Challenge 2 {.challenge}
 >
 > 1. Run `camera` on the pregnant vs lactating contrast.
 > 1. Run `camera` on a different set of MSigDB gene sets, the hallmark datasets, `mouse_H_v5.rdata`.
 > You will need to load in the hallmark gene sets, and the object will be called `Mm.H` in R.
 >
 
-## Challenge 1 solution
 
-```{r}
+```{r solutionChallenge2}
 
 # Run `camera` on the pregnant vs lactating contrast.
 
@@ -299,7 +72,7 @@ table(gst.camera$FDR < 0.05)
 
 # Run `camera` on a different set of MSigDB gene sets, the hallmark datasets, `mouse_H_v5.rdata`.
 
-load("data/mouse_H_v5.rdata")
+load("../data/mouse_H_v5.rdata")
 H.ind <- ids2indices(Mm.H, rownames(dgeObj$counts))
 
 # Check contrasts:
@@ -310,76 +83,3 @@ H.camera <- camera.DGEList(dgeObj,index=H.ind,design=design,contrast=3,inter.gen
 table(H.camera$FDR < 0.05)
 H.camera[1:10,]
 ```
-
-## Gene Set Testing - self-contained gene set tests
-
-### ROAST gene set testing
-
-[ROAST](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btq401) is an example of a self-contained gene set test [@wu2010roast]. It asks the question, "Do the genes in my set tend to be differentially expressed between my conditions of interest?". ROAST does not use information on the other genes in the experiment, unlike `camera`. ROAST is a good option for when you're interested in a specific set, or a few sets. It is not really used to test thousands of sets at one time.
-
-From the Hallmark gene sets, two MYC pathways were most significant for the pregnant vs lactating contrast.
-
-```{r}
-H.camera[1:10,]
-```
-
-Let's see if there are any MYC signalling pathways in MsigDB C2 collection. We can do this with the `grep` command on the names of the gene sets.
-
-```{r}
-grep("MYC_",names(c2.ind))
-
-# Let's save these so that we can subset c2.ind to test all gene sets with MYC in the name
-myc <- grep("MYC_",names(c2.ind))
-
-# What are these pathways called?
-names(c2.ind)[myc]
-```
-
-Let's use ROAST to see if these MYC related gene sets tend to be differentially expressed. Note that the syntax for `camera` and `roast` is almost identical.
-
-```{r}
-myc.rst <- roast(dgeObj,index=c2.ind[myc],design=design,contrast=3,nrot=999)
-myc.rst[1:15,]
-```
-
-Each row corresponds to a single gene set.
-
-The NGenes column gives the number of genes in each set.
-
-The PropDown and PropUp columns contain the proportions of genes in the set that are down- and up-regulated, respectively, with absolute fold changes greater than 2.
-
-The net direction of change is determined from the significance of changes in each direction, and is shown in the Direction column.
-
-The PValue provides evidence for whether the majority of genes in the set are DE in the specified direction
-
-The PValue.Mixed provides evidence for whether the majority of genes in the set are DE in any direction.
-
-FDRs are computed from the corresponding p-values across all sets.
-
-> ## Challenge 2 {.challenge}
->
-> 1. Test whether the MYC signalling pathways tend to be differentially expressed between basal virgin vs lactating.
-> 1. Look for gene sets containing "WNT" in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.
->
-
-## Challenge 2 solution
-
-```{r}
-colnames(design)
-#Solution 1
-myc.rst2 <- roast.DGEList(dgeObj,index=c2.ind[myc],design=design,contrast=4,nrot=999)
-myc.rst2[1:15,]
-
-#Solution 2
-wnt <- grep("WNT",names(c2.ind))
-wnt.rst <- roast.DGEList(dgeObj,index=c2.ind[wnt],design=design,contrast=3,nrot=999)
-wnt.rst[1:15,]
-```
-
-Notes
-
-* A common application of ROAST is to use a set of DE genes that was defined from an analysis of an independent data set. ROAST can then determine whether similar changes are observed in the contrast of interest for the current data set.
-* ROAST estimates p-values by simulation, so the results may change slightly between runs. More precise p-values can be obtained by increasing the number of rotations, albeit at the cost of increased computational time.
-* The smallest p-value that can be reported is 1/(2nrot + 1) where nrot is the number of rotations. This lower bound can be decreased by increasing nrot.
-
-References
