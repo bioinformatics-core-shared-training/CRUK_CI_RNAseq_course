@@ -425,10 +425,8 @@ legend("topleft",fill=c("blue","red","dark green"),legend=levels(sampleinfo$Stat
 Another alternative is to generate an interactive MDS plot using the *Glimma* package. This allows the user to interactively explore the different dimensions.
 
 ```{r glimmaMDS}
-labels <- paste(sampleinfo$SampleName, sampleinfo$CellType, sampleinfo$Status)
-group <- paste(sampleinfo$CellType,sampleinfo$Status,sep=".")
-group <- factor(group)
-glMDSPlot(dgeObj, labels=labels, groups=group, folder="mds")
+labels <- paste(sampleinfo$SampleName, sampleinfo$Group)
+glMDSPlot(dgeObj, labels=labels, groups=sampleinfo$Group, folder="mds")
 ```
 
 *Glimma* was created to make interactive versions of some of the popular plots from the *limma* package. At present it can be used to obtain MDS plots and mean-difference (MD) plots, which will be covered later. The output of `glMDSPlot` is an html page (/mds/MDS-Plot.html) that shows the MDS plot on the left, and the amount of variation explained by each dimension in a barplot on the right. The user can hover over points to find out sample information, and switch between successive dimensions in the MDS plot by clicking on the bars in the barplot. The default MDS plots shows dimensions 1 and 2.
