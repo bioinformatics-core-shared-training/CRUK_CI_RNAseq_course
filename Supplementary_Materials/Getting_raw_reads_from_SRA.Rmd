@@ -208,15 +208,3 @@ for(i in seq_along(combinedInf$bam)){
 }
 list.files()
 ```
-
-
-## Alignment using Rsubread
-
-Alignment could also be performed using `Rsubread` as we did in the first practical session. The only difference is to use the entire `mm10` genome and point to the newly-downloaded fastq files.
-```{r eval=FALSE}
-library(Rsubread)
-buildindex("mm10",reference="mm10.fa")
-fastqfiles <- list.files(pattern=".fastq")
-align("mm10",readfile1=fastqfiles)
-```
-
