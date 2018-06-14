@@ -13,29 +13,30 @@ This course is based on the course [RNAseq analysis in R](http://combine-austral
 
 _Day 2 (p.m.)_
 
-12:30 - 13:30 - Lunch    
+12:30 - 13:30 - Lunch
 
-9:30-10:30 - Introduction to RNAseq - Stephane
+13:30 - 14:00 - Introduction to RNAseq - Stephane
 
-10:30-11:15 Counting for RNA-seq - Stephane
+14:00 - 14:45 Importing and QC of RNA-seq data - Stephane
 
-11:15-12:30 Importing and QC of RNA-seq data - Stephane
-
-13:30 - 17:00 - Linear Models and Statistics for Differential Expression - Oscar Rueda
+14:45 - 17:00 - Linear Models and Statistics for Differential Expression - Oscar Rueda
 
 _Day 3_
 
-9:30-12:00 Differential Expression - Ashley Sawle
+9:30 - 12:00 - Differential Expression - Ashley Sawle
 
-12:00- 13:00 Lunch
+12:00 - 13:00 Lunch
 
-13:00-15:00 Annotation and Visualistaion - Stephane
+13:00 - 15:00 Annotation and Visualistaion - Stephane
 
-15:00-17:00 Gene set analysis and Gene ontology testing - Ashley Sawle
+15:00 - 17:00 Gene set analysis and Gene ontology testing - Ashley Sawle
 
 ## Outline
 
-In this workshop, you will be learning how to analyse RNA-seq count data, using R. This will include reading the data into R, quality control and performing differential expression analysis and gene set testing, with a focus on the edgeR analysis workflow. You will learn how to generate common plots for analysis and visualisation of gene expression data, such as boxplots and heatmaps. You will also be learning how alignment and counting of raw RNA-seq data can be performed in R. This workshop is aimed at biologists interested in learning how to perform differential expression analysis of RNA-seq data when reference genomes are available.   
+In this workshop, you will be learning how to analyse RNA-seq count data, using R. This will include reading the data into R, quality control and performing differential expression analysis and gene set testing, with a focus on the edgeR analysis workflow. You will learn how to generate common plots for analysis and visualisation of gene expression data, such as boxplots and heatmaps. 
+
+This workshop is aimed at biologists interested in learning how to perform differential expression analysis of RNA-seq data when reference genomes are available. 
+
 There is a [course Etherpad](https://public.etherpad-mozilla.org/p/UoC_RNAseqCourse ). Please post questions here and we will answer them as soon as we can (Or if you can answer someone elses question do so!). The trainers may also post useful code snippets here for you.
 
 > ## Prerequisites {.prereq}
