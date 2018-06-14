@@ -201,7 +201,7 @@ plotGseaTable(pathways[topPathways], ranks, fgseaRes, gseaParam = 0.5)
 
 ### ROAST gene set testing
 
-[ROAST](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btq401) is an example of a self-contained gene set test [@wu2010roast]. It asks the question, "Do the genes in my set tend to be differentially expressed between my conditions of interest?". ROAST does not use information on the other genes in the experiment, unlike `camera`. ROAST is a good option for when you're interested in a specific set, or a few sets. It is not really used to test thousands of sets at one time.
+[ROAST](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btq401) is an example of a self-contained gene set test [@wu2010roast]. It asks the question, "Do the genes in my set tend to be differentially expressed between my conditions of interest?". ROAST does not use information on the other genes in the experiment, unlike `camera` (see below). ROAST is a good option for when you're interested in a specific set, or a few sets. It is not really used to test thousands of sets at one time.
 
 Here we will be using the C2 gene sets for mouse, available as .rdata files from the WEHI bioinformatics page [http://bioinf.wehi.edu.au/software/MSigDB/index.html](http://bioinf.wehi.edu.au/software/MSigDB/index.html). The C2 gene sets contain 4725 curated gene sets collected from a variety of places: BioCarta, KEGG, Pathway Interaction Database, Reactome as well as some published studies. It doesn't include GO terms.
 
@@ -236,7 +236,7 @@ myc <- grep("MYC_",names(c2.ind))
 names(c2.ind)[myc]
 ```
 
-Let's use ROAST to see if these MYC related gene sets tend to be differentially expressed. Note that the syntax for `camera` and `roast` is almost identical.
+Let's use ROAST to see if these MYC related gene sets tend to be differentially expressed. 
 
 ```{r}
 # Specify a design matrix without an intercept term
