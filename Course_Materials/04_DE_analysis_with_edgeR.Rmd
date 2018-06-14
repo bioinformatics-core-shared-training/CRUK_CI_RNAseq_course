@@ -37,12 +37,12 @@ First load the packages we need.
 ```{r loadLibraries, message=F}
 library(edgeR)
 library(limma)
-library(readr)
 ```
 
 ```{r recap, eval=FALSE}
 ## Read the counts from the downloaded data
-seqdata <- read_tsv("data/GSE60450_Lactation-GenewiseCounts.txt")
+seqdata <- read.delim("data/GSE60450_Lactation-GenewiseCounts.txt", 
+                      stringsAsFactors = FALSE)
 
 # Remove first two columns from seqdata
 countdata <- as.matrix(seqdata[ ,-(1:2)])
