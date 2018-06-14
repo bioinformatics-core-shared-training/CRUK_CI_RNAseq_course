@@ -5,10 +5,8 @@ date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
   html_notebook:
     toc: yes
-    toc_float: yes
   html_document:
     toc: yes
-    toc_float: yes
 minutes: 300
 layout: page
 subtitle: Gene Set Testing for RNA-seq
@@ -79,16 +77,16 @@ names(genes) <- rownames(results)
 print(head(genes))
 ```
 
-```{r goSeqPackage}
+```{r goSeqPackage, message=F}
 library(goseq)
-
+library(TxDb.Mmusculus.UCSC.mm10.knownGene)
 #print(supportedGeneIDs())
 #print(supportedGenomes())
 ```
 
 Fit the Probability Weighting Function (PWF):
 ```{r pwFunction}
-pwf <- nullp(genes, "mm10","knownGene")
+pwf <- nullp(genes, "mm10", "knownGene")
 ```
 
 Conduct gene set enrichment analysis:
@@ -115,7 +113,9 @@ This analysis is performed by:
 library(fgsea)
 ```
 
-Create ranks:
+#### Create ranks
+
+Rank all genes based on their fold change.
 
 ```{r}
 results.ord <- results[ order(-results[,"logFC"]), ]
@@ -125,19 +125,21 @@ names(ranks) <- rownames(results.ord)
 head(ranks)
 ```
 
+Plot the ranked fold changes.
+
 ```{r}
 #plot(ranks)
 barplot(ranks)
 ```
 
-Load pathways:
+#### Load pathways
 
 ```{r}
 load("data/mouse_H_v5.rdata")
 pathways <- Mm.H
 ```
 
-Conduct analysis:
+#### Conduct analysis
 
 ```{r}
 ?fgsea
@@ -147,26 +149,20 @@ dim(fgseaRes)
 #head(fgseaRes)
 ```
 
-Glance at results:
-
+#### Table of results
 ```{r}
 head(fgseaRes[order(padj), ])
 ```
 
-Plot outcome for the 'HALLMARK_MYOGENESIS' pathway:
+#### Plot outcome for the 'HALLMARK_MYOGENESIS' pathway
 
-First find rank of the 'HALLMARK_MYOGENESIS' pathway genes in the sorted genes:
+First find rank of the 'HALLMARK_MYOGENESIS' pathway genes in the sorted genes.
+Then plot as before.
 
 ```{r}
-
 # We will create a barplot of logFC for the sorted genes and add one vertical red bar for each gene in the 'HALLMARK_MYOGENESIS' pathway
-
-#pathways[["HALLMARK_MYOGENESIS"]]
-
 tmpInd <- match(pathways[["HALLMARK_MYOGENESIS"]],names(ranks))
 tmpInd <- tmpInd[!is.na(tmpInd)]
-
-#tmpInd
 
 ranks2 <- rep(0,length(ranks))
 ranks2[tmpInd] <- ranks[tmpInd]
@@ -174,7 +170,7 @@ ranks2[tmpInd] <- ranks[tmpInd]
 barplot(ranks2)
 ```
 
-Create enrichment score plot:
+#### Enrichment score plot
 
 ```{r}
 plotEnrichment(pathways[["HALLMARK_MYOGENESIS"]],
@@ -183,7 +179,9 @@ plotEnrichment(pathways[["HALLMARK_MYOGENESIS"]],
 
 Remember to check the [GSEA article](http://www.pnas.org/content/102/43/15545.full) for the complete explanation.
 
-Select top pathways and plot outcome for all these:
+# GSEA table plot
+
+Select top pathways and plot outcome for all these
 
 ```{r}
 pathwaysUp <- fgseaRes[ES > 0]

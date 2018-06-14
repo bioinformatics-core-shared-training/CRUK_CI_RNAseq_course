@@ -272,7 +272,7 @@ div.tocify {
 <h1 class="title toc-ignore">RNA-seq analysis in R</h1>
 <h3 class="subtitle"><em>Differential Expression of RNA-seq data - Solutions</em></h3>
 <h4 class="author"><em>Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle</em></h4>
-<h4 class="date"><em>Last modified: 13 Jun 2018</em></h4>
+<h4 class="date"><em>Last modified: 14 Jun 2018</em></h4>
 
 </div>
 
@@ -282,13 +282,77 @@ div.tocify {
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShlZGdlUilcbmxpYnJhcnkobGltbWEpXG5saWJyYXJ5KEdsaW1tYSlcbmxpYnJhcnkoZ3Bsb3RzKVxubGlicmFyeShvcmcuTW0uZWcuZGIpXG5sb2FkKFwiLi4vUm9iamVjdHMvcHJlcHJvY2Vzc2luZy5SZGF0YVwiKVxuYGBgIn0= -->
-<pre class="r"><code>library(edgeR)
-library(limma)
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShlZGdlUilcbmBgYCJ9 -->
+<pre class="r"><code>library(edgeR)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiTG9hZGluZyByZXF1aXJlZCBwYWNrYWdlOiBsaW1tYVxuIn0= -->
+<pre><code>Loading required package: limma</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShsaW1tYSlcbmxpYnJhcnkoR2xpbW1hKVxubGlicmFyeShncGxvdHMpXG5gYGAifQ== -->
+<pre class="r"><code>library(limma)
 library(Glimma)
-library(gplots)
-library(org.Mm.eg.db)
-load(&quot;../Robjects/preprocessing.Rdata&quot;)</code></pre>
+library(gplots)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5BdHRhY2hpbmcgcGFja2FnZTog4oCYZ3Bsb3Rz4oCZXG5cblRoZSBmb2xsb3dpbmcgb2JqZWN0IGlzIG1hc2tlZCBmcm9tIOKAmHBhY2thZ2U6c3RhdHPigJk6XG5cbiAgICBsb3dlc3NcbiJ9 -->
+<pre><code>
+Attaching package: ‘gplots’
+
+The following object is masked from ‘package:stats’:
+
+    lowess</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShvcmcuTW0uZWcuZGIpXG5gYGAifQ== -->
+<pre class="r"><code>library(org.Mm.eg.db)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiTG9hZGluZyByZXF1aXJlZCBwYWNrYWdlOiBBbm5vdGF0aW9uRGJpXG5Mb2FkaW5nIHJlcXVpcmVkIHBhY2thZ2U6IHN0YXRzNFxuTG9hZGluZyByZXF1aXJlZCBwYWNrYWdlOiBCaW9jR2VuZXJpY3NcbkxvYWRpbmcgcmVxdWlyZWQgcGFja2FnZTogcGFyYWxsZWxcblxuQXR0YWNoaW5nIHBhY2thZ2U6IOKAmEJpb2NHZW5lcmljc+KAmVxuXG5UaGUgZm9sbG93aW5nIG9iamVjdHMgYXJlIG1hc2tlZCBmcm9tIOKAmHBhY2thZ2U6cGFyYWxsZWzigJk6XG5cbiAgICBjbHVzdGVyQXBwbHksIGNsdXN0ZXJBcHBseUxCLCBjbHVzdGVyQ2FsbCwgY2x1c3RlckV2YWxRLCBjbHVzdGVyRXhwb3J0LCBjbHVzdGVyTWFwLCBwYXJBcHBseSwgcGFyQ2FwcGx5LFxuICAgIHBhckxhcHBseSwgcGFyTGFwcGx5TEIsIHBhclJhcHBseSwgcGFyU2FwcGx5LCBwYXJTYXBwbHlMQlxuXG5UaGUgZm9sbG93aW5nIG9iamVjdCBpcyBtYXNrZWQgZnJvbSDigJhwYWNrYWdlOmxpbW1h4oCZOlxuXG4gICAgcGxvdE1BXG5cblRoZSBmb2xsb3dpbmcgb2JqZWN0cyBhcmUgbWFza2VkIGZyb20g4oCYcGFja2FnZTpzdGF0c+KAmTpcblxuICAgIElRUiwgbWFkLCBzZCwgdmFyLCB4dGFic1xuXG5UaGUgZm9sbG93aW5nIG9iamVjdHMgYXJlIG1hc2tlZCBmcm9tIOKAmHBhY2thZ2U6YmFzZeKAmTpcblxuICAgIGFueUR1cGxpY2F0ZWQsIGFwcGVuZCwgYXMuZGF0YS5mcmFtZSwgYmFzZW5hbWUsIGNiaW5kLCBjb2xNZWFucywgY29sbmFtZXMsIGNvbFN1bXMsIGRpcm5hbWUsIGRvLmNhbGwsXG4gICAgZHVwbGljYXRlZCwgZXZhbCwgZXZhbHEsIEZpbHRlciwgRmluZCwgZ2V0LCBncmVwLCBncmVwbCwgaW50ZXJzZWN0LCBpcy51bnNvcnRlZCwgbGFwcGx5LCBsZW5ndGhzLCBNYXAsIG1hcHBseSxcbiAgICBtYXRjaCwgbWdldCwgb3JkZXIsIHBhc3RlLCBwbWF4LCBwbWF4LmludCwgcG1pbiwgcG1pbi5pbnQsIFBvc2l0aW9uLCByYW5rLCByYmluZCwgUmVkdWNlLCByb3dNZWFucywgcm93bmFtZXMsXG4gICAgcm93U3Vtcywgc2FwcGx5LCBzZXRkaWZmLCBzb3J0LCB0YWJsZSwgdGFwcGx5LCB1bmlvbiwgdW5pcXVlLCB1bnNwbGl0LCB3aGljaCwgd2hpY2gubWF4LCB3aGljaC5taW5cblxuTG9hZGluZyByZXF1aXJlZCBwYWNrYWdlOiBCaW9iYXNlXG5XZWxjb21lIHRvIEJpb2NvbmR1Y3RvclxuXG4gICAgVmlnbmV0dGVzIGNvbnRhaW4gaW50cm9kdWN0b3J5IG1hdGVyaWFsOyB2aWV3IHdpdGggJ2Jyb3dzZVZpZ25ldHRlcygpJy4gVG8gY2l0ZSBCaW9jb25kdWN0b3IsIHNlZVxuICAgICdjaXRhdGlvbihcIkJpb2Jhc2VcIiknLCBhbmQgZm9yIHBhY2thZ2VzICdjaXRhdGlvbihcInBrZ25hbWVcIiknLlxuXG5Mb2FkaW5nIHJlcXVpcmVkIHBhY2thZ2U6IElSYW5nZXNcbkxvYWRpbmcgcmVxdWlyZWQgcGFja2FnZTogUzRWZWN0b3JzXG5cbkF0dGFjaGluZyBwYWNrYWdlOiDigJhTNFZlY3RvcnPigJlcblxuVGhlIGZvbGxvd2luZyBvYmplY3QgaXMgbWFza2VkIGZyb20g4oCYcGFja2FnZTpncGxvdHPigJk6XG5cbiAgICBzcGFjZVxuXG5UaGUgZm9sbG93aW5nIG9iamVjdCBpcyBtYXNrZWQgZnJvbSDigJhwYWNrYWdlOmJhc2XigJk6XG5cbiAgICBleHBhbmQuZ3JpZFxuIn0= -->
+<pre><code>Loading required package: AnnotationDbi
+Loading required package: stats4
+Loading required package: BiocGenerics
+Loading required package: parallel
+
+Attaching package: ‘BiocGenerics’
+
+The following objects are masked from ‘package:parallel’:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ, clusterExport, clusterMap, parApply, parCapply,
+    parLapply, parLapplyLB, parRapply, parSapply, parSapplyLB
+
+The following object is masked from ‘package:limma’:
+
+    plotMA
+
+The following objects are masked from ‘package:stats’:
+
+    IQR, mad, sd, var, xtabs
+
+The following objects are masked from ‘package:base’:
+
+    anyDuplicated, append, as.data.frame, basename, cbind, colMeans, colnames, colSums, dirname, do.call,
+    duplicated, eval, evalq, Filter, Find, get, grep, grepl, intersect, is.unsorted, lapply, lengths, Map, mapply,
+    match, mget, order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank, rbind, Reduce, rowMeans, rownames,
+    rowSums, sapply, setdiff, sort, table, tapply, union, unique, unsplit, which, which.max, which.min
+
+Loading required package: Biobase
+Welcome to Bioconductor
+
+    Vignettes contain introductory material; view with 'browseVignettes()'. To cite Bioconductor, see
+    'citation(&quot;Biobase&quot;)', and for packages 'citation(&quot;pkgname&quot;)'.
+
+Loading required package: IRanges
+Loading required package: S4Vectors
+
+Attaching package: ‘S4Vectors’
+
+The following object is masked from ‘package:gplots’:
+
+    space
+
+The following object is masked from ‘package:base’:
+
+    expand.grid</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubG9hZChcIi4uL1JvYmplY3RzL3ByZXByb2Nlc3NpbmcuUmRhdGFcIilcbmBgYCJ9 -->
+<pre class="r"><code>load(&quot;../Robjects/preprocessing.Rdata&quot;)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->

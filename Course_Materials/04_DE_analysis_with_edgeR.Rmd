@@ -13,48 +13,36 @@ layout: page
 bibliography: ref.bib
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 **Original Authors: Belinda Phipson, Anna Trigos, Matt Ritchie, Maria Doyle, Harriet Dashnow, Charity Law**
 Based on the course [RNAseq analysis in R](http://combine-australia.github.io/2016-05-11-RNAseq/) delivered on May 11/12th 2016
 
-## Resources and data files
+# Resources and data files
 
-### Original materials
+## Original materials
 
 This material has been created using the following resources:   
 http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf [@Lun2016]  
 http://monashbioinformaticsplatform.github.io/RNAseq-DE-analysis-with-R/99-RNAseq_DE_analysis_with_R.html  
 
-### Data files location
+## Data files location
 
 Data files needed for this analysis are available in the `data` directory.
 
-## Differential expression with edgeR
+# Recap of pre-processing
 
-Now that we are happy that we have normalised the data and that the quality looks good, we can proceed to testing for differentially expressed genes. There are a number of packages to analyse RNA-Seq data. Most people use [DESEQ2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html) or [edgeR](http://bioconductor.org/packages/release/bioc/html/edgeR.html). 
+The previous section walked-through the pre-processing and transformation of the count data. Here, for completeness, we list the minimal steps required to process the data prior to differential expression analysis.
 
-We will use edgeR for the rest of this practical.
+First load the packages we need.
 
-### First load the libraries
-
-```{r}
+```{r loadLibraries, message=F}
 library(edgeR)
 library(limma)
 library(readr)
 ```
 
-
-### Recap of pre-processing
-
-The previous section walked-through the pre-processing and transformation of the count data. Here, for completeness, we list the minimal steps required to process the data prior to differential expression analysis.
-
 ```{r recap, eval=FALSE}
 ## Read the counts from the downloaded data
 seqdata <- read_tsv("data/GSE60450_Lactation-GenewiseCounts.txt")
-
 
 # Remove first two columns from seqdata
 countdata <- as.matrix(seqdata[ ,-(1:2)])
@@ -81,8 +69,16 @@ dgeObj <- DGEList(counts.keep)
 dgeObj <- calcNormFactors(dgeObj)
 ```
 
-Alternatively we can load the Rdata object we created in the pre-processing 
-tutorial.
+# Differential expression with edgeR
+
+Now that we are happy that we have normalised the data and that the quality looks good, we can proceed to testing for differentially expressed genes. There are a number of packages to analyse RNA-Seq data. Most people use [DESEQ2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html) or [edgeR](http://bioconductor.org/packages/release/bioc/html/edgeR.html). 
+
+We will use **edgeR** for the rest of this practical.
+
+## Load the data
+
+Alternatively we can load the `dgeObj` and `sampleinfo` objects with the Rdata 
+file we created in the pre-processing tutorial.
 
 ```{r loadData}
 # before proceeding clean all objects out of the environment
@@ -90,9 +86,10 @@ rm(list=ls())
 
 # load the Rdata object we created in the previous session
 load("Robjects/preprocessing.Rdata")
+ls()
 ```
 
-### Creating the design matrix
+## Creating the design matrix
 
 First we need to create a design matrix for the groups, as we have seen in the linear models lecture. 
 We have two variables, status and cell type. We will fit two models under two assumptions; no interaction and interaction of these two factors. 
@@ -105,7 +102,7 @@ design <- model.matrix(~ CellType + Status, data = sampleinfo)
 colnames(design)[1] <- "Intercept"
 ```
 
-#### Data exploration
+## Data exploration
 
 An MDS plot shows distances, in terms of biological coefficient of variation (BCV), between samples. What do you think of the quality of the data? Can you anticipate if the interaction term will be important?
 
@@ -118,7 +115,7 @@ plotMDS(dgeObj,
 
 ```
 
-### Estimating the dispersion
+## Estimating the dispersion
 
 The common dispersion estimates the overall BCV of the dataset, averaged over all genes:
 
@@ -144,8 +141,7 @@ plotBCV(dgeObj)
 
 ```
 
-
-### Testing for differential expression
+## Testing for differential expression
 
 First, we fit genewise glms:
 
@@ -167,7 +163,7 @@ topTags(lrt_BvsL)
 ```
 
 
-> ## Challenge 1 {.challenge}
+> ### Challenge 1 {.challenge}
 > Conduct likelihood ratio tests for virgin vs lactate and show the top genes.
 
 **Solution**
@@ -178,7 +174,7 @@ topTags(lrt_BvsL)
 
 ```
 
-### Contrasts
+## Contrasts
 
 Suppose we want to find differentially expressed genes between pregnant and virgin. We don't have a parameter that explicitly will allow us to test that hypothesis. We need to build a contrast:
 
@@ -188,13 +184,13 @@ lrt_pVsV <- glmLRT(fit, contrast=PvsV)
 topTags(lrt_pVsV)
 ```
 
-### Testing an interaction model
+## Testing an interaction model
 
-> ## Challenge 2 {.challenge}
+> ### Challenge 2 {.challenge}
 >
-> 1.Fit a model with interaction: What is the rationale to include the interaction (What assumption are you relaxing?)
-> 2. Is the number of replicates good enough to include the interaction?
-> 3. Is the interaction needed in the model?
+> 1.Fit a model with interaction: What is the rationale to include the interaction (What assumption are you relaxing?)  
+> 2. Is the number of replicates good enough to include the interaction?  
+> 3. Is the interaction needed in the model?  
 
 
 **Solution**
@@ -206,7 +202,7 @@ topTags(lrt_pVsV)
 ```
 
 
-### Finally save the results in a new Rdata object
+## Finally save the results in a new Rdata object
 
 ```{r saveObjects}
 

@@ -19,13 +19,19 @@ library(edgeR)
 library(org.Mm.eg.db)
 library(TxDb.Mmusculus.UCSC.mm10.knownGene)
 library(ggbio)
+library(GenomicRanges)
+library(GenomicAlignments)
 ```
 
 ```{r prepareData}
 # load data
-load("Robjects/DE.Rdata")
+load("../Robjects/DE.Rdata")
 # make results table
 results <- as.data.frame(topTags(lrt_BvsL, n = Inf))
+# identify differentially expressed genes
+de <- decideTestsDGE(lrt_BvsL)
+# create a vector of differentially expressed genes
+detags <- rownames(dgeObj)[as.logical(de)]
 # fetch annotations
 ann <- select(org.Mm.eg.db,
               keys = rownames(results),
@@ -36,6 +42,8 @@ results.annotated <- cbind(results, ann)
 tx <- TxDb.Mmusculus.UCSC.mm10.knownGene
 exo <- exonsBy(tx, "gene")
 myreg <- reduce(exo[["110308"]])
+# make gene model
+geneMod <- autoplot(tx, which = myreg)
 ```
 
 
@@ -75,22 +83,26 @@ select(tx,
 >
 
 ```{r solutionChallenge3a, echo=FALSE, fig.height=5, fig.width=10}
-bam <- readGAlignments(file="../data/bam/MCL1.DG.bam",
+bam <- readGAlignments(file="../data/bams_small/MCL1.DG.small.bam",
                        param=ScanBamParam(which=myreg),use.names = TRUE)
-reads.MCL1.DG <- autoplot(bam, stat = "coverage")
+reads.MCL1.DG <- autoplot(bam, stat = "coverage") + 
+    xlim(GRanges("chr15", IRanges(101707000, 101713000)))
 
-bam <- readGAlignments(file="../data/bam/MCL1.DH.bam",
+bam <- readGAlignments(file="../data/bams_small/MCL1.DH.small.bam",
                        param=ScanBamParam(which=myreg),use.names = TRUE)
-reads.MCL1.DH <- autoplot(bam, stat = "coverage")
+reads.MCL1.DH <- autoplot(bam, stat = "coverage") + 
+    xlim(GRanges("chr15", IRanges(101707000, 101713000)))
 
 
-bam <- readGAlignments(file="../data/bam/MCL1.LA.bam",
+bam <- readGAlignments(file="../data/bams_small/MCL1.LA.small.bam",
                        param=ScanBamParam(which=myreg),use.names = TRUE)
-reads.MCL1.LA <- autoplot(bam, stat = "coverage")
+reads.MCL1.LA <- autoplot(bam, stat = "coverage") + 
+    xlim(GRanges("chr15", IRanges(101707000, 101713000)))
 
-bam <- readGAlignments(file="../data/bam/MCL1.LB.bam",
+bam <- readGAlignments(file="../data/bams_small/MCL1.LB.small.bam",
                        param=ScanBamParam(which=myreg),use.names = TRUE)
-reads.MCL1.LB <- autoplot(bam, stat = "coverage")
+reads.MCL1.LB <- autoplot(bam, stat = "coverage") + 
+    xlim(GRanges("chr15", IRanges(101707000, 101713000)))
 
 
 tracks(mm10=geneMod, MCL1.DG=reads.MCL1.DG, MCL1.Dh=reads.MCL1.DH, MCL1.LA=reads.MCL1.LA, MCL1.LB=reads.MCL1.LB) 

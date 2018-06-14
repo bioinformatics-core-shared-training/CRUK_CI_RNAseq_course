@@ -64,19 +64,18 @@ and then unpacking the zip files into your data directory.
 
 ## RNAseq analysis in R tutorials
 
-- [Alignment and Counting](count.nb.html)
-    + [source file](count.Rmd)
-- [RNA-seq Pre-processing](rna-seq-preprocessing.nb.html)
-    + [source file](rna-seq-preprocessing.Rmd)
-    + [with solutions](rna-seq-preprocessing_wiSolution.Rmd)
-- [Differential Expression for RNA-seq](rna-seq-de.nb.html)
-    + [source file](rna-seq-de.Rmd)
-- [Annotation and Visualisation of RNA-seq results](rna-seq-annotation-visualisation.nb.html)
-    + [source file](rna-seq-annotation-visualisation.Rmd)
-    + [with solutions](rna-seq-annotation-visualisation-solutions.Rmd)
-- [Gene-set testing](rna-seq-gene-set-testing.nb.html)
-    + [source file](rna-seq-gene-set-testing.Rmd)
-    + [with solutions](rna-seq-gene-set-testing_wiSolution.Rmd)
+- [RNA-seq Pre-processing](html/02_Preprocessing_Data.nb.html)
+    + [source file](Course_Materials/02_Preprocessing_Data.Rmd)
+    + [practical solutions](Course_Materials/solutions/02_Preprocessing_Data.Solutions.Rmd)
+- [Differential Expression for RNA-seq](html/04_DE_analysis_with_edgeR.nb.html)
+    + [source file](Course_Materials/04_DE_analysis_with_edgeR.Rmd)
+    + [practical solutions](Course_Materials/solutions/04_DE_analysis_with_edgeR.Solutions.Rmd)
+- [Annotation and Visualisation of RNA-seq results](html/05_Annotation_and_Visualisation.nb.html)
+    + [source file](Course_Materials/05_Annotation_and_Visualisation.Rmd)
+    + [practical solutions](Course_Materials/solutions/05_Annotation_and_Visualisation.Solutions.Rmd)
+- [Gene-set testing](html/06_Gene_set_testing.nb.html)
+    + [source file](Course_Materials/06_Gene_set_testing.Rmd)
+    + [practical solutions](Course_Materials/solutions/06_Gene_set_testing.Solutions.Rmd)
     
 ### Lecture slides
 
@@ -91,9 +90,12 @@ Introductory R materials:
 
 Additional RNAseq materials:
 
-- [Downloading files from SRA and aligning](getting-raw-reads.nb.html)
+- [Downloading files from SRA and aligning](Supplementary_Materials/S1_Getting_raw_reads_from_SRA.nb.html)
+- [Alignment and Counting](Supplementary_Materials/S2_Read_Counts_with_Subread.html)
+    + [source file](Supplementary_Materials/S2_Read_Counts_with_Subread.Rmd)
 
-Data: Mouse mammary data (fastq files): [https://figshare.com/s/f5d63d8c265a05618137](https://figshare.com/s/f5d63d8c265a05618137)
+Data: Example Mouse mammary data (fastq files): 
+	[https://figshare.com/s/f5d63d8c265a05618137](https://figshare.com/s/f5d63d8c265a05618137)
 
 ### Additional resources
 

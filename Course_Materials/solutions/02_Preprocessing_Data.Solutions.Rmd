@@ -30,9 +30,9 @@ library(RColorBrewer)
 
 ```{r prepareData}
 # Read the sample information into R
-sampleinfo <- read.delim("data/SampleInfo.txt")
+sampleinfo <- read.delim("../data/SampleInfo.txt")
 # Read the data into R
-seqdata <- read.delim("data/GSE60450_Lactation-GenewiseCounts.txt", stringsAsFactors = FALSE)
+seqdata <- read.delim("../data/GSE60450_Lactation-GenewiseCounts.txt", stringsAsFactors = FALSE)
 # Remove first two columns from seqdata
 countdata <- seqdata[,-(1:2)]
 # Store EntrezGeneID as rownames
@@ -51,7 +51,8 @@ dgeObj <- DGEList(counts.keep)
 logcounts <- cpm(dgeObj, log=TRUE)
 # Apply normalisation to DGEList object
 dgeObj <- calcNormFactors(dgeObj)
-
+# gene variance
+var_genes <- apply(logcounts, 1, var)
 ```
 
 > ## Challenge 1 {.challenge}
@@ -63,7 +64,7 @@ dgeObj <- calcNormFactors(dgeObj)
 
 ```{r solutionChallenge1}
 # load data
-seq_c1 <- read.delim("data/Challenge_1_counts.txt")
+seq_c1 <- read.delim("../data/Challenge_1_counts.txt")
 
 # turn data into a counts matrix
 counts_c1 <- seq_c1[,3:8]

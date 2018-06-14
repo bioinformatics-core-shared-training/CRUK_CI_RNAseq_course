@@ -4,12 +4,10 @@ subtitle: "Annotation and Visualisation of RNA-seq results"
 author: "Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
-  html_notebook:
-    toc: yes
-    toc_float: yes
   html_document:
     toc: yes
-    toc_float: yes
+  html_notebook:
+    toc: yes
 minutes: 300
 layout: page
 bibliography: ref.bib
@@ -188,10 +186,11 @@ points(results.annotated[detags,"logFC"],
 
 Before following up on the DE genes with further lab work, a recommended *sanity check* is to have a look at the expression levels of the individual samples for the genes of interest. We can quickly look at grouped expression using `stripchart`. We can use the normalised log expression values in the  `dgeCounts` object (`dgeCounts$counts`).
 
-```{r geneCountStripchart, fig.width=5, fig.height=8}
+```{r geneCountStripchart, fig.width=5, fig.height=5, fig.align="center"}
 normCounts <- cpm(dgeObj, log = T)
 
 # Let's look at the first gene in the topTable, Krt5, which has a rowname 110308
+par(mar=c(8,4,2,2)) #adjust the plot margins the x-labels are visible - see ?par
 stripchart(normCounts["110308",]~sampleinfo$Group,
            xlab="",
            ylab="log2(Counts)",
@@ -412,7 +411,7 @@ As we have been using counts as our starting point, we haven't investigated the 
 library(GenomicAlignments)
 ```
 
-In the directory `bams_small` there should be `.bam` files for each of the samples in the example study. The workflow to produce these files is described in a [supplmentary page](../Supplementary_Materials/S1_Getting_raw_reads_from_SRA.nb.html) for the course. In brief, the raw reads (`fastq`) were downloaded from the Short Read Archive (SRA) and aligned with `hisat2`. Each bam file was named according to the file name in SRA, but we have renamed the files according to their name in the study. An index file (`.bai`) has been generated for each bam file. In order to reduce the size, the bam files used here only contain a subset of the reads that were aligned in the region chr15:101707000-101713000.
+In the directory `bams_small` there should be `.bam` files for some of the samples in the example study. The workflow to produce these files is described in a [supplmentary page](../Supplementary_Materials/S1_Getting_raw_reads_from_SRA.nb.html) for the course. In brief, the raw reads (`fastq`) were downloaded from the Short Read Archive (SRA) and aligned with `hisat2`. Each bam file was named according to the file name in SRA, but we have renamed the files according to their name in the study. An index file (`.bai`) has been generated for each bam file. In order to reduce the size, the bam files used here only contain a subset of the reads that were aligned in the region chr15:101707000-101713000.
 
 
 ```{r}
