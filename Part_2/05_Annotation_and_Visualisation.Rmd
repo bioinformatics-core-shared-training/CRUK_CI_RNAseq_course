@@ -45,7 +45,7 @@ We have a list of significantly differentially expressed genes, but the only ann
 
 ```{r createDeTable}
 results <- as.data.frame(topTags(lrt_BvsL, n = Inf))
-results
+head(results)
 ```
 
 ### Visualise results with a 'Smear plot'
@@ -124,7 +124,7 @@ annot <- select(org.Mm.eg.db,
               columns=c("ENTREZID","SYMBOL","GENENAME"))
 
 # Have a look at the annotation
-annot
+head(annot)
 ```
 
 Let's double check that the `ENTREZID` column matches exactly to our `results` rownames.
@@ -137,7 +137,7 @@ We can bind in the annotation information to the `results` data frame. (Please n
 
 ```{r annotateResults}
 results.annotated <- cbind(results, annot)
-results.annotated
+head(results.annotated)
 ```
 
 
@@ -323,7 +323,8 @@ It is also possible to save the results of a Bioconductor analysis in a browser 
 First we create a data frame for just the DE genes.
 ```{r tableOfDEGenes}
 sigGenes <- results.annotated[detags,]
-sigGenes
+message("Number of significantly DE genes: ", nrow(sigGenes))
+head(sigGenes)
 ```
 
 ### Create a genomic ranges object
@@ -334,7 +335,7 @@ item in the list is the exon co-ordinates of a particular gene, however, we do
 not need this level of granularity for the bed output, so we will collapse to a 
 single region for each gene. 
 
-First we the `range` function to obtain a single range for every gene and 
+First we use the `range` function to obtain a single range for every gene and 
 tranform to a more convenient object with `unlist`.
 
 ```{r getGeneRanges}
@@ -342,6 +343,16 @@ exo <- exonsBy(tx, "gene")
 exoRanges <- unlist(range(exo))
 sigRegions <- exoRanges[na.omit(match(sigGenes$ENTREZID, names(exoRanges)))]
 sigRegions
+```
+
+For visualisation purposes, we are going to restrict the data to genes that are located on chromosomes 1 to 19 and the sex chromosomes. This can be done with the `keepSeqLevels` function.
+
+```{r trimSequences}
+seqlevels(sigRegions)
+sigRegions <- keepSeqlevels(sigRegions, 
+                            value = paste0("chr", c(1:19,"X","Y")),
+                            pruning.mode="tidy")
+seqlevels(sigRegions)
 ```
 
 ### Add metadata to GRanges object
@@ -356,9 +367,12 @@ sigRegions
 
 ### Scores and colour on exported tracks
 
-Rather than just representing the genomic locations, the `.bed` format is also able to colour each range
-according to some property of the analysis (e.g. direction and magnitude of change) to help highlight
-particular regions of interest. A score can also be displayed when a particular region is clicked-on.
+The `.bed` file format is commonly used to store genomic locations for display 
+in genome browsers (e.g. the UCSC browser or IGV) as tracks. Rather than just 
+representing the genomic locations, the `.bed` format is also able to colour 
+each range according to some property of the analysis (e.g. direction and 
+magnitude of change) to help highlight particular regions of interest. A score
+can also be displayed when a particular region is clicked-on.
 
 For the score we can use the $-log_{10}$ of the adjusted p-value and 
 colour scheme for the regions based on the fold-change
@@ -398,11 +412,11 @@ As we have been using counts as our starting point, we haven't investigated the 
 library(GenomicAlignments)
 ```
 
-In the directory `bam` there should be `.bam` files for each of the samples in the example study. The workflow to produce these files is described in a [supplmentary page](getting-raw-reads.nb.html) for the course. In brief, the raw reads (`fastq`) were downloaded from the Short Read Archive (SRA) and aligned with `hisat2`. Each bam file was named according to the file name in SRA, but we have renamed the files according to their name in the study. An index file (`.bai`) has been generated for each bam file.
+In the directory `bams_small` there should be `.bam` files for each of the samples in the example study. The workflow to produce these files is described in a [supplmentary page](../Supplementary_Material/Getting_raw_reads_from_SRA.nb.html) for the course. In brief, the raw reads (`fastq`) were downloaded from the Short Read Archive (SRA) and aligned with `hisat2`. Each bam file was named according to the file name in SRA, but we have renamed the files according to their name in the study. An index file (`.bai`) has been generated for each bam file. In order to reduce the size, the bam files used here only contain a subset of the reads that were aligned in the region chr15:101707000-101713000.
 
 
 ```{r}
-list.files("data/bam/")
+list.files("data/bams_small/")
 ```
 
 The `readGAlignments` function provides a simple interface to interrogate the aligned reads for a particular sample. It can also utilise the *index* file in order to retrieve only the reads that correspond to a specific region in an efficient manner. The output includes the genomic location of each aligned read and the CIGAR (**C**ompact **I**diosyncratic **G**apped **A**lignment **R**eport); where *M* denotes an match to the genome and *I*, *D* correspond to insertions and deletions.
@@ -410,7 +424,7 @@ The `readGAlignments` function provides a simple interface to interrogate the al
 ```{r}
 generegion <- exo[["110308"]]
 
-my.reads <- readGAlignments(file="data/bam/MCL1.DG.bam",
+my.reads <- readGAlignments(file="data/bams_small/MCL1.DG.small.bam",
                        param=ScanBamParam(which=generegion))
 my.reads
 ```
@@ -418,7 +432,7 @@ my.reads
 It is possible to tweak the function to retrieve other potentially-useful information from the bam file, such as the mapping quality and flag.
 
 ```{r}
-my.reads <- readGAlignments(file="data/bam/MCL1.DG.bam",
+my.reads <- readGAlignments(file="data/bams_small//MCL1.DG.small.bam",
                        param=ScanBamParam(which=generegion,
                                           what=c("seq","mapq","flag")))
 my.reads
@@ -542,11 +556,13 @@ autoplot(tx, which=exo[["110308"]])
 We can even plot the location of sequencing reads if they have been imported using readGAlignments function (or similar).
 
 ```{r}
-myreg <- reduce(exo[["110308"]])
-bam <- readGAlignments(file="data/bam/MCL1.DG.bam",
+myreg <- flank(reduce(exo[["110308"]]), 1000, both = T)
+
+bam <- readGappedReads(file="data/bams_small/MCL1.DG.small.bam",
                        param=ScanBamParam(which=myreg),use.names = TRUE)
 
-autoplot(bam , stat = "coverage")
+autoplot(bam, geom = "rect") + 
+    xlim(GRanges("chr15", IRanges(101707000, 101713000)))
 ```
 
 Like ggplot2, ggbio plots can be saved as objects that can later be modified, or combined together to
@@ -558,7 +574,9 @@ an ideogram) to a plot composition and don’t want to repeat the code to genera
 #idPlot <- plotIdeogram(genome = "mm10",subchr = "chr1")
 #idPlot
 geneMod <- autoplot(tx, which = myreg)
-reads.MCL1.DG <- autoplot(bam, stat = "coverage") + labs(title="MCL1.DG")
+reads.MCL1.DG <- autoplot(bam, stat = "coverage")  + 
+    xlim(GRanges("chr15", IRanges(101707000, 101713000))) +
+    labs(title="MCL1.DG")
 tracks(mm10=geneMod, MCL1.DG=reads.MCL1.DG ) 
 ```
 
