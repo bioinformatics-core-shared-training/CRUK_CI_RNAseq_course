@@ -1,18 +1,3 @@
----
-title: "RNA-seq analysis in R"
-author: "Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle"
-date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
-output:
-  html_notebook:
-    toc: yes
-  html_document:
-    toc: yes
-minutes: 300
-layout: page
-subtitle: Pre-processsing RNA-seq data
-bibliography: ref.bib
----
-
 **Original Authors: Belinda Phipson, Anna Trigos, Matt Ritchie, Maria Doyle, Harriet Dashnow, Charity Law**
 Based on the course [RNAseq analysis in R](http://combine-australia.github.io/2016-05-11-RNAseq/) delivered on May 11/12th 2016
 
@@ -62,7 +47,7 @@ library(RColorBrewer)
 
 ## Mouse mammary gland dataset
 
-The data for this tutorial comes from a Nature Cell Biology paper, [*EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival*](http://www.ncbi.nlm.nih.gov/pubmed/25730472) [@Fu2015]. Both the raw data (sequence reads) can be downloaded from SRA under [SRP045534](https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?study=SRP045534)and processed data (counts) can be downloaded from Gene Expression Omnibus database (GEO) under accession number [GSE60450](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60450). Please see Supplementary material for instructions on downloading raw files, aligning fastq and generating a gene count matrix.
+The data for this tutorial comes from a Nature Cell Biology paper, [*EGF-mediated induction of Mcl-1 at the switch to lactation is essential for alveolar cell survival*](http://www.ncbi.nlm.nih.gov/pubmed/25730472) [@Fu2015]. The raw data (sequence reads) can be downloaded from SRA under [SRP045534](https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?study=SRP045534). The processed data (counts) can be downloaded from Gene Expression Omnibus database (GEO) under accession number [GSE60450](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE60450). Please see Supplementary material for instructions on downloading raw files, aligning fastq and generating a gene count matrix.
 
 This study examines the expression profiles of basal stem-cell enriched cells (B) and committed luminal cells (L) in the mammary gland of virgin, pregnant and lactating mice. Six groups are present, with one for each combination of cell type and mouse status. Each group contains two biological replicates.
 
@@ -284,7 +269,7 @@ We can also plot the library sizes as a barplot to see whether there are any maj
 ```{r plotLibrarySizes}
 
 # The names argument tells the barplot to use the sample names on the x-axis
-# The las argument rotates the axis names
+# The last argument rotates the axis names
 barplot(dgeObj$samples$lib.size, names=colnames(dgeObj), las=2, main="Barplot of library sizes")
 abline(h=20e6, lty=2)
 
@@ -308,7 +293,7 @@ From the boxplots we see that overall the density distributions of raw log-inten
 
 ## Multidimensional scaling plots
 
-By far, one of the most important plots we make when we analyse RNA-Seq data are MDSplots. An MDSplot is a visualisation of a principle components analysis, which determines the greatest sources of variation in the data. A principle components analysis is an example of an unsupervised analysis, where we don't need to specify the groups. If your experiment is well controlled and has worked well, what we hope to see is that the greatest sources of variation in the data are the treatments/groups we are interested in. It is also an incredibly useful tool for quality control and checking for outliers. We can use the `plotMDS` function to create the MDS plot.
+By far, one of the most important plots we make when we analyse RNA-Seq data are MDS plots. An MDS plot is a visualisation of a principle components analysis, which determines the greatest sources of variation in the data. A principle components analysis is an example of an unsupervised analysis, where we don't need to specify the groups. If your experiment is well controlled and has worked well, what we hope to see is that the greatest sources of variation in the data are the treatments/groups we are interested in. It is also an incredibly useful tool for quality control and checking for outliers. We can use the `plotMDS` function to create the MDS plot.
 
 ```{r plotMDSbasic}
 plotMDS(dgeObj)
