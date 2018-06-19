@@ -80,7 +80,7 @@ and then unpacking the zip files into your data directory.
     
 ### Lecture slides
 
-- [RNASeq basics](slides/rnaSeq_May2017.pdf)
+- [RNASeq basics](slides/rnaSeqIntro_19June2018.pdf)
 - [Linear Model and Statistics for Differential Expression](slides/LinearModels.pdf)
 
 ### Supplementary lessons
