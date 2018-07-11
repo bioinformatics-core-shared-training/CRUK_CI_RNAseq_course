@@ -16,4 +16,5 @@ data/*
 !MCL*sm.bam
 *.indel
 *.fastq.gz
+.~lock.
 glimma-plots/*
