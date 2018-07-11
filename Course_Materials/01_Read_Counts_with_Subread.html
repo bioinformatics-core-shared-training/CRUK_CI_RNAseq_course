@@ -91,6 +91,9 @@ img {
 .tabbed-pane {
   padding-top: 12px;
 }
+.html-widget {
+  margin-bottom: 20px;
+}
 button.code-folding-btn:focus {
   outline: none;
 }
@@ -121,7 +124,7 @@ $(document).ready(function () {
 <h1 class="title toc-ignore">RNA-seq analysis in R</h1>
 <h3 class="subtitle"><em>Counting</em></h3>
 <h4 class="author"><em>Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle, Abbi Edwards</em></h4>
-<h4 class="date"><em>Last modified: 13 Jun 2018</em></h4>
+<h4 class="date"><em>Last modified: 11 Jul 2018</em></h4>
 
 </div>
 
@@ -140,22 +143,21 @@ $(document).ready(function () {
 <h2>Counting</h2>
 <p>Once our reads have been aligned against the genome, we need to summarise the information across genes or exons. In the BAM file, there is a chromosomal location for every read that mapped uniquely. We can determine if the region each read is aligned to corresponds to a particular gene or exon and then summarise across the entire BAM file to get total read counts for each gene or exon.</p>
 <p>We will use <strong><code>featureCounts</code></strong> programme from the <a href="http://subread.sourceforge.net/">subRead package</a> to do the counting. In addition to the BAM files, we also need to provide <strong><code>featureCounts</code></strong> with an annotation file. Usually this will be a GTF/GFF file corresponding to the genome assembly used (a description of the GTF format can be found at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html#format4">UCSC website</a>). <strong><code>featureCounts</code></strong> can also use a simpler annotation format called SAF, this is particularly useful for defining custom/novel features that you wish to count against.</p>
-<p>GTF/GFF files define genomic regions covered by different types of genomic features, e.g. genes, transcripts, exons, or UTRs. When using a GTF/GFF file we need to tell <strong><code>featureCounts</code></strong> what feature type to use to count reads, and what attribute type to summarise the results at. For RNAseq we most commonly wish to count reads aligning to exons, and then to summarise at the gene level.</p>
+<p>GTF/GFF files define genomic regions covered by different types of genomic features, e.g. genes, transcripts, exons, or UTRs. The necessary GTF is already in the directory <code>Course_Materials/data</code>. Instruction on where and how to download the GTF can be found in the <a href="../Supplementary_Materials/S1_Getting_raw_reads_from_SRA.html">Supplementary Materials</a>.</p>
+<p>When using a GTF/GFF file we need to tell <strong><code>featureCounts</code></strong> what feature type to use to count reads, and what attribute type to summarise the results at. For RNAseq we most commonly wish to count reads aligning to exons, and then to summarise at the gene level.</p>
 <p>Lets have a quick look at the top of a GTF file so we can see what data it contains and what <strong>feature type</strong> and <strong>attribute type</strong> mean:</p>
-<pre><code>cd RNASeq/data
+<pre><code>cd ~/CourseMaterials/data
   
-head mmu.mm10.gtf</code></pre>
-<p>The code below uses <strong><code>featureCounts</code></strong> to count reads in a BAM file against a GTF for the mouse mm10 genome assembly.</p>
+head Mus_musculus.GRCm38.80.gtf</code></pre>
+<p>The code below uses <strong><code>featureCounts</code></strong> to count reads in a BAM file against a GTF for the mouse GRCm38 genome assembly.</p>
 <pre><code>  featureCounts \
-      --primary \
       -C \
       -t exon \
       -g gene_id \
-      -a mmu.mm10.gtf \
-      -o MCL1.DJ.featureCounts \
-      MCL1.DJ.bam</code></pre>
+      -a Mus_musculus.GRCm38.80.gtf \
+      -o MCL1_DJ.featureCounts \
+      MCL1_DJ.bam</code></pre>
 <ul>
-<li><strong><code>--primary</code></strong> - only count primary alignment</li>
 <li><strong><code>-C</code></strong> - do not count reads where the pairs are mapped to different chromosomes</li>
 <li><strong><code>-t exon</code></strong> - the <strong>feature</strong> type to count reads against, in this case exons</li>
 <li><strong><code>-g gene_id</code></strong> - the <strong>attribute</strong> type to summarise counts by, in this case the gene ID</li>
@@ -167,17 +169,16 @@ head mmu.mm10.gtf</code></pre>
 <p>The summary table reports the numbers of unassigned reads and the reasons why they are not assigned (eg. ambiguity, multi-mapping, secondary alignment, mapping quality, fragment length, chimera, read duplicate, non-junction and so on), in addition to the number of successfully assigned reads for each library. See <a href="http://bioinf.wehi.edu.au/subread-package/SubreadUsersGuide.pdf">subread documentation</a> (‘Program output’ section).</p>
 <pre><code>head MCL1.DJ.featureCounts</code></pre>
 <p>The full results table begins with a line containing the command used to generate the counts. It then has a table of 7 columns. The first column is the gene identifier, this will vary depending on the GTF file used, in our case this is a UCSC gene id. The second to fifth columns describe the genes location, and the sixth column is the length of the gene. The final column contains the number of reads assigned to the gene. Note that <strong><code>featureCounts</code></strong> outputs a row for every gene in the GTF, even the ones with no reads assigned, and the row order is determined by the order in the GTF. This means that if featureCounts is used on mutliple samples with same GTF file, the separate files can be combined easily as the rows always refer to the same gene.</p>
-<p>In fact we can have <strong><code>featureCounts</code></strong> do this for us by running all of our libraries together in one command. To save time for this we will use versions of our BAM files that only include alignments to chromosome 8. You can find these in <strong><code>smallBams</code></strong> directory.</p>
+<p>In fact we can have <strong><code>featureCounts</code></strong> do this for us by running all of our libraries together in one command. To save time for this we will use versions of our BAM files that only include alignments to chromosome 15. You can find these in <strong><code>smallBams</code></strong> directory.</p>
 <pre><code>  featureCounts \
-      --primary \
       -C \
       -t exon \
       -g gene_id \
-      -a mmu.mm10.gtf \
-      -o MCL1.DJ.featureCounts \
-      *.bam</code></pre>
+      -a small_bams/Mus_musculus.GRCm38.80.chr15.gtf  \
+      -o GSE60450_Lactation.chr15.featureCounts \
+      bams_chr15/MCL*.bam</code></pre>
 <p>This gives us a combined counts table as an output with the first 6 columns as before but now the folowing columns contain the counts for all of the samples.</p>
-<pre><code>head MCL1.DJ.featureCounts</code></pre>
+<pre><code>head GSE60450_Lactation.chr15.featureCounts</code></pre>
 <blockquote>
 <h2 id="challenge" class="challenge">Challenge</h2>
 <ol style="list-style-type: decimal">
@@ -189,7 +190,7 @@ head mmu.mm10.gtf</code></pre>
 <ul>
 <li>If you are sequencing your own data, the sequencing facility will almost always provide fastq files which can be aligned to a genome with an aligner of your choice.<br />
 </li>
-<li>For publicly available sequence data from GEO/SRA, the files are usually in the Sequence Read Archive (SRA) format. Prior to read alignment, these files need to be converted into the FASTQ format using the fastq-dump utility from the SRA Toolkit. We have included instructions on how to do this in <a href="Supplementary_Materials/Getting_raw_reads_from_SRA.Rmd">Getting raw reads from SRA</a> under the Supplementary Material directory.</li>
+<li>For publicly available sequence data from GEO/SRA, the files are usually in the Sequence Read Archive (SRA) format. Prior to read alignment, these files need to be converted into the FASTQ format using the fastq-dump utility from the SRA Toolkit. We have included instructions on how to do this in <a href="../Supplementary_Materials/S1_Getting_raw_reads_from_SRA.html">Getting raw reads from SRA</a> under the Supplementary Material directory.</li>
 </ul>
 </div>
 
