@@ -95,9 +95,9 @@ to each gene by featureCounts.
 We will be manipulating and reformating the counts matrix into a suitable
 format for DESeq2.
 
-The `seqdata` is a `tibble` (a kind of `dataframe`) in which the first six 
-columns contain annotation information and the remaining columns contain the 
-count data.
+The `seqdata` is a `tibble` (a kind of `dataframe` used by `dplyr`) in which the
+first six columns contain annotation information and the remaining columns 
+contain the count data.
 
 DESeq2 requires a simple object containing only the count data, we'll keep the
 gene ID by setting them as the row names.
@@ -529,5 +529,5 @@ abline(h=0,col="grey")
 everything**
 
 ```{r saveData}
-save(ddsObj, countdata, sampleinfo, file="Robjects/preprocessing.Rdata")
+save(countdata, sampleinfo, file="data/preprocessing.Rdata")
 ```
