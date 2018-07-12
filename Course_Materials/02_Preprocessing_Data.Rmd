@@ -26,6 +26,8 @@ do that we need to:
 * filter out unwanted genes
 * run some initial QC on the raw count data
 
+We will also look at the effects of normalisation for composition bias.
+
 # Data import
 
 First, let's load all the packages we will need to analyse the data.
@@ -70,7 +72,7 @@ sampleinfo
 The raw reads were aligned using HISAT2 [@Kim2015] to the GRCm38 mouse reference
 genome from Ensembl. featureCounts [@Liao2014] was used to count reads against
 the Ensembl gene annotation and generate a counts matrix (as described in 
-(Section 1)[01_Counting.html].
+[Section 1](01_Counting.html)).
 
 First we need to read the data into R from the file in the *data* directory.
 
@@ -82,9 +84,9 @@ seqdata
 
 In the `seqdata` object each row represents a gene. The columns contains:
 
-1 *Geneid* - Ensembl ID  
-2-5 *Chr*, *Start*, *End*, *Strand* - Genomic locations of exons of the gene
-6 *Length* - Transcript length of the gene  
+   1 *Geneid* - Ensembl ID  
+ 2-5 *Chr*, *Start*, *End*, *Strand* - Genomic locations of exons of the gene  
+   6 *Length* - Transcript length of the gene  
 7-18 One column for each sample with the count of how many reads were assigned  
 to each gene by featureCounts.
 
@@ -119,6 +121,8 @@ countdata <- as.data.frame(seqdata) %>%
     rename_all(str_remove, ".bam") %>% # remove the ".bam" from the column names
     select(sampleinfo$Sample) %>% # keep sample columns using sampleinfo
     as.matrix()
+
+head(countdata)
 ```
 
 Here, we used `str_remove` to remove the unwanted suffix from the column names.
@@ -388,8 +392,8 @@ We don't want to plot a heatmap of all 22013 genes, so let's select data for the
 # We estimate the variance for each row in the logcounts matrix
 var_genes <- apply(rlogcounts, 1, var)
 head(var_genes)
-# Get the gene names for the top 500 most variable genes
-select_var <- names(sort(var_genes, decreasing=TRUE))[1:500]
+# Get the row numbers for the top 500 most variable genes
+select_var <- order(var_genes, decreasing=TRUE)[1:500]
 # Subset logcounts matrix
 hmData <- rlogcounts[select_var,]
 ```
@@ -487,9 +491,9 @@ and composition bias. Let's have a look at the raw `countsdata`; we will need to
 library(limma)
 
 par(mfrow=c(1,2))
-plotMA(rlogcounts, array = 7)
+plotMA(logcounts, array = 7)
 abline(h=0,col="grey")
-plotMA(rlogcounts, array = 11)
+plotMA(logcounts, array = 11)
 abline(h=0,col="grey")
 ```
 
