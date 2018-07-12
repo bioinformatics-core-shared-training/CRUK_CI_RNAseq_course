@@ -12,12 +12,8 @@ layout: page
 subtitle: Pre-processsing RNA-seq data
 bibliography: ref.bib
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
-
-```{r knitrOpts, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 # Introduction
 
@@ -37,7 +33,6 @@ First, let's load all the packages we will need to analyse the data.
 ```{r setup, message = FALSE}
 library(tidyverse)
 library(DESeq2)
-library(ggfortify)
 ```
 
 ## Mouse mammary gland dataset
@@ -64,7 +59,7 @@ cell type and mouse status. Each group contains two biological replicates.
 The `sampleinfo` file contains basic information about the samples that we will
 need for the analysis today.
 
-```{r loadSampleInfo}
+```{r loadSampleInfo, message = FALSE}
 # Read the sample information into a data frame
 sampleinfo <- read_tsv("data/SampleInfo.txt")
 sampleinfo
@@ -79,7 +74,7 @@ the Ensembl gene annotation and generate a counts matrix (as described in
 
 First we need to read the data into R from the file in the *data* directory.
 
-```{r loadData}
+```{r loadData, message = FALSE}
 # Read the data into R
 seqdata <- read_tsv("data/GSE60450_Lactation.featureCounts", comment = "#")
 seqdata
@@ -87,10 +82,10 @@ seqdata
 
 In the `seqdata` object each row represents a gene. The columns contains:
 
-1. *Geneid* - Ensembl ID
-2-5 *Chr*, *Start*, *End*, *Strand* - Genomic locations of each exon of the gene
-6 *Length* - Transcript length of the gene
-7-18 Once Column for each sample with the count of how many reads were assigned
+1 *Geneid* - Ensembl ID  
+2-5 *Chr*, *Start*, *End*, *Strand* - Genomic locations of exons of the gene
+6 *Length* - Transcript length of the gene  
+7-18 One column for each sample with the count of how many reads were assigned  
 to each gene by featureCounts.
 
 ## Format the data
@@ -102,8 +97,8 @@ The `seqdata` is a `tibble` (a kind of `dataframe`) in which the first six
 columns contain annotation information and the remaining columns contain the 
 count data.
 
-DESeq2 requires a simple object containing only the count data and with some
-form of gene ID as the row names.
+DESeq2 requires a simple object containing only the count data, we'll keep the
+gene ID by setting them as the row names.
 
 Let's create new counts data object, `countdata`, that contains only the
 counts for the 12 samples.  
@@ -122,7 +117,8 @@ column of the counts matrix, it will assume the same order.
 countdata <- as.data.frame(seqdata) %>% 
     column_to_rownames("Geneid") %>% # turn the geneid column into rownames
     rename_all(str_remove, ".bam") %>% # remove the ".bam" from the column names
-    select(sampleinfo$Sample) # keep sample columns using sampleinfo
+    select(sampleinfo$Sample) %>% # keep sample columns using sampleinfo
+    as.matrix()
 ```
 
 Here, we used `str_remove` to remove the unwanted suffix from the column names.
@@ -161,31 +157,34 @@ important do assess the quality of our data.
 
 ## Library sizes and distribution plots
 
-First, we can plot how many reads we have for each sample in the `ddsObj`. 
-Whilst normalisation can account for imbalance in coverage across the samples,
-extreme differences may be indicative of underlying problems in the samples.
+First, we can plot how many reads we have for each sample. Whilst normalisation 
+can account for imbalance in coverage across the samples, extreme differences 
+may be indicative of underlying problems in the samples.
 
 ```{r ddsLibrarySizes}
-countdata %>% 
+librarySizes <- countdata %>% 
+    as.data.frame() %>% 
     summarise_all(sum) %>% 
-    gather("Sample", "Counts") %>% 
-    ggplot(aes(x=Sample, y=Counts)) +
-    geom_bar(stat="identity", col="black", fill="steelblue")
+    gather("Sample", "Counts")
+
+ggplot(librarySizes, aes(x=Sample, y=Counts)) +
+       geom_bar(stat="identity", col="black", fill="steelblue")
 ```
 
 Count data is not normally distributed, so if we want to examine the
 distributions of the raw counts it is helpful to transform the data on to a log
-scale. DESeq2 provides two commands that can be used to this, here we will use
-the command `rlog`, you can read about it companion `vst` and the comparison
-between the two 
-[here](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#count-data-transformations). 
+scale. Typically we use a `log2` transformation, however, because the data is
+count data and will contain many `0`s we need to add a count of 1 to every 
+value in order to prevent attempting `log2(0)` from creating errors.
 
 We'll check the distribution of read counts using a boxplot and well add some
 colour to see if there is any difference between sample groups
 
 ```{r plotLogCounts}
 # Get log2 counts per million
-logcounts <- rlog(as.matrix(countdata))
+logcounts <- log2(countdata + 1)
+# lets add the gene ids
+rownames(logcounts) <- rownames(countdata)
 # Check distributions of samples using boxplots
 # Add a horizontal line at the overall median 
 logcounts %>% 
@@ -195,9 +194,6 @@ logcounts %>%
     ggplot(aes(x=Sample, y=logCounts, fill=Status)) +
         geom_hline(yintercept = median(logcounts), colour = "blue", size=2) +
         geom_boxplot()
-        
-
-
 ```
 
 From the boxplots we see that overall the density distributions of raw
@@ -207,89 +203,103 @@ that sample further.
 
 ## Principle Component Analysis
 
+A principle components analysis (PCA) is an example of an unsupervised analysis,
+where we don't specify the grouping of the samples. If your experiment is well
+controlled and has worked well, we should that replicate samples cluster 
+closely, whilst the greatest sources of variation in the data should be between
+treatments/sample groups. It is also an incredibly useful tool for checking for 
+outliers and batch effects.
 
+To run the PCA we should first normalise our data for library size and transform
+to a log scale.DESeq2 provides two commands that can be used to do this, here we
+will use the command `rlog`. `rlog` performs a log2 scale transformation in a 
+way that compensates for differences between samples for genes with low read 
+count and also normalizes between samples for library size. 
 
-## Multidimensional scaling plots
+You can read more about `rlog`, it's alternative `vst` and the comparison
+between the two 
+[here](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#count-data-transformations). 
 
-By far, one of the most important plots we make when we analyse RNA-Seq data
-are MDSplots. An MDSplot is a visualisation of a principle components analysis,
-which determines the greatest sources of variation in the data. A principle
-components analysis is an example of an unsupervised analysis, where we don't
-need to specify the groups. If your experiment is well controlled and has
-worked well, what we hope to see is that the greatest sources of variation in
-the data are the treatments/groups we are interested in. It is also an
-incredibly useful tool for quality control and checking for outliers. We can
-use the `plotMDS` function to create the MDS plot.
+To plot the PCA results we will use the `autoplot` function from the `ggfortify`
+package [@Tang2016]. `ggfortify` is built on top of `ggplot2` and is able to 
+recognise common statistical objects such as PCA results or linear model results 
+and automatically generate summary plot of the results in an appropriate manner.
 
-```{r plotMDSbasic}
-plotMDS(ddsObj)
-```
+```{r pcaPlot, message = FALSE}
+library(ggfortify)
 
-It is a bit difficult to see exactly what is going on with the default plot,
-although we do see samples grouping together in pairs. To make this plot more
-informative, we can colour the samples according to the grouping information.
-We can also change the labels, or instead of labels we can have points.
+rlogcounts <- rlog(countdata)
 
-```{r setPlotParams}
-# Let's set up colour schemes for CellType
-# How many cell types and in what order are they stored?
-levels(sampleinfo$CellType)
-# Let's choose purple for basal and orange for luminal
-col.cell <- c("purple","orange")[sampleinfo$CellType]
-data.frame(sampleinfo$CellType, col.cell)
-col.cell
-sampleinfo$CellType
-
-# Similarly for status
-levels(sampleinfo$Status)
-col.status <- c("blue","red","dark green")[sampleinfo$Status]
-col.status
-```
-
-```{r plotMDScolored, fig.height=5, fig.width=10}
-# We specify the option to let us plot two plots side-by-sde
-par(mfrow=c(1,2))
-
-# Redo the MDS with cell type colouring
-plotMDS(ddsObj, col=col.cell, main="Cell type")
-
-# Let's add a legend to the plot so we know which colours correspond to which
-# cell type
-legend("topleft",
-       fill=c("purple","orange"), 
-       legend=levels(sampleinfo$CellType))
-
-plotMDS(ddsObj,col=col.status, main="Status")
-legend("topleft",
-       fill=c("blue","red","dark green"), 
-       legend=levels(sampleinfo$Status))
+# run PCA
+pcDat <- prcomp(t(rlogcounts))
+# plot PCA
+autoplot(pcDat)
+# Lets add colour to look at the clustering for Status
+autoplot(pcDat,
+         data = sampleinfo, 
+         colour="Status", 
+         size=5)
+# and now status
+# Lets add colour to look at the clustering for Cell Type
+autoplot(pcDat,
+         data = sampleinfo, 
+         colour="CellType", 
+         size=5)
+# We could use shape for one of the factors
+autoplot(pcDat,
+         data = sampleinfo, 
+         colour="Status", 
+         shape="CellType",
+         size=5)
+# Specify some clearer shapes to use that have a black outline and use fill
+autoplot(pcDat,
+         data = sampleinfo, 
+         fill="Status", 
+         shape="CellType",
+         size=5) +
+    scale_shape_manual(values=c(21, 24)) +
+    guides(fill = guide_legend(override.aes=list(shape=22)))
 ```
 
 > ### Discussion
 >
-> Look at the MDS plot coloured by cell type.
+> Look at the last PCA plot.
+> What is the greatest source of variation?
 > Is there something strange going on with the samples?
-> Identify the two samples that don't appear to be in the right place.
->
+> Let's identify these samples:
 
-```{r correctSampleSheet}
-# There is a corrected sample info file in your data directory
-# I'm going to write over the sampleinfo object with the corrected sample info
-sampleinfo <- read.delim("data/SampleInfo_Corrected.txt")
-sampleinfo
+```{r badSamples}
+# setting shape to FALSE causes the plot to default to using the labels
+autoplot(pcDat,
+         data = sampleinfo, 
+         colour="CellType", 
+         shape=FALSE,
+         label.size=6)
 ```
 
-```{r plotMDSfixed, fig.height=5, fig.width=10}
-# Redo the MDSplot with corrected information
-par(mfrow=c(1,2))
-col.cell <- c("purple","orange")[sampleinfo$CellType]
-col.status <- c("blue","red","dark green")[sampleinfo$Status]
+The mislabelled samples are *MCL1.DG*, which is labelled as *luminal* but should
+be *basal*, and *MCL1.LA*, which is labelled as *basal* but should be *luminal*.
+Let's fix the sample sheet and save the new version
 
-plotMDS(ddsObj,col=col.cell, main="Cell type")
-legend("topleft",fill=c("purple","orange"),legend=levels(sampleinfo$CellType))
+```{r correctSampleSheet}
+sampleinfo <- sampleinfo %>% 
+    mutate(CellType=ifelse(Sample=="MCL1.DG", "basal", CellType)) %>% 
+    mutate(CellType=ifelse(Sample=="MCL1.LA", "luminal", CellType)) %>% 
+    mutate(Group=ifelse(Sample=="MCL1.DG", "basal.virgin", Group)) %>% 
+    mutate(Group=ifelse(Sample=="MCL1.LA", "luminal.virgin", Group))
+write_csv(sampleinfo, "data/SampleInfo_Corrected.txt")
+```
 
-plotMDS(ddsObj,col=col.status, main="Status")
-legend("topleft",fill=c("blue","red","dark green"),legend=levels(sampleinfo$Status))
+Let's look at the PCA now.
+
+```{r correctedPCA}
+autoplot(pcDat,
+         data = sampleinfo, 
+         fill="Status", 
+         shape="CellType",
+         size=5) +
+    scale_shape_manual(values=c(21, 24)) +
+    guides(fill = guide_legend(override.aes=list(shape=22)))
 ```
 
 > ### Discussion
@@ -298,88 +308,70 @@ legend("topleft",fill=c("blue","red","dark green"),legend=levels(sampleinfo$Stat
 > What is the second greatest source of variation in the data?
 >
 
-> ### Challenge 2
-> Rather than plotting the sample name we could use a symbol using the `pch` 
-> argument. If we use a different symbol for each of the cell types we could
-> have a single plot with both the cell type and status information represented.
-> 
-> 1. Redo the plots choosing your own colours.
-> 2. Change the plotting character to a symbol instead of the column names  
-> HINT: use `pch` (**p**lotting **ch**aracters) argument. Try `pch=16` and see what happens.
-> 3. Change the plotting characters such that basal samples have the value `24` and luminal samples have the value `25` and colour the points by status (lactate, pregnant, virgin)
->
+Replicate samples from the same group cluster together in the plot, while 
+samples from different groups form separate clusters. This indicates that the
+differences between groups are larger than those within groups, i.e.,
+differential expression is greater than the variance and can be detected. The
+differences between virgin, pregnant and lactating are greater for luminal cells
+than for basal.
 
-**Solution**
-```{r solutionChallenge2, echo=FALSE}
-
-
-
-
-```
-
-
-The distance between each pair of samples in the MDS plot is calculated as the
-leading fold change, defined as the root-mean-square of the largest 500
-log2-fold changes between that pair of samples. Replicate samples from the same
-group cluster together in the plot, while samples from different groups form
-separate clusters. This indicates that the differences between groups are
-larger than those within groups, i.e., differential expression is greater than
-the variance and can be detected. In the MDS plot, the distance between basal
-samples on the left and luminal cells on the right is about 6 units,
-corresponding to a leading fold change of about 64-fold (2^6 = 64) between
-basal and luminal. The expression differences between virgin, pregnant and
-lactating are greater for luminal cells than for basal.
-
-Notes
-
-* The MDS plot can be simply generated with `plotMDS(ddsObj)`. The additional
-code is purely for aesthetics, to improve the visualization of the groups.
-* Clustering in the MDS plot can be used to motivate changes to the design
+Clustering in the PCA plot can be used to motivate changes to the design
  matrix in light of potential batch effects. For example, imagine that the
  first replicate of each group was prepared at a separate time from the second
- replicate. If the MDS plot showed separation of samples by time, it might be
+ replicate. If the PCA plot showed separation of samples by time, it might be
  worthwhile including time in the down stream analysis to account for the
  time-based effect.
 
-### Additional - MDS beyond the first two dimensions
 
-`plotMDS` plots the first two dimensions as a default, however you can plot higher dimensions using the `dim` argument.
+### Additional - PCA beyond the first two dimensions [optional]
 
-```{r plotMDS3and4, fig.width=5, fig.height=5}
-# Dimension 3 appears to separate pregnant samples from the rest. Dim4?
-plotMDS(ddsObj,dim=c(3,4), col=col.status)
-legend("topleft",fill=c("blue","red","dark green"),legend=levels(sampleinfo$Status))
+`autoplot` plots the first two dimensions as a default, however you can plot higher dimensions using the `x` and `y` arguments.
+
+```{r plotPCA3and4, fig.width=5, fig.height=5}
+autoplot(pcDat,
+         data = sampleinfo, 
+         fill = "Status", 
+         shape = "CellType",
+         size = 5,
+         x = 2,
+         y = 3) +
+    scale_shape_manual(values=c(21, 24)) +
+    guides(fill = guide_legend(override.aes=list(shape=22)))
 ```
 
 ### Additional - Interactive MDS Plot with Glimma [optional]
 
-Another alternative is to generate an interactive MDS plot using the *Glimma*
-package. This allows the user to interactively explore the different
-dimensions.
+Another alternative is to generate a Multidimensional scaling (MDS) plot. MDS 
+is similar to PCA, in MDS the distance between each pair of samples in the MDS
+plot is calculated as the 'leading fold change', which is defined as the
+root-mean-square of the largest 500 log2-fold changes between that pair of
+samples. The *Glimma* package creates interactive plots that allow the use to 
+explore the different dimensions.
 
 ```{r glimmaMDS}
-labels <- paste(sampleinfo$SampleName, sampleinfo$Group)
-glMDSPlot(ddsObj, labels=labels, groups=sampleinfo$Group, folder="mds")
+library(Glimma)
+glMDSPlot(rlogcounts, 
+          labels = sampleinfo$Sample, 
+          groups = sampleinfo[,c("CellType", "Status")], 
+          folder = "mds")
 ```
 
 *Glimma* was created to make interactive versions of some of the popular plots
-from the *limma* package. At present it can be used to obtain MDS plots and
-mean-difference (MD) plots, which will be covered later. The output of
-`glMDSPlot` is an html page (/mds/MDS-Plot.html) that shows the MDS plot on the
-left, and the amount of variation explained by each dimension in a barplot on
-the right. The user can hover over points to find out sample information, and
-switch between successive dimensions in the MDS plot by clicking on the bars in
-the barplot. The default MDS plots shows dimensions 1 and 2.
+from the *limma* package. At present it can be used to obtain MDS plots. The
+output of `glMDSPlot` is an html page (/mds/MDS-Plot.html) that shows the MDS
+plot on the left, and the amount of variation explained by each dimension in a
+barplot on the right. The user can hover over points to find out sample
+information, and switch between successive dimensions in the MDS plot by 
+clicking on the bars in the barplot. The default MDS plots shows dimensions 1 
+and 2.
 
 ## Hierarchical clustering with heatmaps
 
-An alternative to `plotMDS` for examining relationships between samples is
+An alternative to PCA plots for examining relationships between samples is
 using hierarchical clustering. Heatmaps are a nice visualisation to examine
 hierarchical clustering of your samples. We can do this using the `heatmap.2`
 function from the *gplots* package. In this example `heatmap.2` calculates a
-matrix of euclidean distances from the logCPM (`logcounts` object) for the 500
-most variable genes. (Note this has more complicated code than plotting
-principle components using `plotMDS`.)
+matrix of euclidean distances from the `logcounts` object.
 
 The *RColorBrewer* package has nicer colour schemes, accessed using the
 `brewer.pal` function. "RdYlBu" is a common choice, and "Spectral" is also
@@ -389,22 +381,23 @@ Note:The `png` function will create a png file to save the plots created
 straight after, and will close this file when `dev.off()` is called. To see
 your plots interactively, simply omit those two lines.
 
-Let's select data for the 500 most variable genes and plot the heatmap
+We don't want to plot a heatmap of all 22013 genes, so let's select data for the 
+500 most variable genes and plot the heatmap.
 
 ```{r getHMData}
 # We estimate the variance for each row in the logcounts matrix
-var_genes <- apply(logcounts, 1, var)
+var_genes <- apply(rlogcounts, 1, var)
 head(var_genes)
 # Get the gene names for the top 500 most variable genes
 select_var <- names(sort(var_genes, decreasing=TRUE))[1:500]
-head(select_var)
 # Subset logcounts matrix
-highly_variable_lcpm <- logcounts[select_var,]
-dim(highly_variable_lcpm)
-head(highly_variable_lcpm)
+hmData <- rlogcounts[select_var,]
 ```
 
-```{r plotHM, fig.width=10, fig.height=10}
+```{r plotHM, fig.width=10, fig.height=10, message = FALSE}
+library(gplots)
+library(RColorBrewer)
+
 # Get some nicer colours
 mypalette <- brewer.pal(11, "RdYlBu")
 # http://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3
@@ -413,14 +406,14 @@ morecols <- colorRampPalette(mypalette)
 col.cell <- c("purple","orange")[sampleinfo$CellType]
 
 # Plot the heatmap
-heatmap.2(highly_variable_lcpm, 
+heatmap.2(hmData, 
           col=rev(morecols(50)),
           trace="column", 
           main="Top 500 most variable genes across samples",
           ColSideColors=col.cell,scale="row")
 ```
 
-> ### Additional Challenge 3
+> ### **Additional Challenge 3**
 >
 > Redo the heatmap using the top 500 LEAST variable genes.  
 > Change the colour scheme to "PiYG" and redo the heatmap. Try `?RColorBrewer` and see what other colour schemes are available.  
@@ -460,67 +453,64 @@ ddsObj <- DESeqDataSetFromMatrix(countData = countdata,
                               design = design)
 ```
 
-# Normalisation for composition bias
+# Normalisation
 
-The trimmed mean of M-values normalization method (TMM) is performed to
-eliminate composition biases between libraries [@robinson2010tmm]. This
-generates a set of normalization factors, where the product of these factors
-and the library sizes defines the effective library size. The `calcNormFactors`
-function in `eddsR` calculates the normalization factors between libraries. TMM
-normalisation (and most scaling normalisation methods) scale relative to one
-sample.
+The `estimateSizeFactors` command of `DESeq2` applies the "median ratio method"
+of normalisation[@Huber2010]. This generates a set of normalization factors and 
+adds them to the `ddsObj` in the `colcolData` slot.
 
-```{r calcNormFactors}
-# Apply normalisation to ddsList object
-ddsObj <- calcNormFactors(ddsObj)
+```{r estimateSizeFactors}
+# Apply normalisation to DDS object
+ddsObj <- estimateSizeFactors(ddsObj)
 ```
 
-This will update the normalisation factors in the `ddsList` object (their
-default values are 1). Take a look at the normalisation factors for these
-samples.
+Take a look at the normalisation factors for these samples.
 
 ```{r vizNormFactors}
-ddsObj$samples
+ddsObj@colData$sizeFactor
 ```
 
-The normalization factors multiply to unity across all libraries. A
-normalization factor below one indicates that the library size will be scaled
+A normalization factor below one indicates that the library size will be scaled
 down, as there is more suppression (i.e., composition bias) in that library
 relative to the other libraries. This is also equivalent to scaling the counts
 upwards in that sample. Conversely, a factor above one scales up the library
 size and is equivalent to downscaling the counts.
 
+The MCL1.LE and MCL1.LF have much smaller normalisation factors, and MCL1.LA and
+MCL1.LB have the largest. If we plot MAplots using the `plotMA` in `limma` [Ritchie2015] function for these samples, we should be able to see the 
+composition bias problem. 
 
-The last two samples have much smaller normalisation factors, and MCL1.LA and
-MCL1.LB have the largest. If we plot mean difference plots using the `plotMD`
-function for these samples, we should be able to see the composition bias
-problem. We will use the `logcounts`, which have been normalised for library
-size, but not for composition bias.
+The `rlog` data (`logcounts`) has already been normalised for both library size 
+and composition bias. Let's have a look at the raw `countsdata`; we will need to log2 scale it first.
 
-```{r plotRawMD, fig.height=5, fig.width=10}
+```{r plotRawMA, fig.height=5, fig.width=10, message = FALSE}
+library(limma)
+
 par(mfrow=c(1,2))
-plotMD(logcounts, column = 7)
+plotMA(rlogcounts, array = 7)
 abline(h=0,col="grey")
-plotMD(logcounts, column = 11)
+plotMA(rlogcounts, array = 11)
 abline(h=0,col="grey")
 ```
 
-The mean-difference plots show average expression (mean: x-axis) against
-log-fold-changes (difference: y-axis).  Because our `ddsList` object contains
+The MA plots show average expression (mean: x-axis) against
+log-fold-changes (difference: y-axis).  Because our `ddsObj` object contains
 the normalisation factors, if we redo these plots using `ddsObj`, we should see
 the composition bias problem has been solved.
 
-```{r plotNormedMD, fig.height=5, fig.width=10}
+```{r plotNormedMA, fig.height=5, fig.width=10}
+normalizedCounts <- counts(ddsObj, normalized=TRUE) 
+logNormalizedCounts <- log2(normalizedCounts + 1)
 par(mfrow=c(1,2))
-plotMD(ddsObj,column = 7)
+plotMA(logNormalizedCounts, array = 7)
 abline(h=0,col="grey")
-plotMD(ddsObj,column = 11)
+plotMA(logNormalizedCounts, array = 11)
 abline(h=0,col="grey")
 ```
 
 > ## Challenge 4
 >
-> Plot the biased and unbiased MD plots side by side for the same sample to see the before and after TMM normalisation effect.
+> Plot the biased and unbiased MA plots side by side for the same sample to see the before and after normalisation.
 >
 
 **Solution**
@@ -531,8 +521,9 @@ abline(h=0,col="grey")
 
 ```
 
-**We need to save a few data objects to use for Day 2 so we don't have to rerun everything**
+**We can save a few data objects to use later so we don't have to rerun 
+everything**
 
 ```{r saveData}
-save(ddsObj, sampleinfo, file="Robjects/preprocessing.Rdata")
+save(ddsObj, countdata, sampleinfo, file="Robjects/preprocessing.Rdata")
 ```
