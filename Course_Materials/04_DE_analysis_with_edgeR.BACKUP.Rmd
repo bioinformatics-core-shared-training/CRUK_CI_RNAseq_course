@@ -1,0 +1,213 @@
+---
+title: "RNA-seq analysis in R"
+subtitle: "Differential Expression of RNA-seq data"
+author: "Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle"
+date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
+output:
+  html_notebook:
+    toc: yes
+  html_document:
+    toc: yes
+minutes: 300
+layout: page
+bibliography: ref.bib
+---
+
+**Original Authors: Belinda Phipson, Anna Trigos, Matt Ritchie, Maria Doyle, Harriet Dashnow, Charity Law**
+Based on the course [RNAseq analysis in R](http://combine-australia.github.io/2016-05-11-RNAseq/) delivered on May 11/12th 2016
+
+# Resources and data files
+
+## Original materials
+
+This material has been created using the following resources:   
+http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf [@Lun2016]  
+http://monashbioinformaticsplatform.github.io/RNAseq-DE-analysis-with-R/99-RNAseq_DE_analysis_with_R.html  
+
+## Data files location
+
+Data files needed for this analysis are available in the `data` directory.
+
+# Recap of pre-processing
+
+The previous section walked-through the pre-processing and transformation of the count data. Here, for completeness, we list the minimal steps required to process the data prior to differential expression analysis.
+
+First load the packages we need.
+
+```{r loadLibraries, message=F}
+library(edgeR)
+library(limma)
+```
+
+```{r recap, eval=FALSE}
+## Read the counts from the downloaded data
+seqdata <- read.delim("data/GSE60450_Lactation-GenewiseCounts.txt", 
+                      stringsAsFactors = FALSE)
+
+# Remove first two columns from seqdata
+countdata <- as.matrix(seqdata[ ,-(1:2)])
+
+# Store EntrezGeneID as rownames
+rownames(countdata) <- seqdata$EntrezGeneID
+# modify column names
+colnames(countdata) <- substr(colnames(countdata), 1, 7)
+
+# Calculate the Counts Per Million measure
+myCPM <- cpm(countdata)
+
+# Identify genes with at least 0.5 cpm in at least 2 samples
+thresh <- myCPM > 0.5
+keep <- rowSums(thresh) >= 2
+
+# Subset the rows of countdata to keep the more highly expressed genes
+counts.keep <- countdata[keep,]
+
+# Convert to an edgeR object
+dgeObj <- DGEList(counts.keep)
+
+# Perform TMM normalisation
+dgeObj <- calcNormFactors(dgeObj)
+```
+
+# Differential expression with edgeR
+
+Now that we are happy that we have normalised the data and that the quality looks good, we can proceed to testing for differentially expressed genes. There are a number of packages to analyse RNA-Seq data. Most people use [DESEQ2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html) or [edgeR](http://bioconductor.org/packages/release/bioc/html/edgeR.html). 
+
+We will use **edgeR** for the rest of this practical.
+
+## Load the data
+
+Alternatively we can load the `dgeObj` and `sampleinfo` objects with the Rdata 
+file we created in the pre-processing tutorial.
+
+```{r loadData}
+# before proceeding clean all objects out of the environment
+rm(list=ls())
+
+# load the Rdata object we created in the previous session
+load("Robjects/preprocessing.Rdata")
+ls()
+```
+
+## Creating the design matrix
+
+First we need to create a design matrix for the groups, as we have seen in the linear models lecture. 
+We have two variables, status and cell type. We will fit two models under two assumptions; no interaction and interaction of these two factors. 
+
+Let's start with the model with only main effects, that is no interaction. The main assumption here is that the effect of the status is the same in both type of cells.
+
+```{r modelMatrix}
+# Specify a design matrix with an intercept term
+design <- model.matrix(~ CellType + Status, data = sampleinfo)
+colnames(design)[1] <- "Intercept"
+```
+
+## Data exploration
+
+An MDS plot shows distances, in terms of biological coefficient of variation (BCV), between samples. What do you think of the quality of the data? Can you anticipate if the interaction term will be important?
+
+```{r mdsPlot}
+
+plotMDS(dgeObj, 
+        labels=sampleinfo$Group, 
+        xlim=c(-4, 5),
+        col=c("black", "dark red", "blue")[sampleinfo$Status])
+
+```
+
+## Estimating the dispersion
+
+The common dispersion estimates the overall BCV of the dataset, averaged over all genes:
+
+```{r commonDispersion}
+
+dgeObj <- estimateCommonDisp(dgeObj)
+
+```
+
+Then we estimate gene-wise dispersion estimates, allowing a possible trend with average count size:
+
+```{r genewiseDispersion}
+
+dgeObj <- estimateGLMTrendedDisp(dgeObj)
+dgeObj <- estimateTagwiseDisp(dgeObj)
+
+```
+
+Plot the estimated dispersions:
+```{r dispersionPlot}
+
+plotBCV(dgeObj)
+
+```
+
+## Testing for differential expression
+
+First, we fit genewise glms:
+
+```{r fitGLM}
+
+# Fit the linear model
+fit <- glmFit(dgeObj, design)
+names(fit)
+head(coef(fit))
+
+```
+
+Conduct likelihood ratio tests for luminal vs basal and show the top genes:
+```{r deByLRT}
+
+lrt_BvsL <- glmLRT(fit, coef=2)
+topTags(lrt_BvsL)
+
+```
+
+
+> ### Challenge 1 {.challenge}
+> Conduct likelihood ratio tests for virgin vs lactate and show the top genes.
+
+**Solution**
+```{r solutionChallenge1}
+
+
+
+
+```
+
+## Contrasts
+
+Suppose we want to find differentially expressed genes between pregnant and virgin. We don't have a parameter that explicitly will allow us to test that hypothesis. We need to build a contrast:
+
+```{r makeContrast}
+PvsV <- makeContrasts(Statuspregnant - Statusvirgin, levels = design)
+lrt_pVsV <- glmLRT(fit, contrast=PvsV)
+topTags(lrt_pVsV)
+```
+
+## Testing an interaction model
+
+> ### Challenge 2 {.challenge}
+>
+> 1.Fit a model with interaction: What is the rationale to include the interaction (What assumption are you relaxing?)  
+> 2. Is the number of replicates good enough to include the interaction?  
+> 3. Is the interaction needed in the model?  
+
+
+**Solution**
+```{r solutionChallenge2}
+
+
+
+
+```
+
+
+## Finally save the results in a new Rdata object
+
+```{r saveObjects}
+
+save(lrt_BvsL, dgeObj, sampleinfo, file="Robjects/DE.Rdata")
+
+```
+
+-----------

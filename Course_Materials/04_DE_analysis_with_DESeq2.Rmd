@@ -210,7 +210,7 @@ head(topGenesPvL)
 
 **Solution**
 ```{r solutionChallenge1}
- resBvL <- results(ddsObj, name="CellType_basal_vs_luminal")
+# resBvL <- results(ddsObj, name="CellType_basal_vs_luminal")
 # topGenesBvL <- resBvL %>%
 #     as.data.frame() %>%
 #     filter(!is.na(padj)) %>%
