@@ -15,7 +15,9 @@ bibliography: ref.bib
 
 # Recap of pre-processing
 
-The previous section walked-through the pre-processing and transformation of the count data. Here, for completeness, we list the minimal steps required to process the data prior to differential expression analysis.
+The previous section walked-through the pre-processing and transformation of the
+count data. Here, for completeness, we list the minimal steps required to 
+process the data prior to differential expression analysis.
 
 ```{r recap, eval = FALSE}
 
@@ -118,7 +120,7 @@ ddsObj <- DESeqDataSetFromMatrix(countData = countdata,
 Let's plot a PCA from `vst` transformed data. 
 Can you anticipate if the interaction term will be important?
 
-```{r mdsPlot, fig.width=10, fig.height=10}
+```{r pcaPlot}
 vstcounts <- vst(ddsObj, blind=TRUE)
 plotPCA(vstcounts, intgroup=c("Status", "CellType"))
 ```
@@ -127,19 +129,19 @@ plotPCA(vstcounts, intgroup=c("Status", "CellType"))
 
 The main DESeq2 work flow is carried out in 3 steps:
 
-1. Calculate the "median ratio" normalisation size factors
+First, Calculate the "median ratio" normalisation size factors...
 
 ```{r commonSizeFactors}
 ddsObj <- estimateSizeFactors(ddsObj)
 ```
 
-2. Then estimate dispersion
+... then estimate dispersion ...
 
 ```{r genewiseDispersion}
 ddsObj <- estimateDispersions(ddsObj)
 ```
 
-3. Apply Negative Binomial GLM fitting and calculate Wald statistics
+... finally, apply Negative Binomial GLM fitting and calculate Wald statistics
 ```{r applyGLM}
 ddsObj <- nbinomWaldTest(ddsObj)
 ```
@@ -162,8 +164,16 @@ ddsObj <- DESeq(ddsObj)
 
 ## Generate a results table
 
+We can generate a table of differential expression results from the DDS object
+using the `results` function of DESeq2. DESeq2 will extract the 
+
+From DESeq2 manual:
+"The results function of the DESeq2 package performs independent filtering by default using the mean of normalized counts as a filter statistic. A threshold on the filter statistic is found which optimizes the number of adjusted p values lower than a [specified] significance level".
+The default significance level for independent filtering is `0.1`, however, you
+should set this to the FDR cut off you are planning to use. We will use `0.05`
+
 ```{r resultsTable}
-res <- results(ddsObj)
+res <- results(ddsObj, lfcThreshold = 0.05)
 head(res)
 ```
 
@@ -181,15 +191,18 @@ are available directly from the model matrix.
 resultsNames(ddsObj)
 ```
 
-### A note on independent filtering
+Let's just rename `res` so that we know which contrast results it contains.
 
-From DESeq2 manual:
-"The results function of the DESeq2 package performs independent filtering by default using the mean of normalized counts as a filter statistic. A threshold on the filter statistic is found which optimizes the number of adjusted p values lower than a [specified] significance level" (default is `padj` < 0.1).
+```{r}
+resVvL <- res
+```
 
 
 ```{r resultPvL}
 # get the results for pregant versus lactate
-resPvL <- results(ddsObj, name="Status_pregnant_vs_lactate")
+resPvL <- results(ddsObj, 
+                  name="Status_pregnant_vs_lactate", 
+                  lfcThreshold = 0.05)
 resPvL
 ```
 
@@ -228,7 +241,9 @@ hypothesis. We need to provide a contrast.
 ```{r makeContrast}
 resultsNames(ddsObj)
 
-resPvV <- results(ddsObj, contrast=c("Status", "pregnant", "virgin"))
+resPvV <- results(ddsObj,
+                  contrast=c("Status", "pregnant", "virgin"),
+                  lfcThreshold = 0.05)
 ```
 
 ## Comparing two design models
@@ -268,9 +283,9 @@ resCvCS <- results(ddsObjC)
 
 ## Finally save the results in a new Rdata object
 
-```{r saveObjects}
+```{r saveObjects, eval=FALSE}
 
-save(resBvL, ddsObj, sampleinfo, file="data/DE.Rdata")
+save(resVvL, ddsObj, sampleinfo, file="results/DE.Rdata")
 
 ```
 
