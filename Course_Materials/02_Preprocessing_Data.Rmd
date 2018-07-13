@@ -529,5 +529,5 @@ abline(h=0,col="grey")
 everything**
 
 ```{r saveData}
-save(countdata, sampleinfo, file="data/preprocessing.Rdata")
+save(countdata, sampleinfo, file="results/preprocessing.Rdata")
 ```
