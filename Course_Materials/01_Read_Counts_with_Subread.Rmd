@@ -8,6 +8,7 @@ output:
 minutes: 300
 layout: page
 subtitle: Counting
+bibliography: ref.bib
 ---
 
 
@@ -16,7 +17,7 @@ subtitle: Counting
 The raw reads, in fastq files, have been aligned using HISAT2. The alignment
 process produces a set of BAM files, where each file contains the read
 alignments for each library. The BAM files containing the aligned reads can be
-found in the **`RNAseq/data`** directory under the **`Course_Materials`** 
+found in the **`data`** directory under the **`CourseMaterials`** 
 
 ## Counting
 
@@ -27,7 +28,7 @@ each read is aligned to corresponds to a particular gene or exon and then
 summarise across the entire BAM file to get total read counts for each gene or
 exon. 
 
-We will use **`featureCounts`** programme from the [subRead
+We will use **`featureCounts`** [@Liao2014] programme from the [subRead
 package](http://subread.sourceforge.net/) to do the counting. In addition to
 the BAM files, we also need to provide **`featureCounts`** with an annotation
 file. Usually this will be a GTF/GFF file corresponding to the genome assembly
@@ -52,7 +53,7 @@ Lets have a quick look at the top of a GTF file so we can see what data it
 contains and what **feature type** and **attribute type** mean:
 
 ```
-cd ~/CourseMaterials/data
+cd ~/CourseMaterials/data/counts
   
 head Mus_musculus.GRCm38.80.gtf
 ```
@@ -62,14 +63,12 @@ GTF for the mouse GRCm38 genome assembly.
 
 ```
   featureCounts \
-      -C \
       -t exon \
       -g gene_id \
       -a Mus_musculus.GRCm38.80.gtf \
       -o MCL1_DJ.featureCounts \
       MCL1_DJ.bam
 ```
-* **`-C`** - do not count reads where the pairs are mapped to different chromosomes
 * **`-t exon`** - the **feature** type to count reads against, in this case exons
 * **`-g gene_id`** - the **attribute** type to summarise counts by, in this case the gene ID
 
@@ -93,11 +92,10 @@ head MCL1.DJ.featureCounts
 
 The full results table begins with a line containing the command used to generate the counts. It then has a table of 7 columns. The first column is the gene identifier, this will vary depending on the GTF file used, in our case this is a UCSC gene id. The second to fifth columns describe the genes location, and the sixth column is the length of the gene. The final column contains the number of reads assigned to the gene. Note that **`featureCounts`** outputs a row for every gene in the GTF, even the ones with no reads assigned, and the row order is determined by the order in the GTF. This means that if featureCounts is used on mutliple samples with same GTF file, the separate files can be combined easily as the rows always refer to the same gene.
 
-In fact we can have **`featureCounts`** do this for us by running all of our libraries together in one command. To save time for this we will use versions of our BAM files that only include alignments to chromosome 15. You can find these in **`smallBams`** directory.
+In fact we can have **`featureCounts`** do this for us by running all of our libraries together in one command. To save time for this we will use versions of our BAM files that only include alignments to chromosome 15. You can find these in **`small_bams`** directory.
 
 ```
   featureCounts \
-      -C \
       -t exon \
       -g gene_id \
       -a small_bams/Mus_musculus.GRCm38.80.chr15.gtf  \
