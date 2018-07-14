@@ -170,7 +170,34 @@ librarySizes <- countdata %>%
     as.data.frame() %>% 
     summarise_all(sum) %>% 
     gather("Sample", "Counts")
+```
 
+### A Brief Introduction to ggplot2
+
+The [`ggplot2`](http://ggplot2.tidyverse.org/) package has emerged as an 
+attractive alternative to the traditional plots provided by base R. A full 
+overview of all capabilities of the package is available from the 
+[cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf).
+
+In brief:-
+
+- `librarySizes` is our data frame containing the variables we wish to plot
+- `aes` creates a mapping between the variables in our data frame to the 
+*aes*thetic proprties of the plot:
+    + the x-axis is mapped to `Sample`
+    + the y-axis is mapped to `Counts`
+- `geom_bar` specifies the particular type of plot we want (in this case a bar 
+plot)
+    + see 
+    [the cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf) 
+    for other plot types
+
+The real advantage of `ggplot2` is the ability to change the appearance of our 
+plot by mapping other variables to aspects of the plot. For example, we could 
+colour the points based on a p-value cut-off. The colours are automatically 
+chosen by `ggplot2`, but we can specifiy particular values.
+
+```{r plotLibrarySize}
 ggplot(librarySizes, aes(x=Sample, y=Counts)) +
        geom_bar(stat="identity", col="black", fill="steelblue")
 ```
