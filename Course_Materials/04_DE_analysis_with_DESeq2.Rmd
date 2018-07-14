@@ -95,9 +95,9 @@ type of cells.
 design <- as.formula(~ CellType + Status)
 modelMatrix <- model.matrix(design, data = sampleinfo)
 modelMatrix
-# Let's set factor levels on CellType to use luminal as the intercept
-sampleinfo$CellType <- factor(sampleinfo$CellType, 
-                              levels = c("luminal", "basal"))
+# Let's set factor levels on Status to use virgin as the intercept
+sampleinfo$Status <- factor(sampleinfo$Status, 
+                              levels = c("virgin", "pregnant", "lactate"))
 modelMatrix <- model.matrix(design, data = sampleinfo)
 modelMatrix
 
@@ -194,27 +194,27 @@ resultsNames(ddsObj)
 Let's just rename `res` so that we know which contrast results it contains.
 
 ```{r}
-resVvL <- res
+resLvV <- res
 ```
 
 
-```{r resultPvL}
-# get the results for pregant versus lactate
-resPvL <- results(ddsObj, 
-                  name="Status_pregnant_vs_lactate", 
+```{r resultPvV}
+# get the results for pregant versus virgin
+resPvV <- results(ddsObj, 
+                  name="Status_pregnant_vs_virgin", 
                   lfcThreshold = 0.05)
-resPvL
+resPvV
 ```
 
 Let's get the top 100 genes by adjusted p-value
 
-```{r topGenesPvL, message = F}
-topGenesPvL <- resPvL %>%
+```{r topGenesPvV, message = F}
+topGenesPvV <- resPvV %>%
     as.data.frame() %>% 
     filter(!is.na(padj)) %>% 
     arrange(padj) %>% 
     head(100)
-head(topGenesPvL)
+head(topGenesPvV)
 ```
 
 > ### Challenge 1 {.challenge}
@@ -235,14 +235,14 @@ head(topGenesPvL)
 ## Contrasts
 
 Suppose we want to find differentially expressed genes between **pregnant** and 
-**virgin**. We don't have a parameter that explicitly will allow us to test that 
-hypothesis. We need to provide a contrast.
+**lactate**. We don't have a parameter that explicitly will allow us to test 
+that hypothesis. We need to provide a contrast.
 
 ```{r makeContrast}
 resultsNames(ddsObj)
 
-resPvV <- results(ddsObj,
-                  contrast=c("Status", "pregnant", "virgin"),
+resPvL <- results(ddsObj,
+                  contrast=c("Status", "pregnant", "lactate"),
                   lfcThreshold = 0.05)
 ```
 
@@ -285,7 +285,7 @@ resCvCS <- results(ddsObjC)
 
 ```{r saveObjects, eval=FALSE}
 
-save(resVvL, ddsObj, sampleinfo, file="results/DE.Rdata")
+save(resLvV, ddsObj, sampleinfo, file="results/DE.Rdata")
 
 ```
 
