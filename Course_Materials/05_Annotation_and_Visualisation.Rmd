@@ -12,17 +12,17 @@ minutes: 300
 layout: page
 bibliography: ref.bib
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
-```{r setup, echo=FALSE}
+```{r setup, message=FALSE}
 library(biomaRt)
-library(tidyverse)
 library(DESeq2)
+library(tidyverse)
 ```
 
 Before starting this section, we will make sure we have all the relevant objects
-from the Differential Expression analysis present.
+from the Differential Expression analysis.
 
 ```{r loadData}
 load("Robjects/DE.Rdata")
@@ -33,7 +33,7 @@ load("Robjects/DE.Rdata")
 - Getting annotation
 - Visualising DE results
 - Retrieving gene models
-- Exporting browser traecks
+- Exporting browser tracks
 
 
 # Adding annotation to the DESeq2 results
@@ -58,7 +58,6 @@ The first step is to select the Biomart database we are going to access and
 which data set we are going to use.
 
 ```{r connect}
-library(biomaRt)
 # view the available databases
 listMarts()
 ## set up connection to ensembl database
@@ -78,25 +77,27 @@ Now we need to set up a query. For this we need to specify three things:
 
 (a) What type of information we are going to search the dataset on - called
 **filters**. In our case this is Ensembl Gene IDs
-(b) A vector if the **values** for our filter - the Ensembl Gene IDs from our DE 
-results table.
+(b) A vector of the **values** for our filter - the Ensembl Gene IDs from our DE 
+results table
 (c) What columns (**attributes**) of the dataset we want returned.
 
 Returning data from Biomart can take time, so it's always a good idea to test 
-your query on a small list of values first to make sure it is what you want. 
-We'll just use the first 10 gene id for now
+your query on a small list of values first to make sure it is doing what you
+want. We'll just use the first 1000 genes for now.
 
-```{r queryBioMart}
+```{r queryBioMart, message=F}
 
 # check the available "filters" - things you can filter for
 listFilters(ensembl) %>% 
     filter(str_detect(name, "ensembl"))
+# Set the filter type and values
 filterType <- "ensembl_gene_id"
-filterValues <- rownames(resVvL)[1:1000]
+filterValues <- rownames(resLvV)[1:1000]
 
 # check the available "attributes" - things you can retreive
 listAttributes(ensembl) %>% 
     head(20)
+# Set the list of attributes
 attributeNames <- c('ensembl_gene_id', 'entrezgene', 'external_gene_name')
 
 # run the query
@@ -107,7 +108,7 @@ annot <- getBM(attributes=attributeNames,
 ```
 
 
-## One-to-many relationships
+### One-to-many relationships
 
 Let's inspect the annotation.
 
@@ -119,11 +120,6 @@ length(unique(annot$ensembl_gene_id)) # why are there less than 1000 Gene ids?
 isDup <- duplicated(annot$ensembl_gene_id)
 dup <- annot$ensembl_gene_id[isDup]
 annot[annot$ensembl_gene_id%in%dup,]
-
-annot %>% 
-    group_by(ensembl_gene_id) %>% 
-    mutate(count=length(entrezgene)) %>% 
-    filter(count>1)
 ```
 
 There are a couple of genes that have multiple entries in the retrieved 
@@ -132,40 +128,45 @@ single Ensembl gene. These one-to-many relationships come up frequently in
 genomic databases, it is important to be aware of them and check when necessary. 
 
 We will need to do a little work before adding the annotation to out results 
-table. We could arbitrarily discard one of rows, or we could concatenate
-the Entrez IDs so that we don't lose information. Let's do the latter.
+table. We could decide to discard one or both of Entrez IDs, or we could 
+concatenate the Entrez IDs so that we don't lose information. 
 
-```{r}
-annot <- annot %>% 
-    group_by(ensembl_gene_id) %>% 
-    mutate(Entrez=str_c(entrezgene, collapse=";")) %>% 
-    select(-entrezgene) %>% 
-    distinct()
+<!-- ```{r} -->
+<!-- annot <- annot %>%  -->
+<!--     group_by(ensembl_gene_id) %>%  -->
+<!--     mutate(Entrez=str_c(entrezgene, collapse=";")) %>%  -->
+<!--     select(-entrezgene) %>%  -->
+<!--     distinct() -->
 
-annot[annot$ensembl_gene_id%in%dup,]
-dim(annot)
-```
+<!-- annot[annot$ensembl_gene_id%in%dup,] -->
+<!-- dim(annot) -->
+<!-- ``` -->
 
+<!--
 Now we have a unique Ensembl ID column, although we still had one missing 
 gene id, and the returned gene id order may not be the same as out original 
 table. 
+-->
+
+### Retrieve full annotation
 
 > ### Challenge {.challenge}
 > That was just 1000 genes. We need annotations for the entire results table.
 > Also, there may be some other interesting columns in BioMart that we wish to
-> retrieve.
-> (a) Search the attributes and add in:
->    (i) The gene description 
->   (ii) The genomic position - chromosome, start, end, and strand (4 columns)
->  (iii) The gene biotype
-> (b) Query BioMart using all of the genes in our results table (`resVvL`)
-> (c) Deal with duplicate rows as above (hint: it's still just Entrez that 
-> causes 1-many relations, but see if you can confirm this for yourself).
+> retrieve.  
+>
+> (a) Search the attributes and add the following to our list of attributes:  
+>       (i) The gene description   
+>       (ii) The genomic position - chromosome, start, end, and strand (4 columns) 
+>       (iii) The gene biotype  
+> (b) Query BioMart using all of the genes in our results table (`resLvV`)  
+> (c) How many Ensembl genes have multipe Entrez IDs associated with them?  
+> (d) How many Ensembl genes in `resLvV` don't have any annotation? Why is this?
 
 ```{r solutionChallenge1}
-# filterValues <- rownames(resVvL)
-
-# check the available "attributes" - things you can retreive
+# filterValues <- rownames(resLvV)
+# 
+# # check the available "attributes" - things you can retreive
 # listAttributes(ensembl) %>%
 #     head(20)
 # attributeNames <- c(attributeNames,
@@ -182,44 +183,72 @@ table.
 #                values = filterValues,
 #                mart = ensembl)
 # 
-# # deal with 1-many
-# annotation_table <- annot %>%
-#     group_by(ensembl_gene_id) %>%
-#     mutate(Entrez=str_c(entrezgene, collapse=";")) %>%
-#     dplyr::select(-entrezgene) %>%
-#     distinct()
+# sum(duplicated(annot$ensembl_gene_id))
+# missingGenes <- !rownames(resLvV)%in%annotation_table$ensembl_gene_id
+# rownames(resLvV)[missingGenes]
 ```
 
 ### Add annotation to the results table
 
 We can now add the annotation to the results table and then save the results 
-using the `write_csv` function, which writes the results out to a csv file.
+using the `write_tsv` function, which writes the results out to a tab
+separated file.
+To save time we have created an annotation table in which we have modified the 
+cumbersome Biomart column names, and dealt with the one-to-many issues.
 
-```{r outputDEtable}
-results.annotated <- as.data.frame(resVvL) %>% 
-    rownames_to_column("ensembl_gene_id") %>% 
-    left_join(annotation_table, "ensembl_gene_id")
+<!-- ```{r} -->
+<!-- ewe <- annot %>% -->
+<!--     filter(!duplicated(ensembl_gene_id)) %>%  -->
+<!--     dplyr::rename(Entrez="entrezgene", Symbol="external_gene_name", -->
+<!--            Description="description", Biotype="gene_biotype", -->
+<!--            Chr="chromosome_name", Start="start_position", -->
+<!--            End="end_position", Strand="strand") %>%  -->
+<!--     arrange(desc(Chr)) -->
+<!-- write_tsv(ewe, "data/Ensembl_annotations.tsv") -->
+<!-- ``` -->
 
-write_tsv(results.annotated, "results/VirginVsLactating_Results_Annotated.txt")
+
+```{r outputDEtable, message=FALSE}
+ensemblAnnot <- read_tsv("data/Ensembl_annotations.tsv")
+colnames(ensemblAnnot)
+resTab <- as.data.frame(resLvV) %>% 
+    rownames_to_column("GeneID") %>% 
+    left_join(ensemblAnnot, "GeneID") %>% 
+    rename(logFC=log2FoldChange, FDR=padj)
+
+write_tsv(resTab, "results/VirginVsLactating_Results_Annotated.txt")
 ```
+
+> ### Challenge {.challenge}
+> Have a look at gene symbols for most significant genes by adjusted p-value.
+> Do they make biological sense in the context of comparing gene expression
+> in mammary gland tissue between lactating and virgin mice? You may want to
+> do a quick web search of your favourite gene/protein database
+
+<!-- ```{r topGenes} -->
+<!-- resTab %>%  -->
+<!--     arrange(FDR) %>%  -->
+<!--     select(Symbol) -->
+<!--     head(10) -->
+<!-- ``` -->
 
 # Visualisation
 
-`DESeq2` provides a method called `lfcShrink` that shrinks log-Fold Change (LFC)
-estimates towards zero using and empirical Bayes procedure. The reason for doing
-this is that there is high variance in the LFC estimates when counts are low and
-this results in lowly expressed genes appearing to be show greater differences 
-between groups that highly expressed genes. The `lfcShrink` method compensates
-for this and allows better visualisation and ranking of genes. We will use it
-for our visualisations of the data.
+`DESeq2` provides a functon called `lfcShrink` that shrinks log-Fold Change 
+(LFC) estimates towards zero using and empirical Bayes procedure. The reason for
+doing this is that there is high variance in the LFC estimates when counts are 
+low and this results in lowly expressed genes appearing to be show greater
+differences between groups that highly expressed genes. The `lfcShrink` method
+compensates for this and allows better visualisation and ranking of genes. We 
+will use it for our visualisations of the data.
 
 ```{r}
-ddsObjVvLshrink <- lfcShrink(ddsObj, coef="Status_virgin_vs_lactate")
+ddsObjVvLshrink <- lfcShrink(ddsObj, coef="Status_lactate_vs_virgin")
 resTab <- ddsObjVvLshrink %>% 
     as.data.frame() %>% 
-    rownames_to_column("ensembl_gene_id") %>% 
-    left_join(annotation_table, "ensembl_gene_id") %>% 
-    arrange(-padj)
+    rownames_to_column("GeneID") %>% 
+    left_join(ensemblAnnot, "GeneID") %>% 
+    rename(logFC=log2FoldChange, FDR=padj)
 ```
 
 ## MA plots
@@ -242,14 +271,15 @@ for the top 20 most significantly differentially expressed genes. Let's use
 ggplot2 instead.
 
 ```{r maPlot}
+# add a column with the names of only the top 10 genes
+cutoff <- sort(resTab$pvalue)[10]
+resTab <- resTab %>% 
+    mutate(TopGeneLabel=ifelse(pvalue<=cutoff, Symbol, ""))
 
-# what is the 20th lowest FDR (padj)
-cutoff <- sort(resTab$padj)[20]
-
-ggplot(resTab, aes(x = log2(baseMean), y=log2FoldChange, fill=padj < 0.05)) + 
-    geom_point(pch=21, ) +
-    scale_fill_manual(values=c("lightyellow","darkred", "black")) + 
-    guides(fill = guide_legend(override.aes = list(alpha=1)))
+ggplot(resTab, aes(x = log2(baseMean), y=logFC)) + 
+    geom_point(aes(colour=FDR < 0.05), pch=20, size=0.5) +
+    geom_text(aes(label=TopGeneLabel)) +
+    labs(x="mean of normalised counts", y="log fold change")
 ```
 
 
@@ -260,40 +290,60 @@ ggplot(resTab, aes(x = log2(baseMean), y=log2FoldChange, fill=padj < 0.05)) +
 Another common visualisation is the 
 [*volcano plot*](https://en.wikipedia.org/wiki/Volcano_plot_(statistics)) which 
 displays a measure of significance on the y-axis and fold-change on the x-axis. 
+In this case we use the log2 fold change (`logFC`) on the x-axis, and on the 
+y-axis we'll use `-log10(FDR)`. This `-log10` transformation is commonly used
+for p-values as it means that more significant genes have a higher scale.
+We should first remove the genes that we excluded by the independent filtering
+process of DESeq2
 
-```{r volcanoPlot,fig.height=5,fig.width=10}
+```{r volcanoPlot, fig.height=5, fig.width=10}
+# first remove the filtered genes (FDR=NA) and create a -log10(FDR) column
+filtTab <- resTab %>% 
+    filter(!is.na(FDR)) %>% 
+    mutate(`-log10(FDR)` = -log10(FDR))
 
-signif <- -log10(results.annotated$FDR)
+ggplot(filtTab, aes(x = logFC, y=`-log10(FDR)`)) + 
+    geom_point(aes(colour=FDR < 0.05), size=2)
+```
 
-plot(results.annotated$logFC, 
-     signif,
-     bg="black",
-     pch=21,
-     xlab="log2(Fold Change)")
-points(results.annotated[detags,"logFC"],
-       -log10(results.annotated[detags,"FDR"]),
-       pch=21,
-       bg="red")
+We could limit the values at the top of the plot so that we can see the lower
+ portion more clearly.
+ 
+```{r volcanoPlotLtd, fig.height=5, fig.width=10}
+filtTab <- filtTab %>% 
+    mutate(`-log10(FDR)`=ifelse(`-log10(FDR)` >50, 51, `-log10(FDR)`))
 
+ggplot(filtTab, aes(x = logFC, y=`-log10(FDR)`)) + 
+    geom_point(aes(colour=FDR < 0.05, shape = `-log10(FDR)` > 50), size=2)
 ```
 
 ### Strip chart for gene expression
 
-Before following up on the DE genes with further lab work, a recommended *sanity check* is to have a look at the expression levels of the individual samples for the genes of interest. We can quickly look at grouped expression using `stripchart`. We can use the normalised log expression values in the  `dgeCounts` object (`dgeCounts$counts`).
+Before following up on the DE genes with further lab work, a recommended *sanity
+check* is to have a look at the expression levels of the individual samples for 
+the genes of interest. We can quickly look at grouped expression using 
+`stripchart`. We can retrieve the normalised expression values in the 
+`ddsObj` object using the `counts` function from DESeq2.
 
 ```{r geneCountStripchart, fig.width=5, fig.height=5, fig.align="center"}
-normCounts <- cpm(dgeObj, log = T)
+normCounts <- counts(ddsObj, normalized=TRUE) %>% 
+    log2()
 
-# Let's look at the first gene in the topTable, Krt5, which has a rowname 110308
+# Let's look at the most significantly differentially expressed gene: Wap
+topgene <- filter(resTab, Symbol=="Wap")
+topgene
+
+groups <- colData(ddsObj)$Group
 par(mar=c(8,4,2,2)) #adjust the plot margins the x-labels are visible - see ?par
-stripchart(normCounts["110308",]~sampleinfo$Group,
+stripchart(normCounts["ENSMUSG00000000381",]~groups,
            xlab="",
            ylab="log2(Counts)",
            vertical=TRUE,
            las=2,
            pch=21,
            col=1:6,
-           cex=2)
+           cex=2,
+           main="Normalised Counts - Wap")
 ```
 
 ### Interactive StripChart with Glimma
@@ -303,14 +353,15 @@ An interactive version of the volcano plot above that includes the raw per sampl
 
 ```{r}
 library(Glimma)
-group <- sampleinfo$Group
-levels(group) <- c("basal.lactate","basal.preg","basal.virgin","lum.lactate", "lum.preg", "lum.virgin")
-annot.mod <- annot
-colnames(annot.mod)[1] <- "GeneID"
-de <- as.numeric(results$FDR<=0.01)
-glXYPlot(x=results$logFC, y=-log10(results$FDR),
-         xlab="logFC", ylab="B", main="B.PregVsLac",
-         counts=normCounts, groups=group, status=de,
+group <- as.factor(sampleinfo$Group)
+levels(group) <- c("basal.lact","basal.preg","basal.vir",
+                   "lum.lact", "lum.preg", "lum.vir")
+annot.mod <- filtTab[,c("GeneID", "Symbol", "Description")]
+de <- as.numeric(filtTab$FDR<=0.05)
+filtCounts <- normCounts[filtTab$GeneID,]
+glXYPlot(x=filtTab$logFC, y=-log10(filtTab$FDR),
+         xlab="logFC", ylab="Normalised Counts", main="Lactating v Virgin",
+         counts=filtCounts, groups=group, status=de,
          anno=annot.mod, id.column="ENTREZID", folder="volcano")
 ```
 
@@ -322,20 +373,11 @@ It might seem natural to add genomic locations to our annotation table, and poss
 
 The package we will be using is `TxDb.Mmusculus.UCSC.mm10.knownGene`. Packages are available for other organisms and genome builds. It is even possible to *build your own database* if one does not exist. See `vignette("GenomicFeatures")` for details
 
-```{r installTxDb, eval=FALSE}
-# source("http://www.bioconductor.org/biocLite.R")
-## For mouse
-# biocLite("TxDb.Mmusculus.UCSC.mm10.knownGene")
-## For Humans
-# biocLite("TxDb.Hsapiens.UCSC.hg19.knownGene")
-```
-
 We load the library in the usual fashion and create a new object to save some typing. As with the `org.` packages, we can query what columns are available with `columns`,
 
 ```{r loadTxDB, message=FALSE}
-library(TxDb.Mmusculus.UCSC.mm10.knownGene)
-tx <- TxDb.Mmusculus.UCSC.mm10.knownGene
-columns(tx)
+library(GenomicFeatures)
+mmusculusEnsembl <- makeTxDbFromBiomart(dataset="mmusculus_gene_ensembl")
 ```
 
 The `select` function is used in the same manner as the `org.Mm.eg.db` packages. 
@@ -477,10 +519,10 @@ We will also truncate the fold-changes to between -5 and 5 to and divide this ra
 
 ```{r}
 rbPal <- colorRampPalette(c("red", "blue"))
-logfc <- pmax(sigRegions$logFC, -5)
-logfc <- pmin(logfc , 5)
+logFC <- pmax(sigRegions$logFC, -5)
+logFC <- pmin(logFC , 5)
 
-Cols <- rbPal(10)[as.numeric(cut(logfc, breaks = 10))]
+Cols <- rbPal(10)[as.numeric(cut(logFC, breaks = 10))]
 ```
 
 The colours and score have to be saved in the GRanges object as `score` and `itemRgb` columns respectively, and will be used to construct the browser track. The rtracklayer package can be used to import and export browsers tracks.
@@ -548,45 +590,6 @@ hist(mcols(my.reads)$mapq, main="", xlab="MAPQ")
 ```
 
 However, there are more-sophisticated visualisation options for aligned reads and range data. We will use the `ggbio` package, which first requires some discussion of the `ggplot2` plotting package.
-
-
-## Brief Introduction to ggplot2
-
-The [`ggplot2`](http://ggplot2.tidyverse.org/) package has emerged as an attractive alternative to the traditional plots provided by base R. A full overview of all capabilities of the package is available from the [cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf).
-
-A simple scatter plot, equivalent to `plotSmear` from before, can be generated as follows:-
-
-```{r,fig.width=12,fig.height=5}
-library(ggplot2)
-ggplot(results, aes(x = logCPM, y=logFC)) + geom_point() 
-
-```
-
-In brief:-
-
-- `results` is our data frame containing the variables we wish to plot
-- `aes` creates a mpping between the variables in our data frame to the *aes*thetic proprties of the plot
-    + the x-axis is mapped to `logCPM`, y-axis is mapped to `logFC`
-- `geom_point` specifies the particular type of plot we want (in this case a scatter plot)
-    + see [the cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf) for other plot types
-
-The real advantage of `ggplot2` is the ability to change the appearance of our plot by mapping other variables to aspects of the plot. For example, we could colour the points based on a p-value cut-off. The colours are automatically chosen by `ggplot2`, but we can specifiy particular values.
-
-```{r,fig.width=12,fig.height=5}
-ggplot(results, aes(x = logCPM, y=logFC, fill=FDR < 0.05)) + 
-    geom_point(pch=21)
-
-ggplot(results, aes(x = logCPM, y=logFC, fill=FDR < 0.05)) + 
-    geom_point(alpha=0.4, pch=21) + 
-    scale_fill_manual(values=c("yellow","red"))
-```
-
-The volcano plot can be constructed in a similar manner
-
-```{r,fig.width=12, fig.height=5}
-ggplot(results, aes(x = logFC, y=-log10(FDR))) + 
-    geom_point(aes(fill=FDR < 0.05), pch=21, size=2)
-```
 
 
 ## Composing plots with ggbio
