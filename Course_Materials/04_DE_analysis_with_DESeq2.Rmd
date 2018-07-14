@@ -167,25 +167,41 @@ ddsObj <- DESeq(ddsObj)
 We can generate a table of differential expression results from the DDS object
 using the `results` function of DESeq2. DESeq2 will extract the 
 
-From DESeq2 manual:
-"The results function of the DESeq2 package performs independent filtering by default using the mean of normalized counts as a filter statistic. A threshold on the filter statistic is found which optimizes the number of adjusted p values lower than a [specified] significance level".
-The default significance level for independent filtering is `0.1`, however, you
-should set this to the FDR cut off you are planning to use. We will use `0.05`
-
 ```{r resultsTable}
 res <- results(ddsObj, lfcThreshold = 0.05)
 head(res)
 ```
 
-Let's have a look at the model matrix to understand why DESeq2 has given us this
-particular contrast.
+### Independent filtering
+
+You will notice that some of the adjusted p-values (`padj`) are NA. Remember 
+in Session 2 we said that there is no need to pre-filter the genes as DESeq2
+will do this through a process it calls 'independent filtering'. The genes 
+with `NA` are the ones DESeq2 has filtered out.
+
+From DESeq2 manual:
+"The results function of the DESeq2 package performs independent filtering by
+default using the mean of normalized counts as a filter statistic. A threshold 
+on the filter statistic is found which optimizes the number of adjusted p values
+lower than a [specified] significance level".
+
+The default significance level for independent filtering is `0.1`, however, you
+should set this to the FDR cut off you are planning to use. We will use `0.05` -
+this was the purpose of the `lfcThreshold` argument in the previous command.
+
+### The default contrast of `results`
+
+The `results` function has returned the results for the contrast "lactate vs 
+virgin". Let's have a look at the model matrix to understand why DESeq2 has 
+given us this particular contrast.
 
 ```{r veiwModelMatrix}
 modelMatrix
 ```
 
-DESeq2 has the command `resultsNames` that allows us to view the contrast that
-are available directly from the model matrix.
+By default, `results` has returned the contrast encoded by the final column in
+the model matrix. DESeq2 has the command `resultsNames` that allows us to view 
+the contrasts that are available directly from the model matrix.
 
 ```{r resultsNames}
 resultsNames(ddsObj)
