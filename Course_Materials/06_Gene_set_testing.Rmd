@@ -11,24 +11,13 @@ minutes: 300
 layout: page
 subtitle: Gene Set Testing for RNA-seq
 bibliography: ref.bib
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
-library(edgeR)
+library(tidyverse)
 ```
-
-**Original Authors: Belinda Phipson, Anna Trigos, Matt Ritchie, Maria Doyle, Harriet Dashnow, Charity Law**
-Based on the course [RNAseq analysis in R](http://combine-australia.github.io/2016-05-11-RNAseq/) delivered on May 11/12th 2016
-## Resources and data files
-
-This material has been created using the following resources:  
-http://www.statsci.org/smyth/pubs/QLedgeRPreprint.pdf [@Lun2016]  
-https://github.com/MonashBioinformaticsPlatform/RNAseq-DE-analysis-with-R
-
-Data files:  
-https://figshare.com/s/1d788fd384d33e913a2a :
-    mouse_c2_v5.rdata
-    mouse_H_v5.rdata
 
 # Gene Set Testing
 
@@ -41,7 +30,7 @@ Competitive gene set tests, such as those implemented in `GOseq` and `camera`, a
 Self-contained tests, which include the `ROAST` procedure, ask the question "Are the genes in the set/pathway differentially expressed as a whole?"
 
 ```{r loadData}
-load("Robjects/DE.Rdata")
+resLvV <- read_tsv("data/VirginVsLactating_Results_Annotated.txt")
 ```
 
 ## Gene Set Testing - competitive gene set tests
@@ -64,37 +53,53 @@ Create list of DEGs:
 
 ```{r}
 
-# Retrieve list of all genes tested:
-results <- as.data.frame(topTags(lrt_BvsL, n = Inf))
-print(head(results))
+# counts <- read_tsv("data/GSE60450_Lactation.featureCounts", comment="#")
+# # Retrieve list of all genes tested:
+# assayedGenes <- counts$Geneid
+# # Derive list of DEGs by filtering on FDR:
+# sigGenes <- resLvV$GeneID[resLvV$FDR < 0.05 & !is.na(resLvV$FDR)]
+# # create genes vector for goseq
+# genes <- as.integer(assayedGenes%in%sigGenes)
+# names(genes) <- assayedGenes
+# 
+# rm(counts)
 
-# Derive list of DEGs by filtering on FDR:
-genes <- results$FDR < 0.01
+# or is it
 
-# Add gene names to that list:
-names(genes) <- rownames(results)
+genes <- as.integer(resLvV$FDR < 0.05 & !is.na(resLvV$FDR))
+names(genes) <- resLvV$GeneID
 
-print(head(genes))
 ```
 
 ```{r goSeqPackage, message=F}
 library(goseq)
-library(TxDb.Mmusculus.UCSC.mm10.knownGene)
-#print(supportedGeneIDs())
-#print(supportedGenomes())
+supportedOrganisms() %>% filter(str_detect(Genome, "mm"))
 ```
 
 Fit the Probability Weighting Function (PWF):
 ```{r pwFunction}
-pwf <- nullp(genes, "mm10", "knownGene")
+pwf <- nullp(genes, "mm10", "ensGene", bias.data = resLvV$Length)
 ```
 
 Conduct gene set enrichment analysis:
 
 ```{r}
 #?goseq
-go.results <- goseq(pwf, "mm10","knownGene")
-go.results
+go.resLvV <- goseq(pwf, "mm10","ensGene")
+go.resLvV
+go.resLvV.bp <- goseq(pwf, "mm10","ensGene", test.cats=c("GO:BP"))
+```
+
+Get the GO information for the GO accessions.
+
+```{r}
+library(GO.db)
+
+for(goAccession in go.resLvV.bp$category[1:10]){
+    print(GOTERM[[goAccession]])
+    cat("-----------------------------------------\n\n")
+}
+
 ```
 
 ### fgsea analysis
@@ -115,13 +120,15 @@ library(fgsea)
 
 #### Create ranks
 
-Rank all genes based on their fold change.
+Rank all genes based on their fold change. We need to exclude genes for
+which we do not have Entrez IDs
 
 ```{r}
-results.ord <- results[ order(-results[,"logFC"]), ]
-head(results.ord)
-ranks <- results.ord$logFC
-names(ranks) <- rownames(results.ord)
+gseaDat <- resLvV %>% 
+    filter(!is.na(Entrez)) %>% 
+    arrange(desc(logFC))
+ranks <- gseaDat$logFC
+names(ranks) <- gseaDat$Entrez
 head(ranks)
 ```
 
@@ -149,31 +156,15 @@ dim(fgseaRes)
 #head(fgseaRes)
 ```
 
-#### Table of results
+#### Table of resLvV
 ```{r}
 head(fgseaRes[order(padj), ])
-```
-
-#### Plot outcome for the 'HALLMARK_MYOGENESIS' pathway
-
-First find rank of the 'HALLMARK_MYOGENESIS' pathway genes in the sorted genes.
-Then plot as before.
-
-```{r}
-# We will create a barplot of logFC for the sorted genes and add one vertical red bar for each gene in the 'HALLMARK_MYOGENESIS' pathway
-tmpInd <- match(pathways[["HALLMARK_MYOGENESIS"]],names(ranks))
-tmpInd <- tmpInd[!is.na(tmpInd)]
-
-ranks2 <- rep(0,length(ranks))
-ranks2[tmpInd] <- ranks[tmpInd]
-
-barplot(ranks2)
 ```
 
 #### Enrichment score plot
 
 ```{r}
-plotEnrichment(pathways[["HALLMARK_MYOGENESIS"]],
+plotEnrichment(pathways[["HALLMARK_ESTROGEN_RESPONSE_EARLY"]],
                ranks)
 ```
 
@@ -190,9 +181,19 @@ pathwaysDown <- fgseaRes[ES < 0]
 topPathwaysDown <- head( pathwaysDown$pathway[ order( pathwaysDown$pval ) ], n=10 )
 topPathways <- c(topPathwaysUp, rev(topPathwaysDown))
 
+topUp <- fgseaRes %>% 
+    filter(ES > 0) %>% 
+    top_n(10, wt=-padj)
+topDown <- fgseaRes %>% 
+    filter(ES < 0) %>% 
+    top_n(10, wt=-padj)
+topPathways <- bind_rows(topUp, topDown) %>% 
+    arrange(-ES)
 
-plotGseaTable(pathways[topPathways], ranks, fgseaRes, gseaParam = 0.5)
-?plotGseaTable
+plotGseaTable(pathways[topPathways$pathway], 
+              ranks, 
+              fgseaRes, 
+              gseaParam = 0.5)
 ```
 
 ## Gene Set Testing - self-contained gene set tests
@@ -276,7 +277,7 @@ FDRs are computed from the corresponding p-values across all sets.
 Notes
 
 * A common application of ROAST is to use a set of DE genes that was defined from an analysis of an independent data set. ROAST can then determine whether similar changes are observed in the contrast of interest for the current data set.
-* ROAST estimates p-values by simulation, so the results may change slightly between runs. More precise p-values can be obtained by increasing the number of rotations, albeit at the cost of increased computational time.
+* ROAST estimates p-values by simulation, so the resLvV may change slightly between runs. More precise p-values can be obtained by increasing the number of rotations, albeit at the cost of increased computational time.
 * The smallest p-value that can be reported is 1/(2nrot + 1) where nrot is the number of rotations. This lower bound can be decreased by increasing nrot.
 
 References
@@ -314,7 +315,7 @@ The total number of significant gene sets at 5\% FDR is:
 table(gst.camera$FDR < 0.05)
 ```
 
-You can write out the camera results to a csv file to open in excel.
+You can write out the camera resLvV to a csv file to open in excel.
 
 ```{r}
 write.csv(gst.camera,file="gst_LumVsBas.csv")
