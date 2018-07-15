@@ -131,23 +131,6 @@ We will need to do a little work before adding the annotation to out results
 table. We could decide to discard one or both of Entrez IDs, or we could 
 concatenate the Entrez IDs so that we don't lose information. 
 
-<!-- ```{r} -->
-<!-- annot <- annot %>%  -->
-<!--     group_by(ensembl_gene_id) %>%  -->
-<!--     mutate(Entrez=str_c(entrezgene, collapse=";")) %>%  -->
-<!--     select(-entrezgene) %>%  -->
-<!--     distinct() -->
-
-<!-- annot[annot$ensembl_gene_id%in%dup,] -->
-<!-- dim(annot) -->
-<!-- ``` -->
-
-<!--
-Now we have a unique Ensembl ID column, although we still had one missing 
-gene id, and the returned gene id order may not be the same as out original 
-table. 
--->
-
 ### Retrieve full annotation
 
 > ### Challenge {.challenge}
@@ -169,7 +152,9 @@ table.
 # # check the available "attributes" - things you can retreive
 # listAttributes(ensembl) %>%
 #     head(20)
-# attributeNames <- c(attributeNames,
+# attributeNames <- c('ensembl_gene_id', 
+#                     'entrezgene',
+#                     'external_gene_name',
 #                     'description',
 #                     'gene_biotype',
 #                     'chromosome_name',
@@ -184,7 +169,7 @@ table.
 #                mart = ensembl)
 # 
 # sum(duplicated(annot$ensembl_gene_id))
-# missingGenes <- !rownames(resLvV)%in%annotation_table$ensembl_gene_id
+# missingGenes <- !rownames(resLvV)%in%annot$ensembl_gene_id
 # rownames(resLvV)[missingGenes]
 ```
 
@@ -194,19 +179,8 @@ We can now add the annotation to the results table and then save the results
 using the `write_tsv` function, which writes the results out to a tab
 separated file.
 To save time we have created an annotation table in which we have modified the 
-cumbersome Biomart column names, and dealt with the one-to-many issues.
-
-<!-- ```{r} -->
-<!-- ewe <- annot %>% -->
-<!--     filter(!duplicated(ensembl_gene_id)) %>%  -->
-<!--     dplyr::rename(Entrez="entrezgene", Symbol="external_gene_name", -->
-<!--            Description="description", Biotype="gene_biotype", -->
-<!--            Chr="chromosome_name", Start="start_position", -->
-<!--            End="end_position", Strand="strand") %>%  -->
-<!--     arrange(desc(Chr)) -->
-<!-- write_tsv(ewe, "data/Ensembl_annotations.tsv") -->
-<!-- ``` -->
-
+cumbersome Biomart column names, and dealt with the one-to-many issues for 
+Entrez IDs.
 
 ```{r outputDEtable, message=FALSE}
 ensemblAnnot <- read_tsv("data/Ensembl_annotations.tsv")
@@ -348,7 +322,9 @@ stripchart(normCounts["ENSMUSG00000000381",]~groups,
 
 ### Interactive StripChart with Glimma
 
-An interactive version of the volcano plot above that includes the raw per sample values in a separate panel is possible via the `glXYPlot` function in the *Glimma* package.
+An interactive version of the volcano plot above that includes the raw per 
+sample values in a separate panel is possible via the `glXYPlot` function in the
+*Glimma* package.
 
 
 ```{r}
@@ -360,7 +336,7 @@ annot.mod <- filtTab[,c("GeneID", "Symbol", "Description")]
 de <- as.numeric(filtTab$FDR<=0.05)
 filtCounts <- normCounts[filtTab$GeneID,]
 glXYPlot(x=filtTab$logFC, y=-log10(filtTab$FDR),
-         xlab="logFC", ylab="Normalised Counts", main="Lactating v Virgin",
+         xlab="logFC", ylab="FDR", main="Lactating v Virgin",
          counts=filtCounts, groups=group, status=de,
          anno=annot.mod, id.column="ENTREZID", folder="volcano")
 ```
