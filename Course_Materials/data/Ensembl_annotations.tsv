@@ -2421,7 +2421,7 @@ ENSMUSG00000007888	12931	Crlf1	Cytokine receptor-like factor 1  [Source:UniProtK
 ENSMUSG00000007950	64296	Abhd8	abhydrolase domain containing 8 [Source:MGI Symbol;Acc:MGI:1918946]	protein_coding	8	71456705	71463655	-1
 ENSMUSG00000008129	74666	4930432K21Rik		protein_coding	8	84148025	84172590	1
 ENSMUSG00000008167	68628	Fbxw9	F-box and WD repeat domain containing 9 [Source:HGNC Symbol;Acc:HGNC:28136]	protein_coding	8	85060055	85067124	1
-ENSMUSG00000008450	68051	Nutf2	Nuclear transport factor 2  [Source:UniProtKB/Swiss-Prot;Acc:P61971]	protein_coding	8	105860580	105879330	1
+ENSMUSG00000008450	621832	Nutf2	Nuclear transport factor 2  [Source:UniProtKB/Swiss-Prot;Acc:P61971]	protein_coding	8	105860580	105879330	1
 ENSMUSG00000011306	70616	Sugp1	SURP and G-patch domain-containing protein 1  [Source:UniProtKB/Swiss-Prot;Acc:Q8CH02]	protein_coding	8	70042813	70072347	1
 ENSMUSG00000012889	244550	Podnl1	Podocan-like protein 1  [Source:UniProtKB/Swiss-Prot;Acc:Q6P3Y9]	protein_coding	8	84125989	84132527	1
 ENSMUSG00000013033	330814	Adgrl1	Adhesion G protein-coupled receptor L1  [Source:UniProtKB/Swiss-Prot;Acc:Q80TR1]	protein_coding	8	83900105	83941954	1
@@ -2808,7 +2808,7 @@ ENSMUSG00000087750	NA	Gm23468	predicted gene, 23468 [Source:MGI Symbol;Acc:MGI:5
 ENSMUSG00000088969	NA	Gm22085	predicted gene, 22085 [Source:MGI Symbol;Acc:MGI:5451862]	snRNA	8	107009502	107009611	-1
 ENSMUSG00000089857	382019	Zfp882	zinc finger protein 882 [Source:MGI Symbol;Acc:MGI:3642748]	protein_coding	8	71908608	71916354	1
 ENSMUSG00000090105	NA	Gm15890	predicted gene 15890 [Source:MGI Symbol;Acc:MGI:3802160]	antisense	8	94379184	94386972	-1
-ENSMUSG00000090137	22186	Uba52	ubiquitin A-52 residue ribosomal protein fusion product 1 [Source:MGI Symbol;Acc:MGI:98887]	protein_coding	8	70508263	70510801	-1
+ENSMUSG00000090137	NA	Uba52	ubiquitin A-52 residue ribosomal protein fusion product 1 [Source:MGI Symbol;Acc:MGI:98887]	protein_coding	8	70508263	70510801	-1
 ENSMUSG00000090188	NA	Gm7418	predicted pseudogene 7418 [Source:MGI Symbol;Acc:MGI:3779742]	processed_pseudogene	8	94835717	94836517	1
 ENSMUSG00000090206	73407	Tepp	Testis, prostate and placenta-expressed protein  [Source:UniProtKB/Swiss-Prot;Acc:Q6IMH0]	protein_coding	8	95310566	95326323	1
 ENSMUSG00000090778	NA	Gm3235	predicted gene 3235 [Source:MGI Symbol;Acc:MGI:3781413]	antisense	8	91621448	91629729	-1
@@ -3931,7 +3931,7 @@ ENSMUSG00000092187	NA	Gm20457	predicted gene 20457 [Source:MGI Symbol;Acc:MGI:51
 ENSMUSG00000092193	NA	Cd9-ps	Cd9 antigen, pseudogene [Source:MGI Symbol;Acc:MGI:3645134]	processed_pseudogene	7	41682658	41683307	-1
 ENSMUSG00000092257	NA	Gm2308	predicted gene 2308 [Source:MGI Symbol;Acc:MGI:3780479]	processed_pseudogene	7	42125200	42126203	-1
 ENSMUSG00000092281	NA	Hmgb1-ps7	high-mobility group high mobility group box 1, pseudogene 7 [Source:MGI Symbol;Acc:MGI:3648695]	processed_pseudogene	7	42020836	42021483	1
-ENSMUSG00000092335	208111	Zfp977	zinc finger protein 977 [Source:MGI Symbol;Acc:MGI:3645327]	protein_coding	7	42579783	42592547	-1
+ENSMUSG00000092335	NA	Zfp977	zinc finger protein 977 [Source:MGI Symbol;Acc:MGI:3645327]	protein_coding	7	42579783	42592547	-1
 ENSMUSG00000092416	434178	Zfp141	zinc finger protein 141 [Source:MGI Symbol;Acc:MGI:3584269]	protein_coding	7	42473386	42505740	-1
 ENSMUSG00000092505	NA	Gm19246	predicted gene, 19246 [Source:MGI Symbol;Acc:MGI:5011431]	processed_pseudogene	7	42488801	42489055	1
 ENSMUSG00000092592	NA	Gm20449		protein_coding	7	41399378	41499417	-1
@@ -7041,7 +7041,7 @@ ENSMUSG00000074817	56522	Papolb	poly(A) polymerase beta [Source:HGNC Symbol;Acc:
 ENSMUSG00000075569	18861	Rsph10b	radial spoke head 10 homolog B (Chlamydomonas) [Source:MGI Symbol;Acc:MGI:1922386]	protein_coding	5	143933035	143985719	1
 ENSMUSG00000075585	NA	6330403L08Rik	RIKEN cDNA 6330403L08 gene [Source:MGI Symbol;Acc:MGI:1917994]	antisense	5	138995056	139000577	1
 ENSMUSG00000075591	NA	Gm10874		lincRNA	5	138363719	138388287	1
-ENSMUSG00000079109	18861	Pms2	PMS1 homolog2, mismatch repair system component [Source:MGI Symbol;Acc:MGI:104288]	protein_coding	5	143909964	143933968	1
+ENSMUSG00000079109	NA	Pms2	PMS1 homolog2, mismatch repair system component [Source:MGI Symbol;Acc:MGI:104288]	protein_coding	5	143909964	143933968	1
 ENSMUSG00000079111	66913	Kdelr2	KDEL (Lys-Asp-Glu-Leu) endoplasmic reticulum protein retention receptor 2 [Source:MGI Symbol;Acc:MGI:1914163]	protein_coding	5	143403838	143421901	1
 ENSMUSG00000079173	22635	Zan	zonadhesin [Source:MGI Symbol;Acc:MGI:106656]	protein_coding	5	137378637	137477064	-1
 ENSMUSG00000079215	269704	Zfp664	zinc finger protein 664 [Source:MGI Symbol;Acc:MGI:2442505]	protein_coding	5	124862691	124902693	1
@@ -9333,7 +9333,7 @@ ENSMUSG00000102564	NA	Gm37035	predicted gene, 37035 [Source:MGI Symbol;Acc:MGI:5
 ENSMUSG00000102595	NA	Gm30097	predicted gene, 30097 [Source:MGI Symbol;Acc:MGI:5589256]	lincRNA	3	82926665	83008488	-1
 ENSMUSG00000102652	NA	Gm37078	predicted gene, 37078 [Source:MGI Symbol;Acc:MGI:5610306]	TEC	3	65969914	65971922	1
 ENSMUSG00000102692	100534287	Dchs2	Mus musculus dachsous cadherin related 2 (Dchs2), mRNA. [Source:RefSeq mRNA;Acc:NM_001357165]	protein_coding	3	83127948	83357209	1
-ENSMUSG00000102805	99889	Gm37240		protein_coding	3	84496426	85887518	-1
+ENSMUSG00000102805	NA	Gm37240		protein_coding	3	84496426	85887518	-1
 ENSMUSG00000102893	NA	Gm37855	predicted gene, 37855 [Source:MGI Symbol;Acc:MGI:5611083]	lincRNA	3	87157693	87162455	1
 ENSMUSG00000102919	NA	Gm37726	predicted gene, 37726 [Source:MGI Symbol;Acc:MGI:5610954]	TEC	3	84873891	84877776	1
 ENSMUSG00000103024	NA	Gm37685	predicted gene, 37685 [Source:MGI Symbol;Acc:MGI:5610913]	TEC	3	75952124	75954300	1
@@ -9729,7 +9729,7 @@ ENSMUSG00000089988	NA	Gm16238	predicted gene 16238 [Source:MGI Symbol;Acc:MGI:38
 ENSMUSG00000089998	NA	Phtf1os		antisense	3	103964536	103968581	-1
 ENSMUSG00000089999	NA	Gm6485	predicted gene 6485 [Source:MGI Symbol;Acc:MGI:3644007]	transcribed_processed_pseudogene	3	104752727	104753165	-1
 ENSMUSG00000090066	102634333	1110002E22Rik	RIKEN cDNA 1110002E22 gene [Source:MGI Symbol;Acc:MGI:1915066]	protein_coding	3	138065052	138081506	1
-ENSMUSG00000090202	75015	4930503B20Rik	RIKEN cDNA 4930503B20 gene [Source:MGI Symbol;Acc:MGI:1922264]	protein_coding	3	146645193	146651317	-1
+ENSMUSG00000090202	NA	4930503B20Rik	RIKEN cDNA 4930503B20 gene [Source:MGI Symbol;Acc:MGI:1922264]	protein_coding	3	146645193	146651317	-1
 ENSMUSG00000090427	NA	Gm17225	predicted gene 17225 [Source:MGI Symbol;Acc:MGI:4938052]	antisense	3	126432883	126439269	-1
 ENSMUSG00000091512	56692	Lamtor3	late endosomal/lysosomal adaptor, MAPK and MTOR activator 3 [Source:MGI Symbol;Acc:MGI:1929467]	protein_coding	3	137918506	137928900	1
 ENSMUSG00000091575	NA	2010016I18Rik	RIKEN cDNA 2010016I18 gene [Source:MGI Symbol;Acc:MGI:1916456]	processed_transcript	3	106481982	106485913	-1
@@ -11604,7 +11604,7 @@ ENSMUSG00000088378	NA	Gm25184	predicted gene, 25184 [Source:MGI Symbol;Acc:MGI:5
 ENSMUSG00000089824	75710	Rbm12	RNA-binding protein 12  [Source:UniProtKB/Swiss-Prot;Acc:Q8R4X3]	protein_coding	2	156091958	156111978	-1
 ENSMUSG00000089917	68556	Uckl1	uridine-cytidine kinase 1-like 1 [Source:MGI Symbol;Acc:MGI:1915806]	protein_coding	2	181569149	181584892	-1
 ENSMUSG00000090077	72699	Lime1	Lck-interacting transmembrane adapter 1  [Source:UniProtKB/Swiss-Prot;Acc:Q9EQR5]	protein_coding	2	181380078	181383628	1
-ENSMUSG00000090093	665001	Gm14399		protein_coding	2	175129493	175142012	-1
+ENSMUSG00000090093	NA	Gm14399		protein_coding	2	175129493	175142012	-1
 ENSMUSG00000090213	407243	Tmem189	Transmembrane protein 189  [Source:UniProtKB/Swiss-Prot;Acc:Q99LQ7]	protein_coding	2	167642608	167689822	-1
 ENSMUSG00000090397	NA	Gm17096	predicted gene 17096 [Source:MGI Symbol;Acc:MGI:4937923]	antisense	2	166943539	166944308	1
 ENSMUSG00000090625	NA	Gm20721		protein_coding	2	174330319	174346712	-1
@@ -12205,7 +12205,7 @@ ENSMUSG00000067608	NA	Pcna-ps2		protein_coding	19	9283238	9284494	1
 ENSMUSG00000068466	NA	Gm5518	predicted gene 5518 [Source:MGI Symbol;Acc:MGI:3648673]	processed_pseudogene	19	29160118	29160765	1
 ENSMUSG00000069554	NA	I830134H01Rik		lincRNA	19	38051774	38054528	-1
 ENSMUSG00000070127	NA	Mir146b	microRNA 146b [Source:MGI Symbol;Acc:MGI:3629945]	miRNA	19	46342762	46342870	1
-ENSMUSG00000071497	68051	Nutf2-ps1	nuclear transport factor 2, pseudogene 1 [Source:MGI Symbol;Acc:MGI:108008]	protein_coding	19	53588204	53589067	-1
+ENSMUSG00000071497	NA	Nutf2-ps1	nuclear transport factor 2, pseudogene 1 [Source:MGI Symbol;Acc:MGI:108008]	protein_coding	19	53588204	53589067	-1
 ENSMUSG00000071528	66477	Usmg5	upregulated during skeletal muscle growth 5 [Source:MGI Symbol;Acc:MGI:1891435]	protein_coding	19	47083471	47090625	-1
 ENSMUSG00000071573	67795	Rnls	renalase, FAD dependent amine oxidase [Source:HGNC Symbol;Acc:HGNC:25641]	protein_coding	19	33137747	33392295	-1
 ENSMUSG00000071604	381217	Fam189a2	family with sequence similarity 189 member A2 [Source:HGNC Symbol;Acc:HGNC:24820]	protein_coding	19	23972751	24031019	-1
@@ -12757,7 +12757,7 @@ ENSMUSG00000056130	225471	Ticam2	TIR domain-containing adapter molecule 2  [Sour
 ENSMUSG00000056153	54607	Socs6	Suppressor of cytokine signaling 6  [Source:UniProtKB/Swiss-Prot;Acc:Q9JLY0]	protein_coding	18	88665224	88927481	-1
 ENSMUSG00000056214	93737	Pard6g	Partitioning defective 6 homolog gamma  [Source:UniProtKB/Swiss-Prot;Acc:Q9JK84]	protein_coding	18	80046895	80119640	1
 ENSMUSG00000056682	NA	4930465K10Rik	RIKEN cDNA 4930465K10 gene [Source:MGI Symbol;Acc:MGI:1914890]	pseudogene	18	77714210	77715449	1
-ENSMUSG00000057130	27366	Txnl4a	thioredoxin-like 4A [Source:MGI Symbol;Acc:MGI:1351613]	protein_coding	18	80206795	80223533	1
+ENSMUSG00000057130	NA	Txnl4a	thioredoxin-like 4A [Source:MGI Symbol;Acc:MGI:1351613]	protein_coding	18	80206795	80223533	1
 ENSMUSG00000057561	13664	Eif1a	Eukaryotic translation initiation factor 1A  [Source:UniProtKB/Swiss-Prot;Acc:Q60872]	protein_coding	18	46597704	46610225	1
 ENSMUSG00000058152	78923	Chsy3	Chondroitin sulfate synthase 3  [Source:UniProtKB/Swiss-Prot;Acc:Q5DTK1]	protein_coding	18	59175401	59410446	1
 ENSMUSG00000058625	NA	Gm17383	predicted gene, 17383 [Source:MGI Symbol;Acc:MGI:4937017]	pseudogene	18	82338774	82339816	1
@@ -14275,7 +14275,7 @@ ENSMUSG00000077239	NA	Snord66	small nucleolar RNA, C/D box 66 [Source:MGI Symbol
 ENSMUSG00000078097	NA	Gm10913	predicted pseudogene 10913 [Source:MGI Symbol;Acc:MGI:3779121]	processed_pseudogene	16	36209277	36209739	1
 ENSMUSG00000079620	140474	Muc4	mucin-4  [Source:RefSeq peptide;Acc:NP_536705]	protein_coding	16	32735886	32782391	1
 ENSMUSG00000079625	277203	Tm4sf19	transmembrane 4 L six family member 19 [Source:MGI Symbol;Acc:MGI:3645933]	protein_coding	16	32400506	32408227	1
-ENSMUSG00000079737	67118	3110001I22Rik	RIKEN cDNA 3110001I22 gene [Source:MGI Symbol;Acc:MGI:1913848]	protein_coding	16	13671929	13678388	1
+ENSMUSG00000079737	NA	3110001I22Rik	RIKEN cDNA 3110001I22 gene [Source:MGI Symbol;Acc:MGI:1913848]	protein_coding	16	13671929	13678388	1
 ENSMUSG00000080364	NA	Gm25777	predicted gene, 25777 [Source:MGI Symbol;Acc:MGI:5455554]	snoRNA	16	18240717	18240842	-1
 ENSMUSG00000080790	NA	Gm7638	predicted gene 7638 [Source:MGI Symbol;Acc:MGI:3643470]	processed_pseudogene	16	11185133	11186099	-1
 ENSMUSG00000080797	NA	Gm15760		processed_pseudogene	16	20545918	20546200	-1
@@ -16780,7 +16780,7 @@ ENSMUSG00000074885	NA	Gm10782		lincRNA	13	56362900	56368857	1
 ENSMUSG00000077449	NA	Gm23127	predicted gene, 23127 [Source:MGI Symbol;Acc:MGI:5452904]	snoRNA	13	75768068	75768197	1
 ENSMUSG00000078180	NA	Gm20900	predicted gene, 20900 [Source:MGI Symbol;Acc:MGI:5434256]	processed_pseudogene	13	120304194	120304665	-1
 ENSMUSG00000078302	15229	Foxd1	Forkhead box protein D1  [Source:UniProtKB/Swiss-Prot;Acc:Q61345]	protein_coding	13	98354242	98359305	1
-ENSMUSG00000078941	108143	Ak6	Adenylate kinase isoenzyme 6  [Source:UniProtKB/Swiss-Prot;Acc:Q8VCP8]	protein_coding	13	100650979	100666359	1
+ENSMUSG00000078941	NA	Ak6	Adenylate kinase isoenzyme 6  [Source:UniProtKB/Swiss-Prot;Acc:Q8VCP8]	protein_coding	13	100650979	100666359	1
 ENSMUSG00000078942	17952	Naip6	NLR family, apoptosis inhibitory protein 6 [Source:MGI Symbol;Acc:MGI:1298222]	protein_coding	13	100281121	100317674	-1
 ENSMUSG00000078945	17948	Naip2	NLR family, apoptosis inhibitory protein 2 [Source:MGI Symbol;Acc:MGI:1298226]	protein_coding	13	100144063	100202092	-1
 ENSMUSG00000078952	NA	Lncenc1	long non-coding RNA, embryonic stem cells expressed 1 [Source:MGI Symbol;Acc:MGI:3780541]	lincRNA	13	97434970	97497007	1
