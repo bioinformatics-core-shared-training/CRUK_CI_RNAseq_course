@@ -41,7 +41,7 @@ library(DESeq2)
 
 The data for this tutorial comes from a Nature Cell Biology paper,
 [*EGF-mediated induction of Mcl-1 at the switch to lactation is essential for
-alveolar cell survival*](http://www.ncbi.nlm.nih.gov/pubmed/25730472)
+alveolar cell survival*](https://www.nature.com/articles/ncb3117)
 [@Fu2015]. The raw data (sequence reads) can be downloaded from SRA under
 [SRP045534](https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?study=SRP045534),
 and processed data (counts) can be downloaded from Gene Expression Omnibus 
@@ -90,6 +90,11 @@ In the `seqdata` object each row represents a gene. The columns contains:
 7-18 One column for each sample with the count of how many reads were assigned  
 to each gene by featureCounts.
 
+## A quick intro to `dplyr`
+
+...
+  
+  
 ## Format the data
 
 We will be manipulating and reformating the counts matrix into a suitable
