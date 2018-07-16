@@ -301,7 +301,7 @@ We could limit the values at the top of the plot so that we can see the lower
  
 ```{r volcanoPlotLtd, fig.height=5, fig.width=10}
 filtTab <- filtTab %>% 
-    mutate(`-log10(FDR)`=ifelse(`-log10(FDR)` >50, 51, `-log10(FDR)`))
+    mutate(`-log10(FDR)`=pmin(`-log10(FDR)`, 51))
 
 ggplot(filtTab, aes(x = logFC, y=`-log10(FDR)`)) + 
     geom_point(aes(colour=FDR < 0.05, shape = `-log10(FDR)` > 50), size=2)
@@ -383,10 +383,6 @@ using the package
 ```{r createTxDB, message=FALSE}
 library(GenomicFeatures)
 txMm <- makeTxDbFromBiomart(dataset="mmusculus_gene_ensembl")
-makeTxDbPackageFromBiomart(version="0.99.0",
-                           maintainer="Fozzy Bear <FozzyBear@themuppetshow.com>",
-                           author="Kermit the Frog <Kermit@themuppetshow.com>",
-                           dataset="mmusculus_gene_ensembl")
 ```
 
 Accessing the information in these TxDb databases is similar to the way in which
@@ -702,7 +698,7 @@ autoplot(top200, layout="karyogram", aes(color=UpRegulated,
 
 
 
-`ggbio` is also able to plot the structure of genes according to a particular model represented by a `GenomicFeatures` object, such as the object we created earlier with the exon coordinates for each gene in the mm10 genome.
+`ggbio` is also able to plot the structure of genes according to a particular model represented by a `GenomicFeatures` object, such as the object we created earlier with the exon coordinates for each gene in the GRCm38 genome.
 
 
 ```{r}
@@ -721,7 +717,7 @@ bam <- readGappedReads(file="counts/small_bams/MCL1.DG.15.sm.bam",
                        param=ScanBamParam(which=myreg), use.names = TRUE)
 
 autoplot(bam, geom = "rect") + 
-    xlim(GRanges("15", IRanges(101707000, 101713000)))
+    xlim(GRanges("15", IRanges(6800000, 6900000)))
 ```
 
 Like ggplot2, ggbio plots can be saved as objects that can later be modified, or combined together to
@@ -729,14 +725,13 @@ form more complicated plots. If saved in this way, the plot will only be display
 when we query the object. This strategy is useful when we want to add a common element (such as
 an ideogram) to a plot composition and don’t want to repeat the code to generate the plot every time.
 
-```{r}
-#idPlot <- plotIdeogram(genome = "mm10",subchr = "chr1")
-#idPlot
-geneMod <- autoplot(tx, which = myreg)
+```{r, message=FALSE}
+geneMod <- autoplot(txMm, which = myreg)  + 
+    xlim(GRanges("15", IRanges(6810000, 6880000)))
 reads.MCL1.DG <- autoplot(bam, stat = "coverage")  + 
-    xlim(GRanges("chr15", IRanges(101707000, 101713000))) +
+    xlim(GRanges("15", IRanges(6810000, 6880000))) +
     labs(title="MCL1.DG")
-tracks(mm10=geneMod, MCL1.DG=reads.MCL1.DG ) 
+tracks(GRCm38=geneMod, MCL1.DG=reads.MCL1.DG )
 ```
 
 > ## Challenge {.challenge}
