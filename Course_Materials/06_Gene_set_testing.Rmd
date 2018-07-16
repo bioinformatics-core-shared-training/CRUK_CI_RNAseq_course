@@ -12,7 +12,7 @@ layout: page
 subtitle: Gene Set Testing for RNA-seq
 bibliography: ref.bib
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 ```{r setup, include=FALSE}
