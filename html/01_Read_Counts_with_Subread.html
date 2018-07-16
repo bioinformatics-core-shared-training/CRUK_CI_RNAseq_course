@@ -153,12 +153,14 @@ head Mus_musculus.GRCm38.80.gtf</code></pre>
 <pre><code>  featureCounts \
       -t exon \
       -g gene_id \
+      --primary \
       -a Mus_musculus.GRCm38.80.gtf \
       -o MCL1_DJ.featureCounts \
       MCL1_DJ.bam</code></pre>
 <ul>
 <li><strong><code>-t exon</code></strong> - the <strong>feature</strong> type to count reads against, in this case exons</li>
 <li><strong><code>-g gene_id</code></strong> - the <strong>attribute</strong> type to summarise counts by, in this case the gene ID</li>
+<li><strong><code>--primary</code></strong> - only count primary alignment</li>
 </ul>
 <p><strong><code>featureCounts</code></strong> has many additional options that can be used to alter the ways in which it does the counting.</p>
 <pre><code>featureCounts --help</code></pre>
@@ -171,6 +173,7 @@ head Mus_musculus.GRCm38.80.gtf</code></pre>
 <pre><code>  featureCounts \
       -t exon \
       -g gene_id \
+      --primary \
       -a small_bams/Mus_musculus.GRCm38.80.chr15.gtf  \
       -o GSE60450_Lactation.chr15.featureCounts \
       bams_chr15/MCL*.bam</code></pre>

@@ -65,12 +65,14 @@ GTF for the mouse GRCm38 genome assembly.
   featureCounts \
       -t exon \
       -g gene_id \
+      --primary \
       -a Mus_musculus.GRCm38.80.gtf \
       -o MCL1_DJ.featureCounts \
       MCL1_DJ.bam
 ```
 * **`-t exon`** - the **feature** type to count reads against, in this case exons
 * **`-g gene_id`** - the **attribute** type to summarise counts by, in this case the gene ID
+* **`--primary`** - only count primary alignment
 
 **`featureCounts`** has many additional options that can be used to alter the ways in which it does the counting.
 
@@ -98,6 +100,7 @@ In fact we can have **`featureCounts`** do this for us by running all of our lib
   featureCounts \
       -t exon \
       -g gene_id \
+      --primary \
       -a small_bams/Mus_musculus.GRCm38.80.chr15.gtf  \
       -o GSE60450_Lactation.chr15.featureCounts \
       bams_chr15/MCL*.bam
