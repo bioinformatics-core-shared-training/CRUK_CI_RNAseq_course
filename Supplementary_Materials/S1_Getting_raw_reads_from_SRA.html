@@ -222,7 +222,7 @@ div.tocify {
 <h1 class="title toc-ignore">RNA-seq analysis in R</h1>
 <h3 class="subtitle"><em>Obtaining and aligning RNA-seq reads from public repositories</em></h3>
 <h4 class="author"><em>Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle</em></h4>
-<h4 class="date"><em>Last modified: 11 Jul 2018</em></h4>
+<h4 class="date"><em>Last modified: 16 Jul 2018</em></h4>
 
 </div>
 
@@ -336,6 +336,8 @@ cd ../../</code></pre>
 <div id="alignment-using-hisat2" class="section level2">
 <h2>Alignment using HISAT2</h2>
 <p><a href="https://ccb.jhu.edu/software/hisat2/index.shtml">HISAT2</a> is a fast, splice-aware aligner, specifically designed for RNAseq data. We will first need to install the software and then use it to index our reference genome before we can align our reads.</p>
+<p>HISAT2 is fast and requires relatively low amounts of memory for the alignment, however the alignment will run much faster if you have access to a muli-core processor - 6-8 cores is ideal.</p>
+<p>The indexing process on the other hand is slow and requires <strong>a lot</strong> of memory, - on our high performance cluster we had to give it &gt;200G of memory for the human GRCh38 reference. This is how HISAT2 can be fast in the alignment - it does a lot of work once, making a very detailed index, which means it can align read more quickly and with less memory usage later.</p>
 <div id="download-and-install-hisat2" class="section level3">
 <h3>Download and Install HISAT2</h3>
 <pre class="bash"><code>mkdir hisat2
@@ -390,60 +392,71 @@ hisat2 -x ${hisat2Ref} \
        samtools sort - &gt; bam/SRR1552444.bam
 samtools index SRR1552444.bam
 
-bowtie2 -x mm10 -U SRR1552445.fastq -S SRR1552445.sam
-samtools view -bS SRR1552445.sam &gt; SRR1552445.bam
-samtools sort SRR1552445.bam -o SRR1552445.sorted.bam
-samtools index SRR1552445.sorted.bam
+hisat2 -x ${hisat2Ref} \
+       -U fastq/SRR1552445.fastq.gz |
+       samtools view -bh - |
+       samtools sort - &gt; bam/SRR1552445.bam
+samtools index SRR1552445.bam
 
-bowtie2 -x mm10 -U SRR1552446.fastq -S SRR1552446.sam
-samtools view -bS SRR1552446.sam &gt; SRR1552446.bam
-samtools sort SRR1552446.bam -o SRR1552446.sorted.bam
-samtools index SRR1552446.sorted.bam
+hisat2 -x ${hisat2Ref} \
+       -U fastq/SRR1552446.fastq.gz |
+       samtools view -bh - |
+       samtools sort - &gt; bam/SRR1552446.bam
+samtools index SRR1552446.bam
 
-bowtie2 -x mm10 -U SRR1552447.fastq -S SRR1552447.sam
-samtools view -bS SRR1552447.sam &gt; SRR1552447.bam
-samtools sort SRR1552447.bam -o SRR1552447.sorted.bam
-samtools index SRR1552447.sorted.bam
+hisat2 -x ${hisat2Ref} \
+       -U fastq/SRR1552447.fastq.gz |
+       samtools view -bh - |
+       samtools sort - &gt; bam/SRR1552447.bam
+samtools index SRR1552447.bam
 
-bowtie2 -x mm10 -U SRR1552448.fastq -S SRR1552448.sam
-samtools view -bS SRR1552448.sam &gt; SRR1552448.bam
-samtools sort SRR1552448.bam -o SRR1552448.sorted.bam
-samtools index SRR1552448.sorted.bam
+hisat2 -x ${hisat2Ref} \
+       -U fastq/SRR1552448.fastq.gz |
+       samtools view -bh - |
+       samtools sort - &gt; bam/SRR1552448.bam
+samtools index SRR1552448.bam
 
-bowtie2 -x mm10 -U SRR1552449.fastq -S SRR1552449.sam
-samtools view -bS SRR1552449.sam &gt; SRR1552449.bam
-samtools sort SRR1552449.bam -o SRR1552449.sorted.bam
-samtools index SRR1552449.sorted.bam
+hisat2 -x ${hisat2Ref} \
+       -U fastq/SRR1552449.fastq.gz |
+       samtools view -bh - |
+       samtools sort - &gt; bam/SRR1552449.bam
+samtools index SRR1552449.bam
 
-bowtie2 -x mm10 -U SRR1552450.fastq -S SRR1552450.sam
-samtools view -bS SRR1552450.sam &gt; SRR1552450.bam
-samtools sort SRR1552450.bam -o SRR1552450.sorted.bam
-samtools index SRR1552450.sorted.bam
+hisat2 -x ${hisat2Ref} \
+       -U fastq/SRR1552450.fastq.gz |
+       samtools view -bh - |
+       samtools sort - &gt; bam/SRR1552450.bam
+samtools index SRR1552450.bam
 
-bowtie2 -x mm10 -U SRR1552451.fastq -S SRR1552451.sam
-samtools view -bS SRR1552451.sam &gt; SRR1552451.bam
-samtools sort SRR1552451.bam -o SRR1552451.sorted.bam
-samtools index SRR1552451.sorted.bam
+hisat2 -x ${hisat2Ref} \
+       -U fastq/SRR1552451.fastq.gz |
+       samtools view -bh - |
+       samtools sort - &gt; bam/SRR1552451.bam
+samtools index SRR1552451.bam
 
-bowtie2 -x mm10 -U SRR1552452.fastq -S SRR1552452.sam
-samtools view -bS SRR1552452.sam &gt; SRR1552452.bam
-samtools sort SRR1552452.bam -o SRR1552452.sorted.bam
-samtools index SRR1552452.sorted.bam
+hisat2 -x ${hisat2Ref} \
+       -U fastq/SRR1552452.fastq.gz |
+       samtools view -bh - |
+       samtools sort - &gt; bam/SRR1552452.bam
+samtools index SRR1552452.bam
 
-bowtie2 -x mm10 -U SRR1552453.fastq -S SRR1552453.sam
-samtools view -bS SRR1552453.sam &gt; SRR1552453.bam
-samtools sort SRR1552453.bam -o SRR1552453.sorted.bam
-samtools index SRR1552453.sorted.bam
+hisat2 -x ${hisat2Ref} \
+       -U fastq/SRR1552453.fastq.gz |
+       samtools view -bh - |
+       samtools sort - &gt; bam/SRR1552453.bam
+samtools index SRR1552453.bam
 
-bowtie2 -x mm10 -U SRR1552454.fastq -S SRR1552454.sam
-samtools view -bS SRR1552454.sam SRR1552454.bam
-samtools sort SRR1552454.bam -o SRR1552454.sorted.bam
-samtools index SRR1552454.sorted.bam
+hisat2 -x ${hisat2Ref} \
+       -U fastq/SRR1552454.fastq.gz |
+       samtools view -bh - |
+       samtools sort - &gt; bam/SRR1552454.bam
+samtools index SRR1552454.bam
 
-bowtie2 -x mm10 -U SRR1552455.fastq -S SRR1552455.sam
-samtools view -bS SRR1552455.sam &gt; SRR1552455.bam
-samtools sort SRR1552455.bam -o SRR1552455.sorted.bam
-samtools index SRR1552455.sorted.bam</code></pre>
+hisat2 -x ${hisat2Ref} \
+       -U fastq/SRR1552455.fastq.gz |
+       samtools view -bh - |
+       samtools sort - &gt; bam/SRR1552455.bam
+samtools index SRR1552455.bam</code></pre>
 </div>
 </div>
 <div id="renaming-to-be-consistent-with-geo" class="section level2">
