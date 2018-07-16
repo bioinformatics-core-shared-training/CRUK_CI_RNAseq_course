@@ -1,0 +1,574 @@
+---
+title: "Introduction to RNAseq analysis in R"
+author: "Stephane Ballereau, Ashley Sawle"
+date: 'July 2018'
+output:
+  ioslides_presentation:
+    widescreen: true
+    smaller: true
+    logo: CRUK_Cambridge_Institute.png
+    css: stylesheet.css
+---
+
+```{r include=FALSE}
+library(tidyr)
+library(dplyr)
+library(highcharter)
+source("plots.R")
+```
+
+
+## Outline
+
+* What makes somatic SNV detection difficult?
+
+* CaVEMan and some other calling tools
+
+* Statistical approaches to calling somatic SNVs
+
+* How well should you expect a tool to perform?
+
+
+## Somatic vs Germline SNVs {#less_space_after_title}
+
+<div style="line-height: 50%;"><br></div>
+
+<img src="images/somatic_and_germline_snv.svg" style="width: 75%; margin: 0 6em;"/>
+
+
+## Numbers of somatic SNVs in different cancer types
+
+Somatic SNV callers typically set the expected mutation rate to be around 5 mutations per megabase, i.e. a total of 15,000 mutations across the genome.
+
+<img src="images/icgc_mutations_by_cancer_type.svg" style="width: 100%"/>
+
+</span><img src="../images/icgc.png" style="vertical-align: top; width: 20%"/><span style="font-size: 75%; float: right">Source: [ICGC Data Portal](https://dcc.icgc.org/projects)
+
+
+## Several factors complicate somatic SNV calling
+
+* <span style="color: #2e3192">**Low cellularity**</span> (tumour DNA content)
+
+* <span style="color: #2e3192">**Intra-tumour heterogeneity**<span> in which multiple tumour cell populations (subclones) exist
+
+* <span style="color: #2e3192">**Aneuploidy**</span>
+
+* Unbalanced structural variation (deletions, duplications, etc.)
+
+<div style="line-height: 50%;"><br></div>
+
+* Matched <span style="color: #2e3192">**normal contaminated with cancer**</span> DNA
+
+    * adjacent normal tissue may contain residual disease or early tumour-initiating somatic mutations
+
+    * circulating tumour DNA in blood normals
+
+<div style="line-height: 100%;"><br></div>
+
+* Sequencing errors
+
+* Alignment artefacts
+
+<span style="font-size: 75%">[Mwenifumbo & Marra, Nat Rev Genet. 2013](http://www.ncbi.nlm.nih.gov/pubmed/23594910)</span>
+
+
+## Issues affecting mutation detection in cancer
+
+In this example the tumour was sequenced to an average depth of 50.
+
+<img src="images/somatic_snv_allele_fraction_cartoon_1.svg" style="width: 50%; display: block; margin-left: auto; margin-right: auto;"/>
+
+<div style="line-height: 150%;"><br></div>
+
+* Is this sufficient?
+
+* <span>Consider the 50 observations of our tumour which carries a mutation at this base</span>
+
+## Issues affecting mutation detection in cancer
+
+<span style="color: #2e3192">**Tumour cellularity**</span>
+
+<img src="images/somatic_snv_allele_fraction_cartoon_2.svg" style="width: 50%; display: block; margin-left: auto; margin-right: auto;"/>
+
+<div style="line-height: 150%;"><br></div>
+
+* In fact the 'tumour' sample has some normal contamination
+
+* 40% of our reads could easily be from the normal sample
+
+## Issues affecting mutation detection in cancer
+
+<span style="color: #2e3192">**Tumour heterogeneity**</span>
+
+<img src="images/somatic_snv_allele_fraction_cartoon_3.svg" style="width: 50%; display: block; margin-left: auto; margin-right: auto;"/>
+
+<div style="line-height: 150%;"><br></div>
+
+* The tumour may be heterogeneous, i.e. DNA may have been sampled from a number of subclones
+
+* The mutation may exist in one or more subclones but not in others
+
+## Issues affecting mutation detection in cancer
+
+<span style="color: #2e3192">**Copy number**</span>
+
+<img src="images/somatic_snv_allele_fraction_cartoon_4.svg" style="width: 50%; display: block; margin-left: auto; margin-right: auto;"/>
+
+<div style="line-height: 150%;"><br></div>
+
+* The tumour may not be diploid
+
+* If it is triploid, then a mutation may be in only one in three of the tumour reads
+
+## Issues affecting mutation detection in cancer
+
+<span style="color: #2e3192">**Uneven coverage**</span>
+
+<img src="images/somatic_snv_allele_fraction_cartoon_5.svg" style="width: 50%; display: block; margin-left: auto; margin-right: auto;"/>
+
+<div style="line-height: 150%;"><br></div>
+
+* 50-fold coverage is the average --- biases, e.g. GC content, mean that coverage is not uniform
+
+* For 10% of the genome we only reach a depth of around 40
+
+## Issues affecting mutation detection in cancer
+
+<span style="color: #2e3192">**Sampling**</span>
+
+<img src="images/somatic_snv_allele_fraction_cartoon_6.svg" style="width: 50%; display: block; margin-left: auto; margin-right: auto;"/>
+
+<div style="line-height: 150%;"><br></div>
+
+* Finally, remember that we are taking a random sample
+
+* We may not get lucky!
+
+<div style="line-height: 100%;"><br></div>
+
+<div style="text-align: right; font-size: 60%">Credit: Andy Lynch</div>
+
+
+## Allele frequencies
+
+```{r echo=FALSE}
+somatic_allele_fractions <- read.delim("snv.somatic.af.txt", stringsAsFactors = FALSE, check.names = FALSE)
+germline_allele_fractions <- read.delim("snv.germline.af.txt", stringsAsFactors = FALSE, check.names = FALSE)
+
+data <- list(
+  Somatic = somatic_allele_fractions %>% unlist(use.names = FALSE),
+  `Germline (tumour)` = germline_allele_fractions %>% select(Tumour) %>% unlist(use.names = FALSE),
+  `Germline (normal)` = germline_allele_fractions %>% select(Normal) %>% unlist(use.names = FALSE)
+)
+
+densityPlot(
+  data,
+  width = 900,
+  height = 400,
+  xLabel = "Variant allele frequency",
+  showYLabels = FALSE,
+  fillOpacity = 0.4,
+  tooltipDigits = 2,
+  visible = c(TRUE, FALSE, TRUE),
+  colours = c('#7cb5ec', '#8085e9', '#90ed7d')
+)
+```
+
+<span style="color: #2e3192">**Germline SNVs**</span>\ \ AF = 0 (homozygous reference), 0.5 (heterozygous variant) or 1 (homozygous variant)
+
+<span style="color: #2e3192">**Somatic SNVs**</span> typically exist at a continuous range of variant allele frequencies.
+
+
+## CaVEMan SNV caller
+
+**[CaVEMan](http://cancerit.github.io/CaVEMan/)** (**Ca**ncer **V**ariants through **E**xpectation **Ma**ximizatio**n**) is the somatic SNV caller in the Sanger CGP pipeline.
+
+<div style="line-height: 100%;"><br></div>
+
+* <span style="color: #2e3192">**Bayesian**</span> probabilistic classifier
+
+* Can make use of <span style="color: #2e3192">**copy number profiles**</span> and estimate of <span style="color: #2e3192">**normal contamination**</span> if available
+
+* Considers _base quality_, _lane_ and _read position_ and _orientation_ to provide more accurate estimates of sequencing error rates
+
+* The CaVEMan wrapper in the CGP pipeline contains several <span style="color: #2e3192">**post-processing filters**</span> applied to increase specificity of calls
+
+<div style="line-height: 100%;"><br></div>
+
+<span style="font-size: 75%">cgpCaVEManWrapper [[Jones et al., 2016](https://www.ncbi.nlm.nih.gov/pubmed/27930805)]</span>
+
+
+## Other somatic SNV callers
+
+Tool           Approach                              Source                          Publication
+-------------  ------------------------------------  ------------------------------  ---------------------
+SomaticSniper  Bayesian                              Washington University           [Larson et al., 2012](https://www.ncbi.nlm.nih.gov/pubmed/22155872)
+VarScan 2      Fisher's exact                        Washington University           [Koboldt et al., 2012](https://www.ncbi.nlm.nih.gov/pubmed/22300766)
+JointSNVmix    Bayesian                              British Columbia Cancer Agency  [Roth et al., 2012](https://www.ncbi.nlm.nih.gov/pubmed/22285562)
+mutationSeq    Machine learning                      British Columbia Cancer Agency  [Ding et al., 2012](https://www.ncbi.nlm.nih.gov/pubmed/22084253)
+Strelka        Bayesian                              Illumina                        [Saunders et al., 2012](https://www.ncbi.nlm.nih.gov/pubmed/22581179)
+MuTect         Bayesian                              Broad Institute                 [Cibulskis et al., 2013](https://www.ncbi.nlm.nih.gov/pubmed/23396013)
+qSNP           Heuristic                             University of Queensland        [Kassahn et al., 2013](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3826759)
+VarDict        Fisher's exact                        AstraZeneca                     [Lai et al., 2016](https://www.ncbi.nlm.nih.gov/pubmed/27060149)
+MuSE           Markov substitution model (Bayesian)  MD Anderson Cancer Center       [Fan et al., 2016](https://www.ncbi.nlm.nih.gov/pubmed/27557938)
+
+<div style="line-height: 10%;"><br></div>
+
+<span style="font-size: 75%">By no means an exhaustive list but includes some of the most popular somatic SNV callers.</span>
+
+
+## Simple statistical approach {#less_space_after_title}
+
+<div style="line-height: 100%;"><br></div>
+
+<span style="line-height: 200%">
+Reference base <span style="color: #2e3192">$\boldsymbol{C}$</span><br/>
+Normal: 48 reads all supporting reference <span style="color: #2e3192">$\boldsymbol{\{\ 48C\ \}}$</span><br/>
+Tumour: 50 reads, 7 of which have an alternate <span style="color: #2e3192">$\boldsymbol{T}$</span> allele <span style="color: #2e3192">$\boldsymbol{\{\ 43C,\ 7T\ \}}$</span>
+</span>
+
+<div style="line-height: 250%;"><br></div>
+
+<span style="color: #2e3192">**2 x 2 contingency table**</span><img src="images/contingency_table.svg" style="vertical-align: top; width: 25%; margin: 0 6em;"/>
+
+<!--
+<div style='width:30%; margin:auto'>
+---------- --------------- -----------------
+             **Reference**     **Alternate**
+Tumour            43                7
+Normal            48                0
+---------- --------------- -----------------
+</div>
+-->
+
+
+## Simple statistical approach {#less_space_after_title}
+
+<div style="line-height: 100%;"><br></div>
+
+<span style="line-height: 200%">
+Reference base <span style="color: #2e3192">$\boldsymbol{C}$</span><br/>
+Normal: 48 reads all supporting reference <span style="color: #2e3192">$\boldsymbol{\{\ 48C\ \}}$</span><br/>
+Tumour: 50 reads, 7 of which have an alternate <span style="color: #2e3192">$\boldsymbol{T}$</span> allele <span style="color: #2e3192">$\boldsymbol{\{\ 43C,\ 7T\ \}}$</span>
+</span>
+
+<div style="line-height: 250%;"><br></div>
+
+<span style="color: #2e3192">**2 x 2 contingency table**</span><img src="images/contingency_table.svg" style="vertical-align: top; width: 25%; margin: 0 6em;"/>
+
+<div style="line-height: 50%;"><br></div>
+
+* Allele fraction of the alternate allele in the tumour, $AF = 7/50 = 0.14$
+
+* Perform a <span style="color: #2e3192">**Fisher's exact test**</span> to determine whether a variant has a significant difference in AF between the two samples
+
+* Method used by <span style="color: #2e3192">**VarScan**</span> and <span style="color: #2e3192">**VarDict**</span>
+
+
+## Fisher's exact test in R
+
+```{r echo = TRUE}
+contingency_table <- t(matrix(c(43, 7, 48, 0), nrow = 2, byrow = TRUE,
+                              dimnames = list(c("Tumour", "Normal"), c("Ref", "Alt"))))
+contingency_table
+```
+
+```{r echo = TRUE}
+fisher.test(contingency_table)
+```
+
+
+## Bayesian statistical approach
+
+Most probabilistic methods for variant calling are based on [Bayes' Theorem](https://en.wikipedia.org/wiki/Bayes%27_theorem)
+
+<div style="line-height: 50%;"><br></div>
+
+$$
+P(G \mid D) = \frac{P(D \mid G)P(G)}{P(D)}
+$$
+
+$G$ = genotype, e.g. AA, AB, BB
+
+$D$ = data, i.e. set of sequence reads at the genomic position of interest
+
+$P(G \mid D)$ is the probability of a given genotype, $G$, given the observed data.
+
+<div style="line-height: 100%;"><br></div>
+
+The probability of observing the given set of sequence reads is the weighted average of the probabilities of observing those reads for each possible genotype:
+
+$$
+P(D) = \sum\limits_{i=1}^nP(D \mid G_i)P(G_i)
+$$
+
+
+## Germline SNV calling (single sample)
+
+Reference $\boldsymbol{C}$, observe 6 reads $\boldsymbol{\{\ 4C,\ 2T\ \}}$ all with base quality $\mathrm{Q} = 30\ \left(P_{error} = 10^{-\frac{30}{10}} = 0.001\right)$
+
+
+## Germline SNV calling (single sample)
+
+Reference $\boldsymbol{C}$, observe 6 reads $\boldsymbol{\{\ 4C,\ 2T\ \}}$ all with base quality $\mathrm{Q} = 30\ \left(P_{error} = 10^{-\frac{30}{10}} = 0.001\right)$
+
+**<span style="color: #3d42c2">Likelihood of data</span>**
+
+$$
+\begin{eqnarray}
+\boldsymbol{P(D \mid CC)} &=& \textrm{Probability of two Q30 errors} &=& 10^{-3}\times10^{-3} &=&\ \ 10^{-6}
+\\[5pt]
+\boldsymbol{P(D \mid TT)} &=& \textrm{Probability of four Q30 errors} &=& \left(10^{-3}\right)^4 &=&\ \ 10^{-12}
+\\[5pt]
+\boldsymbol{P(D \mid CT)} &=& \textrm{Probability of }\{C,C,C,C,T,T\} &=& \left(\tfrac{1}{2}\right)^6 &=&\ \ 0.0156
+\end{eqnarray}
+$$
+
+
+## Germline SNV calling (single sample)
+
+Reference $\boldsymbol{C}$, observe 6 reads $\boldsymbol{\{\ 4C,\ 2T\ \}}$ all with base quality $\mathrm{Q} = 30\ \left(P_{error} = 10^{-\frac{30}{10}} = 0.001\right)$
+
+**<span style="color: #3d42c2">Likelihood of data</span>**
+
+$$
+\begin{eqnarray}
+\boldsymbol{P(D \mid CC)} &=& \textrm{Probability of two Q30 errors} &=& 10^{-3}\times10^{-3} &=&\ \ 10^{-6}
+\\[5pt]
+\boldsymbol{P(D \mid TT)} &=& \textrm{Probability of four Q30 errors} &=& \left(10^{-3}\right)^4 &=&\ \ 10^{-12}
+\\[5pt]
+\boldsymbol{P(D \mid CT)} &=& \textrm{Probability of }\{C,C,C,C,T,T\} &=& \left(\tfrac{1}{2}\right)^6 &=&\ \ 0.0156
+\end{eqnarray}
+$$
+
+<div style="line-height: 50%;"><br></div>
+
+**<span style="color: #3d42c2">Priors</span>**\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ $\boldsymbol{P(CC)} = 0.9985,\ \ \boldsymbol{P(CT)} = 0.001,\ \ \boldsymbol{P(TT)} = 0.0005$
+
+**<span style="color: #3d42c2">Probability of observing $\boldsymbol{\{ 4C, 2T \}}$</span>**
+
+$$
+\begin{eqnarray}
+\boldsymbol{P(D)} &=& P(D \mid CC)(P(CC)\ +\ P(D \mid CT)P(CT)\ +\ P(D \mid TT)P(TT)
+\\[5pt]
+&=& 1.66\times 10^{-5}
+\end{eqnarray}
+$$
+
+
+## Germline SNV calling (single sample)
+
+Reference $\boldsymbol{C}$, observe 6 reads $\boldsymbol{\{\ 4C,\ 2T\ \}}$ all with base quality $\mathrm{Q} = 30\ \left(P_{error} = 10^{-\frac{30}{10}} = 0.001\right)$
+
+**<span style="color: #3d42c2">Likelihood of data</span>**
+
+$$
+\begin{eqnarray}
+\boldsymbol{P(D \mid CC)} &=& \textrm{Probability of two Q30 errors} &=& 10^{-3}\times10^{-3} &=&\ \ 10^{-6}
+\\[5pt]
+\boldsymbol{P(D \mid TT)} &=& \textrm{Probability of four Q30 errors} &=& \left(10^{-3}\right)^4 &=&\ \ 10^{-12}
+\\[5pt]
+\boldsymbol{P(D \mid CT)} &=& \textrm{Probability of }\{C,C,C,C,T,T\} &=& \left(\tfrac{1}{2}\right)^6 &=&\ \ 0.0156
+\end{eqnarray}
+$$
+
+<div style="line-height: 50%;"><br></div>
+
+**<span style="color: #3d42c2">Priors</span>**\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ $\boldsymbol{P(CC)} = 0.9985,\ \ \boldsymbol{P(CT)} = 0.001,\ \ \boldsymbol{P(TT)} = 0.0005$
+
+**<span style="color: #3d42c2">Posterior</span>**
+$$
+\boldsymbol{P(CC \mid D)} = \frac{P(D \mid CC)P(CC)}{P(D)} = \frac{10^{-6}\times 0.9985}{1.66\times 10^{-5}} = 0.06
+$$
+
+<div style="line-height: 50%;"><br></div>
+
+**<span style="color: #3d42c2">Result</span>**$\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ P(CC \mid D) = 0.06$, <span style="color: #ed008c">$\ \ \boldsymbol{P(CT \mid D) = 0.94}$</span>, $\ \ P(TT \mid D) = 3 \times 10^{-11}$
+
+<div style="line-height: 50%;"><br></div>
+
+<div style="text-align: center; font-size: 60%">Source: Heng Li, Broad Institute MPG workshop 2011</div>
+
+
+## Somatic SNV calling
+
+<span style="color: #2e3192">**Joint genotypes**</span>
+
+<div style="text-align:center">
+<img src="images/joint_genotypes.svg" style="width: 60%"/>
+</div>
+
+<div style="line-height: 50%;"><br></div>
+
+$G^N, G^T$ = genotypes of normal and tumour
+
+
+## Bayesian approach extended to somatic SNVs
+
+**<span style="color: #3d42c2">Posterior probability of the joint genotype</span>**
+
+$$
+\begin{eqnarray}
+\boldsymbol{P(G^N, G^T \mid D^N, D^T)}\ \ &\propto&\ \ P(D^N, D^T \mid G^N, G^T)P(G^T, G^N)
+\\[10pt]
+&\propto&\ \ P(D^N \mid D^T, G^N, G^T)P(D^T \mid G^N, G^T)P(G^N, G^T)
+\end{eqnarray}
+$$
+
+<div style="line-height: 150%;"><br></div>
+
+$P(D^N \mid D^T, G^N, G^T) = \boldsymbol{P(D^N \mid G^N)}$
+
+if we assume that the normal sample does not contain any reads sequenced from the tumour, i.e. $D^N$ independent of $G^T$ --- treat as in the single sample case.
+
+<div style="line-height: 100%;"><br></div>
+
+$\boldsymbol{P(D^T \mid G^N, G^T)}$ --- scope to incorporate estimates of tumour purity, copy number, etc.
+
+<div style="line-height: 100%;"><br></div>
+
+$\boldsymbol{P(G^N, G^T)}$ --- prior for joint genotype; could treat as independent events, $P(G^N, G^T) = P(G^N)P(G^T)$, but not realistic since $T$ and $N$ samples from same individual so share germline variants.
+
+
+## VCF output file {#less_space_after_title}
+
+<div style="line-height: 50%;"><br></div>
+
+<img src="images/somatic_snv_vcf.svg" style="width: 100%"/>
+
+
+## How well can we expect a somatic SNV caller to perform?
+
+<span style="color: #2e3192">**Sensitivity**</span> = _ability to correctly identify the true mutations_
+
+<span style="color: #2e3192">**Specificity**</span> = _ability to only call true mutations, i.e. no false positives_
+
+<div style="line-height: 100%;"><br></div>
+
+* Sensitivity and specificity is a function of the biology, the sample and data quality, and the calling method.
+
+* Each new tool promises better accuracy than all before, but how will it perform in your hands?
+
+* Need some representative datasets with established ground truth
+
+    * <span>Recent benchmarking exercises/challenges (TCGA, ICGC, DREAM)</span>
+
+
+## Benchmark datasets
+
+<span style="color: #2e3192">**ICGC benchmarking exercise**</span>
+
+<div style="line-height: 15%;"><br></div>
+
+* Medulloblastoma tumour/normal pair sequenced in 6 different centres to combined 300-fold coverage used to establish 'truth'
+
+* 16 ICGC project teams ran their pipelines on data from one centre (40x)
+
+<span style="font-size: 75%">[Alioto et al., Nat Commun. 2015](http://www.ncbi.nlm.nih.gov/pubmed/26647970)</span>
+
+<div style="line-height: 100%;"><br></div>
+
+<span style="color: #2e3192">**ICGC-TCGA DREAM Somatic Mutation Calling challenge**</span>
+
+<div style="line-height: 15%;"><br></div>
+
+* 6 synthetic datasets based on cell line sequenced to 80x, BAM randomnly split into 2 ('tumour' and 'normal'), mutations added to one computationally
+
+    * <span>Synthetic dataset 4: 80% cellularity; 50% and 35% subclone VAF (effectively 30% and 15%)</span>
+
+<div style="line-height: 15%;"><br></div>
+
+* <span>Real challenge: 5 pancreatic and 5 prostate cancer patients</span>
+
+<span style="font-size: 75%">[Ewing et al., Nat Methods 2015](http://www.ncbi.nlm.nih.gov/pubmed/25984700) [[leaderboards](https://www.synapse.org/#!Synapse:syn312572/wiki/58893)]</span>
+
+
+## Assessing SNV calling
+
+<div class="columns-2">
+
+<img src="images/snv_call_accuracy_venn_diagram.svg"/>
+
+<div style="line-height: 250%;"><br></div>
+
+$TP$ -- true positives, i.e. correct calls
+
+$FP$ -- false positives, i.e. incorrect calls
+
+$FN$ -- false negatives, i.e. number of missed calls
+
+</div>
+
+$$
+\textrm{Precision} = \frac{TP}{TP + FP}\ \ \ \ \ \ \ \ \ \ \ \ \textrm{Recall} = \frac{TP}{TP + FN}
+$$
+
+<div style="line-height: 100%;"><br></div>
+
+<span style="font-size: 75%">
+$$\textrm{Balanced accuracy} = \tfrac{1}{2}(\textrm{Precision} + \textrm{Recall})\ \ \ \ \ \ \ \ \ \ F\textrm{-score} = \frac{2 \times \textrm{Precision} \times \textrm{Recall}}{\textrm{Precision} + \textrm{Recall}}\ \ \ \ \ \ \ \ \ \ \textrm{Jaccard index} = \frac{TP}{TP + FP + FN}$$
+</span>
+
+
+## ICGC Benchmark -- medulloblastoma MB99
+
+```{r echo=FALSE}
+mb99 <- read.delim("icgc_benchmark_mb99.txt",
+                   stringsAsFactors = FALSE, check.names = FALSE)
+
+scatterPlot(
+  mb99 %>%
+    transmute(
+      x = Precision,
+      y = Recall,
+      series = ifelse(grepl("^MB.F", Group), "CRUK-CI",
+               ifelse(grepl("^MB", Group), "Submissions",
+               Group)),
+      tooltip = paste(
+        Group,
+        "<br>TP: ", TP, ", FP: ", FP, ", FN: ", (1255 - TP),
+        "<br>Precision: ", Precision,
+        "<br>Recall: ", Recall,
+        "<br>Balanced accuracy: ", Balanced_accuracy,
+        sep = ""
+      )
+    ),
+  series = c(
+    "MuTect2",
+    "CaVEMan Sanger CGP",
+    "MuSE",
+    "Strelka",
+    "CRUK-CI",
+    "Submissions"
+  ),
+  colours = c(
+    "#73e600",
+    "#b23aee",
+    "#ff0066",
+    "#ffcc4d",
+    "#ffb700",
+    "#8fc1ef"
+  ),
+  visible = c(FALSE, FALSE, FALSE, FALSE, TRUE, TRUE),
+  sizes = c(6.0, 6.0, 6.0, 6.0, 4.5, 4.5),
+  xLabel = "Precision",
+  yLabel = "Recall",
+  xmin = 0.0, xmax = 1.0,
+  ymin = 0.0, ymax = 1.0,
+  yLine = 1019 / 1255, yLineColour = "#696969"
+)
+```
+
+
+## Summary
+
+* Several factors complicate the detection of somatic SNVs (tumour purity, tumour heterogeneity, copy number changes, low sequencing depth, etc.)
+
+* Most somatic SNV callers employ sophisticated Bayesian statistical techniques
+
+* Some callers, including CaVEMan, incorporate copy number information and estimates of tumour purity
+
+* There is a trade-off between sensitivity and specificity
+
+* Additional filtering of SNV calls can be helpful
+
