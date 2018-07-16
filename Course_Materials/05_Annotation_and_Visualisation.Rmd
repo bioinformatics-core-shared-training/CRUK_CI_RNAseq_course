@@ -123,13 +123,13 @@ annot[annot$ensembl_gene_id%in%dup,]
 ```
 
 There are a couple of genes that have multiple entries in the retrieved 
-annotation. This is becaues The one-to-many there are multiple Entrez IDs for a 
-single Ensembl gene. These one-to-many relationships come up frequently in 
-genomic databases, it is important to be aware of them and check when necessary. 
+annotation. This is becaues there are multiple Entrez IDs for a single Ensembl 
+gene. These one-to-many relationships come up frequently in genomic databases, 
+it is important to be aware of them and check when necessary. 
 
 We will need to do a little work before adding the annotation to out results 
-table. We could decide to discard one or both of Entrez IDs, or we could 
-concatenate the Entrez IDs so that we don't lose information. 
+table. We could decide to discard one or both of the Entrez ID mappings, or we 
+could concatenate the Entrez IDs so that we don't lose information. 
 
 ### Retrieve full annotation
 
@@ -182,14 +182,18 @@ To save time we have created an annotation table in which we have modified the
 cumbersome Biomart column names, and dealt with the one-to-many issues for 
 Entrez IDs.
 
-```{r outputDEtable, message=FALSE}
+```{r addAnnotation, message=FALSE}
 ensemblAnnot <- read_tsv("data/Ensembl_annotations.tsv")
 colnames(ensemblAnnot)
 resTab <- as.data.frame(resLvV) %>% 
     rownames_to_column("GeneID") %>% 
     left_join(ensemblAnnot, "GeneID") %>% 
     rename(logFC=log2FoldChange, FDR=padj)
+```
 
+Finally we can output the annotation DE results using `write_csv`.
+
+```{r outputDEtables, eval=F}
 write_tsv(resTab, "results/VirginVsLactating_Results_Annotated.txt")
 ```
 
@@ -217,12 +221,24 @@ compensates for this and allows better visualisation and ranking of genes. We
 will use it for our visualisations of the data.
 
 ```{r}
-ddsObjVvLshrink <- lfcShrink(ddsObj, coef="Status_lactate_vs_virgin")
-resTab <- ddsObjVvLshrink %>% 
+ddsShrink <- lfcShrink(ddsObj, coef="Status_lactate_vs_virgin")
+resTab <- ddsShrink %>% 
     as.data.frame() %>% 
     rownames_to_column("GeneID") %>% 
     left_join(ensemblAnnot, "GeneID") %>% 
     rename(logFC=log2FoldChange, FDR=padj)
+```
+
+## P-value histogram
+
+A quick and easy "sanity check" for our DE results is to generate a p-value 
+histogram. What we should see is a high bar in the `0 - 0.05` and then a roughly
+uniform tail to the right of this. There is a nice explanation of other possible
+patterns in the histogram and what to when you see them in [this 
+post](http://varianceexplained.org/statistics/interpreting-pvalue-histogram/).
+
+```{r pvalHist, fig.align="center", fig.width=5, fig.height=5}
+hist(resTab$pvalue)
 ```
 
 ## MA plots
@@ -235,8 +251,8 @@ being contrasted.
 
 `DESeq2` has a handy function for plotting this...
 
-```{r maPlotDESeq2}
-plotMA(ddsObjVvLshrink, alpha=0.05)
+```{r maPlotDESeq2, fig.align="center", fig.width=7, fig.height=5}
+plotMA(ddsShrink, alpha=0.05)
 ```
 
 ...this is fine for a quick look, but it is not easy to make changes to the way
@@ -244,7 +260,7 @@ it looks or add things such as gene labels. Perhaps we would like to add labels
 for the top 20 most significantly differentially expressed genes. Let's use 
 ggplot2 instead.
 
-```{r maPlot}
+```{r maPlot, fig.align="center", fig.width=7, fig.height=7}
 # add a column with the names of only the top 10 genes
 cutoff <- sort(resTab$pvalue)[10]
 resTab <- resTab %>% 
@@ -310,13 +326,13 @@ topgene
 groups <- colData(ddsObj)$Group
 par(mar=c(8,4,2,2)) #adjust the plot margins the x-labels are visible - see ?par
 stripchart(normCounts["ENSMUSG00000000381",]~groups,
+           col=1:6,
+           vertical=TRUE,
+           pch=21,
+           las=2,
+           cex=2,
            xlab="",
            ylab="log2(Counts)",
-           vertical=TRUE,
-           las=2,
-           pch=21,
-           col=1:6,
-           cex=2,
            main="Normalised Counts - Wap")
 ```
 
