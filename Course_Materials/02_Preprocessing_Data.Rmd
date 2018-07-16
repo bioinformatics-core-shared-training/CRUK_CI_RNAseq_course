@@ -323,7 +323,7 @@ sampleinfo <- sampleinfo %>%
     mutate(CellType=ifelse(Sample=="MCL1.LA", "luminal", CellType)) %>% 
     mutate(Group=ifelse(Sample=="MCL1.DG", "basal.virgin", Group)) %>% 
     mutate(Group=ifelse(Sample=="MCL1.LA", "luminal.virgin", Group))
-write_csv(sampleinfo, "data/SampleInfo_Corrected.txt")
+write_csv(sampleinfo, "results/SampleInfo_Corrected.txt")
 ```
 
 Let's look at the PCA now.
@@ -546,7 +546,8 @@ abline(h=0,col="grey")
 
 > ## Challenge 4
 >
-> Plot the biased and unbiased MA plots side by side for the same sample to see the before and after normalisation.
+> Plot the biased and unbiased MA plots side by side for the same sample to see 
+> the before and after normalisation.
 >
 
 **Solution**
