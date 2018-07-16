@@ -1,0 +1,58 @@
+---
+title: "RNA-seq analysis in R"
+author: "Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle"
+date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
+output:
+  html_notebook:
+    toc: yes
+  html_document:
+    toc: yes
+minutes: 300
+layout: page
+subtitle: Gene Set Testing for RNA-seq
+bibliography: ref.bib
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+```
+
+# Gene Set Testing
+
+The list of differentially expressed genes is sometimes so long that its interpretation becomes cumbersome and time consuming. A common downstream procedure is gene set testing. It aims to understand which pathways or gene networks the differentially expressed genes are implicated in.
+
+Various ways exist to test for enrichment of biological pathways.
+
+```{r loadData}
+resLvV <- read_tsv("data/VirginVsLactating_Results_Annotated.txt")
+```
+
+## Gene Set Testing - competitive gene set tests
+
+```{r}
+
+gseaDat <- resLvV %>% 
+    filter(!is.na(Entrez)) %>% 
+    arrange(desc(logFC))
+ranks <- gseaDat$logFC
+names(ranks) <- gseaDat$Entrez
+
+```
+
+#### Load pathways
+
+```{r}
+load("data/mouse_H_v5.rdata")
+makeCPgmt <- function(x, n){
+    data.frame(ont=n, gene=x)
+}
+Mm.H.CP <- map2_df(Mm.H, names(Mm.H), makeCPgmt)
+```
+
+```{r}
+library(clusterProfiler)
+gseaRes <- GSEA(ranks, TERM2GENE = Mm.H.CP, verbose=F)
+head(gseaRes[order(gseaRes$p.adjust), ])
+```
