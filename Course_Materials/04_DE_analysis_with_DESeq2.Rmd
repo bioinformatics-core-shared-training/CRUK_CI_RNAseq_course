@@ -45,9 +45,6 @@ Alternatively we can load the `objects with the Rdata file we created in the
 pre-processing tutorial.
 
 ```{r loadData}
-# before proceeding clean all objects out of the environment
-rm(list=ls())
-
 # load the Rdata object we created in the previous session
 load("Robjects/preprocessing.Rdata")
 ls()
