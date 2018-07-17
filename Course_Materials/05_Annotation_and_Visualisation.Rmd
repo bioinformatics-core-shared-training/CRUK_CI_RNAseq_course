@@ -363,12 +363,12 @@ right. A search bar is available to search for genes of interest.
 
 
 ## Additional Material
-### Retrieving Detailed Genomic Locations
 
+### Working with Genomic Locations - Transcript database packages
 
-. There is a whole suite of annotation packages that can be used to 
-access this information, and for performing more-advanced queries that relate to
-the location of genes. These are listed on the Bioconductor [annotation 
+There is a whole suite of annotation packages that can be used to access and for
+perform advanced queries on information about the genomic location of genes, 
+trancripts and exons. These are listed on the Bioconductor [annotation 
 page](http://bioconductor.org/packages/release/BiocViews.html#___AnnotationData)
 and have the prefix `TxDb.` (where "tx" is "transcript"). In addition there are 
 a large number of packages that make use of these annotations for downstream 
@@ -380,10 +380,91 @@ database from either a GTF file or from various online resources such as Biomart
 using the package
 [`GenomicFeatures`](https://bioconductor.org/packages/release/bioc/html/GenomicFeatures.html).
 
-```{r createTxDB, eval=FALSE}
+#### Creating a TxDb database from a GTF file
+
+The created database is only loaded into the current R session. You will need 
+to run this command each time - it can be a little slow.
+
+```{r createTxDBGTF, eval=FALSE}
+library(GenomicFeatures)
+txMm <- makeTxDbFromGFF(file = "counts/Mus_musculus.GRCm38.80.gtf", format = "gtf")
+```
+
+#### Creating a TxDb database from Biomart
+The created database is only loaded into the current R session. You will need to
+run this command each time.
+
+```{r createTxDBBiomart, eval=FALSE}
 library(GenomicFeatures)
 txMm <- makeTxDbFromBiomart(dataset="mmusculus_gene_ensembl")
 ```
+
+#### Creating a TxDb package from Biomart
+
+This creates an R package that can be installed just like a package that you
+might download from Bioconductor or CRAN. This can then loaded as normal 
+whenever it is needed, saving you having to build the database each time.
+
+A little extra work is needed at the command line to build the package from the 
+files produced by this method. Feel free to skip this section if you want - the 
+previous two methods are adequate if you can tolderate the short wait each time 
+you create the database.
+
+```{r creatTxDBpackage, eval=FALSE}
+library(GenomicFeatures)
+makeTxDbPackageFromBiomart(version="0.01",
+                           destDir = "~",
+                           maintainer="Some One <so@someplace.org>",
+                           author="Some One <so@someplace.com>",
+                           dataset="mmusculus_gene_ensembl")
+```
+
+This creates a new folder in your *home* directory (`~` is a shortcut for home).
+
+We will not go into detail about how to contruct an R package, or the contents
+of the package directory. This method generates all the files you need. More 
+information on contructing R packages can be found in Hadely Wickham's 
+["R Packages" book](http://r-pkgs.had.co.nz/).
+
+The directory created will be something like `TxDb.Mmusculus.BioMart.ENSEMBLMARTENSEMBL.GRCm38.p6`. This going to be the 
+packaged name and is referenced in various files in the package directory. We
+recommend changing it to something more manageable such as 
+`TxDb.Mmusculus.Ens.GRCm38`. We need to change the directory name, the database
+file name and each reference in the `DESCRIPTION` and `man/package.Rd` files.
+
+To this run the following at the command line (in the terminal not R).
+
+```{bash, eval=FALSE}
+OldName=TxDb.Mmusculus.BioMart.ENSEMBLMARTENSEMBL.GRCm38.p6
+NewName=TxDb.Mmusculus.Ens.GRCm38
+
+cd ~
+# rename the package directory
+mv ${OldName} ${NewName}
+
+cd ${NewName}
+# rename the database file
+mv inst/extdata/${OldName}.sqlite inst/extdata/${NewName}.sqlite
+
+# replace the references in the old directory
+sed -i s/${OldName}/${NewName}/ DESCRIPTION 
+sed -i s/${OldName}/${NewName}/ man/package.Rd 
+
+cd ~
+# Build the package from the directory of files created by the above command
+R CMD build TxDb.Mmusculus.Ens.GRCm38
+# Install the package from the tarball created
+R CMD INSTALL TxDb.Mmusculus.Ens.GRCm38.p6_0.01.tar.gz
+```
+
+```{r loadTxDBlibrary, eval=FALSE}
+library(GenomicFeatures)
+library(TxDb.Mmusculus.Ens.GRCm38)
+txMm <- TxDb.Mmusculus.Ens.GRCm38
+```
+
+
+### Retrieving information from TxDb packages
 
 Accessing the information in these TxDb databases is similar to the way in which
 we accessed information using `biomaRt` except that `filters` (the information
@@ -691,8 +772,7 @@ plotGrandLinear(top200, aes(y = logFC, col = UpRegulated))
 
 ```{r,fig.width=12,fig.height=5}
 
-autoplot(top200, layout="karyogram", aes(color=UpRegulated,
-                                       fill=UpRegulated))
+autoplot(top200, layout="karyogram", aes(color=UpRegulated, fill=UpRegulated))
 
 ```
 
@@ -731,7 +811,7 @@ geneMod <- autoplot(txMm, which = myreg)  +
 reads.MCL1.DG <- autoplot(bam, stat = "coverage")  + 
     xlim(GRanges("15", IRanges(6810000, 6880000))) +
     labs(title="MCL1.DG")
-tracks(GRCm38=geneMod, MCL1.DG=reads.MCL1.DG )
+tracks(GRCm38=geneMod, MCL1.DG=reads.MCL1.DG)
 ```
 
 > ## Challenge {.challenge}
