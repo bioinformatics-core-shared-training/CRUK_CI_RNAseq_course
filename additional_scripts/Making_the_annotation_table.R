@@ -117,12 +117,14 @@ annotUnEnt %>%
 
 ### Final table
 
-annotUnEnt %>%
+ensemblAnnot <- annotUnEnt %>%
     #left_join(homolDeDup) %>% 
     dplyr::rename(GeneID="ensembl_gene_id", Entrez="entrezgene",
               Symbol="external_gene_name", Description="description",
               Biotype="gene_biotype", Chr="chromosome_name",
               Start="start_position", End="end_position",
               Strand="strand") %>%
-    arrange(desc(Chr)) %>% 
-    write_tsv("data/Ensembl_annotations.tsv")
+    arrange(desc(Chr))
+
+save(annot, file="Robjects/Full_annotation.RData")
+save(ensemblAnnot, file="Robjects/Ensembl_annotations.RData")

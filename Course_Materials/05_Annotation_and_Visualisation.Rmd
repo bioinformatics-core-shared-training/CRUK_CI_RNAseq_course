@@ -183,7 +183,7 @@ cumbersome Biomart column names, and dealt with the one-to-many issues for
 Entrez IDs.
 
 ```{r addAnnotation, message=FALSE}
-ensemblAnnot <- read_tsv("data/Ensembl_annotations.tsv")
+load("Robjects/Ensembl_annotations.RData")
 colnames(ensemblAnnot)
 resTab <- as.data.frame(resLvV) %>% 
     rownames_to_column("GeneID") %>% 
@@ -380,7 +380,7 @@ database from either a GTF file or from various online resources such as Biomart
 using the package
 [`GenomicFeatures`](https://bioconductor.org/packages/release/bioc/html/GenomicFeatures.html).
 
-```{r createTxDB, message=FALSE}
+```{r createTxDB, eval=FALSE}
 library(GenomicFeatures)
 txMm <- makeTxDbFromBiomart(dataset="mmusculus_gene_ensembl")
 ```
