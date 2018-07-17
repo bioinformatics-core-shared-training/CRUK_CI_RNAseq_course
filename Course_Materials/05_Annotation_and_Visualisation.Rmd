@@ -185,7 +185,7 @@ Entrez IDs.
 ```{r addAnnotation, message=FALSE}
 load("Robjects/Ensembl_annotations.RData")
 colnames(ensemblAnnot)
-resTab <- as.data.frame(resLvV) %>% 
+annotLvV <- as.data.frame(resLvV) %>% 
     rownames_to_column("GeneID") %>% 
     left_join(ensemblAnnot, "GeneID") %>% 
     rename(logFC=log2FoldChange, FDR=padj)
@@ -194,7 +194,7 @@ resTab <- as.data.frame(resLvV) %>%
 Finally we can output the annotation DE results using `write_csv`.
 
 ```{r outputDEtables, eval=F}
-write_tsv(resTab, "results/VirginVsLactating_Results_Annotated.txt")
+write_tsv(annotLvV, "data/VirginVsLactating_Results_Annotated.txt")
 ```
 
 > ### Challenge {.challenge}
@@ -204,7 +204,7 @@ write_tsv(resTab, "results/VirginVsLactating_Results_Annotated.txt")
 > do a quick web search of your favourite gene/protein database
 
 <!-- ```{r topGenes} -->
-<!-- resTab %>%  -->
+<!-- annotated.Results %>%  -->
 <!--     arrange(FDR) %>%  -->
 <!--     select(Symbol) -->
 <!--     head(10) -->
@@ -222,7 +222,7 @@ will use it for our visualisations of the data.
 
 ```{r}
 ddsShrink <- lfcShrink(ddsObj, coef="Status_lactate_vs_virgin")
-resTab <- ddsShrink %>% 
+shrinkLvV <- ddsShrink %>% 
     as.data.frame() %>% 
     rownames_to_column("GeneID") %>% 
     left_join(ensemblAnnot, "GeneID") %>% 
@@ -238,7 +238,7 @@ patterns in the histogram and what to when you see them in [this
 post](http://varianceexplained.org/statistics/interpreting-pvalue-histogram/).
 
 ```{r pvalHist, fig.align="center", fig.width=5, fig.height=5}
-hist(resTab$pvalue)
+hist(shrinkLvV$pvalue)
 ```
 
 ## MA plots
@@ -262,18 +262,15 @@ ggplot2 instead.
 
 ```{r maPlot, fig.align="center", fig.width=7, fig.height=7}
 # add a column with the names of only the top 10 genes
-cutoff <- sort(resTab$pvalue)[10]
-resTab <- resTab %>% 
+cutoff <- sort(shrinkLvV$pvalue)[10]
+shrinkLvV <- shrinkLvV %>% 
     mutate(TopGeneLabel=ifelse(pvalue<=cutoff, Symbol, ""))
 
-ggplot(resTab, aes(x = log2(baseMean), y=logFC)) + 
+ggplot(shrinkLvV, aes(x = log2(baseMean), y=logFC)) + 
     geom_point(aes(colour=FDR < 0.05), pch=20, size=0.5) +
     geom_text(aes(label=TopGeneLabel)) +
     labs(x="mean of normalised counts", y="log fold change")
 ```
-
-
-
 
 ## Volcano plot
 
@@ -288,7 +285,7 @@ process of DESeq2
 
 ```{r volcanoPlot, fig.height=5, fig.width=10}
 # first remove the filtered genes (FDR=NA) and create a -log10(FDR) column
-filtTab <- resTab %>% 
+filtTab <- shrinkLvV %>% 
     filter(!is.na(FDR)) %>% 
     mutate(`-log10(FDR)` = -log10(FDR))
 
@@ -320,7 +317,7 @@ normCounts <- counts(ddsObj, normalized=TRUE) %>%
     log2()
 
 # Let's look at the most significantly differentially expressed gene: Wap
-topgene <- filter(resTab, Symbol=="Wap")
+topgene <- filter(shrinkLvV, Symbol=="Wap")
 topgene
 
 groups <- colData(ddsObj)$Group
@@ -341,6 +338,10 @@ stripchart(normCounts["ENSMUSG00000000381",]~groups,
 An interactive version of the volcano plot above that includes the raw per 
 sample values in a separate panel is possible via the `glXYPlot` function in the
 *Glimma* package.
+
+```{r exportRdata, eval=FALSE}
+save(annotLvV, shrinkLvV, file="results/Annotated_Results_LvV.RData")
+```
 
 
 ```{r}
@@ -589,7 +590,7 @@ from our analysis such as the fold-change and significance.
 
 First we create a data frame for just the DE genes.
 ```{r tableOfDEGenes}
-sigGenes <- filter(resTab, FDR <= 0.01)
+sigGenes <- filter(shrinkLvV, FDR <= 0.01)
 message("Number of significantly DE genes: ", nrow(sigGenes))
 head(sigGenes)
 ```
