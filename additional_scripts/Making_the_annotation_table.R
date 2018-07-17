@@ -33,13 +33,14 @@ annot <- getBM(attributes=attributeNames,
                values = filterValues,
                mart = ensembl)
 
+# There are 63 ensembl id's with multiple Entrez ID's
 # Deduplicate the entrez IDS - just arbitrarily take the first
-# fsgea throws a nasty warning about multiple genes if we have this issue
 
 annotUn <- annot %>%
     filter(!duplicated(ensembl_gene_id))
 
-# The problem: we have 10 duplicated Entrez IDs
+# The problem: we now have 10 duplicated Entrez IDs
+# fsgea throws a nasty warning about multiple genes if we have this issue
 load("Robjects/DE.Rdata")
 res <- as.data.frame(resLvV) %>% 
     rownames_to_column("ensembl_gene_id") %>% 
