@@ -19,40 +19,154 @@ editor_options:
 library(tidyverse)
 ```
 
-# Gene Set Testing
-
 The list of differentially expressed genes is sometimes so long that its interpretation becomes cumbersome and time consuming. A common downstream procedure is gene set testing. It aims to understand which pathways or gene networks the differentially expressed genes are implicated in.
 
 Various ways exist to test for enrichment of biological pathways.
 
-```{r loadData}
-resLvV <- read_tsv("data/VirginVsLactating_Results_Annotated.txt")
-```
+# GSEA analysis
 
-## Gene Set Testing - competitive gene set tests
+Gene Set Enrichment Analysis GSEA was tests whether a set of genes of interest, 
+e.g. genes
+[@Subramanian15545]. The software is distributed by the [Broad 
+Institute](http://software.broadinstitute.org/gsea/index.jsp) and is freely 
+available for use by academic and non-profit organisations. 
+
+In addition to the GSEA software the Broad also provide a number of very well 
+curated `gene set`s for testing against your data - the [Molecular Signatures 
+Database (MSigDB)](http://software.broadinstitute.org/gsea/msigdb/index.jsp). 
+Unfortunately, these are collections of human genes, however, these lists
+have been translated to mouse equivalents by the Walter+Eliza Hall Institutes
+Bioinformatics service and made avaialble for [download](http://bioinf.wehi.edu.au/software/MSigDB/).
+
+
+The analysis is performed by:
+
+- (i) ranking all genes in the `data set`
+- (ii) identifying the rank positions of all members of the `gene set` in the 
+ranked `data set`
+- (iii) calculating an enrichment score (ES) that represents the difference 
+between the observed rankings and that which would be expected assuming a random 
+rank distribution.
+
+[commentary on GSEA](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1266131/). 
+The article describing the original software is available 
+[here](http://www.pnas.org/content/102/43/15545.long).
+
+## `fgsea`
+
+The `fgsea` package [@Sergushichev2016] implements the same algorithm in R [vignette](http://www.bioconductor.org/packages/release/bioc/vignettes/fgsea/inst/doc/fgsea-tutorial.html) "fast preranked gene set enrichment analysis (GSEA)".
 
 ```{r}
+library(fgsea)
+```
 
-gseaDat <- resLvV %>% 
+```{r loadData}
+load("Robjects/Annotated_Results_LvV.RData")
+```
+
+## Create ranks
+
+Rank all genes based on their fold change. We need to exclude genes for
+which we do not have Entrez IDs. Also, we should use the shrunk LFC values.
+
+```{r}
+gseaDat <- shrinkLvV %>% 
     filter(!is.na(Entrez)) %>% 
     arrange(desc(logFC))
 ranks <- gseaDat$logFC
 names(ranks) <- gseaDat$Entrez
-
+head(ranks)
 ```
 
-#### Load pathways
+Plot the ranked fold changes.
+
+```{r}
+#plot(ranks)
+barplot(ranks)
+```
+
+## Load pathways
 
 ```{r}
 load("data/mouse_H_v5.rdata")
-makeCPgmt <- function(x, n){
-    data.frame(ont=n, gene=x)
-}
-Mm.H.CP <- map2_df(Mm.H, names(Mm.H), makeCPgmt)
 ```
 
+## Conduct analysis
+
 ```{r}
+fgseaRes <- fgsea(Mm.H, ranks, minSize=15, maxSize = 500, nperm=1000)
+#head(fgseaRes)
+```
+
+## Table of resLvV
+```{r}
+head(fgseaRes[order(padj, -abs(NES)), ], n=10)
+```
+
+## Enrichment score plot
+
+```{r}
+plotEnrichment(pathways[["HALLMARK_ESTROGEN_RESPONSE_EARLY"]], ranks)
+```
+
+Remember to check the [GSEA article](http://www.pnas.org/content/102/43/15545.full) for the complete explanation.
+
+## GSEA table plot
+
+Select top pathways and plot outcome for all these
+
+```{r}
+topUp <- fgseaRes %>% 
+    filter(ES > 0) %>% 
+    top_n(10, wt=-padj)
+topDown <- fgseaRes %>% 
+    filter(ES < 0) %>% 
+    top_n(10, wt=-padj)
+topPathways <- bind_rows(topUp, topDown) %>% 
+    arrange(-ES)
+
+plotGseaTable(pathways[topPathways$pathway], 
+              ranks, 
+              fgseaRes, 
+              gseaParam = 0.5)
+```
+
+# GO enrichment analysis
+
+We're going to use `clusterProfiler` [@Yu2012].
+
+```{r libraryCP}
 library(clusterProfiler)
-gseaRes <- GSEA(ranks, TERM2GENE = Mm.H.CP, verbose=F)
-head(gseaRes[order(gseaRes$p.adjust), ])
+library(org.Mm.eg.db)
+```
+
+```{r getSigGeneList}
+sigGenes <- shrinkLvV$GeneID[ shrinkLvV$FDR < 0.05 & !is.na(shrinkLvV$FDR) ]
+geneList <- shrinkLvV$GeneID
+```
+
+```{r }
+ego <- enrichGO(gene          = sigGenes,
+                universe      = geneList,
+                OrgDb         = org.Mm.eg.db,
+                ont           = "BP",
+                pAdjustMethod = "BH",
+                pvalueCutoff  = 1,
+                qvalueCutoff  = 1,
+                readable      = TRUE,
+                keyType = "ENSEMBL")
+```
+
+
+
+
+```{r goSeqPackage, message=F}
+library(goseq)
+
+genesq <- as.integer(shrinkLvV$FDR < 0.05 & !is.na(shrinkLvV$FDR))
+names(genesq) <- shrinkLvV$GeneID
+
+pwf <- nullp(genesq, "mm10", "ensGene", bias.data = shrinkLvV$Length)
+
+go.resLvV.bp <- goseq(pwf, "mm10","ensGene", test.cats=c("GO:BP"))
 ```
