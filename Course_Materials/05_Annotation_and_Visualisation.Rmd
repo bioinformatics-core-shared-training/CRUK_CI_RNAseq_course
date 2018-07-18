@@ -131,9 +131,9 @@ We will need to do a little work before adding the annotation to out results
 table. We could decide to discard one or both of the Entrez ID mappings, or we 
 could concatenate the Entrez IDs so that we don't lose information. 
 
-### Retrieve full annotation
+## Retrieve full annotation
 
-> ### Challenge {.challenge}
+> ### Challenge 1 {.challenge}
 > That was just 1000 genes. We need annotations for the entire results table.
 > Also, there may be some other interesting columns in BioMart that we wish to
 > retrieve.  
@@ -148,29 +148,6 @@ could concatenate the Entrez IDs so that we don't lose information.
 
 ```{r solutionChallenge1}
 # filterValues <- rownames(resLvV)
-# 
-# # check the available "attributes" - things you can retreive
-# listAttributes(ensembl) %>%
-#     head(20)
-# attributeNames <- c('ensembl_gene_id', 
-#                     'entrezgene',
-#                     'external_gene_name',
-#                     'description',
-#                     'gene_biotype',
-#                     'chromosome_name',
-#                     'start_position',
-#                     'end_position',
-#                     'strand')
-# 
-# # run the query
-# annot <- getBM(attributes=attributeNames,
-#                filters = filterType,
-#                values = filterValues,
-#                mart = ensembl)
-# 
-# sum(duplicated(annot$ensembl_gene_id))
-# missingGenes <- !rownames(resLvV)%in%annot$ensembl_gene_id
-# rownames(resLvV)[missingGenes]
 ```
 
 ### Add annotation to the results table
@@ -179,8 +156,8 @@ We can now add the annotation to the results table and then save the results
 using the `write_tsv` function, which writes the results out to a tab
 separated file.
 To save time we have created an annotation table in which we have modified the 
-cumbersome Biomart column names, added transcript length, and 
-dealt with the one-to-many issues for Entrez IDs.
+cumbersome Biomart column names, added median transcript length (we'll need this
+in a later session), and dealt with the one-to-many issues for Entrez IDs.
 
 ```{r addAnnotation, message=FALSE}
 load("Robjects/Ensembl_annotations.RData")
@@ -197,18 +174,14 @@ Finally we can output the annotation DE results using `write_csv`.
 write_tsv(annotLvV, "data/VirginVsLactating_Results_Annotated.txt")
 ```
 
-> ### Challenge {.challenge}
+> ### Challenge 2 {.challenge}
 > Have a look at gene symbols for most significant genes by adjusted p-value.
 > Do they make biological sense in the context of comparing gene expression
 > in mammary gland tissue between lactating and virgin mice? You may want to
 > do a quick web search of your favourite gene/protein database
 
-<!-- ```{r topGenes} -->
-<!-- annotated.Results %>%  -->
-<!--     arrange(FDR) %>%  -->
-<!--     select(Symbol) -->
-<!--     head(10) -->
-<!-- ``` -->
+```{r solution2}
+```
 
 # Visualisation
 
@@ -220,10 +193,9 @@ differences between groups that highly expressed genes. The `lfcShrink` method
 compensates for this and allows better visualisation and ranking of genes. We 
 will use it for our visualisations of the data.
 
-```{r}
+```{r shrinkLFC}
 ddsShrink <- lfcShrink(ddsObj, coef="Status_lactate_vs_virgin")
-shrinkLvV <- ddsShrink %>% 
-    as.data.frame() %>% 
+shrinkLvV <- as.data.frame(ddsShrink) %>%
     rownames_to_column("GeneID") %>% 
     left_join(ensemblAnnot, "GeneID") %>% 
     rename(logFC=log2FoldChange, FDR=padj)
@@ -260,7 +232,7 @@ it looks or add things such as gene labels. Perhaps we would like to add labels
 for the top 20 most significantly differentially expressed genes. Let's use 
 ggplot2 instead.
 
-```{r maPlot, fig.align="center", fig.width=7, fig.height=7}
+```{r maPlot, fig.align="center", fig.width=5, fig.height=5}
 # add a column with the names of only the top 10 genes
 cutoff <- sort(shrinkLvV$pvalue)[10]
 shrinkLvV <- shrinkLvV %>% 
@@ -500,7 +472,7 @@ select(txMm,
 ```
  
 
-> ### Challenge 2 {.challenge}
+> ### Challenge 3 {.challenge}
 >
 > Use the txMm to retrieve the exon coordinates for the genes: 
     + `ENSMUSG00000021604`
@@ -509,9 +481,6 @@ select(txMm,
 >
 
 ```{r solutionChallenge2, echo=FALSE, warning=FALSE, message=FALSE}
-
-
-
 
 ```
 
@@ -654,7 +623,7 @@ colour scheme for the regions based on the fold-change
 
 We will also truncate the fold-changes to between -5 and 5 to and divide this range into 10 equal bins
 
-```{r}
+```{r createPalette}
 rbPal <- colorRampPalette(c("red", "blue"))
 logFC <- pmax(sigRegions$logFC, -5)
 logFC <- pmin(logFC , 5)
@@ -666,7 +635,7 @@ The colours and score have to be saved in the GRanges object as `score` and `ite
 
 Now we can export the signifcant results from the DE analysis as a `.bed` track using `rtracklayer`. You can load the resulting file in IGV, if you wish.
 
-```{r}
+```{r exportTrack}
 mcols(sigRegions)$score <- -log10(sigRegions$FDR)
 mcols(sigRegions)$itemRgb <- Cols
 sigRegions
@@ -686,13 +655,13 @@ library(GenomicAlignments)
 In the directory `small_bams` there should be `.bam` files for some of the samples in the example study. The workflow to produce these files is described in a [supplmentary page](../Supplementary_Materials/S1_Getting_raw_reads_from_SRA.nb.html) for the course. In brief, the raw reads (`fastq`) were downloaded from the Short Read Archive (SRA) and aligned with `hisat2`. Each bam file was named according to the file name in SRA, but we have renamed the files according to their name in the study. An index file (`.bai`) has been generated for each bam file. In order to reduce the size, the bam files used here only contain a subset of the reads that were aligned in the region chr15:101707000-101713000.
 
 
-```{r}
+```{r bamFiles}
 list.files("counts/small_bams/")
 ```
 
 The `readGAlignments` function provides a simple interface to interrogate the aligned reads for a particular sample. It can also utilise the *index* file in order to retrieve only the reads that correspond to a specific region in an efficient manner. The output includes the genomic location of each aligned read and the CIGAR (**C**ompact **I**diosyncratic **G**apped **A**lignment **R**eport); where *M* denotes an match to the genome and *I*, *D* correspond to insertions and deletions.
 
-```{r}
+```{r readReads}
 exo <- exonsBy(txMm, "gene") 
 generegion <- exo[["ENSMUSG00000022146"]] %>% 
     keepSeqlevels(value = 15, pruning.mode="tidy")
@@ -704,7 +673,7 @@ my.reads
 
 It is possible to tweak the function to retrieve other potentially-useful information from the bam file, such as the mapping quality and flag.
 
-```{r}
+```{r additionalInfo}
 my.reads <- readGAlignments(file="counts/small_bams/MCL1.DG.15.sm.bam",
                        param=ScanBamParam(which=generegion,
                                           what=c("seq","mapq","flag")))
@@ -753,7 +722,7 @@ ggbio, using the ranges information to get the genomic coordinates of the ranges
 
 To stop the plots from being too cluttered we will consider the top 200 genes only.
 
-```{r,fig.width=12,fig.height=5}
+```{r manhattanPlot, fig.width=12, fig.height=5}
 library(ggbio)
 top200 <- sigRegions[order(sigRegions$FDR)[1:200]]
 
@@ -763,7 +732,7 @@ plotGrandLinear(top200 , aes(y = logFC))
 
 `ggbio` has alternated the colours of the chromosomes. However, an appealing feature of `ggplot2` is the ability to map properties of your plot to variables present in your data. For example, we could create a variable to distinguish between up- and down-regulated genes. The variables used for aesthetic mapping must be present in the `mcols` section of your ranges object.
 
-```{r,fig.width=12,fig.height=5}
+```{r manPlot2, fig.width=12, fig.height=5}
 mcols(top200)$UpRegulated <- mcols(top200)$logFC > 0
 
 plotGrandLinear(top200, aes(y = logFC, col = UpRegulated))
@@ -771,7 +740,7 @@ plotGrandLinear(top200, aes(y = logFC, col = UpRegulated))
 
 `plotGrandLinear` is a special function in `ggbio` with preset options for the manhattan style of plot. More often, users will call the `autoplot` function and `ggbio` will choose the most appropriate layout. One such layout is the *karyogram*. 
 
-```{r,fig.width=12,fig.height=5}
+```{r karyogram, fig.width=12, fig.height=5}
 
 autoplot(top200, layout="karyogram", aes(color=UpRegulated, fill=UpRegulated))
 
@@ -782,13 +751,13 @@ autoplot(top200, layout="karyogram", aes(color=UpRegulated, fill=UpRegulated))
 `ggbio` is also able to plot the structure of genes according to a particular model represented by a `GenomicFeatures` object, such as the object we created earlier with the exon coordinates for each gene in the GRCm38 genome.
 
 
-```{r}
+```{r geneModelPlot}
 autoplot(txMm, which=exo[["ENSMUSG00000022146"]])
 ```
 
 We can even plot the location of sequencing reads if they have been imported using readGAlignments function (or similar).
 
-```{r}
+```{r coveragePlot}
 myreg <- exo[["ENSMUSG00000022146"]] %>% 
     GenomicRanges::reduce() %>% 
     flank(width = 1000, both = T) %>% 
@@ -806,7 +775,7 @@ form more complicated plots. If saved in this way, the plot will only be display
 when we query the object. This strategy is useful when we want to add a common element (such as
 an ideogram) to a plot composition and don’t want to repeat the code to generate the plot every time.
 
-```{r, message=FALSE}
+```{r combinePl, message=FALSE}
 geneMod <- autoplot(txMm, which = myreg)  + 
     xlim(GRanges("15", IRanges(6810000, 6880000)))
 reads.MCL1.DG <- autoplot(bam, stat = "coverage")  + 
@@ -814,14 +783,3 @@ reads.MCL1.DG <- autoplot(bam, stat = "coverage")  +
     labs(title="MCL1.DG")
 tracks(GRCm38=geneMod, MCL1.DG=reads.MCL1.DG)
 ```
-
-> ## Challenge {.challenge}
->
-> Create tracks to compare the coverage of the gene Krt5 for the samples MCL1.DG, MCL1.DH, MCL1.LA and MCL1.LB
->
-
-```{r,echo=FALSE,fig.height=5,fig.width=10}
-
-
-```
-

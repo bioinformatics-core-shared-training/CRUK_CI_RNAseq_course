@@ -15,97 +15,103 @@ layout: page
 ---
 
 ```{r setup, include=FALSE}
-library(edgeR)
-library(org.Mm.eg.db)
-library(TxDb.Mmusculus.UCSC.mm10.knownGene)
-library(ggbio)
-library(GenomicRanges)
-library(GenomicAlignments)
+library(biomaRt)
+library(DESeq2)
+library(tidyverse)
 ```
 
 ```{r prepareData}
 # load data
 load("../Robjects/DE.Rdata")
-# make results table
-results <- as.data.frame(topTags(lrt_BvsL, n = Inf))
-# identify differentially expressed genes
-de <- decideTestsDGE(lrt_BvsL)
-# create a vector of differentially expressed genes
-detags <- rownames(dgeObj)[as.logical(de)]
-# fetch annotations
-ann <- select(org.Mm.eg.db,
-              keys = rownames(results),
-              columns = c("ENTREZID","SYMBOL","GENENAME"))
-# annotate the results
-results.annotated <- cbind(results, ann)
-# load the txDB object
-tx <- TxDb.Mmusculus.UCSC.mm10.knownGene
-exo <- exonsBy(tx, "gene")
-myreg <- reduce(exo[["110308"]])
-# make gene model
-geneMod <- autoplot(tx, which = myreg)
+## set up connection to ensembl database
+ensembl=useMart("ENSEMBL_MART_ENSEMBL")
+# list the available datasets (species)
+listDatasets(ensembl) %>% 
+    filter(str_detect(description, "Mouse"))
+# specify a data set to use
+ensembl = useDataset("mmusculus_gene_ensembl", mart=ensembl)
+# Set the filter type and values
+filterType <- "ensembl_gene_id"
+# annotated
+load("../Robjects/Ensembl_annotations.RData")
+annotLvV <- as.data.frame(resLvV) %>% 
+    rownames_to_column("GeneID") %>% 
+    left_join(ensemblAnnot, "GeneID") %>% 
+    rename(logFC=log2FoldChange, FDR=padj)
+# txdb object
+txMm <- makeTxDbFromBiomart(dataset="mmusculus_gene_ensembl")
 ```
 
 
-> ## Challenge 1 {.challenge}
+> ### Challenge 1 {.challenge}
+> That was just 1000 genes. We need annotations for the entire results table.
+> Also, there may be some other interesting columns in BioMart that we wish to
+> retrieve.  
 >
-> Re-visit the `plotSmear` plot from above and use the `text` function to add labels for the names of the top 200 most DE genes
->
+> (a) Search the attributes and add the following to our list of attributes:  
+>       (i) The gene description   
+>       (ii) The genomic position - chromosome, start, end, and strand (4 columns) 
+>       (iii) The gene biotype  
+> (b) Query BioMart using all of the genes in our results table (`resLvV`)  
+> (c) How many Ensembl genes have multipe Entrez IDs associated with them?  
+> (d) How many Ensembl genes in `resLvV` don't have any annotation? Why is this?
 
-```{r solutionChallenge1, echo=FALSE, fig.height=5, fig.width=10}
-n_genes <- 20
-plotSmear(lrt_BvsL, de.tags=detags)
-text(results.annotated$logCPM[seq(n_genes)],
-     results.annotated$logFC[seq(n_genes)],
-     labels = results.annotated$SYMBOL[seq(n_genes)],
-     col = "blue")
+```{r solutionChallenge1}
+filterValues <- rownames(resLvV)
+
+# check the available "attributes" - things you can retreive
+listAttributes(ensembl) %>%
+    head(20)
+attributeNames <- c('ensembl_gene_id',
+                    'entrezgene',
+                    'external_gene_name',
+                    'description',
+                    'gene_biotype',
+                    'chromosome_name',
+                    'start_position',
+                    'end_position',
+                    'strand')
+
+# run the query
+annot <- getBM(attributes=attributeNames,
+               filters = filterType,
+               values = filterValues,
+               mart = ensembl)
+
+# dulicate ids
+sum(duplicated(annot$ensembl_gene_id))
+
+# missing gens
+missingGenes <- !rownames(resLvV)%in%annot$ensembl_gene_id
+rownames(resLvV)[missingGenes]
 ```
 
-> ## Challenge 2 {.challenge}
+
+> ### Challenge 2 {.challenge}
+> Have a look at gene symbols for most significant genes by adjusted p-value.
+> Do they make biological sense in the context of comparing gene expression
+> in mammary gland tissue between lactating and virgin mice? You may want to
+> do a quick web search of your favourite gene/protein database
+
+```{r topGenes}
+annotLvV %>%
+    arrange(FDR) %>%
+    head(10)
+```
+
+> ### Challenge 3 {.challenge}
 >
-> Use the TxDb.Mmusculus.UCSC.mm10.knownGene package to retrieve the exon coordinates for the genes `50916`, `110308`, `12293` 
+> Use the txMm to retrieve the exon coordinates for the genes: 
+    + `ENSMUSG00000021604`
+    + `ENSMUSG00000022146`
+    + `ENSMUSG00000040118` 
 >
 
-```{r solutionChallenge2, echo=FALSE, warning=FALSE, message=FALSE}
-
-keys <- c("50916", "110308", "12293")
-select(tx, 
-       keys=keys,
+```{r solutionChallenge3, echo=FALSE, warning=FALSE, message=FALSE}
+keyList <- c("ENSMUSG00000021604", "ENSMUSG00000022146", "ENSMUSG00000040118")
+select(txMm, 
+       keys=keyList,
        keytype = "GENEID",
-       columns=c("EXONCHROM","EXONSTART","EXONEND")
+       columns=c("TXNAME", "TXCHROM", "TXSTART", "TXEND", "TXSTRAND", "TXTYPE")
       )
-
 ```
-
-> ## Challenge 3a {.challenge}
->
-> Create tracks to compare the coverage of the gene Krt5 for the samples MCL1.DG, MCL1.DH, MCL1.LA and MCL1.LB
->
-
-```{r solutionChallenge3a, echo=FALSE, fig.height=5, fig.width=10}
-bam <- readGAlignments(file="../data/bams_small/MCL1.DG.small.bam",
-                       param=ScanBamParam(which=myreg),use.names = TRUE)
-reads.MCL1.DG <- autoplot(bam, stat = "coverage") + 
-    xlim(GRanges("chr15", IRanges(101707000, 101713000)))
-
-bam <- readGAlignments(file="../data/bams_small/MCL1.DH.small.bam",
-                       param=ScanBamParam(which=myreg),use.names = TRUE)
-reads.MCL1.DH <- autoplot(bam, stat = "coverage") + 
-    xlim(GRanges("chr15", IRanges(101707000, 101713000)))
-
-
-bam <- readGAlignments(file="../data/bams_small/MCL1.LA.small.bam",
-                       param=ScanBamParam(which=myreg),use.names = TRUE)
-reads.MCL1.LA <- autoplot(bam, stat = "coverage") + 
-    xlim(GRanges("chr15", IRanges(101707000, 101713000)))
-
-bam <- readGAlignments(file="../data/bams_small/MCL1.LB.small.bam",
-                       param=ScanBamParam(which=myreg),use.names = TRUE)
-reads.MCL1.LB <- autoplot(bam, stat = "coverage") + 
-    xlim(GRanges("chr15", IRanges(101707000, 101713000)))
-
-
-tracks(mm10=geneMod, MCL1.DG=reads.MCL1.DG, MCL1.Dh=reads.MCL1.DH, MCL1.LA=reads.MCL1.LA, MCL1.LB=reads.MCL1.LB) 
-
-```
-
