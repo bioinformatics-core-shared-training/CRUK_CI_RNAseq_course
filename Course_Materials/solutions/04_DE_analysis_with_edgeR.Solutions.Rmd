@@ -19,54 +19,61 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-library(edgeR)
-library(limma)
-library(Glimma)
-library(gplots)
-library(org.Mm.eg.db)
+library(tidyverse)
+library(DESeq2)
 load("../Robjects/preprocessing.Rdata")
 ```
 
 ```{r prepareData}
-# Specify a design matrix with an intercept term
-design <- model.matrix(~ CellType + Status, data = sampleinfo)
-colnames(design)[1] <- "Intercept"
-# estimate dispersion
-dgeObj <- estimateCommonDisp(dgeObj)
-dgeObj <- estimateGLMTrendedDisp(dgeObj)
-dgeObj <- estimateTagwiseDisp(dgeObj)
-# Fit the linear model
-fit <- glmFit(dgeObj, design)
-# luminal vs basal
-lrt.BvsL <- glmLRT(fit, coef=2)
+# Specify a model
+design <- as.formula(~ CellType + Status)
+# set virgin to base line
+sampleinfo$Status <- factor(sampleinfo$Status, 
+                              levels = c("virgin", "pregnant", "lactate"))
+# rebuild a clean DDS object
+ddsObj <- DESeqDataSetFromMatrix(countData = countdata,
+                              colData = sampleinfo,
+                              design = design)
+# Run DESeq
+ddsObj <- DESeq(ddsObj)
 ```
 
 
-> ## Challenge 1 {.challenge}
-> Conduct likelihood ratio tests for virgin vs lactate and show the top genes.
+> #### Challenge 1 {.challenge}
+> Obtain results for luminal vs basal and find the top 200 genes (call the new
+> results object `resLvB`.
 
 ```{r solutionChallenge1}
-lrt.BvsL <- glmLRT(fit, coef=4)
-topTags(lrt.BvsL)
+resLvB <- results(ddsObj, name="CellType_luminal_vs_basal")
+topGenesLvB <- as.data.frame(resLvB) %>%
+    rownames_to_column("GeneID") %>% 
+    arrange(padj) %>%
+    head(200)
+topGenesLvB
 ```
 
-> ## Challenge 2 {.challenge}
->
-> 1.Fit a model with interaction: What is the rationale to include the interaction (What assumption are you relaxing?)
-> 2. Is the number of replicates good enough to include the interaction?
-> 3. Is the interaction needed in the model?
+> ### Challenge 2 {.challenge}
+> When we looked at the PCA it did seem that an interaction model might be
+> warranted. Let's test that.
+> 1.Fit a model with interaction: What is the rationale to include the 
+> interaction?  
+> 2. Use the LRT to compare the two models.
+> 3. Is the number of replicates good enough to include the interaction?  
+> 4. Is the interaction needed in the model?  
 
-**Solution**
 ```{r solutionChallenge2}
-# Solution
-design2 <- model.matrix(~ CellType * Status, data = sampleinfo)
-fit2 <- glmFit(dgeObj, design2)
+designI <- as.formula(~ CellType * Status)
 
-head(coef(fit2))
+# Build model
+ddsObjI <- DESeqDataSetFromMatrix(countData = countdata,
+                              colData = sampleinfo,
+                              design = designI)
+# Run DESeq
+ddsObjI <- DESeq(ddsObjI)
 
-lrt2 <- glmLRT(fit2, coef=5)
-topTags(lrt2)
-
-lrt3 <- glmLRT(fit2, coef=6)
-topTags(lrt3)
+# Compare the models
+ddsObjI <- DESeq(ddsObjI, test="LRT", reduced=design)
+resIvA <- results(ddsObjI)
+head(resIvA)
+length(which(resIvA$padj<=0.05))
 ```

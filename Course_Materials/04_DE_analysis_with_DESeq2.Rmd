@@ -20,7 +20,6 @@ count data. Here, for completeness, we list the minimal steps required to
 process the data prior to differential expression analysis.
 
 ```{r recap, eval = FALSE}
-
 # Read the sample information into a data frame
 sampleinfo <- read_tsv("data/SampleInfo.txt")
 
@@ -90,20 +89,29 @@ type of cells.
 ```{r modelForumla}
 # Use the standard R 'formula' syntax for an additive model
 design <- as.formula(~ CellType + Status)
+```
+
+What does this look like as a model matrix?
+```{r modelMatrix}
 modelMatrix <- model.matrix(design, data = sampleinfo)
 modelMatrix
-# Let's set factor levels on Status to use virgin as the intercept
+```
+
+It would be nice if `virgin` were the the base line/intercept. To get R to 
+use `virgin` as the intercept we need to use a `factor`. Let's set factor levels
+on Status to use virgin as the intercept.
+
+```{r setFactors}
 sampleinfo$Status <- factor(sampleinfo$Status, 
                               levels = c("virgin", "pregnant", "lactate"))
 modelMatrix <- model.matrix(design, data = sampleinfo)
 modelMatrix
-
 ```
 
 ### Build a DESeq2DataSet
 
-We don't actually need to pass DESeq2 the model matrix, if we pass it the design
-formula it will build the matrix itself.
+We don't actually need to pass DESeq2 the model matrix, instead we pass it the 
+design formula and the `sampleinfo` it will build the matrix itself.
 
 ```{r makeDDSObj}
 # create the DESeqDataSet object
@@ -117,7 +125,7 @@ ddsObj <- DESeqDataSetFromMatrix(countData = countdata,
 Let's plot a PCA from `vst` transformed data. 
 Can you anticipate if the interaction term will be important?
 
-```{r pcaPlot}
+```{r pcaPlot, fig.width=5, fig.height=5}
 vstcounts <- vst(ddsObj, blind=TRUE)
 plotPCA(vstcounts, intgroup=c("Status", "CellType"))
 ```
@@ -162,7 +170,7 @@ ddsObj <- DESeq(ddsObj)
 ## Generate a results table
 
 We can generate a table of differential expression results from the DDS object
-using the `results` function of DESeq2. DESeq2 will extract the 
+using the `results` function of DESeq2.
 
 ```{r resultsTable}
 res <- results(ddsObj, lfcThreshold = 0.05)
@@ -208,11 +216,14 @@ Let's just rename `res` so that we know which contrast results it contains.
 
 ```{r}
 resLvV <- res
+rm(res)
 ```
 
+If we want a different contrast we can just pass the `results` function the name
+of the design matrix column that encodes it.
+Let's retrieve the results for pregant versus virgin
 
 ```{r resultPvV}
-# get the results for pregant versus virgin
 resPvV <- results(ddsObj, 
                   name="Status_pregnant_vs_virgin", 
                   lfcThreshold = 0.05)
@@ -222,27 +233,18 @@ resPvV
 Let's get the top 100 genes by adjusted p-value
 
 ```{r topGenesPvV, message = F}
-topGenesPvV <- resPvV %>%
-    as.data.frame() %>% 
-    filter(!is.na(padj)) %>% 
+topGenesPvV <- as.data.frame(resPvV) %>%
+    rownames_to_column("GeneID") %>% 
     arrange(padj) %>% 
     head(100)
-head(topGenesPvV)
+topGenesPvV
 ```
 
-> ### Challenge 1 {.challenge}
-> Obtain results for basal vs luminal and find the top 200 genes (call the new
-> results object `resBvL`.
+> #### Challenge 1 {.challenge}
+> Obtain results for luminal vs basal and find the top 200 genes.
+> Call the new results object `resBvL`.
 
-**Solution**
 ```{r solutionChallenge1}
-# resBvL <- results(ddsObj, name="CellType_basal_vs_luminal")
-# topGenesBvL <- resBvL %>%
-#     as.data.frame() %>%
-#     filter(!is.na(padj)) %>%
-#     arrange(padj) %>%
-#     head(200)
-# head(topGenesBvL)
 ```
 
 ## Contrasts
@@ -261,6 +263,12 @@ resPvL <- results(ddsObj,
 
 ## Comparing two design models
 
+Suppose we thought that maybe `status` were irrelevant and really the only 
+differences might be between cell types. We could fit a simpler model, this 
+would give us more degrees of freedom and therefore more power, but how
+would we know if it was a better model of not? We can compare the two models
+using the "log ratio test" (LRT).
+
 ```{r compareModels}
 designC <- as.formula(~ CellType )
 
@@ -270,36 +278,21 @@ resCvCS <- results(ddsObjC)
 ```
 
 > ### Challenge 2 {.challenge}
->
-> 1.Fit a model with interaction: What is the rationale to include the 
-> interaction?  
-> 2. Is the number of replicates good enough to include the interaction?  
-> 3. Is the interaction needed in the model?  
+> When we looked at the PCA it did seem that an interaction model might be
+> warranted. Let's test that.  
+> 1.Fit a model with interaction.
+> 2. Use the LRT to compare the two models.  
+> 3. Is the number of replicates good enough to include the interaction?    
+> 4. Is the interaction needed in the model?  
 
-
-**Solution**
 ```{r solutionChallenge2}
-# designI <- as.formula(~ CellType * Status)
-# 
-# # Build model
-# ddsObjI <- DESeqDataSetFromMatrix(countData = countdata,
-#                               colData = sampleinfo,
-#                               design = designI)
-# # Run DESeq
-# ddsObjI <- DESeq(ddsObjI)
-# 
-# # Compare the models
-# ddsObjI <- DESeq(ddsObjI, test="LRT", reduced=design)
-# resIvA <- results(ddsObjI)
 ```
 
 
 ## Finally save the results in a new Rdata object
 
 ```{r saveObjects, eval=FALSE}
-
 save(resLvV, ddsObj, sampleinfo, file="results/DE.Rdata")
-
 ```
 
 -----------
