@@ -179,8 +179,8 @@ We can now add the annotation to the results table and then save the results
 using the `write_tsv` function, which writes the results out to a tab
 separated file.
 To save time we have created an annotation table in which we have modified the 
-cumbersome Biomart column names, and dealt with the one-to-many issues for 
-Entrez IDs.
+cumbersome Biomart column names, added transcript length, and 
+dealt with the one-to-many issues for Entrez IDs.
 
 ```{r addAnnotation, message=FALSE}
 load("Robjects/Ensembl_annotations.RData")

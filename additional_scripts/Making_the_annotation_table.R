@@ -10,8 +10,7 @@ ensembl=useMart("ENSEMBL_MART_ENSEMBL")
 ensembl = useDataset("mmusculus_gene_ensembl", mart=ensembl)
 
 listAttributes(ensembl) %>% 
-    filter(str_detect(name, "homolog")) %>% 
-    filter(str_detect(name, "sapiens"))
+    head(n=40)
 
 # get annot
 filterType <- "ensembl_gene_id"
@@ -32,6 +31,16 @@ annot <- getBM(attributes=attributeNames,
                filters = filterType,
                values = filterValues,
                mart = ensembl)
+
+# get transcript length
+txLen <- getBM(attributes=c('ensembl_gene_id', 'transcript_length'),
+               filters = filterType,
+               values = filterValues,
+               mart = ensembl) %>% 
+    group_by(ensembl_gene_id) %>% 
+    summarise(transcript_length=median(transcript_length))
+
+annot <- left_join(annot, txLen)
 
 # There are 63 ensembl id's with multiple Entrez ID's
 # Deduplicate the entrez IDS - just arbitrarily take the first
@@ -123,8 +132,7 @@ ensemblAnnot <- annotUnEnt %>%
               Symbol="external_gene_name", Description="description",
               Biotype="gene_biotype", Chr="chromosome_name",
               Start="start_position", End="end_position",
-              Strand="strand") %>%
-    arrange(desc(Chr))
+              Strand="strand", medianTxLength='transcript_length')
 
 save(annot, file="Robjects/Full_annotation.RData")
 save(ensemblAnnot, file="Robjects/Ensembl_annotations.RData")
