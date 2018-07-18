@@ -56,7 +56,7 @@ This study examines the expression profiles of basal stem-cell enriched cells
 and lactating mice. Six groups are present, with one for each combination of
 cell type and mouse status. Each group contains two biological replicates.
 
-# Reading in the sample metadata
+## Reading in the sample metadata
 
 The `sampleinfo` file contains basic information about the samples that we will
 need for the analysis today.
@@ -90,11 +90,14 @@ In the `seqdata` object each row represents a gene. The columns contains:
 7-18 One column for each sample with the count of how many reads were assigned  
 to each gene by featureCounts.
 
-## A quick intro to `dplyr`
+### A quick intro to `dplyr`
 
 ...
-  
-  
+....
+.....
+....
+...
+
 ## Format the data
 
 We will be manipulating and reformating the counts matrix into a suitable
@@ -164,7 +167,7 @@ dim(countdata)
 Before moving on to doing the actually differential expression analysis it 
 important do assess the quality of our data.
 
-## Library sizes and distribution plots
+## Library sizes bar plot
 
 First, we can plot how many reads we have for each sample. Whilst normalisation 
 can account for imbalance in coverage across the samples, extreme differences 
@@ -177,7 +180,7 @@ librarySizes <- countdata %>%
     gather("Sample", "Counts")
 ```
 
-### A Brief Introduction to ggplot2
+### A Brief Introduction to `ggplot2`
 
 The [`ggplot2`](http://ggplot2.tidyverse.org/) package has emerged as an 
 attractive alternative to the traditional plots provided by base R. A full 
@@ -204,8 +207,10 @@ chosen by `ggplot2`, but we can specifiy particular values.
 
 ```{r plotLibrarySize}
 ggplot(librarySizes, aes(x=Sample, y=Counts)) +
-       geom_bar(stat="identity", col="black", fill="steelblue")
+       geom_bar(col="black", fill="steelblue", stat="identity")
 ```
+
+## Count distribution boxplots
 
 Count data is not normally distributed, so if we want to examine the
 distributions of the raw counts it is helpful to transform the data on to a log
@@ -221,21 +226,51 @@ colour to see if there is any difference between sample groups
 logcounts <- log2(countdata + 1)
 # lets add the gene ids
 rownames(logcounts) <- rownames(countdata)
-# Check distributions of samples using boxplots
-# Add a horizontal line at the overall median 
-logcounts %>% 
+
+# reform the table and add sample data
+logcounts <- logcounts %>% 
     as.data.frame() %>% 
     gather("Sample", "logCounts") %>% 
-    left_join(sampleinfo, "Sample") %>% 
-    ggplot(aes(x=Sample, y=logCounts, fill=Status)) +
-        geom_hline(yintercept = median(logcounts), colour = "blue", size=2) +
-        geom_boxplot()
+    left_join(sampleinfo, "Sample")
+
+# Check distributions of samples using boxplots
+# Add a horizontal line at the overall median 
+ggplot(logcounts, aes(x=Sample, y=logCounts, fill=Status)) +
+        geom_boxplot() +
+        geom_hline(yintercept = median(logcounts$logCounts), colour = "blue")
 ```
 
 From the boxplots we see that overall the density distributions of raw
 log-intensities are not identical but still not very different. If a sample is
 really far above or below the blue horizontal line we may need to investigate
 that sample further.
+
+> ### Challenge 1
+>
+> 1. Use the `DESeq2` function `rlog` to transform the count data. This function
+> also normalises for library size.
+> 2. Plot the count distribution boxplots with this data
+> How has this effected the count distributions?
+
+```{r solutionChallenge1}
+# rlogcounts <- rlog(countdata)
+# 
+# rownames(rlogcounts) <- rownames(countdata)
+# 
+# # reform the table and add sample data
+# rlogcounts <- rlogcounts %>% 
+#     as.data.frame() %>% 
+#     gather("Sample", "logCounts") %>% 
+#     left_join(sampleinfo, "Sample")
+# 
+# # Check distributions of samples using boxplots
+# # Add a horizontal line at the overall median 
+# ggplot(rlogcounts, aes(x=Sample, y=logCounts, fill=Group)) +
+#         geom_boxplot() +
+#         geom_hline(yintercept = median(rlogcounts$logCounts), colour = "blue")
+
+```
+
 
 ## Principle Component Analysis
 
@@ -261,7 +296,7 @@ package [@Tang2016]. `ggfortify` is built on top of `ggplot2` and is able to
 recognise common statistical objects such as PCA results or linear model results 
 and automatically generate summary plot of the results in an appropriate manner.
 
-```{r pcaPlot, message = FALSE}
+```{r pcaPlot, message = FALSE, fig.width=6.5, fig.height=5, fig.align="center"}
 library(ggfortify)
 
 rlogcounts <- rlog(countdata)
@@ -304,7 +339,7 @@ autoplot(pcDat,
 > Is there something strange going on with the samples?
 > Let's identify these samples:
 
-```{r badSamples}
+```{r badSamples, fig.width=6.5, fig.height=5, fig.align="center"}
 # setting shape to FALSE causes the plot to default to using the labels
 autoplot(pcDat,
          data = sampleinfo, 
@@ -315,7 +350,7 @@ autoplot(pcDat,
 
 The mislabelled samples are *MCL1.DG*, which is labelled as *luminal* but should
 be *basal*, and *MCL1.LA*, which is labelled as *basal* but should be *luminal*.
-Let's fix the sample sheet and save the new version
+Let's fix the sample sheet...
 
 ```{r correctSampleSheet}
 sampleinfo <- sampleinfo %>% 
@@ -323,12 +358,13 @@ sampleinfo <- sampleinfo %>%
     mutate(CellType=ifelse(Sample=="MCL1.LA", "luminal", CellType)) %>% 
     mutate(Group=ifelse(Sample=="MCL1.DG", "basal.virgin", Group)) %>% 
     mutate(Group=ifelse(Sample=="MCL1.LA", "luminal.virgin", Group))
+
 write_csv(sampleinfo, "results/SampleInfo_Corrected.txt")
 ```
 
 Let's look at the PCA now.
 
-```{r correctedPCA}
+```{r correctedPCA, fig.width=6.5, fig.height=5, fig.align="center"}
 autoplot(pcDat,
          data = sampleinfo, 
          fill="Status", 
@@ -352,18 +388,17 @@ differences between virgin, pregnant and lactating are greater for luminal cells
 than for basal.
 
 Clustering in the PCA plot can be used to motivate changes to the design
- matrix in light of potential batch effects. For example, imagine that the
- first replicate of each group was prepared at a separate time from the second
- replicate. If the PCA plot showed separation of samples by time, it might be
- worthwhile including time in the down stream analysis to account for the
- time-based effect.
+matrix in light of potential batch effects. For example, imagine that the
+first replicate of each group was prepared at a separate time from the second
+replicate. If the PCA plot showed separation of samples by time, it might be
+worthwhile including time in the down stream analysis to account for the
+time-based effect.
 
-
-### Additional - PCA beyond the first two dimensions [optional]
+## PCA beyond the first two dimensions [optional]
 
 `autoplot` plots the first two dimensions as a default, however you can plot higher dimensions using the `x` and `y` arguments.
 
-```{r plotPCA3and4, fig.width=5, fig.height=5}
+```{r plotPCA3and4, fig.width=6.5, fig.height=5, fig.align="center"}
 autoplot(pcDat,
          data = sampleinfo, 
          fill = "Status", 
@@ -375,7 +410,7 @@ autoplot(pcDat,
     guides(fill = guide_legend(override.aes=list(shape=22)))
 ```
 
-### Additional - Interactive MDS Plot with Glimma [optional]
+## Interactive MDS Plot with Glimma
 
 Another alternative is to generate a Multidimensional scaling (MDS) plot. MDS 
 is similar to PCA, in MDS the distance between each pair of samples in the MDS
@@ -422,12 +457,11 @@ We don't want to plot a heatmap of all 22013 genes, so let's select data for the
 
 ```{r getHMData}
 # We estimate the variance for each row in the logcounts matrix
-var_genes <- apply(rlogcounts, 1, var)
-head(var_genes)
+countVar <- apply(rlogcounts, 1, var)
 # Get the row numbers for the top 500 most variable genes
-select_var <- order(var_genes, decreasing=TRUE)[1:500]
+highVar <- order(countVar, decreasing=TRUE)[1:500]
 # Subset logcounts matrix
-hmData <- rlogcounts[select_var,]
+hmDat <- rlogcounts[highVar,]
 ```
 
 ```{r plotHM, fig.width=10, fig.height=10, message = FALSE}
@@ -442,22 +476,22 @@ morecols <- colorRampPalette(mypalette)
 col.cell <- c("purple","orange")[sampleinfo$CellType]
 
 # Plot the heatmap
-heatmap.2(hmData, 
+heatmap.2(hmDat, 
           col=rev(morecols(50)),
           trace="column", 
           main="Top 500 most variable genes across samples",
           ColSideColors=col.cell,scale="row")
 ```
 
-> ### **Additional Challenge 3**
+> ### Challenge 2  {.challenge}
 >
 > Redo the heatmap using the top 500 LEAST variable genes.  
-> Change the colour scheme to "PiYG" and redo the heatmap. Try `?RColorBrewer` and see what other colour schemes are available.  
+> Change the colour scheme to "PiYG" and redo the heatmap. Try `brewer.pal.info` 
+> and `display.brewer.all` to see what other colour schemes are available.  
 > Change the sample names to `group` using the `labCol` argument  
 > Remove the gene names from the righthand side of the plot using `labRow`  
 
-**Solution**
-```{r solutionChallenge3, echo=FALSE, fig.height=8, fig.width=6}
+```{r solutionChallenge2, echo=FALSE, fig.height=8, fig.width=6}
 
 
 
@@ -466,6 +500,8 @@ heatmap.2(hmData,
 
 
 -----
+
+
 # Convert counts to **DESeqDataSet** object
 
 Next we'll create a `DESeqDataSet` object. This is an object used by `DESeq2` to
@@ -489,7 +525,7 @@ ddsObj <- DESeqDataSetFromMatrix(countData = countdata,
                               design = design)
 ```
 
-# Normalisation
+## Normalisation
 
 The `estimateSizeFactors` command of `DESeq2` applies the "median ratio method"
 of normalisation[@Huber2010]. This generates a set of normalization factors and 
@@ -521,6 +557,7 @@ and composition bias. Let's have a look at the raw `countsdata`; we will need to
 
 ```{r plotRawMA, fig.height=5, fig.width=10, message = FALSE}
 library(limma)
+logcounts <- log2(countdata + 1)
 
 par(mfrow=c(1,2))
 plotMA(logcounts, array = 7)
@@ -537,6 +574,7 @@ the composition bias problem has been solved.
 ```{r plotNormedMA, fig.height=5, fig.width=10}
 normalizedCounts <- counts(ddsObj, normalized=TRUE) 
 logNormalizedCounts <- log2(normalizedCounts + 1)
+
 par(mfrow=c(1,2))
 plotMA(logNormalizedCounts, array = 7)
 abline(h=0,col="grey")
@@ -544,19 +582,25 @@ plotMA(logNormalizedCounts, array = 11)
 abline(h=0,col="grey")
 ```
 
-> ## Challenge 4
+> ### Challenge 3
 >
-> Plot the biased and unbiased MA plots side by side for the same sample to see 
-> the before and after normalisation.
+> Plot the biased and unbiased MA plots both samples side by side to see the 
+> before and after normalisation.
 >
 
-**Solution**
-```{r solutionChallenge4, echo=FALSE, fig.height=5, fig.width=10}
-
-
-
-
+```{r solutionChallenge3, echo=FALSE, fig.height=10, fig.width=10}
+par(mfrow=c(2,2))
+plotMA(logcounts, array = 7, main="MCL1.LA - Raw")
+abline(h=0,col="grey")
+plotMA(logNormalizedCounts, array = 7, main="MCL1.LA - Normalised")
+abline(h=0,col="grey")
+plotMA(logcounts, array = 11, main="MCL1.LE - Raw")
+abline(h=0,col="grey")
+plotMA(logNormalizedCounts, array = 11, main="MCL1.LE - Normalised")
+abline(h=0,col="grey")
 ```
+
+## Export data
 
 **We can save a few data objects to use later so we don't have to rerun 
 everything**
@@ -564,3 +608,7 @@ everything**
 ```{r saveData}
 save(countdata, sampleinfo, file="results/preprocessing.Rdata")
 ```
+
+--------------------
+
+# References
