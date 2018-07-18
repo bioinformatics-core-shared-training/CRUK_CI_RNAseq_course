@@ -19,112 +19,58 @@ editor_options:
 library(tidyverse)
 ```
 
-# Gene Set Testing
-
 The list of differentially expressed genes is sometimes so long that its interpretation becomes cumbersome and time consuming. A common downstream procedure is gene set testing. It aims to understand which pathways or gene networks the differentially expressed genes are implicated in.
 
-Various ways exist to test for enrichment of biological pathways. Two types of test answer two different questions: competitive and self-contained gene set tests.
+Various ways exist to test for enrichment of biological pathways.
 
-Competitive gene set tests, such as those implemented in `GOseq` and `camera`, ask the question whether the differentially expressed genes tend to be over-represented in the gene set, compared to all the other genes in the experiment.
+# GSEA analysis
 
-Self-contained tests, which include the `ROAST` procedure, ask the question "Are the genes in the set/pathway differentially expressed as a whole?"
+Gene Set Enrichment Analysis GSEA was tests whether a set of genes of interest, 
+e.g. genes
+[@Subramanian15545]. The software is distributed by the [Broad 
+Institute](http://software.broadinstitute.org/gsea/index.jsp) and is freely 
+available for use by academic and non-profit organisations. 
 
-```{r loadData}
-resLvV <- read_tsv("data/VirginVsLactating_Results_Annotated.txt")
-```
+In addition to the GSEA software the Broad also provide a number of very well 
+curated `gene set`s for testing against your data - the [Molecular Signatures 
+Database (MSigDB)](http://software.broadinstitute.org/gsea/msigdb/index.jsp). 
+Unfortunately, these are collections of human genes, however, these lists
+have been translated to mouse equivalents by the Walter+Eliza Hall Institutes
+Bioinformatics service and made avaialble for [download](http://bioinf.wehi.edu.au/software/MSigDB/).
 
-## Gene Set Testing - competitive gene set tests
 
-### GOseq analysis
+The analysis is performed by:
 
-GOseq is a method to conduct Gene Ontology (GO) analysis suitable for RNA-seq data as it accounts for the gene length bias in detection of over-representation ([GOseq article](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2010-11-2-r14))
+- (i) ranking all genes in the `data set`
+- (ii) identifying the rank positions of all members of the `gene set` in the 
+ranked `data set`
+- (iii) calculating an enrichment score (ES) that represents the difference 
+between the observed rankings and that which would be expected assuming a random 
+rank distribution.
 
-From the [GOseq vignette](https://www.bioconductor.org/packages/release/bioc/vignettes/goseq/inst/doc/goseq.pdf):
+[commentary on GSEA](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1266131/). 
+The article describing the original software is available 
+[here](http://www.pnas.org/content/102/43/15545.long).
 
-- GOseq first needs to quantify the length bias present in the dataset under consideration.
-- This is done by calculating a Probability Weighting Function or PWF which can be thought of as a function which gives the probability that a gene will be differentially expressed (DE), based on its length alone.
-- The PWF is calculated by fitting a monotonic spline to the binary data series of differential expression (1=DE, 0=Not DE) as a function of gene length.
-- The PWF is used to weight the chance of selecting each gene when forming a null distribution for GO category membership.
-- The fact that the PWF is calculated directly from the dataset under consideration makes this approach robust, only correcting for the length bias present in the data.
+## `fgsea`
 
-"GO analysis of RNA-seq data requires the use of random sampling in order to generate a suitable null distribution for GO category membership and calculate each category's significance for over representation amongst DE genes. ... In  most  cases,  the  Wallenius distribution can be used to approximate the true null distribution, without any significant loss in accuracy. The goseq package implements this approximation as its default option."
-
-Create list of DEGs:
-
-```{r}
-
-# counts <- read_tsv("data/GSE60450_Lactation.featureCounts", comment="#")
-# # Retrieve list of all genes tested:
-# assayedGenes <- counts$Geneid
-# # Derive list of DEGs by filtering on FDR:
-# sigGenes <- resLvV$GeneID[resLvV$FDR < 0.05 & !is.na(resLvV$FDR)]
-# # create genes vector for goseq
-# genes <- as.integer(assayedGenes%in%sigGenes)
-# names(genes) <- assayedGenes
-# 
-# rm(counts)
-
-# or is it
-
-genes <- as.integer(resLvV$FDR < 0.05 & !is.na(resLvV$FDR))
-names(genes) <- resLvV$GeneID
-
-```
-
-```{r goSeqPackage, message=F}
-library(goseq)
-supportedOrganisms() %>% filter(str_detect(Genome, "mm"))
-```
-
-Fit the Probability Weighting Function (PWF):
-```{r pwFunction}
-pwf <- nullp(genes, "mm10", "ensGene", bias.data = resLvV$Length)
-```
-
-Conduct gene set enrichment analysis:
-
-```{r}
-#?goseq
-go.resLvV <- goseq(pwf, "mm10","ensGene")
-go.resLvV
-go.resLvV.bp <- goseq(pwf, "mm10","ensGene", test.cats=c("GO:BP"))
-```
-
-Get the GO information for the GO accessions.
-
-```{r}
-library(GO.db)
-
-for(goAccession in go.resLvV.bp$category[1:10]){
-    print(GOTERM[[goAccession]])
-    cat("-----------------------------------------\n\n")
-}
-
-```
-
-### fgsea analysis
-
-From the fgsea [vignette](http://www.bioconductor.org/packages/release/bioc/vignettes/fgsea/inst/doc/fgsea-tutorial.html) "fast preranked gene set enrichment analysis (GSEA)":
-
-This analysis is performed by:
-
-- (i) ranking all genes in the data set based on their correlation to the chosen phenotype,
-- (ii) identifying the rank positions of all members of the gene set, and 
-- (iii) calculating an enrichment score (ES) that represents the difference between the observed rankings and that which would be expected assuming a random rank distribution.
-
-"After establishing the ES for each gene set across the phenotype, GSEA reiteratively randomizes the sample labels and retests for enrichment across the random classes. By performing repeated class label randomizations, the ES for each gene set across the true classes can be compared to the ES distribution from the random classes. Those gene sets that significantly outperform iterative random class permutations are considered significant." [commentary on GSEA](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1266131/). The article describing the original software is available [here](http://www.pnas.org/content/102/43/15545.long).
+The `fgsea` package [@Sergushichev2016] implements the same algorithm in R [vignette](http://www.bioconductor.org/packages/release/bioc/vignettes/fgsea/inst/doc/fgsea-tutorial.html) "fast preranked gene set enrichment analysis (GSEA)".
 
 ```{r}
 library(fgsea)
 ```
 
-#### Create ranks
+```{r loadData}
+load("Robjects/Annotated_Results_LvV.RData")
+```
+
+## Create ranks
 
 Rank all genes based on their fold change. We need to exclude genes for
-which we do not have Entrez IDs
+which we do not have Entrez IDs. Also, we should use the shrunk LFC values.
 
 ```{r}
-gseaDat <- resLvV %>% 
+gseaDat <- shrinkLvV %>% 
     filter(!is.na(Entrez)) %>% 
     arrange(desc(logFC))
 ranks <- gseaDat$logFC
@@ -139,48 +85,39 @@ Plot the ranked fold changes.
 barplot(ranks)
 ```
 
-#### Load pathways
+## Load pathways
 
 ```{r}
 load("data/mouse_H_v5.rdata")
 pathways <- Mm.H
 ```
 
-#### Conduct analysis
+## Conduct analysis
 
 ```{r}
-?fgsea
 fgseaRes <- fgsea(pathways, ranks, minSize=15, maxSize = 500, nperm=1000)
-class(fgseaRes)
-dim(fgseaRes)
 #head(fgseaRes)
 ```
 
-#### Table of resLvV
+## Table of resLvV
 ```{r}
-head(fgseaRes[order(padj), ])
+head(fgseaRes[order(padj, -abs(NES)), ], n=10)
 ```
 
-#### Enrichment score plot
+## Enrichment score plot
 
 ```{r}
-plotEnrichment(pathways[["HALLMARK_ESTROGEN_RESPONSE_EARLY"]],
-               ranks)
+plotEnrichment(pathways[["HALLMARK_ESTROGEN_RESPONSE_EARLY"]], ranks)
 ```
 
 Remember to check the [GSEA article](http://www.pnas.org/content/102/43/15545.full) for the complete explanation.
 
-# GSEA table plot
+## GSEA table plot
 
-Select top pathways and plot outcome for all these
+The function `plotGseaTable` allows us to plot a summary figue showing the 
+results for multiple pathways.
 
 ```{r}
-pathwaysUp <- fgseaRes[ES > 0]
-topPathwaysUp <- head( pathwaysUp$pathway[ order(pathwaysUp$pval) ], n=10 )
-pathwaysDown <- fgseaRes[ES < 0]
-topPathwaysDown <- head( pathwaysDown$pathway[ order( pathwaysDown$pval ) ], n=10 )
-topPathways <- c(topPathwaysUp, rev(topPathwaysDown))
-
 topUp <- fgseaRes %>% 
     filter(ES > 0) %>% 
     top_n(10, wt=-padj)
@@ -196,140 +133,151 @@ plotGseaTable(pathways[topPathways$pathway],
               gseaParam = 0.5)
 ```
 
-## Gene Set Testing - self-contained gene set tests
+# GO enrichment analysis
 
-### ROAST gene set testing
+## `goseq`
 
-[ROAST](https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btq401) is an example of a self-contained gene set test [@wu2010roast]. It asks the question, "Do the genes in my set tend to be differentially expressed between my conditions of interest?". ROAST does not use information on the other genes in the experiment, unlike `camera` (see below). ROAST is a good option for when you're interested in a specific set, or a few sets. It is not really used to test thousands of sets at one time.
+GOseq is a method to conduct Gene Ontology (GO) analysis suitable for RNA-seq data as it accounts for the gene length bias in detection of over-representation [[@Young2010]](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2010-11-2-r14)
 
-Here we will be using the C2 gene sets for mouse, available as .rdata files from the WEHI bioinformatics page [http://bioinf.wehi.edu.au/software/MSigDB/index.html](http://bioinf.wehi.edu.au/software/MSigDB/index.html). The C2 gene sets contain 4725 curated gene sets collected from a variety of places: BioCarta, KEGG, Pathway Interaction Database, Reactome as well as some published studies. It doesn't include GO terms.
+From the [GOseq vignette](https://www.bioconductor.org/packages/release/bioc/vignettes/goseq/inst/doc/goseq.pdf):
 
-```{r}
-# Load in the mouse c2 gene sets
-# The R object is called Mm.c2
-load("data/mouse_c2_v5.rdata")
+- GOseq first needs to quantify the length bias present in the dataset under consideration.
+- This is done by calculating a Probability Weighting Function or PWF which can be thought of as a function which gives the probability that a gene will be differentially expressed (DE), based on its length alone.
+- The PWF is calculated by fitting a monotonic spline to the binary data series of differential expression (1=DE, 0=Not DE) as a function of gene length.
+- The PWF is used to weight the chance of selecting each gene when forming a null distribution for GO category membership.
+- The fact that the PWF is calculated directly from the dataset under consideration makes this approach robust, only correcting for the length bias present in the data.
 
-# Have a look at the first few gene sets
-names(Mm.c2)[1:5]
+"GO analysis of RNA-seq data requires the use of random sampling in order to generate a suitable null distribution for GO category membership and calculate each category's significance for over representation amongst DE genes. ... In  most  cases,  the  Wallenius distribution can be used to approximate the true null distribution, without any significant loss in accuracy. The goseq package implements this approximation as its default option."
 
-# Number of gene sets in C2
-length(Mm.c2)
+```{r goSeqPackage, message=FALSE}
+library(goseq)
+supportedOrganisms() %>% filter(str_detect(Genome, "mm"))
 ```
 
-The gene identifiers are Entrez Gene ID, as are the rownames of our DGEList object 'dgeObj'. We need to map the Entrez gene ids between the list of gene sets and our DGEList object. We can do this using the `ids2indices` function.
+## Create a list of differentially expressed genes
 
-```{r}
-c2.ind <- ids2indices(Mm.c2, rownames(dgeObj$counts))
+```{r getDEGs}
+genes <- as.integer(shrinkLvV$FDR < 0.01 & !is.na(shrinkLvV$FDR))
+names(genes) <- shrinkLvV$GeneID
 ```
 
+## Fit the Probability Weighting Function (PWF)
 
-Let's see if there are any MYC signalling pathways in MsigDB C2 collection. We can do this with the `grep` command on the names of the gene sets.
-
-```{r}
-grep("MYC_", names(c2.ind))
-
-# Let's save these so that we can subset c2.ind to test all gene sets with MYC in the name
-myc <- grep("MYC_",names(c2.ind))
-
-# What are these pathways called?
-names(c2.ind)[myc]
+```{r pwFunction}
+pwf <- nullp(genes, "mm10", "ensGene", bias.data = shrinkLvV$medianTxLength)
 ```
 
-Let's use ROAST to see if these MYC related gene sets tend to be differentially expressed. 
+## Conduct GO enrichment analysis
 
-```{r}
-# Specify a design matrix without an intercept term
-design <- model.matrix(~ CellType + Status, data = sampleinfo)
-# Run ROAST
-myc.rst <- roast(dgeObj,
-                 index=c2.ind[myc],
-                 design=design,
-                 contrast=3,
-                 nrot=999)
-myc.rst[1:15,]
+```{r runGoseq}
+goResults <- goseq(pwf, "mm10","ensGene", test.cats=c("GO:BP"))
 ```
 
-Each row corresponds to a single gene set.
+## Plot the top 10
 
-The NGenes column gives the number of genes in each set.
+```{r plotGO}
+goResults %>% 
+    top_n(10, wt=-over_represented_pvalue) %>% 
+    mutate(`hits (%)`=numDEInCat*100/numInCat) %>% 
+    dplyr::rename(Count=numDEInCat, p.value=over_represented_pvalue) %>% 
+    ggplot(aes(x=`hits (%)`, y=term, colour=p.value, size=Count)) +
+        geom_point() +
+        geom_vline(xintercept = 0, linetype=2, alpha=0.3)
+```
 
-The PropDown and PropUp columns contain the proportions of genes in the set that are down- and up-regulated, respectively, with absolute fold changes greater than 2.
+## Get the GO information for the GO accessions
 
-The net direction of change is determined from the significance of changes in each direction, and is shown in the Direction column.
-
-The PValue provides evidence for whether the majority of genes in the set are DE in the specified direction
-
-The PValue.Mixed provides evidence for whether the majority of genes in the set are DE in any direction.
-
-FDRs are computed from the corresponding p-values across all sets.
+```{r getGOinfo}
+library(GO.db)
+GOTERM[[goResults$category[1]]]
+```
 
 > ## Challenge 1 {.challenge}
 >
-> 1. Test whether the MYC signalling pathways tend to be differentially expressed between basal virgin vs lactating.
-> 1. Look for gene sets containing "WNT" in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.
->
+> 1. Create a gene list for genes that are up-regulated by at least 4x (logFC>2)
+> in lactating mice
+> 2. Run a `goseq` analysis on this gene list
+> 3. Plot the results
+> 4. How is this result different to the previous GO analysis?
 
-```{r solutionChallenge1}
+Look at genes that are up regulated by at least 4x (logFC>2) in lactating mices
 
-
+```{r solution1, eval=F}
+# isSigGeneUp <- shrinkLvV$FDR < 0.01 & 
+#     !is.na(shrinkLvV$FDR) & 
+#     shrinkLvV$logFC > 2
+# 
+# genesUp <- as.integer(isSigGeneUp)
+# names(genesUp) <- shrinkLvV$GeneID
+# 
+# pwf <- nullp(genesUp, "mm10", "ensGene", bias.data = shrinkLvV$medianTxLength)
+# 
+# goResultsUp <- goseq(pwf, "mm10","ensGene", test.cats=c("GO:BP"))
+# 
+# goResultsUp %>% 
+#     top_n(10, wt=-(over_represented_pvalue)) %>% 
+#     mutate(`hits (%)`=numDEInCat*100/numInCat) %>% 
+#     dplyr::rename(Count=numDEInCat,  p.value=over_represented_pvalue) %>% 
+#     ggplot(aes(x=`hits (%)`, 
+#                y=term, 
+#                colour=p.value, 
+#                size=Count)) +
+#         geom_point() +
+#         geom_vline(xintercept = 0, linetype=2, alpha=0.3)
 ```
 
-Notes
+# KEGG pathway enrichment analysis
 
-* A common application of ROAST is to use a set of DE genes that was defined from an analysis of an independent data set. ROAST can then determine whether similar changes are observed in the contrast of interest for the current data set.
-* ROAST estimates p-values by simulation, so the resLvV may change slightly between runs. More precise p-values can be obtained by increasing the number of rotations, albeit at the cost of increased computational time.
-* The smallest p-value that can be reported is 1/(2nrot + 1) where nrot is the number of rotations. This lower bound can be decreased by increasing nrot.
+## `clusterProfiler`
 
-References
+We can analyse for enrichment of KEGG pathways in much the same way as for GO 
+terms. We could also use `goseq` for this, but this time we're going to use 
+`clusterProfiler` [@Yu2012]. `clusterprofiler` supports direct online access of
+the current KEGG database, rather than relying on R annotation packages, it
+also provides some nice visualisation options.
 
-Supplementary Material - CAMERA
-===============================
-
-### CAMERA gene set testing using the Broad's curated gene sets
-
-Other databases of gene sets that are available come from the Broad Institute's Molecular Signatures Database ([MSigDB](http://software.broadinstitute.org/gsea/msigdb)). [CAMERA](https://academic.oup.com/nar/article/40/17/e133/2411151/Camera-a-competitive-gene-set-test-accounting-for) is good option for testing a very large number of gene sets such as the MSigDB sets, as it is very fast. It has the advantage of accounting for inter-gene correlation within each gene set [@wu2012camera].
-
-CAMERA takes as input the DGEList object `dgeObj`, the indexed list of gene sets `c2.ind`, the design matrix, the contrast being tested, as well as some other arguments. By default, CAMERA can estimate the correlation for each gene set separately. However, in practise, it works well to set a small inter-gene correlation of about 0.05 using the `inter.gene.cor` argument.
-
-```{r}
-# Specify a design matrix without an intercept term
-design <- model.matrix(~ CellType + Status, data = sampleinfo)
-#design
-
-# Check contrasts:
-print(colnames(design))
-
-# Run analysis:
-gst.camera <- camera.DGEList(dgeObj,index=c2.ind,design=design,contrast=2,inter.gene.cor=0.05)
+```{r loadClusterProfiler}
+library(clusterProfiler)
+search_kegg_organism('mmu', by='kegg_code')
 ```
 
-CAMERA outputs a dataframe of the resulting statistics, with each row denoting a different gene set. The output is ordered by p-value so that the most significant should be at the top. Let's look at the top 5 gene sets:
+## KEGG enrichment analysis
 
-```{r}
-gst.camera[1:5,]
+```{r enrichKEGG}
+sigGenes <- na.exclude(shrinkLvV$Entrez[ shrinkLvV$FDR < 0.01 & 
+                                             !is.na(shrinkLvV$FDR) &
+                                             abs(shrinkLvV$logFC) > 1 ])
+kk <- enrichKEGG(gene         = sigGenes,
+                 organism     = 'mmu')
+head(kk, n=10)
 ```
 
-The total number of significant gene sets at 5\% FDR is:
+## Visualise a pathway
 
-```{r}
-table(gst.camera$FDR < 0.05)
+### In a browser
+
+`clusterProfile` has a function `browseKegg` that allows you to view the Kegg
+pathway with the genes colours in in your browser.
+
+```{r browseKegg}
+browseKEGG(kk, 'mmu03320')
 ```
 
-You can write out the camera resLvV to a csv file to open in excel.
+### As a file
 
-```{r}
-write.csv(gst.camera,file="gst_LumVsBas.csv")
+The package `pathview` [@Luo2013] can be used to generate figures of KEGG 
+pathways. One advantage over `clusterProfiles` browser methos is that the genes
+are coloured according to their expression levels in our data. The package plots
+the KEGG pathway to a `png` file in the working directory.
+
+```{r pathview}
+library(pathview)
+
+logFC <- annotLvV$logFC
+names(logFC) <- annotLvV$Entrez
+pathview(gene.data  = logFC,
+         pathway.id = "mmu03320",
+         species    = "mmu",
+         limit      = list(gene=5, cpd=1))
 ```
 
-> ## Challenge 2 {.challenge}
->
-> 1. Run `camera` on the pregnant vs lactating contrast.
-> 1. Run `camera` on a different set of MSigDB gene sets, the hallmark datasets, `mouse_H_v5.rdata`.
-> You will need to load in the hallmark gene sets, and the object will be called `Mm.H` in R.
->
-
-
-```{r solutionChallenge2}
-
-
-```
