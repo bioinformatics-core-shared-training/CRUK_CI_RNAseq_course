@@ -15,71 +15,102 @@ subtitle: Gene Set Testing for RNA-seq - Solutions
 ---
 
 ```{r setup, include=FALSE}
-library(edgeR)
+library(tidyverse)
+library(fgsea)
+library(goseq)
+library(clusterProfiler)
+library(pathview)
 ```
 
-```{r prepareData}
-load("../Robjects/DE.Rdata")
-results <- as.data.frame(topTags(lrt_BvsL, n = Inf))
-# Load in the mouse c2 gene sets
-# The R object is called Mm.c2
-load("../data/mouse_c2_v5.rdata")
-c2.ind <- ids2indices(Mm.c2, rownames(dgeObj$counts))
-# all gene sets with MYC in the name
-myc <- grep("MYC_",names(c2.ind))
-# Specify a design matrix without an intercept term
-design <- model.matrix(~ CellType + Status, data = sampleinfo)
+```{r prepareData, include=FALSE}
+load("../Robjects/Annotated_Results_LvV.RData")
+# fgsea data
+gseaDat <- filter(shrinkLvV, !is.na(Entrez))
+ranks <- gseaDat$logFC
+load("../Robjects/mouse_H_v5.rdata")
+pathwaysH <- Mm.H
+# Kegg data
+sigGenes <- shrinkLvV$Entrez[ shrinkLvV$FDR < 0.01 & 
+                              !is.na(shrinkLvV$FDR) &
+                              abs(shrinkLvV$logFC) > 1 ]
+sigGenes <- na.exclude(sigGenes)
+kk <- enrichKEGG(gene = sigGenes, organism = 'mmu')
 ```
 
 > ## Challenge 1 {.challenge}
 >
-> 1. Test whether the MYC signalling pathways tend to be differentially expressed between basal virgin vs lactating.
-> 1. Look for gene sets containing "WNT" in the name and see whether they tend to be differentially expressed in basal pregnant vs lactating.
->
+> Another common way to rank the genes is to order by pvalue, but also, sorting
+> so that upregulated genes are at start and downregulated at the other - 
+> you can do this combining the sign of the fold change and the pvalue.
+> 1. Rank the genes by statisical significance - you will need to create
+> a new ranking value using `-log10({p value}) * sign({Fold Change})`
+> 2. Load the "C2" pathways from the the `data/mouse_c2_v5.rdata` file
+> 3. Run `fgsea` using the new ranked genes and the C2 pathways
+> 4. Run `fgsea` using the new ranked genes and the H pathways. How do these 
+> results differ from the ones we got when ranking by the fold change alone?
 
-```{r solutionChallenge1}
-colnames(design)
-#Solution 1
-myc.rst2 <- roast.DGEList(dgeObj,index=c2.ind[myc],design=design,contrast=4,nrot=999)
-myc.rst2[1:15,]
+```{r solution1}
+ranks <- -log10(gseaDat$pvalue) * sign(gseaDat$logFC)
+names(ranks) <- gseaDat$Entrez  
 
-#Solution 2
-wnt <- grep("WNT",names(c2.ind))
-wnt.rst <- roast.DGEList(dgeObj,index=c2.ind[wnt],design=design,contrast=3,nrot=999)
-wnt.rst[1:15,]
+load("../Robjects/mouse_c2_v5.rdata")
+pathwaysC2 <- Mm.c2
+
+fgseaResC2 <- fgsea(pathwaysC2, ranks, minSize=15, maxSize = 500, nperm=1000)
+head(fgseaResC2[order(padj, -abs(NES)), ], n=10)
+
+fgseaResH <- fgsea(pathwaysH, ranks, minSize=15, maxSize = 500, nperm=1000)
+head(fgseaResH[order(padj, -abs(NES)), ], n=20)
+
 ```
-
 
 > ## Challenge 2 {.challenge}
 >
-> 1. Run `camera` on the pregnant vs lactating contrast.
-> 1. Run `camera` on a different set of MSigDB gene sets, the hallmark datasets, `mouse_H_v5.rdata`.
-> You will need to load in the hallmark gene sets, and the object will be called `Mm.H` in R.
+> 1. Create a gene list for genes that are up-regulated by at least 4x (logFC>2)
+> in lactating mice
+> 2. Run a `goseq` analysis on this gene list
+> 3. Plot the results
+> 4. How is this result different to the previous GO analysis?
+
+Look at genes that are up regulated by at least 4x (logFC>2) in lactating mices
+
+```{r solution2, message=FALSE}
+isSigGeneUp <- shrinkLvV$FDR < 0.01 &
+    !is.na(shrinkLvV$FDR) &
+    shrinkLvV$logFC > 2
+
+genesUp <- as.integer(isSigGeneUp)
+names(genesUp) <- shrinkLvV$GeneID
+
+pwf <- nullp(genesUp, "mm10", "ensGene", bias.data = shrinkLvV$medianTxLength)
+
+goResultsUp <- goseq(pwf, "mm10","ensGene", test.cats=c("GO:BP"))
+
+goResultsUp %>%
+    top_n(10, wt=-over_represented_pvalue) %>%
+    mutate(hitsPerc=numDEInCat*100/numInCat) %>% 
+    ggplot(aes(x=hitsPerc, 
+               y=term, 
+               colour=over_represented_pvalue, 
+               size=numDEInCat)) +
+        geom_point() +
+        geom_vline(xintercept = 0, linetype=2, alpha=0.3) +
+        labs(x="Hits (%)", y="GO term", colour="p value", size="Count")
+```
+
+> ## Challenge 3 {.challenge}
 >
+> 1. Use `pathview` to export a figure for "mmu04060", but this time only
+> use genes that are statistically significant at FDR < 0.01
 
+```{r solution3}
+sigGenes <- shrinkLvV$FDR < 0.01 & !is.na(shrinkLvV$FDR)
 
-```{r solutionChallenge2}
+logFC <- annotLvV$logFC[sigGenes]
+names(logFC) <- annotLvV$Entrez[sigGenes]
 
-# Run `camera` on the pregnant vs lactating contrast.
-
-# Check contrasts:
-colnames(design)
-
-# Run analysis:
-gst.camera <- camera.DGEList(dgeObj,index=c2.ind,design=design,contrast=3,inter.gene.cor=0.05)
-gst.camera[1:5,]
-table(gst.camera$FDR < 0.05)
-
-# Run `camera` on a different set of MSigDB gene sets, the hallmark datasets, `mouse_H_v5.rdata`.
-
-load("../data/mouse_H_v5.rdata")
-H.ind <- ids2indices(Mm.H, rownames(dgeObj$counts))
-
-# Check contrasts:
-print(colnames(design))
-
-# Run analysis:
-H.camera <- camera.DGEList(dgeObj,index=H.ind,design=design,contrast=3,inter.gene.cor=0.05)
-table(H.camera$FDR < 0.05)
-H.camera[1:10,]
+pathview(gene.data = logFC, 
+         pathway.id = "mmu04060", 
+         species = "mmu", 
+         limit = list(gene=5, cpd=1))
 ```

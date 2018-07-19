@@ -56,7 +56,7 @@ The article describing the original software is available
 
 The `fgsea` package [@Sergushichev2016] implements the same algorithm in R [vignette](http://www.bioconductor.org/packages/release/bioc/vignettes/fgsea/inst/doc/fgsea-tutorial.html) "fast preranked gene set enrichment analysis (GSEA)".
 
-```{r}
+```{r fgsea}
 library(fgsea)
 ```
 
@@ -69,10 +69,9 @@ load("Robjects/Annotated_Results_LvV.RData")
 Rank all genes based on their fold change. We need to exclude genes for
 which we do not have Entrez IDs. Also, we should use the shrunk LFC values.
 
-```{r}
-gseaDat <- shrinkLvV %>% 
-    filter(!is.na(Entrez)) %>% 
-    arrange(desc(logFC))
+```{r preparedata}
+gseaDat <- filter(shrinkLvV, !is.na(Entrez))
+
 ranks <- gseaDat$logFC
 names(ranks) <- gseaDat$Entrez
 head(ranks)
@@ -81,25 +80,30 @@ head(ranks)
 Plot the ranked fold changes.
 
 ```{r}
-#plot(ranks)
-barplot(ranks)
+barplot(sort(ranks, decreasing = T))
 ```
 
 ## Load pathways
 
 ```{r}
-load("data/mouse_H_v5.rdata")
-pathways <- Mm.H
+load("Robjects/mouse_H_v5.rdata")
+pathwaysH <- Mm.H
 ```
 
 ## Conduct analysis
 
 ```{r}
-fgseaRes <- fgsea(pathways, ranks, minSize=15, maxSize = 500, nperm=1000)
-#head(fgseaRes)
+fgseaRes <- fgsea(pathwaysH, ranks, minSize=15, maxSize = 500, nperm=1000)
 ```
 
-## Table of resLvV
+The warning produced indicates that there are few genes that have the same fold
+change and so are ranked equally. `fgsea` with arbitrarily order determine which
+comes first in the ranked list. As long as this number is small it shouldn't
+significantly effect the results. If the number is large something is 
+suspicious about the fold change results.
+
+Lets look at the top 10 results.
+
 ```{r}
 head(fgseaRes[order(padj, -abs(NES)), ], n=10)
 ```
@@ -107,7 +111,7 @@ head(fgseaRes[order(padj, -abs(NES)), ], n=10)
 ## Enrichment score plot
 
 ```{r}
-plotEnrichment(pathways[["HALLMARK_ESTROGEN_RESPONSE_EARLY"]], ranks)
+plotEnrichment(pathwaysH[["HALLMARK_ESTROGEN_RESPONSE_EARLY"]], ranks)
 ```
 
 Remember to check the [GSEA article](http://www.pnas.org/content/102/43/15545.full) for the complete explanation.
@@ -127,10 +131,26 @@ topDown <- fgseaRes %>%
 topPathways <- bind_rows(topUp, topDown) %>% 
     arrange(-ES)
 
-plotGseaTable(pathways[topPathways$pathway], 
+plotGseaTable(pathwaysH[topPathways$pathway], 
               ranks, 
               fgseaRes, 
               gseaParam = 0.5)
+```
+
+> ## Challenge 1 {.challenge}
+>
+> Another common way to rank the genes is to order by pvalue, but also, sorting
+> so that upregulated genes are at start and downregulated at the other - 
+> you can do this combining the sign of the fold change and the pvalue.  
+> 1. Rank the genes by statisical significance - you will need to create
+> a new ranking value using `-log10({p value}) * sign({Fold Change})`  
+> 2. Load the "C2" pathways from the the `data/mouse_c2_v5.rdata` file   
+> 3. Run `fgsea` using the new ranked genes and the C2 pathways  
+> 4. Run `fgsea` using the new ranked genes and the H pathways. How do these 
+> results differ from the ones we got when ranking by the fold change alone?  
+
+```{r solution1}
+
 ```
 
 # GO enrichment analysis
@@ -157,7 +177,8 @@ supportedOrganisms() %>% filter(str_detect(Genome, "mm"))
 ## Create a list of differentially expressed genes
 
 ```{r getDEGs}
-genes <- as.integer(shrinkLvV$FDR < 0.01 & !is.na(shrinkLvV$FDR))
+isSigGene <- shrinkLvV$FDR < 0.01 & !is.na(shrinkLvV$FDR)
+genes <- as.integer(isSigGene)
 names(genes) <- shrinkLvV$GeneID
 ```
 
@@ -169,7 +190,7 @@ pwf <- nullp(genes, "mm10", "ensGene", bias.data = shrinkLvV$medianTxLength)
 
 ## Conduct GO enrichment analysis
 
-```{r runGoseq}
+```{r runGoseq, message=FALSE}
 goResults <- goseq(pwf, "mm10","ensGene", test.cats=c("GO:BP"))
 ```
 
@@ -178,11 +199,14 @@ goResults <- goseq(pwf, "mm10","ensGene", test.cats=c("GO:BP"))
 ```{r plotGO}
 goResults %>% 
     top_n(10, wt=-over_represented_pvalue) %>% 
-    mutate(`hits (%)`=numDEInCat*100/numInCat) %>% 
-    dplyr::rename(Count=numDEInCat, p.value=over_represented_pvalue) %>% 
-    ggplot(aes(x=`hits (%)`, y=term, colour=p.value, size=Count)) +
+    mutate(hitsPerc=numDEInCat*100/numInCat) %>% 
+    ggplot(aes(x=hitsPerc, 
+               y=term, 
+               colour=over_represented_pvalue, 
+               size=numDEInCat)) +
         geom_point() +
-        geom_vline(xintercept = 0, linetype=2, alpha=0.3)
+        geom_vline(xintercept = 0, linetype=2, alpha=0.3) +
+        labs(x="Hits (%)", y="GO term", colour="p value", size="Count")
 ```
 
 ## Get the GO information for the GO accessions
@@ -192,38 +216,17 @@ library(GO.db)
 GOTERM[[goResults$category[1]]]
 ```
 
-> ## Challenge 1 {.challenge}
+> ## Challenge 2 {.challenge}
 >
-> 1. Create a gene list for genes that are up-regulated by at least 4x (logFC>2)
+> 1. Create a list of genes that are statistically significant at FDR < 0.01 and
+> are up-regulated by at least 4x (logFC>2)
 > in lactating mice
 > 2. Run a `goseq` analysis on this gene list
 > 3. Plot the results
 > 4. How is this result different to the previous GO analysis?
 
-Look at genes that are up regulated by at least 4x (logFC>2) in lactating mices
+```{r solution2, eval=F}
 
-```{r solution1, eval=F}
-# isSigGeneUp <- shrinkLvV$FDR < 0.01 & 
-#     !is.na(shrinkLvV$FDR) & 
-#     shrinkLvV$logFC > 2
-# 
-# genesUp <- as.integer(isSigGeneUp)
-# names(genesUp) <- shrinkLvV$GeneID
-# 
-# pwf <- nullp(genesUp, "mm10", "ensGene", bias.data = shrinkLvV$medianTxLength)
-# 
-# goResultsUp <- goseq(pwf, "mm10","ensGene", test.cats=c("GO:BP"))
-# 
-# goResultsUp %>% 
-#     top_n(10, wt=-(over_represented_pvalue)) %>% 
-#     mutate(`hits (%)`=numDEInCat*100/numInCat) %>% 
-#     dplyr::rename(Count=numDEInCat,  p.value=over_represented_pvalue) %>% 
-#     ggplot(aes(x=`hits (%)`, 
-#                y=term, 
-#                colour=p.value, 
-#                size=Count)) +
-#         geom_point() +
-#         geom_vline(xintercept = 0, linetype=2, alpha=0.3)
 ```
 
 # KEGG pathway enrichment analysis
@@ -236,7 +239,7 @@ terms. We could also use `goseq` for this, but this time we're going to use
 the current KEGG database, rather than relying on R annotation packages, it
 also provides some nice visualisation options.
 
-```{r loadClusterProfiler}
+```{r loadClusterProfiler, message=FALSE}
 library(clusterProfiler)
 search_kegg_organism('mmu', by='kegg_code')
 ```
@@ -244,11 +247,11 @@ search_kegg_organism('mmu', by='kegg_code')
 ## KEGG enrichment analysis
 
 ```{r enrichKEGG}
-sigGenes <- na.exclude(shrinkLvV$Entrez[ shrinkLvV$FDR < 0.01 & 
-                                             !is.na(shrinkLvV$FDR) &
-                                             abs(shrinkLvV$logFC) > 1 ])
-kk <- enrichKEGG(gene         = sigGenes,
-                 organism     = 'mmu')
+sigGenes <- shrinkLvV$Entrez[ shrinkLvV$FDR < 0.01 & 
+                              !is.na(shrinkLvV$FDR) &
+                              abs(shrinkLvV$logFC) > 1 ]
+sigGenes <- na.exclude(sigGenes)
+kk <- enrichKEGG(gene = sigGenes, organism = 'mmu')
 head(kk, n=10)
 ```
 
@@ -275,9 +278,17 @@ library(pathview)
 
 logFC <- annotLvV$logFC
 names(logFC) <- annotLvV$Entrez
-pathview(gene.data  = logFC,
-         pathway.id = "mmu03320",
-         species    = "mmu",
-         limit      = list(gene=5, cpd=1))
+pathview(gene.data = logFC, 
+         pathway.id = "mmu03320", 
+         species = "mmu", 
+         limit = list(gene=5, cpd=1))
 ```
 
+> ## Challenge 3 {.challenge}
+>
+> 1. Use `pathview` to export a figure for "mmu04060", but this time only
+> use genes that are statistically significant at FDR < 0.01
+
+```{r solution3, eval=F}
+
+```
