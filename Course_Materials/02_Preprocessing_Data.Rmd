@@ -18,7 +18,7 @@ editor_options:
 # Introduction
 
 In this section we will begin the process of analysing the RNAseq in R. In the
-next section we will use DESeq2 [@Love2014] for differential analysis. Before we
+next section we will use DESeq2 for differential analysis. Before we
 do that we need to:
 
 * import our counts into R
@@ -27,6 +27,10 @@ do that we need to:
 * run some initial QC on the raw count data
 
 We will also look at the effects of normalisation for composition bias.
+
+A detailed analysis workflow, recommended by the authors of DESeq2 can be found
+on [the Bionconductor 
+website](http://master.bioconductor.org/packages/release/workflows/vignettes/rnaseqGene/inst/doc/rnaseqGene.html).
 
 # Data import
 
@@ -78,8 +82,10 @@ First we need to read the data into R from the file in the *data* directory.
 
 ```{r loadData, message = FALSE}
 # Read the data into R
-seqdata <- read_tsv("data/GSE60450_Lactation.featureCounts", comment = "#")
-seqdata
+seqdata <- read.delim("data/GSE60450_Lactation.featureCounts", 
+                      comment = "#",
+                      stringsAsFactors=F)
+head(seqdata)
 ```
 
 In the `seqdata` object each row represents a gene. The columns contains:
@@ -103,9 +109,8 @@ to each gene by featureCounts.
 We will be manipulating and reformating the counts matrix into a suitable
 format for DESeq2.
 
-The `seqdata` is a `tibble` (a kind of `dataframe` used by `dplyr`) in which the
-first six columns contain annotation information and the remaining columns 
-contain the count data.
+The `seqdata` is a `dataframe` in which the first six columns contain annotation
+information and the remaining columns contain the count data.
 
 DESeq2 requires a simple object containing only the count data, we'll keep the
 gene ID by setting them as the row names.
@@ -123,8 +128,7 @@ the analysis it will not guess which row of the `sampleinfo` belongs to which
 column of the counts matrix, it will assume the same order.
 
 ```{r createCountMatrix}
-# tibbles aren't allowed rownames so first we need to convert to a dataframe
-countdata <- as.data.frame(seqdata) %>% 
+countdata <- seqdata %>%
     column_to_rownames("Geneid") %>% # turn the geneid column into rownames
     rename_all(str_remove, ".bam") %>% # remove the ".bam" from the column names
     select(sampleinfo$Sample) %>% # keep sample columns using sampleinfo
@@ -605,7 +609,7 @@ abline(h=0,col="grey")
 **We can save a few data objects to use later so we don't have to rerun 
 everything**
 
-```{r saveData}
+```{r saveData, eval=F}
 save(countdata, sampleinfo, file="results/preprocessing.RData")
 ```
 
