@@ -86,7 +86,7 @@ barplot(sort(ranks, decreasing = T))
 ## Load pathways
 
 ```{r}
-load("Robjects/mouse_H_v5.rdata")
+load("Robjects/mouse_H_v5.RData")
 pathwaysH <- Mm.H
 ```
 
@@ -144,7 +144,7 @@ plotGseaTable(pathwaysH[topPathways$pathway],
 > you can do this combining the sign of the fold change and the pvalue.  
 > 1. Rank the genes by statisical significance - you will need to create
 > a new ranking value using `-log10({p value}) * sign({Fold Change})`  
-> 2. Load the "C2" pathways from the the `data/mouse_c2_v5.rdata` file   
+> 2. Load the "C2" pathways from the the `data/mouse_c2_v5.RData` file   
 > 3. Run `fgsea` using the new ranked genes and the C2 pathways  
 > 4. Run `fgsea` using the new ranked genes and the H pathways. How do these 
 > results differ from the ones we got when ranking by the fold change alone?  

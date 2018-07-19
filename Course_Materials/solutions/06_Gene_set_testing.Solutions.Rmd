@@ -27,7 +27,7 @@ load("../Robjects/Annotated_Results_LvV.RData")
 # fgsea data
 gseaDat <- filter(shrinkLvV, !is.na(Entrez))
 ranks <- gseaDat$logFC
-load("../Robjects/mouse_H_v5.rdata")
+load("../Robjects/mouse_H_v5.RData")
 pathwaysH <- Mm.H
 # Kegg data
 sigGenes <- shrinkLvV$Entrez[ shrinkLvV$FDR < 0.01 & 
@@ -44,7 +44,7 @@ kk <- enrichKEGG(gene = sigGenes, organism = 'mmu')
 > you can do this combining the sign of the fold change and the pvalue.
 > 1. Rank the genes by statisical significance - you will need to create
 > a new ranking value using `-log10({p value}) * sign({Fold Change})`
-> 2. Load the "C2" pathways from the the `data/mouse_c2_v5.rdata` file
+> 2. Load the "C2" pathways from the the `data/mouse_c2_v5.RData` file
 > 3. Run `fgsea` using the new ranked genes and the C2 pathways
 > 4. Run `fgsea` using the new ranked genes and the H pathways. How do these 
 > results differ from the ones we got when ranking by the fold change alone?
@@ -53,7 +53,7 @@ kk <- enrichKEGG(gene = sigGenes, organism = 'mmu')
 ranks <- -log10(gseaDat$pvalue) * sign(gseaDat$logFC)
 names(ranks) <- gseaDat$Entrez  
 
-load("../Robjects/mouse_c2_v5.rdata")
+load("../Robjects/mouse_c2_v5.RData")
 pathwaysC2 <- Mm.c2
 
 fgseaResC2 <- fgsea(pathwaysC2, ranks, minSize=15, maxSize = 500, nperm=1000)

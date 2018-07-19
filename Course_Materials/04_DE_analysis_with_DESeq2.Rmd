@@ -40,12 +40,12 @@ countdata <- countdata[keep,]
 
 ## Load the data
 
-Alternatively we can load the `objects with the Rdata file we created in the 
+Alternatively we can load the `objects with the RData file we created in the 
 pre-processing tutorial.
 
 ```{r loadData}
-# load the Rdata object we created in the previous session
-load("Robjects/preprocessing.Rdata")
+# load the RData object we created in the previous session
+load("Robjects/preprocessing.RData")
 ls()
 dim(countdata)
 sampleinfo
@@ -289,10 +289,10 @@ resCvCS <- results(ddsObjC)
 ```
 
 
-## Finally save the results in a new Rdata object
+## Finally save the results in a new RData object
 
 ```{r saveObjects, eval=FALSE}
-save(resLvV, ddsObj, sampleinfo, file="results/DE.Rdata")
+save(resLvV, ddsObj, sampleinfo, file="results/DE.RData")
 ```
 
 -----------

@@ -21,7 +21,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(tidyverse)
 library(DESeq2)
-load("../Robjects/preprocessing.Rdata")
+load("../Robjects/preprocessing.RData")
 ```
 
 ```{r prepareData}

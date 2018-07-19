@@ -25,7 +25,7 @@ Before starting this section, we will make sure we have all the relevant objects
 from the Differential Expression analysis.
 
 ```{r loadData}
-load("Robjects/DE.Rdata")
+load("Robjects/DE.RData")
 ```
 
 # Overview
@@ -311,7 +311,7 @@ An interactive version of the volcano plot above that includes the raw per
 sample values in a separate panel is possible via the `glXYPlot` function in the
 *Glimma* package.
 
-```{r exportRdata, eval=FALSE}
+```{r exportRData, eval=FALSE}
 save(annotLvV, shrinkLvV, file="results/Annotated_Results_LvV.RData")
 ```
 

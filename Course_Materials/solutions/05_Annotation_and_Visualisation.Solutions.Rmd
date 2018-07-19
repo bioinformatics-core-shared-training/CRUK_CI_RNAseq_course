@@ -22,7 +22,7 @@ library(tidyverse)
 
 ```{r prepareData}
 # load data
-load("../Robjects/DE.Rdata")
+load("../Robjects/DE.RData")
 ## set up connection to ensembl database
 ensembl=useMart("ENSEMBL_MART_ENSEMBL")
 # list the available datasets (species)
