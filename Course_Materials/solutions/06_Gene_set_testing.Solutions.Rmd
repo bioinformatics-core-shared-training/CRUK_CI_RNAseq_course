@@ -94,7 +94,7 @@ goResultsUp %>%
                colour=over_represented_pvalue, 
                size=numDEInCat)) +
         geom_point() +
-        geom_vline(xintercept = 0, linetype=2, alpha=0.3) +
+        expand_limits(x=0) +
         labs(x="Hits (%)", y="GO term", colour="p value", size="Count")
 ```
 
@@ -114,3 +114,8 @@ pathview(gene.data = logFC,
          species = "mmu", 
          limit = list(gene=5, cpd=1))
 ```
+
+mmu04060.pathview.png:
+
+![mmu04060 -Cytokine-cytokine receptor interaction](../../images/mmu04060.pathview.png)
+

@@ -205,7 +205,7 @@ goResults %>%
                colour=over_represented_pvalue, 
                size=numDEInCat)) +
         geom_point() +
-        geom_vline(xintercept = 0, linetype=2, alpha=0.3) +
+        expand_limits(x=0) +
         labs(x="Hits (%)", y="GO term", colour="p value", size="Count")
 ```
 
@@ -284,6 +284,10 @@ pathview(gene.data = logFC,
          limit = list(gene=5, cpd=1))
 ```
 
+mmu03320.pathview.png:
+
+![mmu03320 - PPAR signaling pathway](../images/mmu03320.pathview.png)
+
 > ## Challenge 3 {.challenge}
 >
 > 1. Use `pathview` to export a figure for "mmu04060", but this time only
@@ -292,3 +296,7 @@ pathview(gene.data = logFC,
 ```{r solution3, eval=F}
 
 ```
+
+---------------------------------------------------------------
+
+# References

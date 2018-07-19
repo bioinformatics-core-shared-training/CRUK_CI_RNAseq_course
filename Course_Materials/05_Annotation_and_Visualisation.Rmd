@@ -232,7 +232,7 @@ it looks or add things such as gene labels. Perhaps we would like to add labels
 for the top 20 most significantly differentially expressed genes. Let's use 
 ggplot2 instead.
 
-```{r maPlot, fig.align="center", fig.width=5, fig.height=5}
+```{r maPlot, fig.align="center", fig.width=7, fig.height=7}
 # add a column with the names of only the top 10 genes
 cutoff <- sort(shrinkLvV$pvalue)[10]
 shrinkLvV <- shrinkLvV %>% 
@@ -276,34 +276,27 @@ ggplot(filtTab, aes(x = logFC, y=`-log10(FDR)`)) +
     geom_point(aes(colour=FDR < 0.05, shape = `-log10(FDR)` > 50), size=2)
 ```
 
-### Strip chart for gene expression
+## Strip chart for gene expression
 
 Before following up on the DE genes with further lab work, a recommended *sanity
 check* is to have a look at the expression levels of the individual samples for 
-the genes of interest. We can quickly look at grouped expression using 
-`stripchart`. We can retrieve the normalised expression values in the 
-`ddsObj` object using the `counts` function from DESeq2.
+the genes of interest. We can quickly look at grouped expression by using 
+`plotCounts` function of `DESeq2` to  retrieve the normalised expression values 
+from the `ddsObj` object and then plotting with  `ggplot2`.
 
-```{r geneCountStripchart, fig.width=5, fig.height=5, fig.align="center"}
-normCounts <- counts(ddsObj, normalized=TRUE) %>% 
-    log2()
-
-# Let's look at the most significantly differentially expressed gene: Wap
+```{r plotGeneCounts}
+# Let's look at the most significantly differentially expressed gene
 topgene <- filter(shrinkLvV, Symbol=="Wap")
-topgene
+geneID <- topgene$GeneID
 
-groups <- colData(ddsObj)$Group
-par(mar=c(8,4,2,2)) #adjust the plot margins the x-labels are visible - see ?par
-stripchart(normCounts["ENSMUSG00000000381",]~groups,
-           col=1:6,
-           vertical=TRUE,
-           pch=21,
-           las=2,
-           cex=2,
-           xlab="",
-           ylab="log2(Counts)",
-           main="Normalised Counts - Wap")
+plotCounts(ddsObj, gene = geneID, intgroup = c("CellType", "Status"),
+           returnData = T) %>% 
+    ggplot(aes(x=Status, y=log2(count))) +
+      geom_point(aes(fill=Status), pch=21, size=2) +
+      facet_wrap(~CellType) +
+      expand_limits(y=0)
 ```
+
 
 ### Interactive StripChart with Glimma
 
@@ -318,16 +311,26 @@ save(annotLvV, shrinkLvV, file="results/Annotated_Results_LvV.RData")
 
 ```{r}
 library(Glimma)
-group <- as.factor(sampleinfo$Group)
-levels(group) <- c("basal.lact","basal.preg","basal.vir",
-                   "lum.lact", "lum.preg", "lum.vir")
-annot.mod <- filtTab[,c("GeneID", "Symbol", "Description")]
-de <- as.numeric(filtTab$FDR<=0.05)
+
+group <- str_remove_all(sampleinfo$Group, "[aeiou]")
+
+de <- as.integer(filtTab$FDR <= 0.05)
+
+normCounts <- log2(counts(ddsObj))
 filtCounts <- normCounts[filtTab$GeneID,]
-glXYPlot(x=filtTab$logFC, y=-log10(filtTab$FDR),
-         xlab="logFC", ylab="FDR", main="Lactating v Virgin",
-         counts=filtCounts, groups=group, status=de,
-         anno=annot.mod, id.column="ENTREZID", folder="volcano")
+
+glXYPlot(
+  x = filtTab$logFC,
+  y = -log10(filtTab$FDR),
+  xlab = "logFC",
+  ylab = "FDR",
+  main = "Lactating v Virgin",
+  counts = filtCounts,
+  groups = group,
+  status = de,
+  anno = filtTab[, c("GeneID", "Symbol", "Description")],
+  folder = "volcano"
+)
 ```
 
 This function creates an html page (./volcano/XY-Plot.html) with a volcano plot 
