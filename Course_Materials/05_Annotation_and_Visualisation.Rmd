@@ -147,7 +147,6 @@ could concatenate the Entrez IDs so that we don't lose information.
 > (d) How many Ensembl genes in `resLvV` don't have any annotation? Why is this?
 
 ```{r solutionChallenge1}
-# filterValues <- rownames(resLvV)
 ```
 
 ### Add annotation to the results table
@@ -230,7 +229,35 @@ plotMA(ddsShrink, alpha=0.05)
 ...this is fine for a quick look, but it is not easy to make changes to the way
 it looks or add things such as gene labels. Perhaps we would like to add labels
 for the top 20 most significantly differentially expressed genes. Let's use 
-ggplot2 instead.
+the package `ggplot2` instead.
+
+### A Brief Introduction to `ggplot2`
+
+The [`ggplot2`](http://ggplot2.tidyverse.org/) package has emerged as an 
+attractive alternative to the traditional plots provided by base R. A full 
+overview of all capabilities of the package is available from the 
+[cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf).
+
+In brief:-
+
+- `shrinkLvV` is our data frame containing the variables we wish to plot
+- `aes` creates a mapping between the variables in our data frame to the 
+*aes*thetic proprties of the plot:
+    + the x-axis will be mapped to log2(`baseMean`)
+    + the y-axis will be mapped to the `logFC`
+- `geom_point` specifies the particular type of plot we want (in this case a bar 
+plot)
+- `geom_text` allows us to add labels to some or all of the points
+    + see 
+    [the cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf) 
+    for other plot types
+
+The real advantage of `ggplot2` is the ability to change the appearance of our 
+plot by mapping other variables to aspects of the plot. For example, we could 
+colour the points based on a the sample group. To this we can add metadata from
+the `sampleinfo` table to the data. The colours are automatically chosen by
+`ggplot2`, but we can specifiy particular values.
+
 
 ```{r maPlot, fig.align="center", fig.width=7, fig.height=7}
 # add a column with the names of only the top 10 genes
@@ -309,7 +336,7 @@ save(annotLvV, shrinkLvV, file="results/Annotated_Results_LvV.RData")
 ```
 
 
-```{r}
+```{r Glimma, eval=FALSE}
 library(Glimma)
 
 group <- str_remove_all(sampleinfo$Group, "[aeiou]")
@@ -434,7 +461,6 @@ R CMD INSTALL TxDb.Mmusculus.Ens.GRCm38.p6_0.01.tar.gz
 ```
 
 ```{r loadTxDBlibrary, eval=FALSE}
-library(GenomicFeatures)
 library(TxDb.Mmusculus.Ens.GRCm38)
 txMm <- TxDb.Mmusculus.Ens.GRCm38
 ```
@@ -451,6 +477,7 @@ First we need to decide what information we want. In order to see what we can
 extract we can run the `columns` function on the annotation database.
 
 ```{r checkColumns}
+library(GenomicFeatures)
 columns(txMm)
 ```
 
@@ -638,11 +665,13 @@ The colours and score have to be saved in the GRanges object as `score` and `ite
 
 Now we can export the signifcant results from the DE analysis as a `.bed` track using `rtracklayer`. You can load the resulting file in IGV, if you wish.
 
-```{r exportTrack}
+```{r addMetaData}
 mcols(sigRegions)$score <- -log10(sigRegions$FDR)
 mcols(sigRegions)$itemRgb <- Cols
 sigRegions
+```
 
+```{r exportTrack, eval=FALSE}
 library(rtracklayer)
 export(sigRegions , con = "results/topHits.bed")
 ```
@@ -786,3 +815,7 @@ reads.MCL1.DG <- autoplot(bam, stat = "coverage")  +
     labs(title="MCL1.DG")
 tracks(GRCm38=geneMod, MCL1.DG=reads.MCL1.DG)
 ```
+
+--------------------------------------------------------------------------------
+
+# References
