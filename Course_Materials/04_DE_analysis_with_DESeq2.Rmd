@@ -51,7 +51,7 @@ dim(countdata)
 sampleinfo
 ```
 
-# Differential expression with DESeq2
+# The model formula and design matrices
 
 First load the packages we need.
 
@@ -75,7 +75,7 @@ We will use **DESeq2** for the rest of this practical.
 
 ### Creating the design model formula
 
-First we need to create a design model formula for our analysis. DESeq2 will 
+First we need to create a design model formula for our analysis. `DESeq2` will 
 use this to generate the model matrix, as we have seen in the linear models 
 lecture. 
 
@@ -108,9 +108,9 @@ modelMatrix <- model.matrix(design, data = sampleinfo)
 modelMatrix
 ```
 
-### Build a DESeq2DataSet
+# Build a DESeq2DataSet
 
-We don't actually need to pass DESeq2 the model matrix, instead we pass it the 
+We don't actually need to pass `DESeq2` the model matrix, instead we pass it the 
 design formula and the `sampleinfo` it will build the matrix itself.
 
 ```{r makeDDSObj}
@@ -120,7 +120,7 @@ ddsObj <- DESeqDataSetFromMatrix(countData = countdata,
                               design = design)
 ```
 
-## Data exploration
+# Data exploration
 
 Let's plot a PCA from `vst` transformed data. 
 Can you anticipate if the interaction term will be important?
@@ -130,9 +130,11 @@ vstcounts <- vst(ddsObj, blind=TRUE)
 plotPCA(vstcounts, intgroup=c("Status", "CellType"))
 ```
 
-## DESeq workflow
+# Differential expression analysis with DESeq2
 
-The main DESeq2 work flow is carried out in 3 steps:
+## The `DESeq2` work flow
+
+The main `DESeq2` work flow is carried out in 3 steps:
 
 First, Calculate the "median ratio" normalisation size factors...
 
@@ -173,7 +175,7 @@ We can generate a table of differential expression results from the DDS object
 using the `results` function of DESeq2.
 
 ```{r resultsTable}
-res <- results(ddsObj, lfcThreshold = 0.05)
+res <- results(ddsObj, alpha=0.05)
 head(res)
 ```
 
@@ -182,22 +184,22 @@ head(res)
 You will notice that some of the adjusted p-values (`padj`) are NA. Remember 
 in Session 2 we said that there is no need to pre-filter the genes as DESeq2
 will do this through a process it calls 'independent filtering'. The genes 
-with `NA` are the ones DESeq2 has filtered out.
+with `NA` are the ones `DESeq2` has filtered out.
 
-From DESeq2 manual:
-"The results function of the DESeq2 package performs independent filtering by
+From `DESeq2` manual:
+"The results function of the `DESeq2` package performs independent filtering by
 default using the mean of normalized counts as a filter statistic. A threshold 
 on the filter statistic is found which optimizes the number of adjusted p values
 lower than a [specified] significance level".
 
 The default significance level for independent filtering is `0.1`, however, you
 should set this to the FDR cut off you are planning to use. We will use `0.05` -
-this was the purpose of the `lfcThreshold` argument in the previous command.
+this was the purpose of the `alpha` argument in the previous command.
 
 ### The default contrast of `results`
 
 The `results` function has returned the results for the contrast "lactate vs 
-virgin". Let's have a look at the model matrix to understand why DESeq2 has 
+virgin". Let's have a look at the model matrix to understand why `DESeq2` has 
 given us this particular contrast.
 
 ```{r veiwModelMatrix}
@@ -205,7 +207,7 @@ modelMatrix
 ```
 
 By default, `results` has returned the contrast encoded by the final column in
-the model matrix. DESeq2 has the command `resultsNames` that allows us to view 
+the model matrix. `DESeq2` has the command `resultsNames` that allows us to view 
 the contrasts that are available directly from the model matrix.
 
 ```{r resultsNames}
@@ -226,7 +228,7 @@ Let's retrieve the results for pregant versus virgin
 ```{r resultPvV}
 resPvV <- results(ddsObj, 
                   name="Status_pregnant_vs_virgin", 
-                  lfcThreshold = 0.05)
+                  alpha = 0.05)
 resPvV
 ```
 
@@ -257,11 +259,12 @@ that hypothesis. We need to provide a contrast.
 resultsNames(ddsObj)
 
 resPvL <- results(ddsObj,
-                  contrast=c("Status", "pregnant", "lactate"),
-                  lfcThreshold = 0.05)
+                  contrast=c("Status", "pregnant", "lactate"), 
+                  alpha = 0.05)
+resPvL
 ```
 
-## Comparing two design models
+# Comparing two design models
 
 Suppose we thought that maybe `status` were irrelevant and really the only 
 differences might be between cell types. We could fit a simpler model, this 
@@ -275,7 +278,15 @@ designC <- as.formula(~ CellType )
 # Compare the designs
 ddsObjC <- DESeq(ddsObj, test="LRT", reduced=designC)
 resCvCS <- results(ddsObjC)
+resCvCS
 ```
+
+The null hypothesis is that there is no significant difference between the two
+models, i.e. the simpler model is sufficient to explain the variation in gene
+expression between the samples. If the the adjusted p-value for a gene passes
+a significance threshold (e.g. padj < 0.05) then we should consider using the 
+more complex model for this gene. In practice we would usually choose one model
+or the other and apply it to all genes.
 
 > ### Challenge 2 {.challenge}
 > When we looked at the PCA it did seem that an interaction model might be
@@ -288,6 +299,35 @@ resCvCS <- results(ddsObjC)
 ```{r solutionChallenge2}
 ```
 
+# Testing log2 fold change versus a threshold
+
+A common practice when considering the results of a differential expression 
+analysis is to filter out genes that are statistically significant but have a 
+low fold change. Perhaps you are only interested in very strong response to the
+experimental conditions and decide to eliminate from consideration all genes
+with an absolute fold change lower than 2x. 
+
+Rather than do this by filtering after running the differential analysis, 
+`DESeq2` provides a means for testing the hypothesis that fold change is greater
+(or actually lesser than if you want) a given threshold.
+
+```{r lfcThresholdTest}
+resPvL2 <- results(ddsObj,
+                  contrast=c("Status", "pregnant", "lactate"), 
+                  alpha = 0.05,
+                  lfcThreshold=0.5, 
+                  altHypothesis="greaterAbs")
+
+sum(resPvL2$padj<0.05, na.rm = T)
+sum(resPvL$padj<0.05 & abs(resPvL$log2FoldChange)>=2^0.5, na.rm = T)
+```
+
+There are four possible values for `altHypothesis`:
+
+* greaterAbs - |β|>x - tests are two-tailed
+* lessAbs - |β|<x - p values are the maximum of the upper and lower tests
+* greater - β>x
+* less - β<x
 
 ## Finally save the results in a new RData object
 
@@ -296,3 +336,5 @@ save(resLvV, ddsObj, sampleinfo, file="results/DE.RData")
 ```
 
 -----------
+
+# References

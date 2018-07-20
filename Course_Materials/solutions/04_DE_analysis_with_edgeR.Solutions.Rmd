@@ -18,13 +18,13 @@ layout: page
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r, include=FALSE}
 library(tidyverse)
 library(DESeq2)
-load("../Robjects/preprocessing.RData")
 ```
 
-```{r prepareData}
+```{r prepareData, include=F}
+load("../Robjects/preprocessing.RData")
 # Specify a model
 design <- as.formula(~ CellType + Status)
 # set virgin to base line
@@ -44,7 +44,7 @@ ddsObj <- DESeq(ddsObj)
 > results object `resLvB`.
 
 ```{r solutionChallenge1}
-resLvB <- results(ddsObj, name="CellType_luminal_vs_basal")
+resLvB <- results(ddsObj, name="CellType_luminal_vs_basal", alpha=0.05)
 topGenesLvB <- as.data.frame(resLvB) %>%
     rownames_to_column("GeneID") %>% 
     arrange(padj) %>%
