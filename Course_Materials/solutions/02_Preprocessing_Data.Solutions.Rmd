@@ -62,21 +62,22 @@ logNormalizedCounts <- log2(normalizedCounts + 1)
 > How has this effected the count distributions?
 
 ```{r}
-rlogDat <- rlog(countdata)
+rlogcounts <- rlog(countdata)
 
-rownames(rlogDat) <- rownames(countdata)
+rownames(rlogcounts) <- rownames(countdata)
 
 # reform the table and add sample data
-rlogDat <- rlogDat %>%
+plotData <- rlogcounts %>%
     as.data.frame() %>%
     gather("Sample", "logCounts") %>%
     left_join(sampleinfo, "Sample")
 
 # Check distributions of samples using boxplots
 # Add a horizontal line at the overall median
-ggplot(rlogDat, aes(x=Sample, y=logCounts, fill=Group)) +
+medianCount <- median(plotData$logCounts)
+ggplot(plotData, aes(x=Sample, y=logCounts, fill=Group)) +
         geom_boxplot() +
-        geom_hline(yintercept = median(rlogDat$logCounts), colour = "blue")
+        geom_hline(yintercept = medianCount, colour = "blue")
 
 ```
 

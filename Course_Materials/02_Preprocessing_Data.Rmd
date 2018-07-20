@@ -67,7 +67,7 @@ need for the analysis today.
 
 ```{r loadSampleInfo, message = FALSE}
 # Read the sample information into a data frame
-sampleinfo <- read_tsv("data/SampleInfo.txt")
+sampleinfo <- read.delim("data/SampleInfo.txt", stringsAsFactors=F)
 sampleinfo
 ```
 
@@ -98,11 +98,68 @@ to each gene by featureCounts.
 
 ### A quick intro to `dplyr`
 
-...
-....
-.....
-....
-...
+One of the most complex aspects of learning to work with data in `R` is 
+getting to grips with subsetting and manipulating data tables. The package 
+`dplyr` [@Wickham2018] was developed to make this process more intuitive than it
+is using standard base `R` processes. It also makes use of a new symbol `%>%`,
+called the "pipe", which makes the code a bit tidier. 
+
+We are introducing this because it makes many of the processes we will look at 
+later **much simpler**. Importantly it also results in code that is much easier
+to read and understand.
+
+Let's have quick look at this by playing with our `sampleinfo` table.
+
+Suppose we wanted a new sample table that:
+
+1. Just includes the "basal" samples
+2. Only has the columns "CellType" and "Group"
+3. Renames the "CellType" column as "Cell"
+
+In base `R` we would do the something like:
+
+```{r baseR, eval=FALSE}
+newTable <- sampleinfo
+
+basal <- which(newTable$CellType=="basal")
+newTable <- newTable[basal, ]
+
+newTable <- newTable[basal, c("CellType", "Group")]
+
+colnames(newTable)[1] <- "Cell"
+```
+
+With `dplyr` we can use two new functions - `filter` and `select` - for the
+first two steps:
+
+```{r dplyr, eval=FALSE}
+newTable <- sampleinfo
+newTable <- filter(newTable, CellType=="basal")
+newTable <- select(newTable, CellType, Group)
+```
+
+There's no need to quote the column names as dplyr intelligently interprets
+the arguments it's passes as belonging to the data table columns.
+
+Rather than repeatedly reassigning `newTable <- f(newTable)` as above, we can 
+use the pipe - `%>%`. This takes the output of one function and "*pipes*" it
+into the first argument of the next function so that we don't have to keep
+specifying the object we are working with:
+
+```{r pipe, eval=FALSE}
+newTable <- sampleinfo %>%
+    filter(CellType=="basal") %>%
+    select(CellType, Group) %>% 
+    rename(Cell=CellType)
+```
+
+This is a fairly trivial example and the benefits may not be immediately 
+obvious, but once you get used to using `dplyr` (and the other related
+"tidyverse" packages, such as `stringr`) you'll find it much more powerful and 
+easy to use than base R. 
+
+We will encounter a few more `dplyr` commands during the course, we will explain
+their use as we come to them.
 
 ## Format the data
 
@@ -126,6 +183,11 @@ It is also *critical* to ensure that the samples in the columns are in the same
 order as the rows of `sampleinfo`. When we load these objects into DESeq2 for 
 the analysis it will not guess which row of the `sampleinfo` belongs to which
 column of the counts matrix, it will assume the same order.
+
+We'll use to new `dplyr` commands:
+
+* `columns_to_rownames` to set the rownames using a named column
+* `rename_all` which allows to rename all the columns using a string function
 
 ```{r createCountMatrix}
 countdata <- seqdata %>%
@@ -177,41 +239,13 @@ First, we can plot how many reads we have for each sample. Whilst normalisation
 can account for imbalance in coverage across the samples, extreme differences 
 may be indicative of underlying problems in the samples.
 
-```{r ddsLibrarySizes}
-librarySizes <- countdata %>% 
-    as.data.frame() %>% 
-    summarise_all(sum) %>% 
-    gather("Sample", "Counts")
-```
-
-### A Brief Introduction to `ggplot2`
-
-The [`ggplot2`](http://ggplot2.tidyverse.org/) package has emerged as an 
-attractive alternative to the traditional plots provided by base R. A full 
-overview of all capabilities of the package is available from the 
-[cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf).
-
-In brief:-
-
-- `librarySizes` is our data frame containing the variables we wish to plot
-- `aes` creates a mapping between the variables in our data frame to the 
-*aes*thetic proprties of the plot:
-    + the x-axis is mapped to `Sample`
-    + the y-axis is mapped to `Counts`
-- `geom_bar` specifies the particular type of plot we want (in this case a bar 
-plot)
-    + see 
-    [the cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf) 
-    for other plot types
-
-The real advantage of `ggplot2` is the ability to change the appearance of our 
-plot by mapping other variables to aspects of the plot. For example, we could 
-colour the points based on a p-value cut-off. The colours are automatically 
-chosen by `ggplot2`, but we can specifiy particular values.
-
-```{r plotLibrarySize}
-ggplot(librarySizes, aes(x=Sample, y=Counts)) +
-       geom_bar(col="black", fill="steelblue", stat="identity")
+```{r librarySizes}
+librarySizes <- colSums(countdata)
+barplot(librarySizes, 
+        names=names(librarySizes), 
+        las=2, 
+        main="Barplot of library sizes")
+abline(h=20e6, lty=2)
 ```
 
 ## Count distribution boxplots
@@ -222,26 +256,64 @@ scale. Typically we use a `log2` transformation, however, because the data is
 count data and will contain many `0`s we need to add a count of 1 to every 
 value in order to prevent attempting `log2(0)` from creating errors.
 
-We'll check the distribution of read counts using a boxplot and well add some
-colour to see if there is any difference between sample groups
-
-```{r plotLogCounts}
+```{r logTransform}
 # Get log2 counts per million
 logcounts <- log2(countdata + 1)
 # lets add the gene ids
 rownames(logcounts) <- rownames(countdata)
+```
 
+We'll check the distribution of read counts using a boxplot and well add some
+colour to see if there is any difference between sample groups. We are going to
+use the package ``ggplot2``[@Wickham2016] to create the plots.
+
+### A Brief Introduction to `ggplot2`
+
+The [`ggplot2`](http://ggplot2.tidyverse.org/) package has emerged as an 
+attractive alternative to the traditional plots provided by base R. A full 
+overview of all capabilities of the package is available from the 
+[cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf).
+
+In brief:-
+
+- `logcounts` is our data frame containing the variables we wish to plot
+- `aes` creates a mapping between the variables in our data frame to the 
+*aes*thetic proprties of the plot:
+    + the x-axis will be mapped to Sample
+    + the y-axis will be mapped to the count data
+    + we will need to rearrange the data a bit to create a column of `Sample` and a column `Counts` containing the counts - see below.
+- `geom_bar` specifies the particular type of plot we want (in this case a bar 
+plot)
+    + see 
+    [the cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf) 
+    for other plot types
+
+`ggplot2` requires the data to be in "tidy" format. This is where each column
+relates to a type of observation and each row to a single data point. In the
+current format the `logcounts` matrix has rows that correspond to genes and 
+columns that correspond to samples. We will need to transform the table so that
+each row coresponds to a single count for a particular gene for a particular 
+sample, this will have three columns - `GeneID`, `Sample`, `logCounts`.
+
+The real advantage of `ggplot2` is the ability to change the appearance of our 
+plot by mapping other variables to aspects of the plot. For example, we could 
+colour the points based on a the sample group. To this we can add metadata from
+the `sampleinfo` table to the data. The colours are automatically chosen by
+`ggplot2`, but we can specifiy particular values.
+
+```{r plotLogCounts}
 # reform the table and add sample data
-logcounts <- logcounts %>% 
+plotData <- logcounts %>% 
     as.data.frame() %>% 
-    gather("Sample", "logCounts") %>% 
-    left_join(sampleinfo, "Sample")
+    gather("Sample", "logCounts") %>% # transforms the matrix to a tidy table
+    left_join(sampleinfo, "Sample") # add sampleinfo using "Sample" column to match the rows
 
 # Check distributions of samples using boxplots
 # Add a horizontal line at the overall median 
-ggplot(logcounts, aes(x=Sample, y=logCounts, fill=Status)) +
+medianCount <- median(plotData$logCounts)
+ggplot(plotData, aes(x=Sample, y=logCounts, fill=Status)) +
         geom_boxplot() +
-        geom_hline(yintercept = median(logcounts$logCounts), colour = "blue")
+        geom_hline(yintercept = medianCount, colour = "blue")
 ```
 
 From the boxplots we see that overall the density distributions of raw
@@ -257,21 +329,7 @@ that sample further.
 > How has this effected the count distributions?
 
 ```{r solutionChallenge1}
-# rlogcounts <- rlog(countdata)
-# 
-# rownames(rlogcounts) <- rownames(countdata)
-# 
-# # reform the table and add sample data
-# rlogcounts <- rlogcounts %>% 
-#     as.data.frame() %>% 
-#     gather("Sample", "logCounts") %>% 
-#     left_join(sampleinfo, "Sample")
-# 
-# # Check distributions of samples using boxplots
-# # Add a horizontal line at the overall median 
-# ggplot(rlogcounts, aes(x=Sample, y=logCounts, fill=Group)) +
-#         geom_boxplot() +
-#         geom_hline(yintercept = median(rlogcounts$logCounts), colour = "blue")
+
 
 ```
 
@@ -362,7 +420,11 @@ sampleinfo <- sampleinfo %>%
     mutate(CellType=ifelse(Sample=="MCL1.LA", "luminal", CellType)) %>% 
     mutate(Group=ifelse(Sample=="MCL1.DG", "basal.virgin", Group)) %>% 
     mutate(Group=ifelse(Sample=="MCL1.LA", "luminal.virgin", Group))
+```
 
+...and export it so that we have the correct version for later use.
+
+```{r, exportSampleSheet, eval=FALSE}
 write_csv(sampleinfo, "results/SampleInfo_Corrected.txt")
 ```
 
@@ -398,7 +460,7 @@ replicate. If the PCA plot showed separation of samples by time, it might be
 worthwhile including time in the down stream analysis to account for the
 time-based effect.
 
-## PCA beyond the first two dimensions [optional]
+## PCA beyond the first two dimensions
 
 `autoplot` plots the first two dimensions as a default, however you can plot higher dimensions using the `x` and `y` arguments.
 
@@ -423,7 +485,7 @@ root-mean-square of the largest 500 log2-fold changes between that pair of
 samples. The *Glimma* package creates interactive plots that allow the use to 
 explore the different dimensions.
 
-```{r glimmaMDS}
+```{r glimmaMDS, eval=FALSE}
 library(Glimma)
 glMDSPlot(rlogcounts, 
           labels = sampleinfo$Sample, 
