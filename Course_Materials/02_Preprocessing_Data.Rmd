@@ -37,8 +37,8 @@ website](http://master.bioconductor.org/packages/release/workflows/vignettes/rna
 First, let's load all the packages we will need to analyse the data.
 
 ```{r setup, message = FALSE}
-library(tidyverse)
 library(DESeq2)
+library(tidyverse)
 ```
 
 ## Mouse mammary gland dataset
@@ -259,61 +259,22 @@ value in order to prevent attempting `log2(0)` from creating errors.
 ```{r logTransform}
 # Get log2 counts per million
 logcounts <- log2(countdata + 1)
-# lets add the gene ids
-rownames(logcounts) <- rownames(countdata)
 ```
 
 We'll check the distribution of read counts using a boxplot and well add some
-colour to see if there is any difference between sample groups. We are going to
-use the package ``ggplot2``[@Wickham2016] to create the plots.
-
-### A Brief Introduction to `ggplot2`
-
-The [`ggplot2`](http://ggplot2.tidyverse.org/) package has emerged as an 
-attractive alternative to the traditional plots provided by base R. A full 
-overview of all capabilities of the package is available from the 
-[cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf).
-
-In brief:-
-
-- `logcounts` is our data frame containing the variables we wish to plot
-- `aes` creates a mapping between the variables in our data frame to the 
-*aes*thetic proprties of the plot:
-    + the x-axis will be mapped to Sample
-    + the y-axis will be mapped to the count data
-    + we will need to rearrange the data a bit to create a column of `Sample` and a column `Counts` containing the counts - see below.
-- `geom_bar` specifies the particular type of plot we want (in this case a bar 
-plot)
-    + see 
-    [the cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf) 
-    for other plot types
-
-`ggplot2` requires the data to be in "tidy" format. This is where each column
-relates to a type of observation and each row to a single data point. In the
-current format the `logcounts` matrix has rows that correspond to genes and 
-columns that correspond to samples. We will need to transform the table so that
-each row coresponds to a single count for a particular gene for a particular 
-sample, this will have three columns - `GeneID`, `Sample`, `logCounts`.
-
-The real advantage of `ggplot2` is the ability to change the appearance of our 
-plot by mapping other variables to aspects of the plot. For example, we could 
-colour the points based on a the sample group. To this we can add metadata from
-the `sampleinfo` table to the data. The colours are automatically chosen by
-`ggplot2`, but we can specifiy particular values.
+colour to see if there is any difference between sample groups.
 
 ```{r plotLogCounts}
-# reform the table and add sample data
-plotData <- logcounts %>% 
-    as.data.frame() %>% 
-    gather("Sample", "logCounts") %>% # transforms the matrix to a tidy table
-    left_join(sampleinfo, "Sample") # add sampleinfo using "Sample" column to match the rows
-
+# make a colour vector
+statusCol <- as.numeric(factor(sampleinfo$Status)) + 1
 # Check distributions of samples using boxplots
-# Add a horizontal line at the overall median 
-medianCount <- median(plotData$logCounts)
-ggplot(plotData, aes(x=Sample, y=logCounts, fill=Status)) +
-        geom_boxplot() +
-        geom_hline(yintercept = medianCount, colour = "blue")
+boxplot(logcounts, 
+        xlab="", 
+        ylab="Log2(Counts)",
+        las=2,
+        col=statusCol)
+# Let's add a blue horizontal line that corresponds to the median logCPM
+abline(h=median(as.matrix(logcounts)), col="blue")
 ```
 
 From the boxplots we see that overall the density distributions of raw
@@ -418,8 +379,7 @@ Let's fix the sample sheet...
 sampleinfo <- sampleinfo %>% 
     mutate(CellType=ifelse(Sample=="MCL1.DG", "basal", CellType)) %>% 
     mutate(CellType=ifelse(Sample=="MCL1.LA", "luminal", CellType)) %>% 
-    mutate(Group=ifelse(Sample=="MCL1.DG", "basal.virgin", Group)) %>% 
-    mutate(Group=ifelse(Sample=="MCL1.LA", "luminal.virgin", Group))
+    mutate(Group=str_c(CellType, ".", Group))
 ```
 
 ...and export it so that we have the correct version for later use.

@@ -23,11 +23,14 @@ library(limma)
 library(tidyverse)
 ```
 
-```{r prepareData}
+```{r prepareData, message=FALSE}
 # Read the sample information into R
-sampleinfo <- read_tsv("../data/SampleInfo.Corrected.txt")
+sampleinfo <- read.delim("../data/SampleInfo.Corrected.txt", 
+                         stringsAsFactors = F)
 # Read the data into R
-seqdata <- read_tsv("../data/GSE60450_Lactation.featureCounts", comment = "#")
+seqdata <- read.delim("../data/GSE60450_Lactation.featureCounts", 
+                      stringsAsFactors = F,
+                      comment = "#")
 # Remove first two columns from seqdata
 countdata <- as.data.frame(seqdata) %>% 
     column_to_rownames("Geneid") %>% # turn the geneid column into rownames
@@ -64,20 +67,15 @@ logNormalizedCounts <- log2(normalizedCounts + 1)
 ```{r}
 rlogcounts <- rlog(countdata)
 
-rownames(rlogcounts) <- rownames(countdata)
-
-# reform the table and add sample data
-plotData <- rlogcounts %>%
-    as.data.frame() %>%
-    gather("Sample", "logCounts") %>%
-    left_join(sampleinfo, "Sample")
-
+statusCol <- as.numeric(factor(sampleinfo$Status)) + 1
 # Check distributions of samples using boxplots
-# Add a horizontal line at the overall median
-medianCount <- median(plotData$logCounts)
-ggplot(plotData, aes(x=Sample, y=logCounts, fill=Group)) +
-        geom_boxplot() +
-        geom_hline(yintercept = medianCount, colour = "blue")
+boxplot(rlogcounts, 
+        xlab="", 
+        ylab="Log2(Counts)",
+        las=2,
+        col=statusCol)
+# Let's add a blue horizontal line that corresponds to the median logCPM
+abline(h=median(as.matrix(logcounts)), col="blue")
 
 ```
 
