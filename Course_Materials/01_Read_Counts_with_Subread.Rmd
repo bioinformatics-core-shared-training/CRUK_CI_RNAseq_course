@@ -103,7 +103,7 @@ In fact we can have **`featureCounts`** do this for us by running all of our lib
       --primary \
       -a small_bams/Mus_musculus.GRCm38.80.chr15.gtf  \
       -o GSE60450_Lactation.chr15.featureCounts \
-      bams_chr15/MCL*.bam
+      small_bams/MCL*.bam
 ```
 
 This gives us a combined counts table as an output with the first 6 columns as before but now the folowing columns contain the counts for all of the samples.
