@@ -208,7 +208,7 @@ uniform tail to the right of this. There is a nice explanation of other possible
 patterns in the histogram and what to when you see them in [this 
 post](http://varianceexplained.org/statistics/interpreting-pvalue-histogram/).
 
-```{r pvalHist, fig.align="center", fig.width=5, fig.height=5}
+```{r pvalHist, fig.align="center"}
 hist(shrinkLvV$pvalue)
 ```
 
@@ -222,7 +222,7 @@ being contrasted.
 
 `DESeq2` has a handy function for plotting this...
 
-```{r maPlotDESeq2, fig.align="center", fig.width=7, fig.height=5}
+```{r maPlotDESeq2, fig.align="center", fig.width=5, fig.height=5}
 plotMA(ddsShrink, alpha=0.05)
 ```
 
@@ -259,7 +259,7 @@ the `sampleinfo` table to the data. The colours are automatically chosen by
 `ggplot2`, but we can specifiy particular values.
 
 
-```{r maPlot, fig.align="center", fig.width=7, fig.height=7}
+```{r maPlot, fig.align="center", fig.width=5, fig.height=5}
 # add a column with the names of only the top 10 genes
 cutoff <- sort(shrinkLvV$pvalue)[10]
 shrinkLvV <- shrinkLvV %>% 
@@ -282,7 +282,7 @@ for p-values as it means that more significant genes have a higher scale.
 We should first remove the genes that we excluded by the independent filtering
 process of DESeq2
 
-```{r volcanoPlot, fig.height=5, fig.width=10}
+```{r volcanoPlot, fig.height=5, fig.width=7}
 # first remove the filtered genes (FDR=NA) and create a -log10(FDR) column
 filtTab <- shrinkLvV %>% 
     filter(!is.na(FDR)) %>% 
@@ -295,7 +295,7 @@ ggplot(filtTab, aes(x = logFC, y=`-log10(FDR)`)) +
 We could limit the values at the top of the plot so that we can see the lower
  portion more clearly.
  
-```{r volcanoPlotLtd, fig.height=5, fig.width=10}
+```{r volcanoPlotLtd, fig.height=5, fig.width=7}
 filtTab <- filtTab %>% 
     mutate(`-log10(FDR)`=pmin(`-log10(FDR)`, 51))
 
@@ -364,8 +364,65 @@ This function creates an html page (./volcano/XY-Plot.html) with a volcano plot
 on the left and a plot showing the log-CPM per sample for a selected gene on the
 right. A search bar is available to search for genes of interest.
 
+## Heatmap
 
-## Additional Material
+We're going to use the package `ComplexHeatmap` [@Gu2016]. We'll also use
+`circlize` to generate a colour scale [@Gu2014].
+
+```{r complexHeatmap, message=F}
+library(ComplexHeatmap)
+library(circlize)
+```
+
+We can't plot the entire data set, let's just select the top 200 by FDR. We'll
+also z-transform the counts.
+
+```{r selectGenes}
+# get the top genes
+sigGenes <- as.data.frame(resLvV) %>% 
+    rownames_to_column("GeneID") %>% 
+    top_n(150, wt=-padj) %>% 
+    pull("GeneID")
+
+# filter the data for the top 200 by padj in the LRT test
+plotDat <- vst(ddsObj)[sigGenes,] %>% 
+    assay()
+z.mat <- t(scale(t(plotDat), center=TRUE, scale=TRUE))
+```
+
+```{r colourScale}
+# colour palette
+myPalette <- c("red3", "ivory", "blue3")
+myRamp = colorRamp2(c(-2, 0, 2), myPalette)
+```
+
+```{r heatmap, fig.width=5, fig.height=8}
+Heatmap(z.mat, name = "z-score",
+        col = myRamp,            
+        show_row_name = FALSE,
+        cluster_columns = FALSE)
+```
+
+we can also split the heat map into clusters and add some annotation.
+
+```{r splitHeatmap, fig.width=5, fig.height=8}
+# cluster the data and split the tree
+hcDat <- hclust(dist(z.mat))
+cutGroups <- cutree(hcDat, h=4)
+
+ha1 = HeatmapAnnotation(df = colData(ddsObj)[,c("CellType", "Status")])
+
+Heatmap(z.mat, name = "z-score",
+        col = myRamp,            
+        show_row_name = FALSE,
+        cluster_columns = FALSE,
+        split=cutGroups,
+        rect_gp = gpar(col = "darkgrey", lwd=0.5),
+        top_annotation = ha1)
+```
+
+
+# Additional Material
 
 ### Working with Genomic Locations - Transcript database packages
 
