@@ -50,13 +50,13 @@ output:
 
 </div>
 
-<img src="images/attendance.gif" style="width: 70%; margin: 0 6em;"/>
+<img src="images/attendance.gif" class="centerimg" style="width: 65%"/>
 
 ## Workflow {#less_space_after_title}
 
 <div style="line-height: 50%;"><br></div>
 
-<img src="images/Workflow_ConesaEtAl2016.png" class="centerimg" style="width: 90%;">
+<img src="images/workflow.svg" class="centerimg" style="width: 70%;">
     
 ## Sources of Noise {#less_space_after_title}
 
@@ -100,8 +100,14 @@ index swapping issue.
 
 <img src="images/Counting.png" class="centerimg" style="width: 75%">
 
-<div style="width: 30%; float: left; border-style: solid; border-width: 1px;
-    border-radius: 25px; padding: 20px; margin-right: 50px">
+<div style="width: 30%; 
+    float: left;
+    border-style: solid; 
+    border-width: 1px;
+    border-radius: 25px; 
+    padding: 20px; 
+    margin-right: 10%;
+    margin-left: 10%;">
 <span style="color: #2e3192">**Genome-based features**</span>
 
 * Exon or gene boundaries
@@ -112,7 +118,12 @@ index swapping issue.
 
 </div>
 
-<div style="width: 45%; float: left">
+<div style="width: 30%; 
+    float: left; 
+    border-style: solid; 
+    border-width: 1px;
+    border-radius: 25px; 
+    padding: 20px;">
 <span style="color: #2e3192">**Transcript-based features**</span>
 
 * Transcript assembly
@@ -121,4 +132,271 @@ index swapping issue.
 
 * Isoform multireads
 
+</div>
+
+<div style="clear: both; text-align: center; padding: 20px">
+**HTSeq or Subread**
+</div>
+
+## Normalisation
+
+* Counting estimates the *relative* counts for each gene
+
+* Does this **accurately** represent the original population of RNAs?
+
+* Various factors mean the relationship between counts and RNA expression is not
+the same for all genes across all samples
+
+
+<div style="width: 30%; 
+    float: left;
+    border-style: solid; 
+    border-width: 1px;
+    border-radius: 25px; 
+    padding: 20px; 
+    margin-right: 10%;
+    margin-left: 10%;">
+<span style="color: #2e3192">**Library Size**</span>
+
+Differing sequencing depth
+
+</div>
+
+<div style="width: 30%; 
+    float: left; 
+    border-style: solid; 
+    border-width: 1px;
+    border-radius: 25px; 
+    padding: 20px;">
+<span style="color: #2e3192">**Gene properties**</span>
+
+GC content, length, sequence
+
+</div>
+
+<div style="width: 40%; 
+    float: left; 
+    border-style: solid; 
+    border-width: 1px;
+    border-radius: 25px; 
+    padding: 20px;
+    clear: both;
+    margin-top: 20px;
+    margin-left: 27%">
+<span style="color: #2e3192;">**Library composition**</span>
+
+Highly expressed genes overrepresented at the cost of lowly expressed genes
+
+"Composition Bias"
+
+</div>
+
+## Normalisation - scaling
+
+Total Count 
+
+* Normalise each sample by total number of reads sequenced.  
+
+* Can also use another statistic similar to total count eg. median, upper 
+quartile 
+
+<div style="line-height: 50%;"><br></div>
+
+<img src="images/scaling.svg" class="centerimg" style="width: 50%">
+
+## Normalisation - DESeq2
+
+* Geometric mean scaling factor
+
+* Assumes most genes are not differentially expressed
+
+1. For each gene calculate the geometric mean across all samples
+2. For each gene in each sample, normalise by dividing by the geometric mean for
+that gene
+3. For each sample calculate the scaling factor as the median of the normalised
+counts
+
+<div style="line-height: 50%;"><br></div>
+
+<img src="images/geom_scaling.png" class="centerimg" style="width: 50%">
+
+## Differential Expression
+
+* Comparing feature abundance under different conditions
+
+*  Assumes linearity of signal
+
+*  When feature=gene, well-established pre- and post-analysis strategies exist
+
+<div style="line-height: 50%;"><br></div>
+
+<img src="images/LinearityOfCounts.png" class="centerimg" style="width: 40%;
+    border-style: solid; 
+    border-width: 1px;
+    ">
+
+<div style="text-align: right">
+    Mortazavi, A. et al (2008) Nature Methods
+</div>
+
+## Differential Expression
+
+Simple difference in means  
+
+<img src="images/DifferenceInMeans.png" class="centerimg" style="width: 60%;">
+
+<div style="text-align: right">
+    Replication introduces variation
+</div>
+
+## Differential Expression - Modelling population distributions
+
+* Normal Distribution - t-test
+
+* Two parameters - `mean` and `sd`
+
+<div  class="centerimg" style="width: 75%">
+```{r diffInMeans, echo=FALSE}
+library(shape)
+x1 <- seq(0, 6, length=100)
+hx1 <- dnorm(x1, mean = 3, sd = 1)
+x2 <- seq(2, 12, length=100)
+hx2 <- dnorm(x2, mean = 7, sd = 1.5)
+
+plot(x1, hx1, type="l", lty=1, xlab="x value",
+     ylab="Density", main="Comparison of Normal Distributions",
+     col="tomato", ylim=c(0, 0.6), xlim=c(0, 13))
+lines(x2, hx2, type="l", col="steelblue")
+abline(v=3, col="tomato3", lty=2)
+abline(v=7, col="steelblue3", lty=2)
+Arrows(3.3, 0.5, 6.7, 0.5, code = 3, arr.type = "curved")
+```
+</div>
+
+## Differential Expression - Modelling population distributions
+
+* Count data - Poisson distribution
+* One parameter - `mean` $(\lambda)$
+* `variance` = `mean`
+
+<div  class="centerimg" style="width: 75%">
+```{r poissonDistr, echo=FALSE}
+x1 <- seq(0, 20)
+hx1 <- dpois(x1, lambda = 1)
+hx2 <- dpois(x1, lambda = 4)
+hx3 <- dpois(x1, lambda = 10)
+
+plot(x1, hx1, type="l", lty=1,
+     main="Comparison of Normal Distributions",
+     xlab="k", ylab="P(X=k)")
+lines(x1, hx2, type="l")
+lines(x1, hx3, type="l")
+cols <- c("coral2", "darkgoldenrod1", "deepskyblue3")
+points(x1, hx1, bg=cols[1], pch=21)
+points(x1, hx2, bg=cols[2], pch=21)
+points(x1, hx3, bg=cols[3], pch=21)
+leg <- c(expression(paste(lambda, " = ", 1)),
+         expression(paste(lambda, " = ", 4)),
+         expression(paste(lambda, " = ", 10)))
+legend("topright", legend = leg, pt.bg = cols, pch=21, bty="n")
+```
+</div>
+
+## Differential Expression - Modelling population distributions
+
+<div style="width: 45%; float: left; 
+    margin-right: 40px; 
+    margin-left: 40px; 
+    margin-top: 50px">
+
+* RNAseq counts for lowly expressed genes vary more than for highly expressed genes
+
+* Use the Negative Binomial distribution
+
+* In the NB distribution `mean` not equal to `variance`
+
+* Two paramenters - `mean` and `dispersion`
+
+</div>
+
+<img src="images/NegativeBinomialDistribution.png", style="width: 45%;">
+
+<div style="text-align: right">
+    Anders, S. & Huber, W. (2010) Genome Biology
+</div>
+
+## Differential Expression - estimating dispersion
+
+<div style="width: 45%; float: left; 
+    margin-right: 40px; 
+    margin-left: 40px; 
+    margin-top: 50px">
+
+* Estimating the dispersion parameter can be difficult with a small number of samples 
+
+* DESeq2 models the variance as the sum of technical and biological variance
+
+* Esimate dispersion for each gene
+
+* ‘Share’ dispersion information between genes to obtain fitted estimate
+
+* Shrink gene-wise estimates towards the the fitted estimates
+
+</div>
+
+<img src="images/dispersion.png", style="width: 45%; margin-top: 40px">
+
+## Towards biological meaning - hierachical clustering {#less_space_after_title}
+
+<div style="line-height: 50%;"><br></div>
+
+<img src="images/Hamy2016PlosOneHC.png" style="width: 63%; 
+                                               display: block;
+                                               margin-left: 23%;">
+
+<div style="text-align: right;">
+    Hamy et al. (2016) PLOS One
+</div>
+
+## Towards biological meaning - Gene Set Enrichment Analysis {#less_space_after_title}
+
+<div style="line-height: 50%;"><br></div>
+
+<div style="float: left; width: 50%; margin-left: 5%; margin-top: 50px">
+<img src="images/GSEA-homegraphic.gif">
+</div>
+
+<div>
+<img src="images/MSigDBTrsp.png" style="width: 45%;">
+</div>
+
+<div style="text-align: right;">
+    http://software.broadinstitute.org/gsea
+</div>
+
+## Towards biological meaning - Network Analysis {#less_space_after_title}
+
+<div style="line-height: 50%;"><br></div>
+
+<img src="images/Hamy2016PlosOneNetworkTrp.png" class="centerimg" style="width: 50%">
+
+<div style="text-align: right;">
+    Hamy et al. (2016) PLOS One
+</div>
+
+
+## More Depth or More Reps? {#less_space_after_title}
+
+<div><br></div>
+
+<img src="images/DepthvReps.jpg" class="centerimg" style="width: 60%">
+
+<div style="text-align: right;">
+    Liu et al. (2014) Bioinformatics
+</div>
+
+##
+
+<div style="text-align: center; margin-top: 30%">
+<span style="color: #2e3192; font-size: 80px">**Thank you**</span>
 </div>
