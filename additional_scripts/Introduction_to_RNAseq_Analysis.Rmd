@@ -56,26 +56,22 @@ output:
 
 <div style="line-height: 50%;"><br></div>
 
-<img src="images/workflow.svg" class="centerimg" style="width: 70%;">
+<img src="images/workflow.svg" class="centerimg" style="width: 60%;">
     
-## Sources of Noise {#less_space_after_title}
+## Sources of Noise
 
-<div style="line-height: 50%;"><br></div>
+<img src="images/Noise.svg" class="centerimg" style="width: 65%">
 
-<img src="images/Noise.png" class="centerimg" style="width: 75%">
+## Sources of Noise - Sampling Bias
 
-## Sources of Noise - Sampling Bias {#less_space_after_title}
-
-<div style="line-height: 50%;"><br></div>
-
-<img src="images/SamplingBias.png" class="centerimg" style="width: 75%">
+<img src="images/SamplingBias.svg" class="centerimg" style="width: 60%">
 
 
-## Sources of Noise - Transcript Length {#less_space_after_title}
+## Sources of Noise - Transcript Length
 
-<div style="line-height: 50%;"><br></div>
-
-<img src="images/TranscriptLength.png" class="centerimg" style="width: 75%">
+<div style="margin-top: 60px; margin-bottom: 40px;">
+<img src="images/TranscriptLength.svg" class="centerimg" style="width: 65%">
+</div>
 
 <div>
 The length of the transcript affects the number of RNA fragments present in the
@@ -83,9 +79,7 @@ library from that gene.
 </div>
 
 
-## Sources of Noise - Sequencing Artefacts {#less_space_after_title}
-
-<div style="line-height: 50%;"><br></div>
+## Sources of Noise - Sequencing Artefacts
 
 <img src="images/SequencingArtefacts.png" class="centerimg" style="width: 75%">
 
@@ -94,9 +88,7 @@ The development of larger suites of unique dual-indexes should eliminate the
 index swapping issue.
 </div>
 
-## Counting/Summarisation {#less_space_after_title}
-
-<div style="line-height: 50%;"><br></div>
+## Counting/Summarisation
 
 <img src="images/Counting.png" class="centerimg" style="width: 75%">
 
@@ -144,8 +136,8 @@ index swapping issue.
 
 * Does this **accurately** represent the original population of RNAs?
 
-* Various factors mean the relationship between counts and RNA expression is not
-the same for all genes across all samples
+* The relationship between counts and RNA expression is not the same for all 
+genes across all samples
 
 
 <div style="width: 30%; 
@@ -200,25 +192,25 @@ Total Count
 * Can also use another statistic similar to total count eg. median, upper 
 quartile 
 
+* Does not account for composition bias
+
 <div style="line-height: 50%;"><br></div>
 
-<img src="images/scaling.svg" class="centerimg" style="width: 50%">
+<img src="images/scaling.svg" class="centerimg" style="width: 40%">
 
-## Normalisation - DESeq2
+## Normalisation - Geometric mean scaling factor
 
-* Geometric mean scaling factor
+* Used by DESeq2
 
-* Assumes most genes are not differentially expressed
-
+<div class="smalltext" style="margin-left: 25px">
 1. For each gene calculate the geometric mean across all samples
-2. For each gene in each sample, normalise by dividing by the geometric mean for
-that gene
-3. For each sample calculate the scaling factor as the median of the normalised
-counts
+2. For each gene in each sample, normalise by dividing by the geometric mean for that gene
+3. For each sample calculate the scaling factor as the median of the normalised counts
+</div>
 
 <div style="line-height: 50%;"><br></div>
 
-<img src="images/geom_scaling.png" class="centerimg" style="width: 50%">
+<img src="images/GeometricScaling.svg" class="centerimg" style="width: 63%">
 
 ## Differential Expression
 
@@ -252,10 +244,10 @@ Simple difference in means
 ## Differential Expression - Modelling population distributions
 
 * Normal Distribution - t-test
-
 * Two parameters - `mean` and `sd`
+* Suitable for microarray data but not for RNAseq data
 
-<div style="width: 60%; margin-left: 16%; padding-top: 32px">
+<div style="width: 60%; margin-left: 16%; padding-top: 5px">
 ```{r diffInMeans, echo=FALSE, fig.width=7, fig.height=4}
 library(shape)
 x1 <- seq(0, 6, length=100)
@@ -364,14 +356,12 @@ legend("topright", legend = leg, pt.bg = cols, pch=21, bty="n")
 
 <div style="float: left; width: 50%; margin-left: 5%; margin-top: 50px">
 <img src="images/GSEA-homegraphic.gif">
+
+    http://software.broadinstitute.org/gsea
 </div>
 
 <div>
 <img src="images/MSigDBTrsp.png" style="width: 45%;">
-</div>
-
-<div style="text-align: right;">
-    http://software.broadinstitute.org/gsea
 </div>
 
 ## Towards biological meaning - Network Analysis {#less_space_after_title}
