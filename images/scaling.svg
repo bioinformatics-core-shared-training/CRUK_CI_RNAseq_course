@@ -28,16 +28,16 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.4856412"
-     inkscape:cx="733.69091"
-     inkscape:cy="499.33984"
+     inkscape:zoom="0.62220775"
+     inkscape:cx="430.60726"
+     inkscape:cy="324.39081"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="1280"
      inkscape:window-height="687"
-     inkscape:window-x="14"
-     inkscape:window-y="30"
+     inkscape:window-x="34"
+     inkscape:window-y="73"
      inkscape:window-maximized="0"
      fit-margin-top="0"
      fit-margin-left="0"
@@ -51,7 +51,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -421,20 +421,21 @@
     </g>
     <path
        style="opacity:1;fill:#4a00ea;fill-opacity:1;stroke:#555555;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m -54.259066,419.26931 0,42.45898 -375.580074,0 0,43.28125 375.580074,0 0,42.45899 91.792969,-32.04883 91.791017,-32.05078 -91.791017,-32.04883 -91.792969,-32.05078 z"
+       d="m -54.259066,419.26931 27.970249,42.45898 -403.550323,0 c 3.10994,7.21354 3.07936,14.35442 3.07936,21.64063 0,7.2862 0.0306,14.42708 -3.07936,21.64062 l 403.550323,0 -27.970249,42.45899 C 8.4900986,505.12602 68.130531,504.73624 129.32492,483.36892 68.129969,462.00321 6.9354644,462.39086 -54.259066,419.26931 Z"
        id="rect4185"
-       inkscape:connector-curvature="0" />
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccaccccc" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:90px;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="-241.70299"
-       y="416.97235"
+       x="-147.6113"
+       y="382.97235"
        id="text4198"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan4200"
-         x="-241.70299"
-         y="416.97235"
+         x="-147.6113"
+         y="382.97235"
          style="font-size:90px">Scaling</tspan></text>
   </g>
 </svg>

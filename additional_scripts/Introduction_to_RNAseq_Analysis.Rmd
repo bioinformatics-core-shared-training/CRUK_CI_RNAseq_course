@@ -60,7 +60,7 @@ output:
     
 ## Sources of Noise
 
-<img src="images/Noise.svg" class="centerimg" style="width: 65%">
+<img src="images/Noise.svg" style="width: 65%; margin-left: 23%">
 
 ## Sources of Noise - Sampling Bias
 
