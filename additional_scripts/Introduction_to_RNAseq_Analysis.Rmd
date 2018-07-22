@@ -244,7 +244,9 @@ Simple difference in means
 ## Differential Expression - Modelling population distributions
 
 * Normal Distribution - t-test
+
 * Two parameters - `mean` and `sd`
+
 * Suitable for microarray data but not for RNAseq data
 
 <div style="width: 60%; margin-left: 16%; padding-top: 5px">
@@ -269,7 +271,9 @@ Arrows(3.3, 0.5, 6.7, 0.5, code = 3, arr.type = "curved")
 ## Differential Expression - Modelling population distributions
 
 * Count data - Poisson distribution
+
 * One parameter - `mean` $(\lambda)$
+
 * `variance` = `mean`
 
 <div style="width: 60%; margin-left: 16%; padding-top: 5px">
