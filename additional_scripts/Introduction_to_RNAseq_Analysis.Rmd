@@ -255,16 +255,17 @@ Simple difference in means
 
 * Two parameters - `mean` and `sd`
 
-<div  class="centerimg" style="width: 75%">
-```{r diffInMeans, echo=FALSE}
+<div style="width: 60%; margin-left: 16%; padding-top: 32px">
+```{r diffInMeans, echo=FALSE, fig.width=7, fig.height=4}
 library(shape)
 x1 <- seq(0, 6, length=100)
 hx1 <- dnorm(x1, mean = 3, sd = 1)
 x2 <- seq(2, 12, length=100)
 hx2 <- dnorm(x2, mean = 7, sd = 1.5)
+par(bg=NA, mar=c(5, 4, 0, 4) + 0.1) 
 
-plot(x1, hx1, type="l", lty=1, xlab="x value",
-     ylab="Density", main="Comparison of Normal Distributions",
+plot(x1, hx1, type="l", lty=1, 
+     xlab="x value", ylab="Density",
      col="tomato", ylim=c(0, 0.6), xlim=c(0, 13))
 lines(x2, hx2, type="l", col="steelblue")
 abline(v=3, col="tomato3", lty=2)
@@ -279,15 +280,14 @@ Arrows(3.3, 0.5, 6.7, 0.5, code = 3, arr.type = "curved")
 * One parameter - `mean` $(\lambda)$
 * `variance` = `mean`
 
-<div  class="centerimg" style="width: 75%">
-```{r poissonDistr, echo=FALSE}
+<div style="width: 60%; margin-left: 16%; padding-top: 5px">
+```{r poissonDistr, echo=FALSE, fig.width=7, fig.height=4}
 x1 <- seq(0, 20)
 hx1 <- dpois(x1, lambda = 1)
 hx2 <- dpois(x1, lambda = 4)
 hx3 <- dpois(x1, lambda = 10)
-
+par(bg=NA, mar=c(5, 4, 0, 4) + 0.1) 
 plot(x1, hx1, type="l", lty=1,
-     main="Comparison of Normal Distributions",
      xlab="k", ylab="P(X=k)")
 lines(x1, hx2, type="l")
 lines(x1, hx3, type="l")
