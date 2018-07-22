@@ -287,8 +287,8 @@ cols <- c("coral2", "darkgoldenrod1", "deepskyblue3")
 points(x1, hx1, bg=cols[1], pch=21)
 points(x1, hx2, bg=cols[2], pch=21)
 points(x1, hx3, bg=cols[3], pch=21)
-leg <- c(expression(paste(lambda, " = ", 1)),
-         expression(paste(lambda, " = ", 4)),
+leg <- c(expression(paste(lambda, " =  ", 1)),
+         expression(paste(lambda, " =  ", 4)),
          expression(paste(lambda, " = ", 10)))
 legend("topright", legend = leg, pt.bg = cols, pch=21, bty="n")
 ```
