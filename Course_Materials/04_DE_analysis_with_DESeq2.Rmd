@@ -1,7 +1,7 @@
 ---
 title: "RNA-seq analysis in R"
 subtitle: "Differential Expression of RNA-seq data"
-author: "Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle"
+author: "Stephane Ballereau, Mark Dunning, Abbi Edwards, Oscar Rueda, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
   html_notebook:
@@ -11,6 +11,8 @@ output:
 minutes: 300
 layout: page
 bibliography: ref.bib
+editor_options: 
+  chunk_output_type: inline
 ---
 
 # Recap of pre-processing
@@ -335,6 +337,6 @@ There are four possible values for `altHypothesis`:
 save(resLvV, ddsObj, sampleinfo, file="results/DE.RData")
 ```
 
------------
+--------------------
 
 # References

@@ -8,6 +8,7 @@ output:
     logo: images/CRUK_Cambridge_Institute.png
     smaller: yes
     widescreen: yes
+  beamer_presentation: default
   slidy_presentation: default
 ---
 
