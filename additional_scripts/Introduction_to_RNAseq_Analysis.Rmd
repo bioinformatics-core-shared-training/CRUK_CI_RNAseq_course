@@ -96,7 +96,7 @@ index swapping issue.
 <div>
 * RNA does not contain the introns
 
-* Need to use a gap-aware aligner and provide gene definitions (GTF) e.g.:
+* Need to use a splice-aware aligner and provide gene definitions (GTF) e.g.:
 
     * HISAT2 (uses Bowtie2)
     * Star
