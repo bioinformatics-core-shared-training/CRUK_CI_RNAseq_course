@@ -1,0 +1,354 @@
+---
+title: "RNA-seq Analysis in R - Instructor Materials"
+subtitle: "Annotation and Visualisation of RNA-seq results"
+author: "Stephane Ballereau, Mark Dunning, Abbi Edwards, Oscar Rueda, Ashley Sawle"
+date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
+output:
+  html_notebook:
+    toc: yes
+  html_document:
+    toc: yes
+minutes: 300
+layout: page
+---
+
+```{r setup, message=FALSE}
+library(biomaRt)
+library(DESeq2)
+library(tidyverse)
+```
+
+```{r loadData}
+load("Robjects/DE.RData")
+```
+
+# Overview
+
+- Getting annotation
+- Visualising DE results
+
+# Adding annotation to the DESeq2 results
+
+* *organism-level* packages in Bioconductor
+
+* `biomaRt`
+
+## Select BioMart database and dataset
+
+```{r connect}
+# view the available databases
+listMarts()
+## set up connection to ensembl database
+ensembl=useMart("ENSEMBL_MART_ENSEMBL")
+
+# list the available datasets (species)
+listDatasets(ensembl) %>% 
+    filter(str_detect(description, "Mouse"))
+
+# specify a data set to use
+ensembl = useDataset("mmusculus_gene_ensembl", mart=ensembl)
+```
+
+## Query the database
+
+* **filters** - Ensembl Gene IDs
+* **values** - the Ensembl Gene IDs from our DE results table
+* **attributes**
+
+* test your query on a small list
+
+```{r queryBioMart, message=F}
+
+# check the available "filters" - things you can filter for
+listFilters(ensembl) %>% 
+    filter(str_detect(name, "ensembl"))
+# Set the filter type and values
+filterType <- "ensembl_gene_id"
+filterValues <- rownames(resLvV)[1:1000]
+
+# check the available "attributes" - things you can retreive
+listAttributes(ensembl) %>% 
+    head(20)
+# Set the list of attributes
+attributeNames <- c('ensembl_gene_id', 'entrezgene', 'external_gene_name')
+
+# run the query
+annot <- getBM(attributes=attributeNames, 
+               filters = filterType, 
+               values = filterValues, 
+               mart = ensembl)
+```
+
+
+### One-to-many relationships
+
+Let's inspect the annotation.
+
+```{r inspectAnnot}
+head(annot)
+dim(annot) # why are there more than 1000 rows?
+length(unique(annot$ensembl_gene_id)) # why are there less than 1000 Gene ids?
+
+isDup <- duplicated(annot$ensembl_gene_id)
+dup <- annot$ensembl_gene_id[isDup]
+annot[annot$ensembl_gene_id%in%dup,]
+```
+
+*  multiple Entrez IDs for a single Ensembl 
+
+## Retrieve full annotation
+
+> ### Challenge 1 {.challenge}
+> That was just 1000 genes. We need annotations for the entire results table.
+> Also, there may be some other interesting columns in BioMart that we wish to
+> retrieve.  
+>
+> (a) Search the attributes and add the following to our list of attributes:  
+>       (i) The gene description   
+>       (ii) The genomic position - chromosome, start, end, and strand (4 columns) 
+>       (iii) The gene biotype  
+> (b) Query BioMart using all of the genes in our results table (`resLvV`)  
+> (c) How many Ensembl genes have multipe Entrez IDs associated with them?  
+> (d) How many Ensembl genes in `resLvV` don't have any annotation? Why is this?
+
+```{r solutionChallenge1}
+filterValues <- rownames(resLvV)
+
+# check the available "attributes" - things you can retreive
+listAttributes(ensembl) %>%
+    head(20)
+attributeNames <- c('ensembl_gene_id',
+                    'entrezgene',
+                    'external_gene_name',
+                    'description',
+                    'gene_biotype',
+                    'chromosome_name',
+                    'start_position',
+                    'end_position',
+                    'strand')
+
+# run the query
+annot <- getBM(attributes=attributeNames,
+               filters = filterType,
+               values = filterValues,
+               mart = ensembl)
+
+# dulicate ids
+sum(duplicated(annot$ensembl_gene_id))
+
+# missing gens
+missingGenes <- !rownames(resLvV)%in%annot$ensembl_gene_id
+rownames(resLvV)[missingGenes]
+```
+
+### Add annotation to the results table
+
+* we have created an annotation table:
+    * modified the column names
+    * added median transcript length
+    * dealt with the one-to-many issues for Entrez IDs.
+
+```{r addAnnotation, message=FALSE}
+load("Robjects/Ensembl_annotations.RData")
+colnames(ensemblAnnot)
+annotLvV <- as.data.frame(resLvV) %>% 
+    rownames_to_column("GeneID") %>% 
+    left_join(ensemblAnnot, "GeneID") %>% 
+    rename(logFC=log2FoldChange, FDR=padj)
+```
+
+Finally we can output the annotation DE results using `write_csv`.
+
+```{r outputDEtables, eval=F}
+write_tsv(annotLvV, "data/VirginVsLactating_Results_Annotated.txt")
+```
+
+> ### Challenge 2 {.challenge}
+> Have a look at gene symbols for most significant genes by adjusted p-value.
+> Do they make biological sense in the context of comparing gene expression
+> in mammary gland tissue between lactating and virgin mice? You may want to
+> do a quick web search of your favourite gene/protein database
+
+```{r solution2}
+annotLvV %>%
+    arrange(FDR) %>%
+    head(10)
+```
+
+# Visualisation
+
+* `lfcShrink`
+
+```{r shrinkLFC}
+ddsShrink <- lfcShrink(ddsObj, coef="Status_lactate_vs_virgin")
+shrinkLvV <- as.data.frame(ddsShrink) %>%
+    rownames_to_column("GeneID") %>% 
+    left_join(ensemblAnnot, "GeneID") %>% 
+    rename(logFC=log2FoldChange, FDR=padj)
+```
+
+## P-value histogram
+
+* [this 
+post](http://varianceexplained.org/statistics/interpreting-pvalue-histogram/).
+
+```{r pvalHist, fig.align="center"}
+hist(shrinkLvV$pvalue)
+```
+
+## MA plots
+
+* `DESeq2` has a handy function for plotting this...
+
+```{r maPlotDESeq2, fig.align="center", fig.width=5, fig.height=5}
+plotMA(ddsShrink, alpha=0.05)
+```
+
+* Let's use the package `ggplot2` instead.
+
+### A Brief Introduction to `ggplot2`
+
+- `shrinkLvV` is to plot
+- `aes` - variables to the *aes*thetics of the plot:
+    + the x-axis will be mapped to log2(`baseMean`)
+    + the y-axis will be mapped to the `logFC`
+- `geom_point` specifies the particular type of plot we want (in this case a bar 
+plot)
+- `geom_text` allows us to add labels to some or all of the points
+
+```{r maPlot, fig.align="center", fig.width=5, fig.height=5}
+# add a column with the names of only the top 10 genes
+cutoff <- sort(shrinkLvV$pvalue)[10]
+shrinkLvV <- shrinkLvV %>% 
+    mutate(TopGeneLabel=ifelse(pvalue<=cutoff, Symbol, ""))
+
+ggplot(shrinkLvV, aes(x = log2(baseMean), y=logFC)) + 
+    geom_point(aes(colour=FDR < 0.05), pch=20, size=0.5) +
+    geom_text(aes(label=TopGeneLabel)) +
+    labs(x="mean of normalised counts", y="log fold change")
+```
+
+## Volcano plot
+
+* x = `logFC`
+* y =`-log10(FDR)`
+
+```{r volcanoPlot, fig.height=5, fig.width=7}
+# first remove the filtered genes (FDR=NA) and create a -log10(FDR) column
+filtTab <- shrinkLvV %>% 
+    filter(!is.na(FDR)) %>% 
+    mutate(`-log10(FDR)` = -log10(FDR))
+
+ggplot(filtTab, aes(x = logFC, y=`-log10(FDR)`)) + 
+    geom_point(aes(colour=FDR < 0.05), size=2)
+```
+
+* limit y-axis to see the lower portion more clearly.
+ 
+```{r volcanoPlotLtd, fig.height=5, fig.width=7}
+filtTab <- filtTab %>% 
+    mutate(`-log10(FDR)`=pmin(`-log10(FDR)`, 51))
+
+ggplot(filtTab, aes(x = logFC, y=`-log10(FDR)`)) + 
+    geom_point(aes(colour=FDR < 0.05, shape = `-log10(FDR)` > 50), size=2)
+```
+
+## Strip chart for gene expression
+
+* *sanity check*
+* `plotCounts` to  retrieve the normalised expression values 
+* then plot with `ggplot2`.
+
+```{r plotGeneCounts}
+# Let's look at the most significantly differentially expressed gene
+topgene <- filter(shrinkLvV, Symbol=="Wap")
+geneID <- topgene$GeneID
+
+plotCounts(ddsObj, gene = geneID, intgroup = c("CellType", "Status"),
+           returnData = T) %>% 
+    ggplot(aes(x=Status, y=log2(count))) +
+      geom_point(aes(fill=Status), pch=21, size=2) +
+      facet_wrap(~CellType) +
+      expand_limits(y=0)
+```
+
+
+### Interactive StripChart with Glimma
+
+```{r Glimma, eval=FALSE}
+library(Glimma)
+
+group <- str_remove_all(sampleinfo$Group, "[aeiou]")
+
+de <- as.integer(filtTab$FDR <= 0.05)
+
+normCounts <- log2(counts(ddsObj))
+filtCounts <- normCounts[filtTab$GeneID,]
+
+glXYPlot(
+  x = filtTab$logFC,
+  y = -log10(filtTab$FDR),
+  xlab = "logFC",
+  ylab = "FDR",
+  main = "Lactating v Virgin",
+  counts = filtCounts,
+  groups = group,
+  status = de,
+  anno = filtTab[, c("GeneID", "Symbol", "Description")],
+  folder = "volcano"
+)
+```
+
+## Heatmap
+
+```{r complexHeatmap, message=F}
+library(ComplexHeatmap)
+library(circlize)
+```
+
+* top 200 by FDR
+* z-transform the counts.
+
+```{r selectGenes}
+# get the top genes
+sigGenes <- as.data.frame(resLvV) %>% 
+    rownames_to_column("GeneID") %>% 
+    top_n(150, wt=-padj) %>% 
+    pull("GeneID")
+
+# filter the data for the top 200 by padj in the LRT test
+plotDat <- vst(ddsObj)[sigGenes,] %>% 
+    assay()
+z.mat <- t(scale(t(plotDat), center=TRUE, scale=TRUE))
+```
+
+```{r colourScale}
+# colour palette
+myPalette <- c("red3", "ivory", "blue3")
+myRamp = colorRamp2(c(-2, 0, 2), myPalette)
+```
+
+```{r heatmap, fig.width=5, fig.height=8}
+Heatmap(z.mat, name = "z-score",
+        col = myRamp,            
+        show_row_name = FALSE,
+        cluster_columns = FALSE)
+```
+
+we can also split the heat map into clusters and add some annotation.
+
+```{r splitHeatmap, fig.width=5, fig.height=8}
+# cluster the data and split the tree
+hcDat <- hclust(dist(z.mat))
+cutGroups <- cutree(hcDat, h=4)
+
+ha1 = HeatmapAnnotation(df = colData(ddsObj)[,c("CellType", "Status")])
+
+Heatmap(z.mat, name = "z-score",
+        col = myRamp,            
+        show_row_name = FALSE,
+        cluster_columns = FALSE,
+        split=cutGroups,
+        rect_gp = gpar(col = "darkgrey", lwd=0.5),
+        top_annotation = ha1)
+```
