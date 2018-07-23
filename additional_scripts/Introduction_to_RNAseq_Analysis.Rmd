@@ -89,14 +89,14 @@ The development of larger suites of unique dual-indexes should eliminate the
 index swapping issue.
 </div>
 
-## Gapped Alignment
+## Alignment
 
 <img src="images/splicing.svg" class="centerimg" style="width: 75%">
 
 <div>
 * RNA does not contain the introns
 
-* Need to use a splice-aware aligner and provide gene definitions (GTF) e.g.:
+* When aligning to the genome we need to use a splice-aware aligner and provide gene definitions (GTF) e.g.:
 
     * HISAT2 (uses Bowtie2)
     * Star
