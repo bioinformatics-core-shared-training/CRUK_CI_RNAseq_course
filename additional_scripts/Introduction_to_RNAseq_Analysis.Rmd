@@ -376,13 +376,15 @@ dat <- data.frame(C1=rnorm(6, 4, 1),
 
 ewe <- lm(dat$Expression~dat$Group)
 
-dat %>% 
-    ggplot(aes(x=Group, y=Expression, fill=Cat)) +
-        geom_point(pch=21) +
-        geom_abline(slope=ewe$coefficients[2], intercept = ewe$coefficients[1]) +
-        expand_limits(y = 0) +
-        scale_x_continuous(limits=c(0, 3), breaks=c(1, 2)) +
-        guides(fill=FALSE) + theme(panel.background = element_blank())
+par(bg=NA, mar=c(5, 4, 0, 4) + 0.1) 
+plot(dat$Group, dat$Expression, 
+     pch=21, 
+     bg=rep(c("tomato", "steelblue"), each=6),
+     xlim=c(0, 3),
+     ylim=c(0, 8), xaxt="n", xlab="Group", ylab = "Expression")
+axis(1, at = 1:2)
+abline(h=5, lty=2, col="grey")
+abline(ewe, col="red")
 
 ```
 </div>
