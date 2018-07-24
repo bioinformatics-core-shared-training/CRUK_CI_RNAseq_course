@@ -364,7 +364,7 @@ legend("topright", legend = leg, pt.bg = cols, pch=21, bty="n")
 
 * Calculate coefficients describing change in gene expression
 
-* Linear Model --> General Linear Model
+* Linear Model $\rightarrow$ General Linear Model
 
 <div style="width: 30%; margin-left: 16%; padding-top: 5px">
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=7, fig.height=4}
