@@ -41,7 +41,7 @@ output:
 <div style="float: left">
 * Differential expression:
 
-    * Gene level expression changes
+    * **Gene level expression changes**
 
     * Relative isoform abundance
 
@@ -58,7 +58,7 @@ output:
 <div style="line-height: 50%;"><br></div>
 
 <img src="images/workflow.svg" class="centerimg" style="width: 60%;">
-    
+
 ## Sources of Noise
 
 <img src="images/Noise.svg" style="width: 65%; margin-left: 23%">
@@ -177,7 +177,7 @@ Differing sequencing depth
     padding: 20px;">
 <span style="color: #2e3192">**Gene properties**</span>
 
-GC content, length, sequence
+Length, GC content, sequence
 
 </div>
 
@@ -200,7 +200,7 @@ Highly expressed genes overrepresented at the cost of lowly expressed genes
 
 ## Normalisation - scaling
 
-Total Count 
+Library Size 
 
 * Normalise each sample by total number of reads sequenced.  
 
@@ -258,9 +258,9 @@ Simple difference in means
 
 ## Differential Expression - Modelling population distributions
 
-* Normal Distribution - t-test
+* Normal (Gaussian) Distribution - t-test
 
-* Two parameters - `mean` and `sd`
+* Two parameters - $mean$ and $sd$ ($sd^2 = variance$)
 
 * Suitable for microarray data but not for RNAseq data
 
@@ -287,9 +287,9 @@ Arrows(3.3, 0.5, 6.7, 0.5, code = 3, arr.type = "curved")
 
 * Count data - Poisson distribution
 
-* One parameter - `mean` $(\lambda)$
+* One parameter - $mean$ $(\lambda)$
 
-* `variance` = `mean`
+* $variance$ = $mean$
 
 <div style="width: 60%; margin-left: 16%; padding-top: 5px">
 ```{r poissonDistr, echo=FALSE, fig.width=7, fig.height=4}
@@ -324,9 +324,11 @@ legend("topright", legend = leg, pt.bg = cols, pch=21, bty="n")
 
 * Use the Negative Binomial distribution
 
-* In the NB distribution `mean` not equal to `variance`
+* In the NB distribution $mean$ not equal to $variance$
 
-* Two paramenters - `mean` and `dispersion`
+* Two paramenters - $mean$ and $dispersion$
+
+* $dispersion$ describes how $variance$ changes with $mean$
 
 </div>
 
@@ -357,16 +359,32 @@ legend("topright", legend = leg, pt.bg = cols, pch=21, bty="n")
 
 <img src="images/dispersion.png", style="width: 45%; margin-top: 40px">
 
-## Towards biological meaning - hierachical clustering {#less_space_after_title}
 
-<div style="line-height: 50%;"><br></div>
+## Differential Expression - linear models
 
-<img src="images/Hamy2016PlosOneHC.png" style="width: 63%; 
-                                               display: block;
-                                               margin-left: 23%;">
+* Calculate coefficients describing change in gene expression
 
-<div style="text-align: right;">
-    Hamy et al. (2016) PLOS One
+* Linear Model --> General Linear Model
+
+<div style="width: 30%; margin-left: 16%; padding-top: 5px">
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=7, fig.height=4}
+library(tidyverse)
+dat <- data.frame(C1=rnorm(6, 4, 1),
+                  C2=rnorm(6, 6, 1.3)) %>% 
+    gather("Cat", "Expression") %>% 
+    mutate(Group=as.numeric(factor(Cat)))
+
+ewe <- lm(dat$Expression~dat$Group)
+
+dat %>% 
+    ggplot(aes(x=Group, y=Expression, fill=Cat)) +
+        geom_point(pch=21) +
+        geom_abline(slope=ewe$coefficients[2], intercept = ewe$coefficients[1]) +
+        expand_limits(y = 0) +
+        scale_x_continuous(limits=c(0, 3), breaks=c(1, 2)) +
+        guides(fill=FALSE) + theme(panel.background = element_blank())
+
+```
 </div>
 
 ## Towards biological meaning - Gene Set Enrichment Analysis {#less_space_after_title}
@@ -381,6 +399,18 @@ legend("topright", legend = leg, pt.bg = cols, pch=21, bty="n")
 
 <div>
 <img src="images/MSigDBTrsp.png" style="width: 45%;">
+</div>
+
+## Towards biological meaning - hierachical clustering {#less_space_after_title}
+
+<div style="line-height: 50%;"><br></div>
+
+<img src="images/Hamy2016PlosOneHC.png" style="width: 63%; 
+                                               display: block;
+                                               margin-left: 23%;">
+
+<div style="text-align: right;">
+    Hamy et al. (2016) PLOS One
 </div>
 
 ## Towards biological meaning - Network Analysis {#less_space_after_title}
