@@ -2,6 +2,7 @@ source("http://www.bioconductor.org/biocLite.R")
 biocLite(c(
 "biomaRt",
 "clusterProfiler",
+"ComplexHeatmap",
 "DESeq2",
 "fgsea",
 "GenomicAlignments",
