@@ -116,33 +116,20 @@ Suppose we wanted a new sample table that:
 2. Only has the columns "CellType" and "Group"
 3. Renames the "CellType" column as "Cell"
 
-In base `R` we would do the something like:
-
-```{r baseR, eval=FALSE}
-newTable <- sampleinfo
-
-basal <- which(newTable$CellType=="basal")
-newTable <- newTable[basal, ]
-
-newTable <- newTable[basal, c("CellType", "Group")]
-
-colnames(newTable)[1] <- "Cell"
-```
-
-With `dplyr` we can use two new functions - `filter` and `select` - for the
-first two steps:
+With `dplyr` we can use three new functions: `filter`, `select` and `rename`:
 
 ```{r dplyr, eval=FALSE}
 newTable <- sampleinfo
 newTable <- filter(newTable, CellType=="basal")
 newTable <- select(newTable, CellType, Group)
+newTable <- rename(newTable, Cell=CellType)
 ```
 
 There's no need to quote the column names as dplyr intelligently interprets
 the arguments it's passes as belonging to the data table columns.
 
 Rather than repeatedly reassigning `newTable <- f(newTable)` as above, we can 
-use the pipe - `%>%`. This takes the output of one function and "*pipes*" it
+use the "*pipe*" - `%>%`. This takes the output of one function and "*pipes*" it
 into the first argument of the next function so that we don't have to keep
 specifying the object we are working with:
 
@@ -328,18 +315,8 @@ rlogcounts <- rlog(countdata)
 pcDat <- prcomp(t(rlogcounts))
 # plot PCA
 autoplot(pcDat)
-# Lets add colour to look at the clustering for Status
-autoplot(pcDat,
-         data = sampleinfo, 
-         colour="Status", 
-         size=5)
-# and now status
-# Lets add colour to look at the clustering for Cell Type
-autoplot(pcDat,
-         data = sampleinfo, 
-         colour="CellType", 
-         size=5)
-# We could use shape for one of the factors
+# We can use colour and shape to identify the Cell Type and the Status of each
+# sample
 autoplot(pcDat,
          data = sampleinfo, 
          colour="Status", 
@@ -373,7 +350,8 @@ autoplot(pcDat,
 
 The mislabelled samples are *MCL1.DG*, which is labelled as *luminal* but should
 be *basal*, and *MCL1.LA*, which is labelled as *basal* but should be *luminal*.
-Let's fix the sample sheet...
+Let's fix the sample sheet...We're going to use another `dplyr` command: 
+`mutate`. `mutate` creates new columns in the data frame.
 
 ```{r correctSampleSheet}
 sampleinfo <- sampleinfo %>% 
@@ -565,7 +543,7 @@ ddsObj <- estimateSizeFactors(ddsObj)
 Take a look at the normalisation factors for these samples.
 
 ```{r vizNormFactors}
-ddsObj@colData$sizeFactor
+sizeFactors(ddsObj)
 ```
 
 A normalization factor below one indicates that the library size will be scaled
