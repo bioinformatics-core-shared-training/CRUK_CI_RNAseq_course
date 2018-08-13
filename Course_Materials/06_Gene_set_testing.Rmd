@@ -19,7 +19,10 @@ editor_options:
 library(tidyverse)
 ```
 
-The list of differentially expressed genes is sometimes so long that its interpretation becomes cumbersome and time consuming. A common downstream procedure is gene set testing. It aims to understand which pathways or gene networks the differentially expressed genes are implicated in.
+The list of differentially expressed genes is sometimes so long that its 
+interpretation becomes cumbersome and time consuming. A common downstream 
+procedure is gene set testing. It aims to understand which pathways or gene 
+networks the differentially expressed genes are implicated in.
 
 Various ways exist to test for enrichment of biological pathways.
 
@@ -64,36 +67,39 @@ library(fgsea)
 load("Robjects/Annotated_Results_LvV.RData")
 ```
 
-## Create ranks
+## Ranking Data
 
-Rank all genes based on their fold change. We need to exclude genes for
-which we do not have Entrez IDs. Also, we should use the shrunk LFC values.
+We need to provide `fgsea` a vector containing numeric data by which it should 
+rank the genes. To start with we will simply use a rank based on their fold 
+change. We do not need to rank the genes ourselves, `fgsea` will do this based
+on the data we provide.
+
+We need to exclude genes for which we do not have Entrez IDs. Also, we should 
+use the shrunk LFC values.
 
 ```{r preparedata}
 gseaDat <- filter(shrinkLvV, !is.na(Entrez))
 
-ranks <- gseaDat$logFC
-names(ranks) <- gseaDat$Entrez
-head(ranks)
-```
-
-Plot the ranked fold changes.
-
-```{r}
-barplot(sort(ranks, decreasing = T))
+rankData <- gseaDat$logFC
+names(rankData) <- gseaDat$Entrez
+head(rankData)
 ```
 
 ## Load pathways
 
-```{r}
+```{r loadPathways}
 load("Robjects/mouse_H_v5.RData")
 pathwaysH <- Mm.H
 ```
 
 ## Conduct analysis
 
-```{r}
-fgseaRes <- fgsea(pathwaysH, ranks, minSize=15, maxSize = 500, nperm=1000)
+```{r runFgsea}
+fgseaRes <- fgsea(pathwaysH, 
+                  rankData, 
+                  minSize=15, 
+                  maxSize = 500, 
+                  nperm=1000)
 ```
 
 The warning produced indicates that there are few genes that have the same fold
@@ -104,35 +110,33 @@ suspicious about the fold change results.
 
 Lets look at the top 10 results.
 
-```{r}
+```{r top10pathways}
 head(fgseaRes[order(padj, -abs(NES)), ], n=10)
 ```
 
 ## Enrichment score plot
 
-```{r}
-plotEnrichment(pathwaysH[["HALLMARK_ESTROGEN_RESPONSE_EARLY"]], ranks)
+```{r gseaEnrichmentPlot}
+plotEnrichment(pathwaysH[["HALLMARK_ESTROGEN_RESPONSE_EARLY"]], rankData)
 ```
 
-Remember to check the [GSEA article](http://www.pnas.org/content/102/43/15545.full) for the complete explanation.
+Remember to check the [GSEA 
+article](http://www.pnas.org/content/102/43/15545.full) for the complete 
+explanation.
 
 ## GSEA table plot
 
 The function `plotGseaTable` allows us to plot a summary figue showing the 
 results for multiple pathways.
 
-```{r}
-topUp <- fgseaRes %>% 
-    filter(ES > 0) %>% 
-    top_n(10, wt=-padj)
-topDown <- fgseaRes %>% 
-    filter(ES < 0) %>% 
-    top_n(10, wt=-padj)
-topPathways <- bind_rows(topUp, topDown) %>% 
-    arrange(-ES)
+```{r gseaTablePlot}
+topPathways <- fgseaRes %>% 
+    top_n(20, wt=-padj) %>% 
+    arrange(-NES) %>% 
+    pull(pathway)
 
-plotGseaTable(pathwaysH[topPathways$pathway], 
-              ranks, 
+plotGseaTable(pathwaysH[topPathways], 
+              rankData, 
               fgseaRes, 
               gseaParam = 0.5)
 ```
@@ -157,35 +161,55 @@ plotGseaTable(pathwaysH[topPathways$pathway],
 
 ## `goseq`
 
-GOseq is a method to conduct Gene Ontology (GO) analysis suitable for RNA-seq data as it accounts for the gene length bias in detection of over-representation [[@Young2010]](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2010-11-2-r14)
+GOseq is a method to conduct Gene Ontology (GO) analysis suitable for RNA-seq 
+data as it accounts for the gene length bias in detection of over-representation [[@Young2010]](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2010-11-2-r14).
 
-From the [GOseq vignette](https://www.bioconductor.org/packages/release/bioc/vignettes/goseq/inst/doc/goseq.pdf):
+From the [GOseq 
+vignette](https://www.bioconductor.org/packages/release/bioc/vignettes/goseq/inst/doc/goseq.pdf):
 
-- GOseq first needs to quantify the length bias present in the dataset under consideration.
-- This is done by calculating a Probability Weighting Function or PWF which can be thought of as a function which gives the probability that a gene will be differentially expressed (DE), based on its length alone.
-- The PWF is calculated by fitting a monotonic spline to the binary data series of differential expression (1=DE, 0=Not DE) as a function of gene length.
-- The PWF is used to weight the chance of selecting each gene when forming a null distribution for GO category membership.
-- The fact that the PWF is calculated directly from the dataset under consideration makes this approach robust, only correcting for the length bias present in the data.
+- GOseq first needs to quantify the length bias present in the dataset under
+consideration.
+- This is done by calculating a Probability Weighting Function or PWF which can 
+be thought of as a function which gives the probability that a gene will be
+differentially expressed (DE), based on its length alone.
+- The PWF is calculated by fitting a monotonic spline to the binary data series 
+of differential expression (1=DE, 0=Not DE) as a function of gene length.
+- The PWF is used to weight the chance of selecting each gene when forming a 
+null distribution for GO category membership.
+- The fact that the PWF is calculated directly from the dataset under 
+consideration makes this approach robust, only correcting for the length bias 
+present in the data.
 
-"GO analysis of RNA-seq data requires the use of random sampling in order to generate a suitable null distribution for GO category membership and calculate each category's significance for over representation amongst DE genes. ... In  most  cases,  the  Wallenius distribution can be used to approximate the true null distribution, without any significant loss in accuracy. The goseq package implements this approximation as its default option."
+"GO analysis of RNA-seq data requires the use of random sampling in order to 
+generate a suitable null distribution for GO category membership and calculate 
+each category's significance for over representation amongst DE genes. ... In 
+most  cases,  the  Wallenius distribution can be used to approximate the true 
+null distribution, without any significant loss in accuracy. The goseq package 
+implements this approximation as its default option."
 
-```{r goSeqPackage, message=FALSE}
+```{r goSeqPackage, message=FALSE, warning=FALSE}
 library(goseq)
 supportedOrganisms() %>% filter(str_detect(Genome, "mm"))
 ```
 
 ## Create a list of differentially expressed genes
 
+The input for `goseq` is a vector that indicates, for each gene, whether or not
+it is significantly differentially expressed. This should be a named vector, 
+where the names are the gene ids and the values are *`1`* if the gene is 
+significant and a *`0`* if it is not.
+
+In this case we can use the Ensembl gene IDs.
+
 ```{r getDEGs}
-isSigGene <- shrinkLvV$FDR < 0.01 & !is.na(shrinkLvV$FDR)
-genes <- as.integer(isSigGene)
-names(genes) <- shrinkLvV$GeneID
+sigData <- as.integer( shrinkLvV$FDR < 0.01 & !is.na(shrinkLvV$FDR) )
+names(sigData) <- shrinkLvV$GeneID
 ```
 
 ## Fit the Probability Weighting Function (PWF)
 
 ```{r pwFunction}
-pwf <- nullp(genes, "mm10", "ensGene", bias.data = shrinkLvV$medianTxLength)
+pwf <- nullp(sigData, "mm10", "ensGene", bias.data = shrinkLvV$medianTxLength)
 ```
 
 ## Conduct GO enrichment analysis
@@ -218,8 +242,8 @@ GOTERM[[goResults$category[1]]]
 
 > ## Challenge 2 {.challenge}
 >
-> 1. Create a list of genes that are statistically significant at FDR < 0.01 and
-> are up-regulated by at least 4x (logFC>2)
+> 1. Create a vector showing genes that are statistically significant at 
+> FDR < 0.01 and that are up-regulated by at least 4x (logFC>2)
 > in lactating mice
 > 2. Run a `goseq` analysis on this gene list
 > 3. Plot the results
@@ -246,11 +270,20 @@ search_kegg_organism('mmu', by='kegg_code')
 
 ## KEGG enrichment analysis
 
+The input for the KEGG enrichment is list of gene IDs for significant genes. 
+
+This time we'll only use gene with an absolute fold change greater than 2.
+
+For this tool we need to use Entrez IDs, so once again we will have to eliminate
+the missing values.
+
 ```{r enrichKEGG}
-sigGenes <- shrinkLvV$Entrez[ shrinkLvV$FDR < 0.01 & 
-                              !is.na(shrinkLvV$FDR) &
-                              abs(shrinkLvV$logFC) > 1 ]
-sigGenes <- na.exclude(sigGenes)
+sigGenes <- shrinkLvV %>% 
+    filter(FDR < 0.01 & !is.na(FDR) & 
+               abs(logFC) > 1 & 
+               !is.na(Entrez)) %>% 
+    pull(Entrez)
+
 kk <- enrichKEGG(gene = sigGenes, organism = 'mmu')
 head(kk, n=10)
 ```
@@ -269,15 +302,21 @@ browseKEGG(kk, 'mmu03320')
 ### As a file
 
 The package `pathview` [@Luo2013] can be used to generate figures of KEGG 
-pathways. One advantage over `clusterProfiles` browser methos is that the genes
-are coloured according to their expression levels in our data. The package plots
-the KEGG pathway to a `png` file in the working directory.
+pathways. 
 
-```{r pathview}
+One advantage over `clusterProfiles` browser method is that the genes are 
+coloured according to their fold change levels in our data. To do this we need
+to pass `pathview` a named vector of fold change data (actually you could
+colour by any numeric vector, e.g. p-value).
+
+The package plots the KEGG pathway to a `png` file in the working directory.
+
+```{r pathview, message=F}
 library(pathview)
 
 logFC <- annotLvV$logFC
 names(logFC) <- annotLvV$Entrez
+
 pathview(gene.data = logFC, 
          pathway.id = "mmu03320", 
          species = "mmu", 
