@@ -105,7 +105,7 @@ on Status to use virgin as the intercept.
 
 ```{r setFactors}
 sampleinfo$Status <- factor(sampleinfo$Status, 
-                              levels = c("virgin", "pregnant", "lactate"))
+                            levels = c("virgin", "pregnant", "lactate"))
 modelMatrix <- model.matrix(design, data = sampleinfo)
 modelMatrix
 ```
@@ -117,9 +117,9 @@ design formula and the `sampleinfo` it will build the matrix itself.
 
 ```{r makeDDSObj}
 # create the DESeqDataSet object
-ddsObj <- DESeqDataSetFromMatrix(countData = countdata,
-                              colData = sampleinfo,
-                              design = design)
+ddsObj.raw <- DESeqDataSetFromMatrix(countData = countdata,
+                                     colData = sampleinfo,
+                                     design = design)
 ```
 
 # Data exploration
@@ -128,7 +128,7 @@ Let's plot a PCA from `vst` transformed data.
 Can you anticipate if the interaction term will be important?
 
 ```{r pcaPlot, fig.width=5, fig.height=5}
-vstcounts <- vst(ddsObj, blind=TRUE)
+vstcounts <- vst(ddsObj.raw, blind=TRUE)
 plotPCA(vstcounts, intgroup=c("Status", "CellType"))
 ```
 
@@ -141,7 +141,7 @@ The main `DESeq2` work flow is carried out in 3 steps:
 First, Calculate the "median ratio" normalisation size factors...
 
 ```{r commonSizeFactors}
-ddsObj <- estimateSizeFactors(ddsObj)
+ddsObj <- estimateSizeFactors(ddsObj.raw)
 ```
 
 ... then estimate dispersion ...
@@ -163,12 +163,8 @@ wish to alter the default parameters of one or more steps, otherwise the `DESeq`
 function is fine.
 
 ```{r theShortVersion}
-# rebuild a clean DDS object
-ddsObj <- DESeqDataSetFromMatrix(countData = countdata,
-                              colData = sampleinfo,
-                              design = design)
 # Run DESeq
-ddsObj <- DESeq(ddsObj)
+ddsObj <- DESeq(ddsObj.raw)
 ```
 
 ## Generate a results table
@@ -204,7 +200,7 @@ The `results` function has returned the results for the contrast "lactate vs
 virgin". Let's have a look at the model matrix to understand why `DESeq2` has 
 given us this particular contrast.
 
-```{r veiwModelMatrix}
+```{r viewModelMatrix}
 modelMatrix
 ```
 
@@ -300,36 +296,6 @@ or the other and apply it to all genes.
 
 ```{r solutionChallenge2}
 ```
-
-# Testing log2 fold change versus a threshold
-
-A common practice when considering the results of a differential expression 
-analysis is to filter out genes that are statistically significant but have a 
-low fold change. Perhaps you are only interested in very strong response to the
-experimental conditions and decide to eliminate from consideration all genes
-with an absolute fold change lower than 2x. 
-
-Rather than do this by filtering after running the differential analysis, 
-`DESeq2` provides a means for testing the hypothesis that fold change is greater
-(or actually lesser than if you want) a given threshold.
-
-```{r lfcThresholdTest}
-resPvL2 <- results(ddsObj,
-                  contrast=c("Status", "pregnant", "lactate"), 
-                  alpha = 0.05,
-                  lfcThreshold=0.5, 
-                  altHypothesis="greaterAbs")
-
-sum(resPvL2$padj<0.05, na.rm = T)
-sum(resPvL$padj<0.05 & abs(resPvL$log2FoldChange)>=2^0.5, na.rm = T)
-```
-
-There are four possible values for `altHypothesis`:
-
-* greaterAbs - |β|>x - tests are two-tailed
-* lessAbs - |β|<x - p values are the maximum of the upper and lower tests
-* greater - β>x
-* less - β<x
 
 ## Finally save the results in a new RData object
 
