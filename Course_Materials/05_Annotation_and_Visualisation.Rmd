@@ -140,9 +140,9 @@ could concatenate the Entrez IDs so that we don't lose information.
 >
 > (a) Search the attributes and add the following to our list of attributes:  
 >       (i) The gene description   
->       (ii) The genomic position - chromosome, start, end, and strand (4 columns) 
->       (iii) The gene biotype  
+>       (ii) The gene biotype  
 > (b) Query BioMart using all of the genes in our results table (`resLvV`)  
+>
 > (c) How many Ensembl genes have multipe Entrez IDs associated with them?  
 > (d) How many Ensembl genes in `resLvV` don't have any annotation? Why is this?
 
@@ -171,15 +171,6 @@ Finally we can output the annotation DE results using `write_csv`.
 
 ```{r outputDEtables, eval=F}
 write_tsv(annotLvV, "data/VirginVsLactating_Results_Annotated.txt")
-```
-
-> ### Challenge 2 {.challenge}
-> Have a look at gene symbols for most significant genes by adjusted p-value.
-> Do they make biological sense in the context of comparing gene expression
-> in mammary gland tissue between lactating and virgin mice? You may want to
-> do a quick web search of your favourite gene/protein database
-
-```{r solution2}
 ```
 
 # Visualisation
