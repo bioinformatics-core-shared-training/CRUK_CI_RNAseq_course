@@ -269,10 +269,17 @@ displays a measure of significance on the y-axis and fold-change on the x-axis.
 
 > ### Challenge 2 {.challenge}
 > Use the log2 fold change (`logFC`) on the x-axis, and use `-log10(FDR)` on the y-axis. (This >`-log10` transformation is commonly used for p-values as it means that more significant genes have a >higher scale) 
+>
 > (a) Remove the genes that we excluded by the independent filtering process of DESeq2
+>
 > (b) Create a column of -log10(FDR) values
+>
 > (c) Create a plot with points coloured by if FDR < 0.05
+>
 > (d) Limit the values at the top in order to see the lower portion more clearly.
+
+An example of what your plot should look like:
+![](../images/Volcano.png)
 
 ## Strip chart for gene expression
 
