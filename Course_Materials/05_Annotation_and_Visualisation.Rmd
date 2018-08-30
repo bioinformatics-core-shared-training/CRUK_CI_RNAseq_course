@@ -399,9 +399,13 @@ Heatmap(z.mat, name = "z-score",
         top_annotation = ha1)
 ```
 
+```{r saveEnvironment}
+save.image(file="Robjects/Annotation_and_Visualisation.RData")
+```
+
 
 # Additional Material
-There is additional material for you to work through in the Supplemantary data directory. Details include using genomic ranges and some extra useful plots like the one below.
+There is additional material for you to work through in the [Supplementary Materials](../Supplementary_Materials) directory. Details include using genomic ranges and some extra useful plots like the one below.
 
 ![](../images/Coverage.png)
 --------------------------------------------------------------------------------
