@@ -4,9 +4,9 @@ subtitle: "Annotation and Visualisation of RNA-seq results"
 author: "Stephane Ballereau, Mark Dunning, Abbi Edwards, Oscar Rueda, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
-  html_document:
-    toc: yes
   html_notebook:
+    toc: yes
+  html_document:
     toc: yes
 minutes: 300
 layout: page
@@ -401,9 +401,12 @@ Heatmap(z.mat, name = "z-score",
 
 
 # Additional Material
+
 There is additional material for you to work through in the Supplemantary data directory. Details include using genomic ranges and some extra useful plots like the one below.
 
 ![](../images/Coverage.png)
+
+
 --------------------------------------------------------------------------------
 
 # References
