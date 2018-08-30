@@ -401,4 +401,9 @@ Heatmap(z.mat, name = "z-score",
 
 
 # Additional Material
+There is additional material for you to work through in the Supplemantary data directory. Details include using genomic ranges and some extra useful plots like the one below.
 
+![](../images/Coverage.png)
+--------------------------------------------------------------------------------
+
+# References
