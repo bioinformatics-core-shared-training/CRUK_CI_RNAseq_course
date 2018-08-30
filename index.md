@@ -15,9 +15,9 @@ _Day 2 (p.m.)_
 
 12:30 - 13:30 - Lunch
 
-13:30 - 14:00 - Introduction to RNAseq - Stephane Ballereau
+13:30 - 14:00 - Introduction to RNAseq - Ashley Sawle
 
-14:00 - 14:45 Importing and QC of RNA-seq data - Stephane Ballereau
+14:00 - 14:45 - Importing and QC of RNA-seq data - Ashley Sawle
 
 14:45 - 17:00 - Linear Models and Statistics for Differential Expression - Oscar Rueda
 
@@ -27,9 +27,9 @@ _Day 3_
 
 12:00 - 13:00 Lunch
 
-13:00 - 15:00 Annotation and Visualistaion - Stephane Ballereau
+13:00 - 15:00 Annotation and Visualistaion - Abbi Edwards
 
-15:00 - 17:00 Gene set analysis and Gene ontology testing - Ashley Sawle
+15:00 - 17:00 Gene set analysis and Gene ontology testing - Stephane Ballereau
 
 ## Outline
 
