@@ -1,7 +1,7 @@
 ---
 title: "Introduction to RNAseq analysis in R"
-author: "Stephane Ballereau, Ashley Sawle"
-date: "July 2018"
+author: "Ashley Sawle"
+date: "September 2018"
 output:
   ioslides_presentation:
     css: stylesheet.css
@@ -11,7 +11,7 @@ output:
   beamer_presentation: default
   slidy_presentation: default
 ---
-
+<!--
 ## The many faces of RNA-seq
 
 <div style="width: 31%; float: left">
@@ -52,12 +52,14 @@ output:
 </div>
 
 <img src="images/attendance.gif" class="centerimg" style="width: 65%"/>
+--> 
 
-## Workflow {#less_space_after_title}
+## Differential Gene Expression Analysis Workflow {#less_space_after_title}
 
 <div style="line-height: 50%;"><br></div>
 
-<img src="images/workflow.svg" class="centerimg" style="width: 60%;">
+<img src="images/workflow_3Day.svg" class="centerimg" style="width: 60%; margin-top: 60px;">
+<!-- <img src="images/workflow.svg" class="centerimg" style="width: 60%;"> -->
 
 ## Sources of Noise
 
@@ -89,6 +91,7 @@ The development of larger suites of unique dual-indexes should eliminate the
 index swapping issue.
 </div>
 
+<!--
 ## Alignment
 
 <img src="images/splicing.svg" class="centerimg" style="width: 75%">
@@ -144,6 +147,7 @@ index swapping issue.
 <div style="clear: both; text-align: center; padding: 20px">
 **HTSeq or Subread**
 </div>
+-->
 
 ## Normalisation
 
@@ -389,6 +393,22 @@ abline(ewe, col="red")
 ```
 </div>
 
+## Towards biological meaning - hierachical clustering {#less_space_after_title}
+
+<div style="line-height: 50%;"><br></div>
+
+<img src="images/Heatmap.svg" style="width: %; 
+                                     display: block;
+                                     margin-left: 32%;">
+
+
+## Towards biological meaning - Gene Ontology testing {#less_space_after_title}
+
+<img src="images/GOenrichment.svg" style="width: 70%; 
+                                     display: block;
+                                     margin-left: 8%;
+                                     margin-top: 10%">
+
 ## Towards biological meaning - Gene Set Enrichment Analysis {#less_space_after_title}
 
 <div style="line-height: 50%;"><br></div>
@@ -403,18 +423,6 @@ abline(ewe, col="red")
 <img src="images/MSigDBTrsp.png" style="width: 45%;">
 </div>
 
-## Towards biological meaning - hierachical clustering {#less_space_after_title}
-
-<div style="line-height: 50%;"><br></div>
-
-<img src="images/Hamy2016PlosOneHC.png" style="width: 63%; 
-                                               display: block;
-                                               margin-left: 23%;">
-
-<div style="text-align: right;">
-    Hamy et al. (2016) PLOS One
-</div>
-
 ## Towards biological meaning - Network Analysis {#less_space_after_title}
 
 <div style="line-height: 50%;"><br></div>
@@ -424,7 +432,6 @@ abline(ewe, col="red")
 <div style="text-align: right;">
     Hamy et al. (2016) PLOS One
 </div>
-
 
 ## More Depth or More Reps? {#less_space_after_title}
 
