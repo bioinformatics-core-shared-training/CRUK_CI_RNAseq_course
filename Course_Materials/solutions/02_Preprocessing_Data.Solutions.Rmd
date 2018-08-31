@@ -79,7 +79,7 @@ abline(h=median(as.matrix(logcounts)), col="blue")
 
 ```
 
-> ## Challenge 2 {.challenge}
+> ### Challenge 2 {.challenge}
 >
 > Redo the heatmap using the top 500 LEAST variable genes.
 > Change the colour scheme to "PiYG" and redo the heatmap. Try `?RColorBrewer` and see what other colour schemes are available.
@@ -118,7 +118,7 @@ heatmap.2(hmData,
 > before and after normalisation.
 >
 
-```{r solutionChallenge3, echo=FALSE, fig.height=10, fig.width=10}
+```{r solutionChallenge3, fig.height=10, fig.width=10}
 par(mfrow=c(2,2))
 plotMA(logcounts, array = 7, main="MCL1.LA - Raw")
 abline(h=0,col="grey")
