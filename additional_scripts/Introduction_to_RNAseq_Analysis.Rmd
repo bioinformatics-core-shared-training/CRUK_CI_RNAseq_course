@@ -423,6 +423,13 @@ abline(ewe, col="red")
 <img src="images/MSigDBTrsp.png" style="width: 45%;">
 </div>
 
+## Towards biological meaning - Pathway Analysis {#less_space_after_title}
+
+<div style="line-height: 50%;"><br></div>
+
+<img src="images/mmu03320.pathview.png" class="centerimg" style="width: 65%">
+
+<!--
 ## Towards biological meaning - Network Analysis {#less_space_after_title}
 
 <div style="line-height: 50%;"><br></div>
@@ -432,6 +439,7 @@ abline(ewe, col="red")
 <div style="text-align: right;">
     Hamy et al. (2016) PLOS One
 </div>
+-->
 
 ## More Depth or More Reps? {#less_space_after_title}
 
