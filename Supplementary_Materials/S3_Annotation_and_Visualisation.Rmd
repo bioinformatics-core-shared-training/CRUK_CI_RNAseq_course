@@ -24,7 +24,7 @@ library(tidyverse)
 Load in the datasets from the Annotation and Visualisation main session
 
 ```{r loadData}
-load("../Course_Materials/Robjects/Annotation_and_Visualisation.RData")
+load("S3_Annotation_and_Visualisation.RData")
 ```
 
 ### Working with Genomic Locations - Transcript database packages

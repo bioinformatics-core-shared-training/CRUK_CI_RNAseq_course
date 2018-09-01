@@ -88,18 +88,26 @@ rownames(resLvV)[missingGenes]
 
 
 > ### Challenge 2 {.challenge}
-> Have a look at gene symbols for most significant genes by adjusted p-value.
-> Do they make biological sense in the context of comparing gene expression
-> in mammary gland tissue between lactating and virgin mice? You may want to
-> do a quick web search of your favourite gene/protein database
 
-```{r topGenes}
-annotLvV %>%
-    arrange(FDR) %>%
-    head(10)
+> Use the log2 fold change (`logFC`) on the x-axis, and use `-log10(FDR)` on the y-axis. (This >`-log10` transformation is commonly used for p-values as it means that more significant genes have a >higher scale) 
+>
+> (a) Create a column of -log10(FDR) values
+>
+> (b) Create a plot with points coloured by if FDR < 0.05
+
+
+```{r volcanoPlot, fig.height=5, fig.width=7}
+# first remove the filtered genes (FDR=NA) and create a -log10(FDR) column
+filtTab <- shrinkLvV %>% 
+    filter(!is.na(FDR)) %>% 
+    mutate(`-log10(FDR)` = -log10(FDR))
+
+ggplot(filtTab, aes(x = logFC, y=`-log10(FDR)`)) + 
+    geom_point(aes(colour=FDR < 0.05), size=1)
 ```
 
-> ### Challenge 3 {.challenge}
+
+> ### Challenge 3 {.challenge} - In Supplementary Materials
 >
 > Use the txMm to retrieve the exon coordinates for the genes: 
     + `ENSMUSG00000021604`

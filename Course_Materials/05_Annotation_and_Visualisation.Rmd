@@ -32,9 +32,6 @@ load("Robjects/DE.RData")
 
 - Getting annotation
 - Visualising DE results
-- Retrieving gene models
-- Exporting browser tracks
-
 
 # Adding annotation to the DESeq2 results
 
@@ -91,7 +88,7 @@ want. We'll just use the first 1000 genes for now.
 listFilters(ensembl) %>% 
     filter(str_detect(name, "ensembl"))
 # Set the filter type and values
-filterType <- "ensembl_gene_id"
+ourFilterType <- "ensembl_gene_id"
 filterValues <- rownames(resLvV)[1:1000]
 
 # check the available "attributes" - things you can retreive
@@ -102,7 +99,7 @@ attributeNames <- c('ensembl_gene_id', 'entrezgene', 'external_gene_name')
 
 # run the query
 annot <- getBM(attributes=attributeNames, 
-               filters = filterType, 
+               filters = ourFilterType, 
                values = filterValues, 
                mart = ensembl)
 ```
@@ -257,7 +254,7 @@ shrinkLvV <- shrinkLvV %>%
     mutate(TopGeneLabel=ifelse(pvalue<=cutoff, Symbol, ""))
 
 ggplot(shrinkLvV, aes(x = log2(baseMean), y=logFC)) + 
-    geom_point(aes(colour=FDR < 0.05), pch=20, size=0.5) +
+    geom_point(aes(colour=FDR < 0.05), shape=20, size=0.5) +
     geom_text(aes(label=TopGeneLabel)) +
     labs(x="mean of normalised counts", y="log fold change")
 ```
@@ -270,16 +267,12 @@ displays a measure of significance on the y-axis and fold-change on the x-axis.
 > ### Challenge 2 {.challenge}
 > Use the log2 fold change (`logFC`) on the x-axis, and use `-log10(FDR)` on the y-axis. (This >`-log10` transformation is commonly used for p-values as it means that more significant genes have a >higher scale) 
 >
-> (a) Remove the genes that we excluded by the independent filtering process of DESeq2
+> (a) Create a column of -log10(FDR) values
 >
-> (b) Create a column of -log10(FDR) values
->
-> (c) Create a plot with points coloured by if FDR < 0.05
->
-> (d) Limit the values at the top in order to see the lower portion more clearly.
+> (b) Create a plot with points coloured by if FDR < 0.05
 
 An example of what your plot should look like:
-![](../images/Volcano.png)
+![](../images/Volcano.png) 
 
 ## Strip chart for gene expression
 
@@ -297,7 +290,7 @@ geneID <- topgene$GeneID
 plotCounts(ddsObj, gene = geneID, intgroup = c("CellType", "Status"),
            returnData = T) %>% 
     ggplot(aes(x=Status, y=log2(count))) +
-      geom_point(aes(fill=Status), pch=21, size=2) +
+      geom_point(aes(fill=Status), shape=21, size=2) +
       facet_wrap(~CellType) +
       expand_limits(y=0)
 ```
@@ -309,31 +302,26 @@ An interactive version of the volcano plot above that includes the raw per
 sample values in a separate panel is possible via the `glXYPlot` function in the
 *Glimma* package.
 
-```{r exportRData, eval=FALSE}
-save(annotLvV, shrinkLvV, file="results/Annotated_Results_LvV.RData")
-```
-
 
 ```{r Glimma, eval=FALSE}
 library(Glimma)
 
 group <- str_remove_all(sampleinfo$Group, "[aeiou]")
 
-de <- as.integer(filtTab$FDR <= 0.05)
+de <- shrinkLvV$FDR <= 0.05 & !is.na(shrinkLvV$FDR)
 
 normCounts <- log2(counts(ddsObj))
-filtCounts <- normCounts[filtTab$GeneID,]
 
 glXYPlot(
-  x = filtTab$logFC,
-  y = -log10(filtTab$FDR),
+  x = shrinkLvV$logFC,
+  y = -log10(shrinkLvV$pvalue),
   xlab = "logFC",
   ylab = "FDR",
   main = "Lactating v Virgin",
-  counts = filtCounts,
+  counts = normCounts,
   groups = group,
   status = de,
-  anno = filtTab[, c("GeneID", "Symbol", "Description")],
+  anno = shrinkLvV[, c("GeneID", "Symbol", "Description")],
   folder = "volcano"
 )
 ```
@@ -352,14 +340,13 @@ library(ComplexHeatmap)
 library(circlize)
 ```
 
-We can't plot the entire data set, let's just select the top 200 by FDR. We'll
+We can't plot the entire data set, let's just select the top 150 by FDR. We'll
 also z-transform the counts.
 
 ```{r selectGenes}
 # get the top genes
-sigGenes <- as.data.frame(resLvV) %>% 
-    rownames_to_column("GeneID") %>% 
-    top_n(150, wt=-padj) %>% 
+sigGenes <- as.data.frame(shrinkLvV) %>% 
+    top_n(150, wt=-FDR) %>% 
     pull("GeneID")
 
 # filter the data for the top 200 by padj in the LRT test
@@ -377,7 +364,7 @@ myRamp = colorRamp2(c(-2, 0, 2), myPalette)
 ```{r heatmap, fig.width=5, fig.height=8}
 Heatmap(z.mat, name = "z-score",
         col = myRamp,            
-        show_row_name = FALSE,
+        show_row_names = FALSE,
         cluster_columns = FALSE)
 ```
 
@@ -400,9 +387,15 @@ Heatmap(z.mat, name = "z-score",
 ```
 
 
-# Additional Material
+```{r saveEnvironment, eval=FALSE}
+save.image(file="Robjects/Annotation_and_Visualisation.RData")
+save(annotLvV, shrinkLvV, file="results/Annotated_Results_LvV.RData")
+```
 
-There is additional material for you to work through in the Supplemantary data directory. Details include using genomic ranges and some extra useful plots like the one below.
+
+# Additional Material
+There is additional material for you to work through in the [Supplementary Materials](../Supplementary_Materials/S3_Annotation_and_Visualisation.nb.html) directory. Details include using genomic ranges, retrieving gene models, exporting browser tracks and some extra useful plots like the one below.
+
 
 ![](../images/Coverage.png)
 
