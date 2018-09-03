@@ -388,7 +388,6 @@ Heatmap(z.mat, name = "z-score",
 
 
 ```{r saveEnvironment, eval=FALSE}
-save.image(file="Robjects/Annotation_and_Visualisation.RData")
 save(annotLvV, shrinkLvV, file="results/Annotated_Results_LvV.RData")
 ```
 
