@@ -24,6 +24,7 @@ library(tidyverse)
 Load in the datasets from the Annotation and Visualisation main session
 
 ```{r loadData}
+load("../Course_Materials/Robjects/Ensembl_annotations.RData")
 load("../Course_Materials/Robjects/Annotated_Results_LvV.RData")
 ```
 
@@ -95,7 +96,11 @@ recommend changing it to something more manageable such as
 `TxDb.Mmusculus.Ens.GRCm38`. We need to change the directory name, the database
 file name and each reference in the `DESCRIPTION` and `man/package.Rd` files.
 
-To this run the following at the command line (in the terminal not R).
+To do this run the following chunk of code. This code is actually run in 'bash',
+the language used in the terminal rather than R. This shows how versatile 
+RStudio is, you can run code from languages other than R when it is more 
+convenient for you to do so.
+
 
 ```{bash, eval=FALSE}
 OldName=TxDb.Mmusculus.BioMart.ENSEMBLMARTENSEMBL.GRCm38.p6
@@ -154,7 +159,7 @@ information for our most highly differentially expressed gene.
 
 ```{r select}
 keyList <- ensemblAnnot$GeneID[ensemblAnnot$Symbol=="Wap"]
-dplyr::select(txMm, 
+select(txMm, 
        keys=keyList,
        keytype = "GENEID",
        columns=c("TXNAME", "TXCHROM", "TXSTART", "TXEND", "TXSTRAND", "TXTYPE")
