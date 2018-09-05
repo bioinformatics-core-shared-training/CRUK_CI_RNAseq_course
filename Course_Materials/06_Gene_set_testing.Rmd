@@ -279,7 +279,7 @@ the missing values.
 
 ```{r enrichKEGG}
 sigGenes <- shrinkLvV %>% 
-    filter(FDR < 0.01 & !is.na(FDR) & 
+    filter(FDR < 0.05 & !is.na(FDR) & 
                abs(logFC) > 1 & 
                !is.na(Entrez)) %>% 
     pull(Entrez)
