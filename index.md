@@ -1,5 +1,5 @@
 # Introduction to RNA-seq data analysis 
-### 3rd - 5th September 2018
+### 27th - 29th March 2019
 #### Bioinformatics Training Room, Craik-Marshall Building, Downing Site, University of Cambridge
 
 ![](images/CRUK_Cambridge_Major Centre logo.jpg)
@@ -13,35 +13,55 @@ This workshop is aimed at biologists interested in learning how to perform diffe
 
 ## Etherpad
 
-There is a [course Etherpad](https://tinyurl.com/RNAseq092018). Please post questions here and we will answer them as soon as we can (Or if you can answer someone elses question do so!). The trainers may also post useful code snippets here for you.
+There is a [course Etherpad](https://etherpad.wikimedia.org/p/RNAseq_UoC_March2019). Please post questions here and we will answer them as soon as we can (Or if you can answer someone elses question do so!). The trainers may also post useful code snippets here for you.
 
-## Timetable (for Part 2 )
+## Timetable
 
-_Day 2 (p.m.)_
+_Day 1_
+
+9:30 - 10:15 - [Introduction to RNAseq Methods](slides/Day1_Lecture.pptx) - Ashley Sawle
+
+10:15 - 11:00 - [Introduction to Alignment and Quantification](slides/Day1_Lecture.pptx) - Guillermo Parada Gonzalez
+
+11:00 - 12:30 [Practical: QC and Alignment with HISAT2](slides/DAY_1.pdf)
+- [Dropbox with full materials for Part 1 of the course including data files](https://www.dropbox.com/sh/rb03yhfqixvbcn5/AADqyJXECPbcZdyIUXw6yQEia?dl=0)
+
+12:30 - 13:30 Lunch
+
+13:30 - 17:30 [Practical: Transcriptome assembly and quantificatioin with stringtie](slides/DAY_1.pdf#page=11)
+- [Solutions for Day 1 practical](slides/DAY1answers.txt)
+
+_Day 2_
+
+9:30 - 10:30 [Normalisation; Quasi-mapping and quantification with Salmon](slides/Day2_Lecture.pptx) - Guillermo Parada Gonzalez 
+
+10:30 - 12:30 [Practical: Mapping and quantification with Star; Quantification with Salmon](slides/DAY_2.pdf)
+- [Solutions for Day 2 practical](slides/DAY2answers.txt)
 
 12:30 - 13:30 - Lunch
 
 13:30 - 14:00 - [Introduction to RNAseq Analysis in R](html/00_Introduction_to_RNAseq_Analysis.html) - Ashley Sawle
 
 14:00 - 14:45 - [RNA-seq Pre-processing](html/02_Preprocessing_Data.nb.html) - Ashley Sawle  
-    + [practical solutions](Course_Materials/solutions/02_Preprocessing_Data.Solutions.nb.html)
+- [practical solutions](Course_Materials/solutions/02_Preprocessing_Data.Solutions.nb.html)
 
-14:45 - 17:30 - [Linear Model and Statistics for Differential Expression](slides/LinearModels.pdf) - Oscar Rueda
-
+14:45 - 17:30 - [Linear Model and Statistics for Differential Expression](slides/LinearModels.pdf) - Dominique-Laurent Couturier
+ - [Linear models practical sessions](html/03_Linear_Models.nb.html)
+ 
 _Day 3_
 
-9:30 - 12:00 - [Differential Expression for RNA-seq](html/04_DE_analysis_with_DESeq2.nb.html) - Ashley Sawle  
-    + [practical solutions](Course_Materials/solutions/04_DE_analysis.Solutions.nb.html)
+9:30 - 12:00 - [Differential Expression for RNA-seq](html/04_DE_analysis_with_DESeq2.nb.html) - Stephane Ballereau
+- [practical solutions](Course_Materials/solutions/04_DE_analysis.Solutions.nb.html)
 
 12:00 - 13:00 Lunch
 
 13:00 - 15:30 [Annotation and Visualisation of RNA-seq results](html/05_Annotation_and_Visualisation.nb.html) - Abbi Edwards  
-    + [practical solutions](Course_Materials/solutions/05_Annotation_and_Visualisation.Solutions.nb.html)
+- [practical solutions](Course_Materials/solutions/05_Annotation_and_Visualisation.Solutions.nb.html)
 
-15:30 - 17:30 [Gene-set testing](html/06_Gene_set_testing.nb.html) - Stephane Ballereau  
-    + [practical solutions](Course_Materials/solutions/06_Gene_set_testing.Solutions.nb.html)
+15:30 - 17:30 [Gene-set testing](html/06_Gene_set_testing.nb.html) - Ashley Sawle  
+- [practical solutions](Course_Materials/solutions/06_Gene_set_testing.Solutions.nb.html)
 
-> ## Prerequisites {.prereq}
+> ## Prerequisites
 >
 > __**Some basic R knowledge is assumed (and is essential). Without it, you will struggle on this course.**__ 
 > If you are not familiar with the R statistical programming language we
@@ -60,7 +80,7 @@ or searching for 'mfernandes61/crukci_rnaseq_course' in Kitematic.
 
 The all of the lecture slides and other source materials, including R code and 
 practical solutions, can be found in the course's [Github 
-repository](https://github.com/bioinformatics-core-shared-training/RNAseq_September_2018)
+repository](https://github.com/bioinformatics-core-shared-training/RNAseq_March_2019)
 
 ### Supplementary lessons
 
@@ -70,11 +90,9 @@ Introductory R materials:
 
 Additional RNAseq materials:
 
-- [Downloading files from SRA and aligning](Supplementary_Materials/S1_Getting_raw_reads_from_SRA.nb.html)
+- [Downloading files from SRA and aligning](Supplementary_Materials/S1_Getting_raw_reads_from_SRA.html)
 - [Alignment and Counting](Supplementary_Materials/S2_Read_Counts_with_Subread.html)
-    + [source file](Supplementary_Materials/S2_Read_Counts_with_Subread.Rmd)
 - [Additional annotation and plotting](Supplementary_Materials/S3_Annotation_and_Visualisation.html)
-    + [source file](Supplementary_Materials/S3_Annotation_and_Visualisation.Rmd)
 
 Data: Example Mouse mammary data (fastq files): 
 	[https://figshare.com/s/f5d63d8c265a05618137](https://figshare.com/s/f5d63d8c265a05618137)
