@@ -19,7 +19,7 @@ There is a [course Etherpad](https://etherpad.wikimedia.org/p/RNAseq_UoC_March20
 
 _Day 1_
 
-9:30 - 10:15 - [Introduction to RNAseq Methods](slides/Day1_Lecture.pptx) - Ashley Sawle
+9:30 - 10:15 - [Introduction to RNAseq Methods](html/00a_Introduction_to_RNAseq_Methods.html) - Ashley Sawle
 
 10:15 - 11:00 - [Introduction to Alignment and Quantification](slides/Day1_Lecture.pptx) - Guillermo Parada Gonzalez
 
@@ -40,7 +40,7 @@ _Day 2_
 
 12:30 - 13:30 - Lunch
 
-13:30 - 14:00 - [Introduction to RNAseq Analysis in R](html/00_Introduction_to_RNAseq_Analysis.html) - Ashley Sawle
+13:30 - 14:00 - [Introduction to RNAseq Analysis in R](html/00b_Introduction_to_RNAseq_Analysis_in_R.html) - Ashley Sawle
 
 14:00 - 14:45 - [RNA-seq Pre-processing](html/02_Preprocessing_Data.nb.html) - Ashley Sawle  
 - [practical solutions](Course_Materials/solutions/02_Preprocessing_Data.Solutions.nb.html)

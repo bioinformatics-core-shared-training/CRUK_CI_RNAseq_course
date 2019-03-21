@@ -1,0 +1,134 @@
+---
+title: "Introduction to RNAseq Methods"
+author: "Ashley Sawle"
+date: "March 2019"
+output:
+  ioslides_presentation:
+    css: stylesheet.css
+    logo: images/CRUK_Cambridge_Institute.png
+    smaller: yes
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+---
+## HTS Applications - Overview
+
+<div style="width: 28%; 
+    float: left;
+    border-style: solid; 
+    border-width: 1px;
+    border-radius: 28px; 
+    padding: 20px;
+    display: block;
+    height: 330px;
+    margin-top: 20px">
+<div style="text-align: center;">
+<span style="color: #2e2892;">**DNA Sequencing**</span>
+</div>
+
+* Genome Assembly
+    
+* SNPs/SVs/CNVs
+    
+* DNA methylation
+    
+* DNA-protein interactions (ChIPseq)
+
+* Chromatin Modification (ATAC-seq/ChIPseq)
+
+</div>
+
+<div style="width: 28%; 
+    float: left;
+    border-style: solid; 
+    border-width: 4px;
+    border-radius: 28px; 
+    border-color: #2e3192;
+    padding: 20px;
+    display: block;
+    height: 330px;
+    margin-left: 1.6%;
+    margin-top: 20px">
+<div style="text-align: center;">
+<a href="https://emea.illumina.com/content/dam/illumina-marketing/documents/applications/ngs-library-prep/for-all-you-seq-rna.pdf" style="color: #2e2892;">**RNA Sequencing**</a>
+</div>
+
+* Transcriptome Assembly
+
+* **Differential Gene Expression**
+
+* Fusion Genes
+
+* Splice variants
+
+</div>
+
+<div style="width: 28%; 
+    float: right;
+    border-style: solid; 
+    border-width: 1px;
+    border-radius: 28px; 
+    padding: 20px;
+    display: block;
+    height: 330px;
+    margin-top: 20px">
+<div style="text-align: center;">
+<span style="color: #2e2892;">**Single-Cell**</span>
+</div>
+
+* RNA/DNA
+
+* Low-level RNA/DNA detection
+
+* Cell-type classification
+
+* Dissection of heterogenous cell populations
+
+</div>
+
+## RNAseq Workflow
+
+<div style="width: 45%; 
+            float: left"> 
+            
+<div style="float: none;
+    border-style: solid; 
+    border-width: 1px;
+    border-radius: 28px; 
+    padding: 20px;
+    display: block;
+    height: 30px;
+    text-align: center;
+    margin-bottom: 20px;
+    margin-top: 20px">
+<span style="color: #2e2892;">**Library Preparation**</span>
+</div>
+
+<div style="float: none;
+    border-style: solid; 
+    border-width: 1px;
+    border-radius: 28px; 
+    padding: 20px;
+    display: block;
+    height: 30px;
+    text-align: center;
+    margin-bottom: 20px;
+    margin-top: 20px">
+<span style="color: #2e2892;">**Sequencing**</span>
+</div>
+
+<div style="float: none;
+    border-style: solid; 
+    border-width: 1px;
+    border-radius: 28px; 
+    padding: 20px;
+    display: block;
+    height: 30px;
+    text-align: center;
+    margin-bottom: 20px;
+    margin-top: 20px">
+<span style="color: #2e2892;">**Bioinformatics Analysis**</span>
+</div>
+</div>
+
+<img src="images/NegativeBinomialDistribution.png", style="width: 45%;">
