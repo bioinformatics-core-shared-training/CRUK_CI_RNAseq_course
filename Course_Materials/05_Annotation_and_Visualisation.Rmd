@@ -265,11 +265,11 @@ Another common visualisation is the
 displays a measure of significance on the y-axis and fold-change on the x-axis.
 
 > ### Challenge 2 {.challenge}
-> Use the log2 fold change (`logFC`) on the x-axis, and use `-log10(FDR)` on the y-axis. (This >`-log10` transformation is commonly used for p-values as it means that more significant genes have a >higher scale) 
+> Use the log2 fold change (`logFC`) on the x-axis, and use `-log10(pvalue)` on the y-axis. (This >`-log10` transformation is commonly used for p-values as it means that more significant genes have a >higher scale) 
 >
-> (a) Create a column of -log10(FDR) values
+> (a) Create a column of -log10(pvalue) values
 >
-> (b) Create a plot with points coloured by if FDR < 0.05
+> (b) Create a plot with points coloured by if pvalue < 0.05
 
 An example of what your plot should look like:
 ![](../images/Volcano.png)   
@@ -308,7 +308,7 @@ library(Glimma)
 
 group <- str_remove_all(sampleinfo$Group, "[aeiou]")
 
-de <- shrinkLvV$FDR <= 0.05 & !is.na(shrinkLvV$FDR)
+de <- as.integer(shrinkLvV$FDR <= 0.05 & !is.na(shrinkLvV$FDR))
 
 normCounts <- log2(counts(ddsObj))
 
