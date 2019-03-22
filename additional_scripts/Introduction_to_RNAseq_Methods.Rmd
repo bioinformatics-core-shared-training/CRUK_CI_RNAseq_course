@@ -88,47 +88,68 @@ output:
 
 ## RNAseq Workflow
 
-<div style="width: 45%; 
+<div style="width: 40%; 
             float: left"> 
             
-<div style="float: none;
-    border-style: solid; 
-    border-width: 1px;
-    border-radius: 28px; 
-    padding: 20px;
-    display: block;
-    height: 30px;
-    text-align: center;
-    margin-bottom: 20px;
-    margin-top: 20px">
+<div class="wkfthree">
 <span style="color: #2e2892;">**Library Preparation**</span>
 </div>
 
-<div style="float: none;
-    border-style: solid; 
-    border-width: 1px;
-    border-radius: 28px; 
-    padding: 20px;
-    display: block;
-    height: 30px;
-    text-align: center;
-    margin-bottom: 20px;
-    margin-top: 20px">
+<div class="wkfthree">
 <span style="color: #2e2892;">**Sequencing**</span>
 </div>
 
-<div style="float: none;
-    border-style: solid; 
-    border-width: 1px;
-    border-radius: 28px; 
-    padding: 20px;
-    display: block;
-    height: 30px;
-    text-align: center;
-    margin-bottom: 20px;
-    margin-top: 20px">
+<div class="wkfthree">
 <span style="color: #2e2892;">**Bioinformatics Analysis**</span>
 </div>
 </div>
 
-<img src="images/NegativeBinomialDistribution.png", style="width: 45%;">
+<div style="margin-left: 60px;
+            float: none;">
+<img src="images/RNAseq_WorkFlow.png", style="width: 48%;
+                                               margin-left: auto;
+                                               margin-right: auto;
+                                               display: block;">
+</div>
+
+<div style="text-align: right">
+<p style="font-size: 14px">Image adapted from: Wang, Z., et al. (2009), Nature Reviews Genetics, 10, 57–63.</p>
+</div>
+
+## Designing the right experiment
+
+<img src="images/Experimental_Design-C_Ambrosino.jpg" class="centerimg" style="width: 90%">
+
+<div style="text-align: right">
+<p style="font-size: 14px">Comic by Christine Ambrosino http://www.hawaii.edu/fishlab/Nearside.htm</p>
+</div>
+
+## Designing the right experiment
+
+### Key aspects of experimental design:
+
+* Experimental variables
+
+* Power: variance and replicates
+
+* Bias: confounding factors, randomisation, controls
+
+### A good experiment should:
+
+* Have clear objectives
+
+* Have sufficient power
+
+* Be amenable to statisical analysis
+
+* Be reproducible
+
+## Designing the right experiment
+
+### Practical considerations for RNAseq
+
+* Coverage
+
+* Read length
+
+* Library preparation method

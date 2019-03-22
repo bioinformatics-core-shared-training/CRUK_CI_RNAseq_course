@@ -54,3 +54,16 @@ img.top {
 .smalltext{
     font-size: 10px;
 }
+
+.wkfthree{
+    float: none;
+    border-style: solid; 
+    border-width: 1px;
+    border-radius: 28px; 
+    padding: 20px;
+    display: block;
+    height: 30px;
+    text-align: center;
+    margin-bottom: 90px;
+    margin-top: 20px;
+}
