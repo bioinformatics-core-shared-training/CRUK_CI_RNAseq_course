@@ -153,3 +153,199 @@ output:
 * Read length
 
 * Library preparation method
+
+## Designing the right experiment
+
+### Coverage: How many reads do we need?
+
+<div style="line-height: 50%;"><br></div>
+The coverage is defined as:
+
+<div style="text-align: center; ">
+<p style="font-size: 26px;">
+$\frac{Read\,Length\;\times\;Number\,of\,Reads}{Length\,of\,Target\,Sequence}$
+</p>
+</div>
+
+The amount of sequencing needed for a given sample is determined by the goals of
+the experiment and the nature of the RNA sample.
+
+
+* For a general view of differential expression: 5–25 million reads per sample
+* For alternative splicing and lowly expressed genes: 30–60 million reads per sample.
+* In-depth view of the transcriptome/assemble new transcripts: 100–200 million reads
+* Targeted RNA expression requires fewer reads. 
+* miRNA-Seq or Small RNA Analysis require even fewer reads.
+
+## Designing the right experiment
+
+### Read length: long or short reads? Paired or Single end?
+
+The answer depends on the experiment:
+
+* Gene expression – typically just a short single read e.g. SE 50.
+* kmer-based quantification of Gene Expression (Salmon etc.) - benefits from PE.
+* Transcriptome Analysis – longer paired-end reads (such as 2 x 75 bp).
+* Small RNA Analysis – short single read, e.f. SE50 - will need trimming.
+
+## Library preparation
+
+<div style="position: relative; 
+            z-index: 0;
+            height: 480px;
+            width: 960px;">
+<div style="z-index: 1;
+            position: absolute;
+            top: 0px;
+            left: 0px">
+<img src="images/RNA_Extraction.svg" class="centerimg" style="width: 80%">
+</div>
+
+<div style="z-index: 2;
+            position: absolute;
+            bottom: 0px;
+            left: 0px;">
+<div>
+<img src="images/rRNA.svg" style="width: 8%"> - Ribosomal RNA
+</div>
+<div>
+<img src="images/mRNA.svg" style="width: 8%"> - Poly-A transcripts
+</div>
+<div>
+<img src="images/OtherRNA.svg" style="width: 8%"> - Other RNAs e.g. tRNA, miRNA etc.
+</div>
+</div>
+
+<div style="z-index:3;
+            position: absolute;
+            left: 10px;
+            bottom: 185px">
+<p style="font-size:26px">Total RNA extraction</p>
+</div>
+
+## Library preparation
+
+<div style="width: 45%;
+            float: left;">
+<div style="text-align: center;">
+<span style="color: #2e2892;">**Poly-A Selection**</span>
+</div>
+<div style="padding-top: 20px;
+            padding-bottom: 20px;">
+<img src="images/polyA_selection.svg" class="centerimg" style="width: 95%">
+</div>  
+<div>
+Poly-A transcripts e.g.:
+  
+* mRNAs
+* immature miRNAs
+* snoRNA
+</div>
+</div>
+
+<div style="width: 45%;
+            float: right;">
+<div style="text-align: center;">
+<span style="color: #2e2892;">**Ribominus selection**</span>
+</div>
+<div style="padding-top: 20px;
+            padding-bottom: 20px;">
+<img src="images/ribominus_selection.svg" class="centerimg" style="width: 95%">
+</div>  
+<div>
+Poly-A transcripts + Other mRNAs e.g.:
+
+* tRNAs
+* mature miRNAs
+* piRNAs
+</div>
+</div>
+
+## Library preparation
+
+-----------------------------------------------------------------------------
+
+## Capturing Variance - Replication
+
+### Biological Replication
+
+* Measures the biological variations between individuals
+
+* Accounts for sampling bias
+
+### Technical Replication
+
+* Measures the variation in response quantification due to imprecision in the
+technique
+
+* Accounts for technical noise
+
+
+## Capturing Variance - Replication
+
+### Biological Replication
+
+<div style="width: 45%;
+            float: left;">
+Each replicate is from an indepent biological individual
+
+* *In Vivo*:
+
+    * Patients
+    * Mice
+    
+* *In Vitro*:
+
+    * Different cell lines
+    * Different passages
+    
+</div>
+
+<div style="width: 45%;
+            float: right;">
+<img src="images/BioRep.jpg" class="centerimg" style="width: 95%">
+</div>
+
+## Capturing Variance - Replication
+
+### Technical Replication
+
+<div style="width: 45%;
+            float: left;">
+Replicates are from the same individual but processed separately
+
+* Experimental protocol
+* Measurement platform
+</div>
+
+<div style="width: 45%;
+            float: right;">
+<img src="images/TechRep.jpg" class="centerimg" style="width: 55%">
+</div>
+
+## Controlling batch effects
+
+* Batch effects are sub-groups of measurements that have qualitatively different behavior across conditions and are unrelated to the biological or scientific variables in a study.
+
+* Batch effects are problematic if they are confounded with the experimental variable.
+
+* Batch effects that are randomly distributed across experimental variables can be controlled for.
+
+## Controlling batch effects
+
+<img src="images/BatchEffecta.svg" class="centerimg" style="width: 95%">
+
+## Controlling batch effects
+
+<img src="images/BatchEffectb.svg" class="centerimg" style="width: 95%">
+
+## Controlling batch effects
+
+* Batch effects are sub-groups of measurements that have qualitatively different behavior across conditions and are unrelated to the biological or scientific variables in a study.
+
+* Batch effects are problematic if they are confounded with the experimental variable.
+
+* Batch effects that are randomly distributed across experimental variables can be controlled for.
+
+* Randomise all technical steps in data generation in order to avoid batch effects
+
