@@ -263,7 +263,11 @@ Poly-A transcripts + Other mRNAs e.g.:
 
 ## Library preparation
 
------------------------------------------------------------------------------
+<img src="images/IlluminaLibraryPrep1.png" class="centerimg" style="width: 85%">
+
+## Library preparation
+
+<img src="images/IlluminaLibraryPrep2.png" class="centerimg" style="width: 85%">
 
 ## Capturing Variance - Replication
 
@@ -349,3 +353,44 @@ Replicates are from the same individual but processed separately
 
 * Randomise all technical steps in data generation in order to avoid batch effects
 
+## Controlling batch effects
+
+* Batch effects are sub-groups of measurements that have qualitatively different behavior across conditions and are unrelated to the biological or scientific variables in a study.
+
+* Batch effects are problematic if they are confounded with the experimental variable.
+
+* Batch effects that are randomly distributed across experimental variables can be controlled for.
+
+* Randomise all technical steps in data generation in order to avoid batch effects
+
+<img src="images/PlateEmpty.svg" class="centerimg" style="width: 40%">
+
+## Controlling batch effects
+
+* Batch effects are sub-groups of measurements that have qualitatively different behavior across conditions and are unrelated to the biological or scientific variables in a study.
+
+* Batch effects are problematic if they are confounded with the experimental variable.
+
+* Batch effects that are randomly distributed across experimental variables can be controlled for.
+
+* Randomise all technical steps in data generation in order to avoid batch effects
+
+<img src="images/PlateBad.svg" class="centerimg" style="width: 40%">
+
+## Controlling batch effects
+
+* Batch effects are sub-groups of measurements that have qualitatively different behavior across conditions and are unrelated to the biological or scientific variables in a study.
+
+* Batch effects are problematic if they are confounded with the experimental variable.
+
+* Batch effects that are randomly distributed across experimental variables can be controlled for.
+
+* Randomise all technical steps in data generation in order to avoid batch effects
+
+<img src="images/PlateGood.svg" class="centerimg" style="width: 40%">
+
+## Controlling batch effects
+
+### Multiplexing
+
+<img src="images/multiplexing.jpg" class="centerimg" style="width: 65%">
