@@ -45,22 +45,22 @@ countdata <- countdata[keep,]
 Alternatively we can load the `objects with the RData file we created in the 
 pre-processing tutorial.
 
-```{r loadData}
-# load the RData object we created in the previous session
-load("Robjects/preprocessing.RData")
-ls()
-dim(countdata)
-sampleinfo
-```
-
-# The model formula and design matrices
-
 First load the packages we need.
 
 ```{r setup, message = FALSE}
 library(tidyverse)
 library(DESeq2)
 ```
+
+```{r loadData}
+# load the RData object we created in the previous session
+load("RObjects/preprocessing.RData")
+ls()
+dim(countdata)
+sampleinfo
+```
+
+# The model formula and design matrices
 
 Now that we are happy that the quality of the data looks good, we can 
 proceed to testing for differentially expressed genes. There are a number of 
@@ -205,8 +205,8 @@ modelMatrix
 ```
 
 By default, `results` has returned the contrast encoded by the final column in
-the model matrix. `DESeq2` has the command `resultsNames` that allows us to view 
-the contrasts that are available directly from the model matrix.
+the model matrix. `DESeq2` has the command `resultsNames` that allows us to
+view the contrasts that are available directly from the model matrix.
 
 ```{r resultsNames}
 resultsNames(ddsObj)
@@ -232,13 +232,18 @@ resPvV
 
 Let's get the top 100 genes by adjusted p-value
 
-```{r topGenesPvV, message = F}
+```{r topGenesPvV, message = F, results="hide"}
 topGenesPvV <- as.data.frame(resPvV) %>%
     rownames_to_column("GeneID") %>% 
     arrange(padj) %>% 
     head(100)
 topGenesPvV
 ```
+
+```{r topGenesPvVprint, echo=FALSE}
+head(topGenesPvV)
+```
+
 
 > #### Challenge 1 {.challenge}
 > Obtain results for luminal vs basal and find the top 200 genes.
@@ -289,7 +294,7 @@ or the other and apply it to all genes.
 > ### Challenge 2 {.challenge}
 > When we looked at the PCA it did seem that an interaction model might be
 > warranted. Let's test that.  
-> 1.Fit a model with interaction.
+> 1. Fit a model with interaction.
 > 2. Use the LRT to compare the two models.  
 > 3. Is the number of replicates good enough to include the interaction?    
 > 4. Is the interaction needed in the model?  
