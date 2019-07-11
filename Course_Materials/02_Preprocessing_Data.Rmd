@@ -176,7 +176,6 @@ We'll use to new `dplyr` commands:
 
 ```{r createCountMatrix}
 countdata <- seqdata %>%
-    as.data.frame() %>% 
     column_to_rownames("Geneid") %>% # turn the geneid column into rownames
     rename_all(str_remove, ".bam") %>% # remove the ".bam" from the column names
     select(sampleinfo$Sample) %>% # keep sample columns using sampleinfo$Sample
@@ -243,7 +242,7 @@ count data and will contain many `0`s we need to add a count of 1 to every
 value in order to prevent attempting `log2(0)` from creating errors.
 
 ```{r logTransform}
-# Get log2 counts per million
+# Get log2 counts
 logcounts <- log2(countdata + 1)
 ```
 
@@ -260,7 +259,7 @@ boxplot(logcounts,
         ylab="Log2(Counts)",
         las=2,
         col=statusCol)
-# Let's add a blue horizontal line that corresponds to the median logCPM
+# Let's add a blue horizontal line that corresponds to the median
 abline(h=median(as.matrix(logcounts)), col="blue")
 ```
 
@@ -301,10 +300,11 @@ You can read more about `rlog`, it's alternative `vst` and the comparison
 between the two 
 [here](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#count-data-transformations). 
 
-To plot the PCA results we will use the `autoplot` function from the `ggfortify`
-package [@Tang2016]. `ggfortify` is built on top of `ggplot2` and is able to 
-recognise common statistical objects such as PCA results or linear model results 
-and automatically generate summary plot of the results in an appropriate manner.
+To plot the PCA results we will use the `autoplot` function from the
+`ggfortify` package [@Tang2016]. `ggfortify` is built on top of `ggplot2` and
+is able to recognise common statistical objects such as PCA results or linear
+model results and automatically generate summary plot of the results in an
+appropriate manner.
 
 ```{r pcaPlot, message = FALSE, fig.width=6.5, fig.height=5, fig.align="center"}
 library(ggfortify)
@@ -345,7 +345,7 @@ autoplot(pcDat,
          data = sampleinfo, 
          colour="CellType", 
          shape=FALSE,
-         label.size=6)
+         label.size=4)
 ```
 
 The mislabelled samples are *MCL1.DG*, which is labelled as *luminal* but should
@@ -380,7 +380,8 @@ autoplot(pcDat,
 
 > ### Discussion
 >
-> What is the greatest source of variation in the data (i.e. what does dimension 1 represent)?
+> What is the greatest source of variation in the data (i.e. what does
+> dimension 1 represent)?
 > What is the second greatest source of variation in the data?
 >
 
@@ -400,7 +401,8 @@ time-based effect.
 
 ## PCA beyond the first two dimensions
 
-`autoplot` plots the first two dimensions as a default, however you can plot higher dimensions using the `x` and `y` arguments.
+`autoplot` plots the first two dimensions as a default, however you can plot
+higher dimensions using the `x` and `y` arguments.
 
 ```{r plotPCA3and4, fig.width=6.5, fig.height=5, fig.align="center"}
 autoplot(pcDat,
@@ -456,8 +458,8 @@ Note:The `png` function will create a png file to save the plots created
 straight after, and will close this file when `dev.off()` is called. To see
 your plots interactively, simply omit those two lines.
 
-We don't want to plot a heatmap of all 22013 genes, so let's select data for the 
-500 most variable genes and plot the heatmap.
+We don't want to plot a heatmap of all 22013 genes, so let's select data for
+the 500 most variable genes and plot the heatmap.
 
 ```{r getHMData}
 # We estimate the variance for each row in the logcounts matrix
@@ -490,7 +492,8 @@ heatmap.2(hmDat,
 > ### Challenge 2  {.challenge}
 >
 > Redo the heatmap using the top 500 LEAST variable genes.  
-> Change the colour scheme to "PiYG" and redo the heatmap. Try `brewer.pal.info` 
+> Change the colour scheme to "PiYG" and redo the heatmap. Try
+> `brewer.pal.info` 
 > and `display.brewer.all` to see what other colour schemes are available.  
 > Change the sample names to `group` using the `labCol` argument  
 > Remove the gene names from the righthand side of the plot using `labRow`  
@@ -552,12 +555,14 @@ relative to the other libraries. This is also equivalent to scaling the counts
 upwards in that sample. Conversely, a factor above one scales up the library
 size and is equivalent to downscaling the counts.
 
-The MCL1.LE and MCL1.LF have much smaller normalisation factors, and MCL1.LA and
-MCL1.LB have the largest. If we plot MAplots using the `plotMA` in `limma` [Ritchie2015] function for these samples, we should be able to see the 
+The MCL1.LE and MCL1.LF have much smaller normalisation factors, and MCL1.LA
+and MCL1.LB have the largest. If we plot MAplots using the `plotMA` in `limma`
+[Ritchie2015] function for these samples, we should be able to see the
 composition bias problem. 
 
-The `rlog` data (`logcounts`) has already been normalised for both library size 
-and composition bias. Let's have a look at the raw `countsdata`; we will need to log2 scale it first.
+The `rlog` data (`logcounts`) has already been normalised for both library size
+and composition bias. Let's have a look at the raw `countsdata`; we will need
+to log2 scale it first.
 
 ```{r plotRawMA, fig.height=5, fig.width=10, message = FALSE}
 library(limma)
@@ -570,10 +575,10 @@ plotMA(logcounts, array = 11)
 abline(h=0,col="grey")
 ```
 
-The MA plots show average expression (mean: x-axis) against
-log-fold-changes (difference: y-axis).  Because our `ddsObj` object contains
-the normalisation factors, if we redo these plots using `ddsObj`, we should see
-the composition bias problem has been solved.
+The MA plots show log-fold-changes (difference: y-axis) against average
+expression (mean: x-axis). Because our `ddsObj` object contains the
+normalisation factors, if we redo these plots using `ddsObj`, we should see the
+composition bias problem has been solved.
 
 ```{r plotNormedMA, fig.height=5, fig.width=10}
 normalizedCounts <- counts(ddsObj, normalized=TRUE) 
