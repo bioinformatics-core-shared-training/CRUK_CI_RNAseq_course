@@ -4,9 +4,9 @@ subtitle: "Annotation and Visualisation of RNA-seq results"
 author: "Stephane Ballereau, Mark Dunning, Abbi Edwards, Oscar Rueda, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
-  html_notebook:
-    toc: yes
   html_document:
+    toc: yes
+  html_notebook:
     toc: yes
 minutes: 300
 layout: page
@@ -338,7 +338,7 @@ library(Glimma)
 
 group <- str_remove_all(sampleinfo$Group, "[aeiou]")
 
-de <- shrinkLvV$FDR <= 0.05 & !is.na(shrinkLvV$FDR)
+de <- as.integer(shrinkLvV$FDR <= 0.05 & !is.na(shrinkLvV$FDR))
 
 normCounts <- log2(counts(ddsObj))
 

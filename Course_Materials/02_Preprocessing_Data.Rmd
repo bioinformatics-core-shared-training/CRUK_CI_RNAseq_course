@@ -67,7 +67,7 @@ need for the analysis today.
 
 ```{r loadSampleInfo, message = FALSE}
 # Read the sample information into a data frame
-sampleinfo <- read.delim("data/SampleInfo.txt", stringsAsFactors=F)
+sampleinfo <- read_tsv("data/SampleInfo.txt")
 sampleinfo
 ```
 
@@ -82,10 +82,8 @@ First we need to read the data into R from the file in the *data* directory.
 
 ```{r loadData, message = FALSE}
 # Read the data into R
-seqdata <- read.delim("data/GSE60450_Lactation.featureCounts", 
-                      comment = "#",
-                      stringsAsFactors=F)
-head(seqdata)
+seqdata <- read_tsv("data/GSE60450_Lactation.featureCounts", comment="#")
+seqdata
 ```
 
 In the `seqdata` object each row represents a gene. The columns contains:
@@ -178,6 +176,7 @@ We'll use to new `dplyr` commands:
 
 ```{r createCountMatrix}
 countdata <- seqdata %>%
+    as.data.frame() %>% 
     column_to_rownames("Geneid") %>% # turn the geneid column into rownames
     rename_all(str_remove, ".bam") %>% # remove the ".bam" from the column names
     select(sampleinfo$Sample) %>% # keep sample columns using sampleinfo$Sample
@@ -253,7 +252,8 @@ colour to see if there is any difference between sample groups.
 
 ```{r plotLogCounts}
 # make a colour vector
-statusCol <- as.numeric(factor(sampleinfo$Status)) + 1
+statusCol <- match(sampleinfo$Status, c("virgin", "pregnant", "lactate")) + 1
+
 # Check distributions of samples using boxplots
 boxplot(logcounts, 
         xlab="", 

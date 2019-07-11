@@ -23,7 +23,7 @@ process the data prior to differential expression analysis.
 
 ```{r recap, eval = FALSE}
 # Read the sample information into a data frame
-sampleinfo <- read_tsv("data/SampleInfo.txt")
+sampleinfo <- read_tsv("data/SampleInfo.Corrected.txt")
 
 # Read the data into R
 seqdata <- read_tsv("data/GSE60450_Lactation.featureCounts", comment = "#")
@@ -62,7 +62,7 @@ library(tidyverse)
 library(DESeq2)
 ```
 
-Now that we are happy that that the quality of the data looks good, we can 
+Now that we are happy that the quality of the data looks good, we can 
 proceed to testing for differentially expressed genes. There are a number of 
 packages to analyse RNA-Seq data. Most people use 
 [DESeq2](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html) 
@@ -99,7 +99,7 @@ modelMatrix <- model.matrix(design, data = sampleinfo)
 modelMatrix
 ```
 
-It would be nice if `virgin` were the the base line/intercept. To get R to 
+It would be nice if `virgin` were the base line/intercept. To get R to 
 use `virgin` as the intercept we need to use a `factor`. Let's set factor levels
 on Status to use virgin as the intercept.
 

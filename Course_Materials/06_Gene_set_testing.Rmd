@@ -111,7 +111,9 @@ suspicious about the fold change results.
 Lets look at the top 10 results.
 
 ```{r top10pathways}
-head(fgseaRes[order(padj, -abs(NES)), ], n=10)
+fgseaRes %>% 
+    arrange(desc(abs(NES))) %>% 
+    top_n(10, -padj)
 ```
 
 ## Enrichment score plot
