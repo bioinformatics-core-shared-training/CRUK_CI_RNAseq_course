@@ -94,58 +94,6 @@ In the `seqdata` object each row represents a gene. The columns contains:
 7-18 One column for each sample with the count of how many reads were assigned  
 to each gene by featureCounts.
 
-### A quick intro to `dplyr`
-
-One of the most complex aspects of learning to work with data in `R` is 
-getting to grips with subsetting and manipulating data tables. The package 
-`dplyr` [@Wickham2018] was developed to make this process more intuitive than it
-is using standard base `R` processes. It also makes use of a new symbol `%>%`,
-called the "pipe", which makes the code a bit tidier. 
-
-We are introducing this because it makes many of the processes we will look at 
-later **much simpler**. Importantly it also results in code that is much easier
-to read and understand.
-
-Let's have quick look at this by playing with our `sampleinfo` table.
-
-Suppose we wanted a new sample table that:
-
-1. Just includes the "basal" samples
-2. Only has the columns "CellType" and "Group"
-3. Renames the "CellType" column as "Cell"
-
-With `dplyr` we can use three new functions: `filter`, `select` and `rename`:
-
-```{r dplyr, eval=FALSE}
-newTable <- sampleinfo
-newTable <- filter(newTable, CellType=="basal")
-newTable <- select(newTable, CellType, Group)
-newTable <- rename(newTable, Cell=CellType)
-```
-
-There's no need to quote the column names as dplyr intelligently interprets
-the arguments it's passes as belonging to the data table columns.
-
-Rather than repeatedly reassigning `newTable <- f(newTable)` as above, we can 
-use the "*pipe*" - `%>%`. This takes the output of one function and "*pipes*" it
-into the first argument of the next function so that we don't have to keep
-specifying the object we are working with:
-
-```{r pipe, eval=FALSE}
-newTable <- sampleinfo %>%
-    filter(CellType=="basal") %>%
-    select(CellType, Group) %>% 
-    rename(Cell=CellType)
-```
-
-This is a fairly trivial example and the benefits may not be immediately 
-obvious, but once you get used to using `dplyr` (and the other related
-"tidyverse" packages, such as `stringr`) you'll find it much more powerful and 
-easy to use than base R. 
-
-We will encounter a few more `dplyr` commands during the course, we will explain
-their use as we come to them.
-
 ## Format the data
 
 We will be manipulating and reformating the counts matrix into a suitable
