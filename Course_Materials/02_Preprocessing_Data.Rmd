@@ -337,23 +337,6 @@ replicate. If the PCA plot showed separation of samples by time, it might be
 worthwhile including time in the down stream analysis to account for the
 time-based effect.
 
-## PCA beyond the first two dimensions
-
-`autoplot` plots the first two dimensions as a default, however you can plot
-higher dimensions using the `x` and `y` arguments.
-
-```{r plotPCA3and4, fig.width=6.5, fig.height=5, fig.align="center"}
-autoplot(pcDat,
-         data = sampleinfo, 
-         fill = "Status", 
-         shape = "CellType",
-         size = 5,
-         x = 2,
-         y = 3) +
-    scale_shape_manual(values=c(21, 24)) +
-    guides(fill = guide_legend(override.aes=list(shape=22)))
-```
-
 ## Interactive MDS Plot with Glimma
 
 Another alternative is to generate a Multidimensional scaling (MDS) plot. MDS 
