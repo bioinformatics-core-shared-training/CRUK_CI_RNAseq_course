@@ -267,8 +267,8 @@ autoplot(pcDat)
 # sample
 autoplot(pcDat,
          data = sampleinfo, 
-         colour="Status", 
-         shape="CellType",
+         colour="CellType", 
+         shape="Status",
          size=5)
 ```
 
@@ -311,8 +311,8 @@ Let's look at the PCA now.
 ```{r correctedPCA, fig.width=6.5, fig.height=5, fig.align="center"}
 autoplot(pcDat,
          data = sampleinfo, 
-         fill="Status", 
-         shape="CellType",
+         colour="CellType", 
+         shape="Status",
          size=5)
 ```
 
@@ -446,7 +446,7 @@ plotMA(logNormalizedCounts, array = 11)
 abline(h=0,col="grey")
 ```
 
-> ### Challenge 3
+> ### Challenge 2
 >
 > Plot the biased and unbiased MA plots both samples side by side to see the 
 > before and after normalisation.
