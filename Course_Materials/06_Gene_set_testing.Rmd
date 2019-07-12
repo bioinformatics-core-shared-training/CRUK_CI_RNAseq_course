@@ -110,10 +110,17 @@ suspicious about the fold change results.
 
 Lets look at the top 10 results.
 
-```{r top10pathways}
+```{r top10pathways, eval=FALSE}
 fgseaRes %>% 
     arrange(desc(abs(NES))) %>% 
     top_n(10, -padj)
+```
+
+```{r top10pathwaysPrint, echo=FALSE}
+fgseaRes %>% 
+    arrange(desc(abs(NES))) %>% 
+    top_n(10, -padj) %>%  
+    as_tibble()
 ```
 
 ## Enrichment score plot
@@ -189,9 +196,15 @@ most  cases,  the  Wallenius distribution can be used to approximate the true
 null distribution, without any significant loss in accuracy. The goseq package 
 implements this approximation as its default option."
 
-```{r goSeqPackage, message=FALSE, warning=FALSE}
+```{r goSeqPackage, eval=FALSE}
 library(goseq)
 supportedOrganisms() %>% filter(str_detect(Genome, "mm"))
+```
+
+```{r goSeqPackageprint, echo=FALSE, message=FALSE, warning=FALSE}
+library(goseq)
+supportedOrganisms() %>% filter(str_detect(Genome, "mm"))  %>%  
+    as_tibble()
 ```
 
 ## Create a list of differentially expressed genes
@@ -279,7 +292,7 @@ This time we'll only use gene with an absolute fold change greater than 2.
 For this tool we need to use Entrez IDs, so once again we will have to eliminate
 the missing values.
 
-```{r enrichKEGG}
+```{r enrichKEGG, eval=FALSE}
 sigGenes <- shrinkLvV %>% 
     filter(FDR < 0.05 & !is.na(FDR) & 
                abs(logFC) > 1 & 
@@ -288,6 +301,17 @@ sigGenes <- shrinkLvV %>%
 
 kk <- enrichKEGG(gene = sigGenes, organism = 'mmu')
 head(kk, n=10)
+```
+
+```{r enrichKEGGprint, echo=FALSE}
+sigGenes <- shrinkLvV %>% 
+    filter(FDR < 0.05 & !is.na(FDR) & 
+               abs(logFC) > 1 & 
+               !is.na(Entrez)) %>% 
+    pull(Entrez)
+
+kk <- enrichKEGG(gene = sigGenes, organism = 'mmu')
+head(kk, n=10) %>%  as_tibble()
 ```
 
 ## Visualise a pathway

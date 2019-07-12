@@ -95,7 +95,7 @@ filterValues <- rownames(resLvV)[1:1000]
 listAttributes(ensembl) %>% 
     head(20)
 # Set the list of attributes
-attributeNames <- c('ensembl_gene_id', 'entrezgene', 'external_gene_name')
+attributeNames <- c('ensembl_gene_id', 'entrezgene_id', 'external_gene_name')
 
 # run the query
 annot <- getBM(attributes=attributeNames, 
@@ -111,7 +111,7 @@ Let's inspect the annotation.
 
 ```{r inspectAnnot}
 head(annot)
-dim(annot) # why are there more than 1000 rows?
+dim(annot) # there are 1000, but ...
 length(unique(annot$ensembl_gene_id)) # why are there less than 1000 Gene ids?
 
 isDup <- duplicated(annot$ensembl_gene_id)
@@ -167,7 +167,7 @@ annotLvV <- as.data.frame(resLvV) %>%
 Finally we can output the annotation DE results using `write_csv`.
 
 ```{r outputDEtables, eval=F}
-write_tsv(annotLvV, "data/VirginVsLactating_Results_Annotated.txt")
+write_tsv(annotLvV, "results/VirginVsLactating_Results_Annotated.txt")
 ```
 
 # Visualisation
@@ -388,7 +388,7 @@ Heatmap(z.mat, name = "z-score",
 
 
 ```{r saveEnvironment, eval=FALSE}
-save(annotLvV, shrinkLvV, file="results/Annotated_Results_LvV.RData")
+save(annotLvV, shrinkLvV, file="Robjects/Annotated_Results_LvV.RData")
 ```
 
 
