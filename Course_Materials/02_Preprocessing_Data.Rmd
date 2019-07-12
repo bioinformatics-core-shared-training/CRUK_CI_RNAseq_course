@@ -313,9 +313,7 @@ autoplot(pcDat,
          data = sampleinfo, 
          fill="Status", 
          shape="CellType",
-         size=5) +
-    scale_shape_manual(values=c(21, 24)) +
-    guides(fill = guide_legend(override.aes=list(shape=22)))
+         size=5)
 ```
 
 > ### Discussion
