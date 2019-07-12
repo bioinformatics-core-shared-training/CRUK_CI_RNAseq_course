@@ -270,14 +270,6 @@ autoplot(pcDat,
          colour="Status", 
          shape="CellType",
          size=5)
-# Specify some clearer shapes to use that have a black outline and use fill
-autoplot(pcDat,
-         data = sampleinfo, 
-         fill="Status", 
-         shape="CellType",
-         size=5) +
-    scale_shape_manual(values=c(21, 24)) +
-    guides(fill = guide_legend(override.aes=list(shape=22)))
 ```
 
 > ### Discussion
