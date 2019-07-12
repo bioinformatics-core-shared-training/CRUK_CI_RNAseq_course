@@ -1,9 +1,10 @@
 library(biomaRt)
 library(tidyverse)
 library(magrittr)
+setwd("../Course_Materials/")
 
 
-load("results/DE.RData")
+load("Robjects/DE.RData")
 
 ## set up connection to ensembl database
 ensembl=useMart("ENSEMBL_MART_ENSEMBL")
@@ -45,7 +46,7 @@ saveRDS(txLen, "../additional_scripts/temp_txLen_full.rds")
 annot <- left_join(annot, txLen)
 
 
-# There are 82 ensembl id's with multiple Entrez ID's
+# There are ensembl id's with multiple Entrez ID's
 # Deduplicate the entrez IDS - just arbitrarily take the first
 
 annotUn <- annot %>%

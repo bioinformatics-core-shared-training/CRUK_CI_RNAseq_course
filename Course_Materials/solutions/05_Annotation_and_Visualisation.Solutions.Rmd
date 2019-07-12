@@ -16,11 +16,12 @@ layout: page
 
 ```{r setup, include=FALSE}
 library(biomaRt)
+library(GenomicFeatures)
 library(DESeq2)
 library(tidyverse)
 ```
 
-```{r prepareData}
+```{r prepareData, cache=TRUE}
 # load data
 load("../Robjects/DE.RData")
 ## set up connection to ensembl database

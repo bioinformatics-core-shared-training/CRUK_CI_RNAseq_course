@@ -55,7 +55,7 @@ contains and what **feature type** and **attribute type** mean:
 ```
 cd ~/CourseMaterials/data/counts
   
-head Mus_musculus.GRCm38.80.gtf
+head Mus_musculus.GRCm38.97.gtf
 ```
 
 The code below uses **`featureCounts`** to count reads in a BAM file against a
@@ -66,9 +66,9 @@ GTF for the mouse GRCm38 genome assembly.
       -t exon \
       -g gene_id \
       --primary \
-      -a Mus_musculus.GRCm38.80.gtf \
-      -o MCL1_DJ.featureCounts \
-      MCL1_DJ.bam
+      -a Mus_musculus.GRCm38.97.gtf \
+      -o MCL1_DG.featureCounts \
+      MCL1_DG.bam
 ```
 * **`-t exon`** - the **feature** type to count reads against, in this case
   exons
@@ -84,12 +84,12 @@ featureCounts --help
 ```
 
 Running featureCounts generates two output files. A summary statistics table
-(**`MCL1.DJ.featureCounts.summary`**) and a full table of counts
-(**`MCL1.DJ.featureCounts`**) for each feature (gene in this case). Let take a
+(**`MCL1.DG.featureCounts.summary`**) and a full table of counts
+(**`MCL1.DG.featureCounts`**) for each feature (gene in this case). Let take a
 look at each file.
 
 ```
-cat MCL1.DJ.featureCounts.summary
+cat MCL1.DG.featureCounts.summary
 ```
 
 The summary table reports the numbers of unassigned reads and the reasons why
@@ -101,7 +101,7 @@ documentation](http://bioinf.wehi.edu.au/subread-package/SubreadUsersGuide.pdf)
 ('Program output' section).
 
 ```
-head MCL1.DJ.featureCounts
+head MCL1.DG.featureCounts
 ```
 
 The full results table begins with a line containing the command used to
@@ -126,7 +126,7 @@ these in **`small_bams`** directory.
       -t exon \
       -g gene_id \
       --primary \
-      -a small_bams/Mus_musculus.GRCm38.80.chr15.gtf  \
+      -a small_bams/Mus_musculus.GRCm38.97.chr15.gtf  \
       -o GSE60450_Lactation.chr15.featureCounts \
       small_bams/MCL*.bam
 ```

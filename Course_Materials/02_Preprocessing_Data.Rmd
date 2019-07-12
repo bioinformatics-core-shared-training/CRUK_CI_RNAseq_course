@@ -272,8 +272,8 @@ that sample further.
 >
 > 1. Use the `DESeq2` function `rlog` to transform the count data. This function
 > also normalises for library size.
-> 2. Plot the count distribution boxplots with this data
-> How has this effected the count distributions?
+> 2. Plot the count distribution boxplots with this data  
+>    How has this effected the count distributions?
 
 ```{r solutionChallenge1}
 
@@ -357,7 +357,7 @@ Let's fix the sample sheet...We're going to use another `dplyr` command:
 sampleinfo <- sampleinfo %>% 
     mutate(CellType=ifelse(Sample=="MCL1.DG", "basal", CellType)) %>% 
     mutate(CellType=ifelse(Sample=="MCL1.LA", "luminal", CellType)) %>% 
-    mutate(Group=str_c(CellType, ".", Group))
+    mutate(Group=str_c(CellType, ".", Status))
 ```
 
 ...and export it so that we have the correct version for later use.

@@ -49,7 +49,7 @@ topGenesLvB <- as.data.frame(resLvB) %>%
     rownames_to_column("GeneID") %>% 
     arrange(padj) %>%
     head(200)
-topGenesLvB
+head(topGenesLvB, 10)
 ```
 
 > ### Challenge 2 {.challenge}
