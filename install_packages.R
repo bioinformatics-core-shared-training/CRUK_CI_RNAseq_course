@@ -1,5 +1,7 @@
-source("http://www.bioconductor.org/biocLite.R")
-biocLite(c(
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install((c(
 "biomaRt",
 "clusterProfiler",
 "ComplexHeatmap",
