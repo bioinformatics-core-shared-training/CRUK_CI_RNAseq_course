@@ -1,18 +1,20 @@
 ---
 title: "RNA-seq Analysis in R"
-subtitle: "Annotation and Visualisation of RNA-seq results"
-author: "Stephane Ballereau, Mark Dunning, Abbi Edwards, Oscar Rueda, Ashley Sawle"
+subtitle: "Annotation and Visualisation of Differential Expression Results"
+author: "Stephane Ballereau, Dominique-Laurent Couturier, Mark Dunning, Abbi Edwards, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
-  html_notebook:
-    toc: yes
   html_document:
     toc: yes
-minutes: 300
+  html_notebook:
+    toc: yes
+  pdf_document:
+    toc: yes
 layout: page
-bibliography: ref.bib
-editor_options: 
+minutes: 300
+editor_options:
   chunk_output_type: inline
+bibliography: ref.bib
 ---
 
 ```{r setup, message=FALSE}
