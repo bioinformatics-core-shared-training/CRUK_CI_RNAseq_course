@@ -107,7 +107,7 @@ head MCL1.DG.featureCounts
 The full results table begins with a line containing the command used to
 generate the counts. It then has a table of 7 columns. The first column is the
 gene identifier, this will vary depending on the GTF file used, in our case
-this is a UCSC gene id. The second to fifth columns describe the genes
+this is an Ensembl gene id. The second to fifth columns describe the genes
 location, and the sixth column is the length of the gene. The final column
 contains the number of reads assigned to the gene. Note that
 **`featureCounts`** outputs a row for every gene in the GTF, even the ones with
