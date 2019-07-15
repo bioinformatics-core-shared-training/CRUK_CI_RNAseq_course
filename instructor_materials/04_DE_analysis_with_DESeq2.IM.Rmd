@@ -1,0 +1,288 @@
+---
+title: "RNA-seq analysis in R"
+subtitle: "Differential Expression of RNA-seq data"
+author: "Stephane Ballereau, Dominique-Laurent Couturier, Mark Dunning, Abbi Edwards, Ashley Sawle"
+date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
+output: html_document
+minutes: 300
+layout: page
+---
+
+## Recap of pre-processing
+
+The previous section walked-through the pre-processing and transformation of the
+count data. Here, for completeness, we list the minimal steps required to 
+process the data prior to differential expression analysis.
+
+```{r recap, eval = FALSE}
+## Read the sample information into a data frame
+sampleinfo <- read_tsv("data/SampleInfo.Corrected.txt")
+
+## Read the data into R
+seqdata <- read_tsv("data/GSE60450_Lactation.featureCounts", comment = "#")
+
+## Transform the data to matrix of counts
+countdata <- as.data.frame(seqdata) %>% 
+    column_to_rownames("Geneid") %>% # turn the geneid column into rownames
+    rename_all(str_remove, ".bam") %>% # remove the ".bam" from the column names
+    select(sampleinfo$Sample) %>% # keep sample columns using sampleinfo
+    as.matrix()
+
+## filter the data to remove genes with few counts
+keep <- rowSums(countdata) > 5
+countdata <- countdata[keep,]
+```
+
+### Load the data
+
+```{r setup, message = FALSE}
+library(tidyverse)
+library(DESeq2)
+```
+
+```{r tibbleOptions, include=FALSE}
+options(tibble.print_max=3, tibble.print_min=3)
+```
+
+```{r loadData, eval=FALSE}
+## load the RData object we created in the previous session
+load("Robjects/preprocessing.RData")
+```
+
+```{r loadDataAct, echo=FALSE}
+## load the RData object we created in the previous session
+load("../Course_Materials/Robjects/preprocessing.RData")
+
+```{r investData}
+ls()
+dim(countdata)
+sampleinfo
+```
+
+#### **DESEQ2 v edgeR** [here](https://mikelove.wordpress.com/2016/09/28/deseq2-or-edger/) by Mike Love
+
+### Create a DESeqDataSet object with the raw data
+
+##### * Count data
+##### * Meta data 
+##### * Model
+
+#### Creating the design model formula
+
+##### * `DESeq2` will generate the model matrix internally
+
+##### * Interaction  or additive? - for now just main effects
+
+```{r modelForumla}
+## Use the standard R 'formula' syntax for an additive model
+design <- as.formula(~ CellType + Status)
+```
+
+####  model matrix
+
+```{r modelMatrix, results="hide"}
+modelMatrix <- model.matrix(design, data = sampleinfo)
+modelMatrix
+```
+
+```{r modelMatrixPrint, echo=FALSE}
+head(modelMatrix, n=2)
+```
+
+#### fix virgin to base
+
+```{r setFactors, results="hide"}
+sampleinfo$Status <- factor(sampleinfo$Status, 
+                            levels = c("virgin", "pregnant", "lactate"))
+modelMatrix <- model.matrix(design, data = sampleinfo)
+modelMatrix
+```
+
+```{r setFactorsPrint, echo=FALSE}
+head(modelMatrix, n=2)
+```
+
+### Build a DESeq2DataSet
+
+```{r makeDDSObj}
+## create the DESeqDataSet object
+ddsObj.raw <- DESeqDataSetFromMatrix(countData = countdata,
+                                     colData = sampleinfo,
+                                     design = design)
+```
+
+### Data exploration
+
+```{r pcaPlot, fig.width=1, fig.height=1}
+vstcounts <- vst(ddsObj.raw, blind=TRUE)
+plotPCA(vstcounts, intgroup=c("Status", "CellType"))
+```
+
+##### Will we need an interaction term????
+ 
+## Differential expression analysis with DESeq2
+
+### The `DESeq2` work flow
+
+#### 1. (normalisation) size factors
+
+```{r commonSizeFactors}
+ddsObj <- estimateSizeFactors(ddsObj.raw)
+```
+
+#### 2. then estimate dispersion ...
+
+```{r genewiseDispersion}
+ddsObj <- estimateDispersions(ddsObj)
+```
+
+##### Plot dispersions
+```{r fig.height=2, fig.width=5}
+plotDispEsts(ddsObj)
+```
+
+
+#### 3. apply Negative Binomial GLM fitting and calculate Wald statistics
+```{r applyGLM}
+ddsObj <- nbinomWaldTest(ddsObj)
+```
+
+### The `DESeq` command
+
+```{r theShortVersion, collapse=TRUE}
+## Run DESeq
+ddsObj <- DESeq(ddsObj.raw)
+```
+
+### Generate a results table
+
+```{r resultsTable, results='hide'}
+res <- results(ddsObj, alpha=0.05)
+head(res)
+```
+
+```{r resultsTablePrint, echo=FALSE}
+head(res, n=2)
+```
+
+#### Independent filtering
+
+#### The default contrast of `results`
+
+```{r viewModelMatrix, eval=FALSE}
+modelMatrix
+```
+
+```{r viewModelMatrixprint, echo=FALSE}
+head(modelMatrix, n=2)
+```
+
+```{r resultsNames}
+resultsNames(ddsObj)
+```
+
+#### Getting other contrasts
+Let's just rename `res` so that we know which contrast results it contains.
+
+```{r}
+resLvV <- res
+rm(res)
+```
+
+#### For main effects - resultsNames
+
+```{r resultPvV, results="hide"}
+resultsNames(ddsObj)
+
+resPvV <- results(ddsObj, 
+                  name="Status_pregnant_vs_virgin", 
+                  alpha = 0.05)
+resPvV
+```
+
+```{r echo=FALSE}
+head(resPvV, n=2)
+```
+
+#### Get the top 100 genes by adjusted p-value
+
+```{r topGenesPvV, message = F, results="hide"}
+topGenesPvV <- as.data.frame(resPvV) %>%
+    rownames_to_column("GeneID") %>% 
+    arrange(padj) %>% 
+    head(100)
+topGenesPvV
+```
+
+```{r topGenesPvVprint, echo=FALSE}
+head(topGenesPvV, n=2)
+```
+
+
+> #### Challenge 1 {.challenge}
+> Obtain results for luminal vs basal and find the top 200 genes.
+> Call the new results object `resBvL`.
+
+```{r solutionChallenge1}
+```
+
+#### Unnamed Contrasts
+
+##### How do we get Pregnant v Lacate???
+
+```{r}
+resultsNames(ddsObj)
+```
+
+##### We don't have a explicit parameter
+##### So we need to provide a contrast.
+
+```{r makeContrast, results="hide"}
+
+resPvL <- results(ddsObj,
+                  contrast=c("Status", "pregnant", "lactate"), 
+                  alpha = 0.05)
+resPvL
+```
+
+```{r echo=FALSE}
+head(resPvL, n=2)
+```
+
+## Comparing two design models
+
+### Maybe status is not important ??!?!??!
+
+```{r compareModels, results="hide", message=FALSE}
+designC <- as.formula(~ CellType )
+
+## Compare the designs
+ddsObjC <- DESeq(ddsObj, test="LRT", reduced=designC)
+resCvCS <- results(ddsObjC)
+resCvCS
+```
+
+```{r echo=FALSE}
+head(resCvCS, n=2)
+```
+
+> ### Challenge 2 {.challenge}
+> When we looked at the PCA it did seem that an interaction model might be
+> warranted. Let's test that.  
+>  
+> 1. Fit a model with interaction.  
+> 2. Use the LRT to compare the two models.  
+> 3. Is the number of replicates good enough to include the interaction?    
+> 4. Is the interaction needed in the model?  
+
+```{r solutionChallenge2}
+```
+
+### Finally save the results in a new RData object
+
+```{r saveObjects, eval=FALSE}
+save(resLvV, ddsObj, sampleinfo, file="results/DE.RData")
+```
+
+--------------------
+

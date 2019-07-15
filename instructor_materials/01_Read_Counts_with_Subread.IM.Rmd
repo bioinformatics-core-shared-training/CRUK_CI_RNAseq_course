@@ -1,0 +1,84 @@
+---
+title: "RNA-seq analysis in R"
+author: "Stephane Ballereau, Dominique-Laurent Couturier, Mark Dunning, Abbi Edwards, Ashley Sawle"
+date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
+output:
+  html_document:
+    toc: yes
+minutes: 300
+layout: page
+subtitle: Counting
+---
+
+
+## Introduction and data import
+
+* aligned using HISAT2
+* Bam files **`data`** directory under the **`CourseMaterials`** 
+
+## Counting
+
+```
+cd ~/CourseMaterials/data/counts
+  
+head Mus_musculus.GRCm38.97.gtf
+```
+
+```
+  featureCounts \
+      -t exon \
+      -g gene_id \
+      --primary \
+      -a Mus_musculus.GRCm38.97.gtf \
+      -o MCL1_DG.featureCounts \
+      MCL1_DG.bam
+```
+* **`-t exon`** - the **feature** type to count reads against, in this case
+  exons
+* **`-g gene_id`** - the **attribute** type to summarise counts by, in this
+  case the gene ID
+* **`--primary`** - only count primary alignment
+
+**`featureCounts`** has many additional options that can be used to alter the
+ways in which it does the counting.
+
+```
+featureCounts --help
+```
+
+```
+cat MCL1.DG.featureCounts.summary
+```
+
+```
+head MCL1.DG.featureCounts
+```
+
+## Run on mutliple BAMS
+
+```
+  featureCounts \
+      -t exon \
+      -g gene_id \
+      --primary \
+      -a small_bams/Mus_musculus.GRCm38.97.chr15.gtf  \
+      -o GSE60450_Lactation.chr15.featureCounts \
+      small_bams/MCL*.bam
+```
+
+```
+head GSE60450_Lactation.chr15.featureCounts
+```
+
+> ## Challenge {.challenge}
+>
+> 1. Redo the counting over the exons, rather than the genes. Use
+>    `featureCounts --help` to find the option you need to use. Make sure
+>    featureCounts outputs the results to a new file.
+> 2. Redo the counting over genes, allowing for multimapping reads. Compare the
+>    results to our intial counts.
+>
+
+
+* Supplementary Material directory.  
+
