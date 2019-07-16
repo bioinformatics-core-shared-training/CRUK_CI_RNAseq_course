@@ -52,6 +52,7 @@ load("Robjects/preprocessing.RData")
 ```{r loadDataAct, echo=FALSE}
 ## load the RData object we created in the previous session
 load("../Course_Materials/Robjects/preprocessing.RData")
+```
 
 ```{r investData}
 ls()
@@ -128,6 +129,29 @@ plotPCA(vstcounts, intgroup=c("Status", "CellType"))
 
 ```{r commonSizeFactors}
 ddsObj <- estimateSizeFactors(ddsObj.raw)
+```
+
+##### Take a look at the normalisation factors for these samples.
+
+```{r vizNormFactors}
+sizeFactors(ddsObj)
+```
+
+##### Look at MCL1.LA - will be scaled DOWN
+##### Let's see how this effects the data
+
+```{r MAplots, fig.width=6, fig.height=3}
+library(limma)
+logcounts <- log2(countdata + 1)
+
+normalizedCounts <- counts(ddsObj, normalized=TRUE) 
+logNormalizedCounts <- log2(normalizedCounts + 1)
+
+par(mfrow=c(1,2))
+plotMA(logcounts, array = 7)
+abline(h=0,col="green")
+plotMA(logNormalizedCounts, array = 7)
+abline(h=0,col="green")
 ```
 
 #### 2. then estimate dispersion ...
