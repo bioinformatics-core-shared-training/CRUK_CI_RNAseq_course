@@ -71,7 +71,7 @@ sampleinfo <- read_tsv("data/SampleInfo.txt")
 sampleinfo
 ```
 
-## Reading in the  count data
+## Reading in the count data
 
 The raw reads were aligned using HISAT2 [@Kim2015] to the GRCm38 mouse reference
 genome from Ensembl. featureCounts [@Liao2014] was used to count reads against
@@ -192,7 +192,7 @@ The `stringr` package has a lots of useful functions for manipulating strings
 # Filtering the genes
 
 For many analysis methods it is advisable to filter out as many genes as 
-possible prior to starting the analysis in order to decrease the impact on fasle
+possible prior to starting the analysis in order to decrease the impact on false
 discovery rates when applying multiple testing correction. This is normally done
 by filtering out genes with low numbers of reads, which are likely to be 
 uninformative.
@@ -215,8 +215,8 @@ dim(countdata)
 
 # Quality assessment
 
-Before moving on to doing the actually differential expression analysis it 
-important do assess the quality of our data.
+Before moving on to doing the actual differential expression analysis it is
+important to assess the quality of our data.
 
 ## Library sizes bar plot
 
@@ -246,7 +246,7 @@ value in order to prevent attempting `log2(0)` from creating errors.
 logcounts <- log2(countdata + 1)
 ```
 
-We'll check the distribution of read counts using a boxplot and well add some
+We'll check the distribution of read counts using a boxplot and add some
 colour to see if there is any difference between sample groups.
 
 ```{r plotLogCounts}
@@ -281,22 +281,22 @@ that sample further.
 ```
 
 
-## Principle Component Analysis
+## Principal Component Analysis
 
-A principle components analysis (PCA) is an example of an unsupervised analysis,
+A principal components analysis (PCA) is an example of an unsupervised analysis,
 where we don't specify the grouping of the samples. If your experiment is well
-controlled and has worked well, we should that replicate samples cluster 
+controlled and has worked well, we should find that replicate samples cluster 
 closely, whilst the greatest sources of variation in the data should be between
 treatments/sample groups. It is also an incredibly useful tool for checking for 
 outliers and batch effects.
 
 To run the PCA we should first normalise our data for library size and transform
-to a log scale.DESeq2 provides two commands that can be used to do this, here we
+to a log scale. DESeq2 provides two commands that can be used to do this, here we
 will use the command `rlog`. `rlog` performs a log2 scale transformation in a 
 way that compensates for differences between samples for genes with low read 
 count and also normalizes between samples for library size. 
 
-You can read more about `rlog`, it's alternative `vst` and the comparison
+You can read more about `rlog`, its alternative `vst` and the comparison
 between the two 
 [here](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#count-data-transformations). 
 
@@ -396,7 +396,7 @@ Clustering in the PCA plot can be used to motivate changes to the design
 matrix in light of potential batch effects. For example, imagine that the
 first replicate of each group was prepared at a separate time from the second
 replicate. If the PCA plot showed separation of samples by time, it might be
-worthwhile including time in the down stream analysis to account for the
+worthwhile including time in the downstream analysis to account for the
 time-based effect.
 
 ## PCA beyond the first two dimensions
@@ -536,7 +536,7 @@ ddsObj <- DESeqDataSetFromMatrix(countData = countdata,
 
 The `estimateSizeFactors` command of `DESeq2` applies the "median ratio method"
 of normalisation[@Huber2010]. This generates a set of normalization factors and 
-adds them to the `ddsObj` in the `colcolData` slot.
+adds them to the `ddsObj` in the `colData` slot.
 
 ```{r estimateSizeFactors}
 # Apply normalisation to DDS object
