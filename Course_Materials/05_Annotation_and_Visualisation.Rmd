@@ -175,10 +175,10 @@ write_tsv(annotLvV, "results/VirginVsLactating_Results_Annotated.txt")
 `DESeq2` provides a functon called `lfcShrink` that shrinks log-Fold Change 
 (LFC) estimates towards zero using and empirical Bayes procedure. The reason for
 doing this is that there is high variance in the LFC estimates when counts are 
-low and this results in lowly expressed genes appearing to be show greater
-differences between groups that highly expressed genes. The `lfcShrink` method
+low and this results in lowly expressed genes appearing to show greater
+differences between groups than highly expressed genes. The `lfcShrink` method
 compensates for this and allows better visualisation and ranking of genes. We 
-will use it for our visualisations of the data.
+will use it for our visualisation of the data.
 
 ```{r shrinkLFC}
 ddsShrink <- lfcShrink(ddsObj, coef="Status_lactate_vs_virgin")
@@ -191,9 +191,9 @@ shrinkLvV <- as.data.frame(ddsShrink) %>%
 ## P-value histogram
 
 A quick and easy "sanity check" for our DE results is to generate a p-value 
-histogram. What we should see is a high bar in the `0 - 0.05` and then a roughly
+histogram. What we should see is a high bar at `0 - 0.05` and then a roughly
 uniform tail to the right of this. There is a nice explanation of other possible
-patterns in the histogram and what to when you see them in [this 
+patterns in the histogram and what to do when you see them in [this 
 post](http://varianceexplained.org/statistics/interpreting-pvalue-histogram/).
 
 ```{r pvalHist, fig.align="center"}
@@ -229,7 +229,7 @@ In brief:-
 
 - `shrinkLvV` is our data frame containing the variables we wish to plot
 - `aes` creates a mapping between the variables in our data frame to the 
-*aes*thetic proprties of the plot:
+*aes*thetic properties of the plot:
     + the x-axis will be mapped to log2(`baseMean`)
     + the y-axis will be mapped to the `logFC`
 - `geom_point` specifies the particular type of plot we want (in this case a bar 
@@ -241,7 +241,7 @@ plot)
 
 The real advantage of `ggplot2` is the ability to change the appearance of our 
 plot by mapping other variables to aspects of the plot. For example, we could 
-colour the points based on a the sample group. To this we can add metadata from
+colour the points based on the sample group. To do this we can add metadata from
 the `sampleinfo` table to the data. The colours are automatically chosen by
 `ggplot2`, but we can specifiy particular values.
 
@@ -259,12 +259,15 @@ ggplot(shrinkLvV, aes(x = log2(baseMean), y=logFC)) +
 ```
 
 ## Volcano plot
+
 Another common visualisation is the 
 [*volcano plot*](https://en.wikipedia.org/wiki/Volcano_plot_(statistics)) which 
 displays a measure of significance on the y-axis and fold-change on the x-axis.
 
 > ### Challenge 2 {.challenge}
-> Use the log2 fold change (`logFC`) on the x-axis, and use `-log10(pvalue)` on the y-axis. (This >`-log10` transformation is commonly used for p-values as it means that more significant genes have a >higher scale) 
+> Use the log2 fold change (`logFC`) on the x-axis, and use `-log10(pvalue)` on the y-axis.
+> (This `-log10` transformation is commonly used for p-values as it means that more
+> significant genes have a higher scale) 
 >
 > (a) Create a column of -log10(pvalue) values
 >
@@ -278,8 +281,8 @@ An example of what your plot should look like:
 Before following up on the DE genes with further lab work, a recommended *sanity
 check* is to have a look at the expression levels of the individual samples for 
 the genes of interest. We can quickly look at grouped expression by using 
-`plotCounts` function of `DESeq2` to  retrieve the normalised expression values 
-from the `ddsObj` object and then plotting with  `ggplot2`.
+`plotCounts` function of `DESeq2` to retrieve the normalised expression values 
+from the `ddsObj` object and then plotting with `ggplot2`.
 
 ```{r plotGeneCounts}
 # Let's look at the most significantly differentially expressed gene
