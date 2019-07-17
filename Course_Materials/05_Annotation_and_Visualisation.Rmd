@@ -54,13 +54,26 @@ today.
 ## Select BioMart database and dataset
 
 The first step is to select the Biomart database we are going to access and 
-which data set we are going to use.
+which data set we are going to use. 
+
+There are multiple mirror sites that we could use for access. The default is to 
+use the European servers, however if the server is busy or inaccessible for some
+reason it is possible to access one of the three mirror sites. See the instructions
+at [here](https://www.ensembl.org/info/data/biomart/biomart_r_package.html) for detailed
+instruction on using different mirrors, but in brief simply add the `host` argument to
+the `listMarts` and `useMart` functions below.   
+
+e.g to use the US West mirror:  
+  `ensembl=useMart("ENSEMBL_MART_ENSEMBL", host="uswest.ensembl.org")`  
+
+Currently the UK server is down, so we will use the US West mirror instead (as it's morning
+here, the US is asleep and the server shouldn't be busy!).
 
 ```{r connect}
 # view the available databases
-listMarts()
+listMarts(host="uswest.ensembl.org")
 ## set up connection to ensembl database
-ensembl=useMart("ENSEMBL_MART_ENSEMBL")
+ensembl=useMart("ENSEMBL_MART_ENSEMBL", host="uswest.ensembl.org")
 
 # list the available datasets (species)
 listDatasets(ensembl) %>% 
