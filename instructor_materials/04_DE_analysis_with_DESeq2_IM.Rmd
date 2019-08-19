@@ -1,175 +1,236 @@
 ---
-title: "RNA-seq analysis in R - Instructor Materials"
+title: "RNA-seq analysis in R"
 subtitle: "Differential Expression of RNA-seq data"
-author: "Stephane Ballereau, Mark Dunning, Abbi Edwards, Oscar Rueda, Ashley Sawle"
+author: "Stephane Ballereau, Dominique-Laurent Couturier, Mark Dunning, Abbi Edwards, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
-output:
-  html_notebook:
-    toc: yes
-  html_document:
-    toc: yes
+output: html_document
 minutes: 300
 layout: page
 ---
 
-# Recap of pre-processing
+## Recap of pre-processing
+
+The previous section walked-through the pre-processing and transformation of the
+count data. Here, for completeness, we list the minimal steps required to 
+process the data prior to differential expression analysis.
 
 ```{r recap, eval = FALSE}
-# Read the sample information into a data frame
-sampleinfo <- read_tsv("data/SampleInfo.txt")
+## Read the sample information into a data frame
+sampleinfo <- read_tsv("data/SampleInfo.Corrected.txt")
 
-# Read the data into R
+## Read the data into R
 seqdata <- read_tsv("data/GSE60450_Lactation.featureCounts", comment = "#")
 
-# Transform the data to matrix of counts
+## Transform the data to matrix of counts
 countdata <- as.data.frame(seqdata) %>% 
     column_to_rownames("Geneid") %>% # turn the geneid column into rownames
     rename_all(str_remove, ".bam") %>% # remove the ".bam" from the column names
     select(sampleinfo$Sample) %>% # keep sample columns using sampleinfo
     as.matrix()
 
-# filter the data to remove genes with few counts
+## filter the data to remove genes with few counts
 keep <- rowSums(countdata) > 5
 countdata <- countdata[keep,]
 ```
 
-## Load the data
-
-
-```{r loadData}
-# load the RData object we created in the previous session
-load("Robjects/preprocessing.RData")
-ls()
-dim(countdata)
-sampleinfo
-```
-
-# The model formula and design matrices
-
-First load the packages we need.
+### Load the data
 
 ```{r setup, message = FALSE}
 library(tidyverse)
 library(DESeq2)
 ```
 
-## Create a DESeqDataSet object with the raw data
+```{r tibbleOptions, include=FALSE}
+options(tibble.print_max=3, tibble.print_min=3)
+```
 
-### Creating the design model formula
+```{r loadData, eval=FALSE}
+## load the RData object we created in the previous session
+load("Robjects/preprocessing.RData")
+```
+
+```{r loadDataAct, echo=FALSE}
+## load the RData object we created in the previous session
+load("../Course_Materials/Robjects/preprocessing.RData")
+```
+
+```{r investData}
+ls()
+dim(countdata)
+sampleinfo
+```
+
+#### **DESEQ2 v edgeR** [here](https://mikelove.wordpress.com/2016/09/28/deseq2-or-edger/) by Mike Love
+
+### Create a DESeqDataSet object with the raw data
+
+##### * Count data
+##### * Meta data 
+##### * Model
+
+#### Creating the design model formula
+
+##### * `DESeq2` will generate the model matrix internally
+
+##### * Interaction  or additive? - for now just main effects
 
 ```{r modelForumla}
-# Use the standard R 'formula' syntax for an additive model
+## Use the standard R 'formula' syntax for an additive model
 design <- as.formula(~ CellType + Status)
 ```
 
-* What does this look like as a model matrix?
+####  model matrix
 
-```{r modelMatrix}
+```{r modelMatrix, results="hide"}
 modelMatrix <- model.matrix(design, data = sampleinfo)
 modelMatrix
 ```
 
-* Set factor levels on Status to use virgin as the intercept
+```{r modelMatrixPrint, echo=FALSE}
+head(modelMatrix, n=2)
+```
 
-```{r setFactors}
+#### fix virgin to base
+
+```{r setFactors, results="hide"}
 sampleinfo$Status <- factor(sampleinfo$Status, 
-                              levels = c("virgin", "pregnant", "lactate"))
+                            levels = c("virgin", "pregnant", "lactate"))
 modelMatrix <- model.matrix(design, data = sampleinfo)
 modelMatrix
 ```
 
-# Build a DESeq2DataSet
+```{r setFactorsPrint, echo=FALSE}
+head(modelMatrix, n=2)
+```
 
-* DESeq2 builds the model matrix from the formula
+### Build a DESeq2DataSet
 
 ```{r makeDDSObj}
-# create the DESeqDataSet object
-ddsObj <- DESeqDataSetFromMatrix(countData = countdata,
-                              colData = sampleinfo,
-                              design = design)
+## create the DESeqDataSet object
+ddsObj.raw <- DESeqDataSetFromMatrix(countData = countdata,
+                                     colData = sampleinfo,
+                                     design = design)
 ```
 
-# Data exploration
+### Data exploration
 
-* Let's plot a PCA from `vst` transformed data. 
-* Can you anticipate if the interaction term will be important?
-
-```{r pcaPlot, fig.width=5, fig.height=5}
-vstcounts <- vst(ddsObj, blind=TRUE)
+```{r pcaPlot, fig.width=1, fig.height=1}
+vstcounts <- vst(ddsObj.raw, blind=TRUE)
 plotPCA(vstcounts, intgroup=c("Status", "CellType"))
 ```
 
-# Differential expression analysis with DESeq2
+##### Will we need an interaction term????
+ 
+## Differential expression analysis with DESeq2
 
-## The `DESeq2` work flow
+### The `DESeq2` work flow
 
-The main `DESeq2` work flow is carried out in 3 steps:
+#### 1. (normalisation) size factors
 
 ```{r commonSizeFactors}
-ddsObj <- estimateSizeFactors(ddsObj)
+ddsObj <- estimateSizeFactors(ddsObj.raw)
+```
 
+##### Take a look at the normalisation factors for these samples.
+
+```{r vizNormFactors}
+sizeFactors(ddsObj)
+```
+
+##### Look at MCL1.LA - will be scaled DOWN
+##### Let's see how this effects the data
+
+```{r MAplots, fig.width=6, fig.height=3}
+library(limma)
+logcounts <- log2(countdata + 1)
+
+normalizedCounts <- counts(ddsObj, normalized=TRUE) 
+logNormalizedCounts <- log2(normalizedCounts + 1)
+
+par(mfrow=c(1,2))
+plotMA(logcounts, array = 7)
+abline(h=0,col="green")
+plotMA(logNormalizedCounts, array = 7)
+abline(h=0,col="green")
+```
+
+#### 2. then estimate dispersion ...
+
+```{r genewiseDispersion}
 ddsObj <- estimateDispersions(ddsObj)
+```
 
+##### Plot dispersions
+```{r fig.height=2, fig.width=5}
+plotDispEsts(ddsObj)
+```
+
+
+#### 3. apply Negative Binomial GLM fitting and calculate Wald statistics
+```{r applyGLM}
 ddsObj <- nbinomWaldTest(ddsObj)
 ```
 
-## The `DESeq` command
+### The `DESeq` command
 
-```{r theShortVersion}
-# rebuild a clean DDS object
-ddsObj <- DESeqDataSetFromMatrix(countData = countdata,
-                              colData = sampleinfo,
-                              design = design)
-# Run DESeq
-ddsObj <- DESeq(ddsObj)
+```{r theShortVersion, collapse=TRUE}
+## Run DESeq
+ddsObj <- DESeq(ddsObj.raw)
 ```
 
-## Generate a results table
+### Generate a results table
 
-```{r resultsTable}
+```{r resultsTable, results='hide'}
 res <- results(ddsObj, alpha=0.05)
 head(res)
 ```
 
-* what contrast have we got??
+```{r resultsTablePrint, echo=FALSE}
+head(res, n=2)
+```
 
-### Independent filtering
+#### Independent filtering
 
-* `NA` in padj - independent filtering
+#### The default contrast of `results`
 
-### The default contrast of `results`
-
-* why "lactate vs virgin"?
-
-```{r veiwModelMatrix}
+```{r viewModelMatrix, eval=FALSE}
 modelMatrix
 ```
 
-* `resultsNames` allows us to view available contrasts
+```{r viewModelMatrixprint, echo=FALSE}
+head(modelMatrix, n=2)
+```
 
 ```{r resultsNames}
 resultsNames(ddsObj)
 ```
 
-* rename `res`
+#### Getting other contrasts
+Let's just rename `res` so that we know which contrast results it contains.
 
 ```{r}
 resLvV <- res
 rm(res)
 ```
 
-# Let's retrieve the results for pregant versus virgin - use `name`
+#### For main effects - resultsNames
 
-```{r resultPvV}
+```{r resultPvV, results="hide"}
+resultsNames(ddsObj)
+
 resPvV <- results(ddsObj, 
                   name="Status_pregnant_vs_virgin", 
                   alpha = 0.05)
 resPvV
 ```
 
-* Let's get the top 100 genes by adjusted p-value
+```{r echo=FALSE}
+head(resPvV, n=2)
+```
 
-```{r topGenesPvV, message = F}
+#### Get the top 100 genes by adjusted p-value
+
+```{r topGenesPvV, message = F, results="hide"}
 topGenesPvV <- as.data.frame(resPvV) %>%
     rownames_to_column("GeneID") %>% 
     arrange(padj) %>% 
@@ -177,25 +238,30 @@ topGenesPvV <- as.data.frame(resPvV) %>%
 topGenesPvV
 ```
 
+```{r topGenesPvVprint, echo=FALSE}
+head(topGenesPvV, n=2)
+```
+
+
 > #### Challenge 1 {.challenge}
 > Obtain results for luminal vs basal and find the top 200 genes.
 > Call the new results object `resBvL`.
 
 ```{r solutionChallenge1}
-resLvB <- results(ddsObj, name="CellType_luminal_vs_basal", alpha=0.05)
-topGenesLvB <- as.data.frame(resLvB) %>%
-    rownames_to_column("GeneID") %>% 
-    arrange(padj) %>%
-    head(200)
-topGenesLvB
 ```
 
-## Contrasts
+#### Unnamed Contrasts
 
-* **pregnant** v **lactate** - column --> provide a contrast.
+##### How do we get Pregnant v Lacate???
 
-```{r makeContrast}
+```{r}
 resultsNames(ddsObj)
+```
+
+##### We don't have a explicit parameter
+##### So we need to provide a contrast.
+
+```{r makeContrast, results="hide"}
 
 resPvL <- results(ddsObj,
                   contrast=c("Status", "pregnant", "lactate"), 
@@ -203,63 +269,44 @@ resPvL <- results(ddsObj,
 resPvL
 ```
 
-# Comparing two design models
+```{r echo=FALSE}
+head(resPvL, n=2)
+```
 
-* Maybe just CellType is sufficient to the model the data??
+## Comparing two design models
 
-```{r compareModels}
+### Maybe status is not important ??!?!??!
+
+```{r compareModels, results="hide", message=FALSE}
 designC <- as.formula(~ CellType )
 
-# Compare the designs
+## Compare the designs
 ddsObjC <- DESeq(ddsObj, test="LRT", reduced=designC)
 resCvCS <- results(ddsObjC)
 resCvCS
 ```
 
+```{r echo=FALSE}
+head(resCvCS, n=2)
+```
+
 > ### Challenge 2 {.challenge}
 > When we looked at the PCA it did seem that an interaction model might be
 > warranted. Let's test that.  
-> 1.Fit a model with interaction.  
+>  
+> 1. Fit a model with interaction.  
 > 2. Use the LRT to compare the two models.  
 > 3. Is the number of replicates good enough to include the interaction?    
 > 4. Is the interaction needed in the model?  
 
 ```{r solutionChallenge2}
-designI <- as.formula(~ CellType * Status)
-
-# lets have a look at the model matrix to see the different
-model.matrix(designI, data = sampleinfo)
-
-# Build model
-ddsObjI <- DESeqDataSetFromMatrix(countData = countdata,
-                              colData = sampleinfo,
-                              design = designI)
-# Run DESeq
-ddsObjI <- DESeq(ddsObjI)
-
-# Compare the models
-ddsObjI <- DESeq(ddsObjI, test="LRT", reduced=design)
-resIvA <- results(ddsObjI)
-head(resIvA)
-length(which(resIvA$padj<=0.05))
 ```
 
-# Testing log2 fold change versus a threshold
+### Finally save the results in a new RData object
 
-```{r lfcThresholdTest}
-resPvL2 <- results(ddsObj,
-                  contrast=c("Status", "pregnant", "lactate"), 
-                  alpha = 0.05,
-                  lfcThreshold=0.5, 
-                  altHypothesis="greaterAbs")
-
-sum(resPvL2$padj<0.05, na.rm = T)
-sum(resPvL$padj<0.05 & abs(resPvL$log2FoldChange)>=2^0.5, na.rm = T)
+```{r saveObjects, eval=FALSE}
+save(resLvV, ddsObj, sampleinfo, file="results/DE.RData")
 ```
 
-There are four possible values for `altHypothesis`:
+--------------------
 
-* greaterAbs - |β|>x - tests are two-tailed
-* lessAbs - |β|<x - p values are the maximum of the upper and lower tests
-* greater - β>x
-* less - β<x

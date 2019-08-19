@@ -1,89 +1,92 @@
 ---
-title: "RNA-seq analysis in R - Instructor Materials"
-author: "Stephane Ballereau, Mark Dunning, Abbi Edwards, Oscar Rueda, Ashley Sawle"
+title: "RNA-seq analysis in R"
+author: "Stephane Ballereau, Dominique-Laurent Couturier, Mark Dunning, Abbi Edwards, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
-  html_notebook:
-    toc: yes
-  html_document:
-    toc: yes
-minutes: 300
-layout: page
+  html_document
 subtitle: Gene Set Testing for RNA-seq
 ---
 
 ```{r setup, include=FALSE}
 library(tidyverse)
 ```
-
 # GSEA analysis
 
-* rank all genes in the `data set`
-* identifying the rank positions of all members of the `gene set`
-* calculating an enrichment score (ES)
-* permute to generate a statistic
+##### well curated `gene set`s MSigDB
+##### translated to mouse equivalents by the Walter+Eliza Hall Institutes Bioinformatics
+
+##### (i) ranking all genes in the `data set`
+##### (ii) identifying the rank positions of all members of the `gene set`
+##### (iii) calculating an enrichment score (ES)
 
 ## `fgsea`
 
-The `fgsea` package [@Sergushichev2016] implements the same algorithm in R [vignette](http://www.bioconductor.org/packages/release/bioc/vignettes/fgsea/inst/doc/fgsea-tutorial.html) "fast preranked gene set enrichment analysis (GSEA)".
-
-```{r fgsea}
+```{r fgsea, eval=FALSE}
 library(fgsea)
-```
-
-```{r loadData}
 load("Robjects/Annotated_Results_LvV.RData")
 ```
 
-## Create ranks
+```{r fgseaRun, echo=FALSE}
+library(fgsea)
+load("../Course_Materials/Robjects/Annotated_Results_LvV.RData")
+```
+
+
+##### First we need to provide `fgsea` a vector containing numeric data to rank the genes
 
 ```{r preparedata}
 gseaDat <- filter(shrinkLvV, !is.na(Entrez))
 
-ranks <- gseaDat$logFC
-names(ranks) <- gseaDat$Entrez
-head(ranks)
+rankData <- gseaDat$logFC
+names(rankData) <- gseaDat$Entrez
+head(rankData)
 ```
 
-Plot the ranked fold changes.
+#### Load pathways
 
-```{r}
-barplot(sort(ranks, decreasing = T))
-```
-
-## Load pathways
-
-```{r}
+```{r loadPathways, eval=FALSE}
 load("Robjects/mouse_H_v5.RData")
 pathwaysH <- Mm.H
 ```
 
-## Conduct analysis
-
-```{r}
-fgseaRes <- fgsea(pathwaysH, ranks, minSize=15, maxSize = 500, nperm=1000)
+```{r loadPathwaysRun, echo=FALSE}
+load("../Course_Materials/Robjects/mouse_H_v5.RData")
+pathwaysH <- Mm.H
 ```
 
-* Lets look at the top 10 results.
+#### Conduct analysis
 
-```{r}
+```{r runFgsea}
+fgseaRes <- fgsea(pathwaysH, 
+                  rankData, 
+                  minSize=15, 
+                  maxSize = 500, 
+                  nperm=1000)
+```
+
+```{r top10pathways, eval=FALSE}
 fgseaRes %>% 
     arrange(desc(abs(NES))) %>% 
     top_n(10, -padj)
 ```
 
+```{r top10pathwaysPrint, echo=FALSE}
+fgseaRes %>% 
+    arrange(desc(abs(NES))) %>% 
+    top_n(2, -padj) %>%  
+    head(n=2) %>% 
+    as_tibble()
+```
+
 ## Enrichment score plot
 
-```{r}
-plotEnrichment(pathwaysH[["HALLMARK_ESTROGEN_RESPONSE_EARLY"]], ranks)
+```{r gseaEnrichmentPlot, fig.width=4, fig.height=2}
+plotEnrichment(pathwaysH[["HALLMARK_ESTROGEN_RESPONSE_EARLY"]], rankData)
 ```
 
 ## GSEA table plot
 
-The function `plotGseaTable` allows us to plot a summary figue showing the 
-results for multiple pathways.
-
-```{r}
+```{r gseaTablePlot, fig.width=4, fig.height=2}
 topPathways <- fgseaRes %>% 
     top_n(20, wt=-padj) %>% 
     arrange(-NES) %>% 
@@ -107,11 +110,11 @@ plotGseaTable(pathwaysH[topPathways],
 > 4. Run `fgsea` using the new ranked genes and the H pathways. How do these 
 > results differ from the ones we got when ranking by the fold change alone?  
 
-```{r solution1}
+```{r solution1, eval=FALSE}
 ranks <- -log10(gseaDat$pvalue) * sign(gseaDat$logFC)
 names(ranks) <- gseaDat$Entrez  
 
-load("../Robjects/mouse_c2_v5.RData")
+load("Robjects/mouse_c2_v5.RData")
 pathwaysC2 <- Mm.c2
 
 fgseaResC2 <- fgsea(pathwaysC2, ranks, minSize=15, maxSize = 500, nperm=1000)
@@ -121,40 +124,60 @@ fgseaResH <- fgsea(pathwaysH, ranks, minSize=15, maxSize = 500, nperm=1000)
 head(fgseaResH[order(padj, -abs(NES)), ], n=20)
 ```
 
+```{r solution1Run, echo=FALSE}
+ranks <- -log10(gseaDat$pvalue) * sign(gseaDat$logFC)
+names(ranks) <- gseaDat$Entrez  
+
+load("../Course_Materials/Robjects/mouse_c2_v5.RData")
+pathwaysC2 <- Mm.c2
+
+fgseaResC2 <- fgsea(pathwaysC2, ranks, minSize=15, maxSize = 500, nperm=1000)
+as_tibble(head(fgseaResC2[order(padj, -abs(NES)), ], n=2))
+
+fgseaResH <- fgsea(pathwaysH, ranks, minSize=15, maxSize = 500, nperm=1000)
+as_tibble(head(fgseaResH[order(padj, -abs(NES)), ], n=2))
+```
+
 # GO enrichment analysis
 
 ## `goseq`
 
-* GOseq accounts for the gene length bias
-
-```{r goSeqPackage, message=FALSE}
+```{r goSeqPackage, eval=FALSE}
 library(goseq)
 supportedOrganisms() %>% filter(str_detect(Genome, "mm"))
 ```
 
-## Create a list of differentially expressed genes
+```{r goSeqPackageprint, echo=FALSE, message=FALSE, warning=FALSE}
+library(goseq)
+supportedOrganisms() %>% filter(str_detect(Genome, "mm"))  %>%  
+    head(n=2) %>% 
+    as_tibble()
+```
+
+### Create a list of differentially expressed genes
+
+##### use the Ensembl gene IDs.
 
 ```{r getDEGs}
-isSigGene <- shrinkLvV$FDR < 0.01 & !is.na(shrinkLvV$FDR)
-genes <- as.integer(isSigGene)
-names(genes) <- shrinkLvV$GeneID
+sigData <- as.integer( shrinkLvV$FDR < 0.01 & !is.na(shrinkLvV$FDR) )
+names(sigData) <- shrinkLvV$GeneID
 ```
 
-## Fit the Probability Weighting Function (PWF)
+### Fit the Probability Weighting Function (PWF)
 
-```{r pwFunction}
-pwf <- nullp(genes, "mm10", "ensGene", bias.data = shrinkLvV$medianTxLength)
+```{r pwFunction, fig.width=4, fig.height=2}
+pwf <- nullp(sigData, "mm10", "ensGene", bias.data = shrinkLvV$medianTxLength)
 ```
 
-## Conduct GO enrichment analysis
+### Conduct GO enrichment analysis
 
 ```{r runGoseq, message=FALSE}
 goResults <- goseq(pwf, "mm10","ensGene", test.cats=c("GO:BP"))
 ```
 
-## Plot the top 10
+### Plot the top 10
 
-```{r plotGO}
+```{r plotGO, fig.width=4, fig.height=2}
 goResults %>% 
     top_n(10, wt=-over_represented_pvalue) %>% 
     mutate(hitsPerc=numDEInCat*100/numInCat) %>% 
@@ -167,7 +190,7 @@ goResults %>%
         labs(x="Hits (%)", y="GO term", colour="p value", size="Count")
 ```
 
-## Get the GO information for the GO accessions
+### Get the GO information for the GO accessions
 
 ```{r getGOinfo}
 library(GO.db)
@@ -176,8 +199,8 @@ GOTERM[[goResults$category[1]]]
 
 > ## Challenge 2 {.challenge}
 >
-> 1. Create a list of genes that are statistically significant at FDR < 0.01 and
-> are up-regulated by at least 4x (logFC>2)
+> 1. Create a vector showing genes that are statistically significant at 
+> FDR < 0.01 and that are up-regulated by at least 4x (logFC>2)
 > in lactating mice
 > 2. Run a `goseq` analysis on this gene list
 > 3. Plot the results
@@ -211,8 +234,6 @@ goResultsUp %>%
 
 ## `clusterProfiler`
 
-* `clusterprofiler` direct online access of the current KEGG database
-
 ```{r loadClusterProfiler, message=FALSE}
 library(clusterProfiler)
 search_kegg_organism('mmu', by='kegg_code')
@@ -220,43 +241,56 @@ search_kegg_organism('mmu', by='kegg_code')
 
 ## KEGG enrichment analysis
 
-```{r enrichKEGG}
-sigGenes <- shrinkLvV$Entrez[ shrinkLvV$FDR < 0.01 & 
-                              !is.na(shrinkLvV$FDR) &
-                              abs(shrinkLvV$logFC) > 1 ]
-sigGenes <- na.exclude(sigGenes)
+```{r enrichKEGG, eval=FALSE}
+sigGenes <- shrinkLvV %>% 
+    filter(FDR < 0.05 & !is.na(FDR) & 
+               abs(logFC) > 1 & 
+               !is.na(Entrez)) %>% 
+    pull(Entrez)
+
 kk <- enrichKEGG(gene = sigGenes, organism = 'mmu')
 head(kk, n=10)
 ```
 
-## Visualise a pathway
+```{r enrichKEGGprint, echo=FALSE}
+sigGenes <- shrinkLvV %>% 
+    filter(FDR < 0.05 & !is.na(FDR) & 
+               abs(logFC) > 1 & 
+               !is.na(Entrez)) %>% 
+    pull(Entrez)
 
-### In a browser
+kk <- enrichKEGG(gene = sigGenes, organism = 'mmu')
+head(kk, n=2) %>%  as_tibble()
+```
 
-```{r browseKegg}
+### Visualise a pathway
+
+#### In a browser
+
+```{r browseKegg, eval=FALSE}
 browseKEGG(kk, 'mmu03320')
 ```
 
-### As a file
+#### As a file
 
-```{r pathview}
+```{r pathview, message=F, eval=FALSE}
 library(pathview)
 
 logFC <- annotLvV$logFC
 names(logFC) <- annotLvV$Entrez
+
 pathview(gene.data = logFC, 
          pathway.id = "mmu03320", 
          species = "mmu", 
          limit = list(gene=5, cpd=1))
 ```
 
-
 > ## Challenge 3 {.challenge}
 >
 > 1. Use `pathview` to export a figure for "mmu04060", but this time only
 > use genes that are statistically significant at FDR < 0.01
 
-```{r solution3, eval=F}
+```{r solution3, eval=FALSE}
 sigGenes <- shrinkLvV$FDR < 0.01 & !is.na(shrinkLvV$FDR)
 
 logFC <- annotLvV$logFC[sigGenes]

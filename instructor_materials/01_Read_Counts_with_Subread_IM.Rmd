@@ -1,6 +1,7 @@
 ---
 title: "RNA-seq analysis in R - Instructor Materials"
-author: "Stephane Ballereau, Mark Dunning, Abbi Edwards, Oscar Rueda, Ashley Sawle"
+subtitle: "Read counts with Subread"
+author: "Stephane Ballereau, Dominique-Laurent Couturier, Mark Dunning, Abbi Edwards, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
   html_document:
@@ -14,16 +15,14 @@ subtitle: Counting
 ## Introduction and data import
 
 * Today differential expression analysis of RNASeq data, in R
-* Alignment done with HISAT, results in bam file for each sample
+* aligned using HISAT2
+* Bam files **`data`** directory under the **`CourseMaterials`** 
 * Instructions on obtaining these materials in supplementary section
-
 
 ## Counting
 
-* Before R, counting
-* Alignment tells where each read is but need to summarise data accross genes or exons
-* Use feature counts, part of subread package
-* Also need annotation file (gtf) so feature counts knows where all your genes, UTRs etc. are
+* Also need annotation file (gtf) so feature counts knows where all your genes,
+  UTRs etc. are
 * can get from UCSC or ENSEMBL, instructions in supplementary section
 
 * lets look at gtf
@@ -48,21 +47,11 @@ head Mus_musculus.GRCm38.80.gtf
       MCL1_DJ.bam
 ```
 * **`-t exon`** - the **feature** type to count reads against, in this case exons 
- - where you are counting in
-* **`-g gene_id`** - the **attribute** type to summarise counts by, in this case the gene ID
- - what you want it to give you back
+* **`-g gene_id`** - the **attribute** type to summarise by - gene ID
 * **`--primary`** - only count primary alignment
- - counts only alignments labelled primary in the bam file
- - aligner randomly selects alignment when multimappers have the same mapping quality
- 
-* -a annotation file
-* -o what we want output called
-* our bam we want counting
 
-* get nice output to terminal so you know its running ok
-* post it note if all ok
-
-**`featureCounts`** has many additional options that can be used to alter the ways in which it does the counting.
+**`featureCounts`** has many additional options that can be used to alter the
+ways in which it does the counting.
 
 ```
 featureCounts --help
@@ -70,8 +59,6 @@ featureCounts --help
 
 * -s strandedness, check library prep
 * -C same chromosome, fusions and cancer
-
-* two output files
 
 ```
 cat MCL1.DJ.featureCounts.summary
@@ -91,6 +78,8 @@ head MCL1.DJ.featureCounts
 * save time, chr 15
 * ls in small_bams
 
+
+## Run on mutliple BAMS
 
 ```
   featureCounts \
@@ -128,3 +117,5 @@ head GSE60450_Lactation.chr15.featureCounts
 >
 
 -M flag 
+
+* Supplementary Material directory.  

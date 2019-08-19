@@ -89,7 +89,7 @@ filterValues <- rownames(resLvV)[1:1000]
 listAttributes(ensembl) %>% 
     head(20)
 # Set the list of attributes
-attributeNames <- c('ensembl_gene_id', 'entrezgene', 'external_gene_name')
+attributeNames <- c('ensembl_gene_id', 'entrezgene_id', 'external_gene_name')
 
 # run the query
 annot <- getBM(attributes=attributeNames, 
@@ -148,7 +148,7 @@ filterValues <- rownames(resLvV)
 listAttributes(ensembl) %>%
     head(20)
 attributeNames <- c('ensembl_gene_id',
-                    'entrezgene',
+                    'entrezgene_id',
                     'external_gene_name',
                     'description',
                     'gene_biotype')
@@ -176,6 +176,15 @@ rownames(resLvV)[missingGenes]
 
 
 ```{r addAnnotation, message=FALSE}
+load("../Course_Materials/Robjects/Ensembl_annotations.RData")
+colnames(ensemblAnnot)
+annotLvV <- as.data.frame(resLvV) %>% 
+    rownames_to_column("GeneID") %>% 
+    left_join(ensemblAnnot, "GeneID") %>% 
+    rename(logFC=log2FoldChange, FDR=padj)
+```
+
+```{r addAnnotationR, echo=FALSE, message=FALSE}
 load("../Course_Materials/Robjects/Ensembl_annotations.RData")
 colnames(ensemblAnnot)
 annotLvV <- as.data.frame(resLvV) %>% 
