@@ -1,7 +1,7 @@
 ---
 title: "RNA-seq analysis in R"
 subtitle: "Pre-processsing RNA-seq data"
-author: "Stephane Ballereau, Mark Dunning, Abbi Edwards, Oscar Rueda, Ashley Sawle"
+author: "Stephane Ballereau, Dominique-Laurent Couturier, Mark Dunning, Abbi Edwards, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
   html_notebook:
@@ -283,7 +283,7 @@ that sample further.
 
 ## Principal Component Analysis
 
-A principal components analysis (PCA) is an example of an unsupervised analysis,
+A principal component analysis (PCA) is an example of an unsupervised analysis,
 where we don't specify the grouping of the samples. If your experiment is well
 controlled and has worked well, we should find that replicate samples cluster 
 closely, whilst the greatest sources of variation in the data should be between
@@ -319,17 +319,9 @@ autoplot(pcDat)
 # sample
 autoplot(pcDat,
          data = sampleinfo, 
-         colour="Status", 
-         shape="CellType",
+         colour="CellType", 
+         shape="Status",
          size=5)
-# Specify some clearer shapes to use that have a black outline and use fill
-autoplot(pcDat,
-         data = sampleinfo, 
-         fill="Status", 
-         shape="CellType",
-         size=5) +
-    scale_shape_manual(values=c(21, 24)) +
-    guides(fill = guide_legend(override.aes=list(shape=22)))
 ```
 
 > ### Discussion
@@ -371,11 +363,9 @@ Let's look at the PCA now.
 ```{r correctedPCA, fig.width=6.5, fig.height=5, fig.align="center"}
 autoplot(pcDat,
          data = sampleinfo, 
-         fill="Status", 
-         shape="CellType",
-         size=5) +
-    scale_shape_manual(values=c(21, 24)) +
-    guides(fill = guide_legend(override.aes=list(shape=22)))
+         colour="CellType", 
+         shape="Status",
+         size=5)
 ```
 
 > ### Discussion
@@ -398,23 +388,6 @@ first replicate of each group was prepared at a separate time from the second
 replicate. If the PCA plot showed separation of samples by time, it might be
 worthwhile including time in the downstream analysis to account for the
 time-based effect.
-
-## PCA beyond the first two dimensions
-
-`autoplot` plots the first two dimensions as a default, however you can plot
-higher dimensions using the `x` and `y` arguments.
-
-```{r plotPCA3and4, fig.width=6.5, fig.height=5, fig.align="center"}
-autoplot(pcDat,
-         data = sampleinfo, 
-         fill = "Status", 
-         shape = "CellType",
-         size = 5,
-         x = 2,
-         y = 3) +
-    scale_shape_manual(values=c(21, 24)) +
-    guides(fill = guide_legend(override.aes=list(shape=22)))
-```
 
 ## Interactive MDS Plot with Glimma
 
@@ -441,73 +414,6 @@ barplot on the right. The user can hover over points to find out sample
 information, and switch between successive dimensions in the MDS plot by 
 clicking on the bars in the barplot. The default MDS plots shows dimensions 1 
 and 2.
-
-## Hierarchical clustering with heatmaps
-
-An alternative to PCA plots for examining relationships between samples is
-using hierarchical clustering. Heatmaps are a nice visualisation to examine
-hierarchical clustering of your samples. We can do this using the `heatmap.2`
-function from the *gplots* package. In this example `heatmap.2` calculates a
-matrix of euclidean distances from the `logcounts` object.
-
-The *RColorBrewer* package has nicer colour schemes, accessed using the
-`brewer.pal` function. "RdYlBu" is a common choice, and "Spectral" is also
-nice.
-
-Note:The `png` function will create a png file to save the plots created
-straight after, and will close this file when `dev.off()` is called. To see
-your plots interactively, simply omit those two lines.
-
-We don't want to plot a heatmap of all 22013 genes, so let's select data for
-the 500 most variable genes and plot the heatmap.
-
-```{r getHMData}
-# We estimate the variance for each row in the logcounts matrix
-countVar <- apply(rlogcounts, 1, var)
-# Get the row numbers for the top 500 most variable genes
-highVar <- order(countVar, decreasing=TRUE)[1:500]
-# Subset logcounts matrix
-hmDat <- rlogcounts[highVar,]
-```
-
-```{r plotHM, fig.width=10, fig.height=10, message = FALSE}
-library(gplots)
-library(RColorBrewer)
-
-# Get some nicer colours
-mypalette <- brewer.pal(11, "RdYlBu")
-# http://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3
-morecols <- colorRampPalette(mypalette)
-# Set up colour vector for celltype variable
-col.cell <- c("purple","orange")[sampleinfo$CellType]
-
-# Plot the heatmap
-heatmap.2(hmDat, 
-          col=rev(morecols(50)),
-          trace="column", 
-          main="Top 500 most variable genes across samples",
-          ColSideColors=col.cell,scale="row")
-```
-
-> ### Challenge 2  {.challenge}
->
-> Redo the heatmap using the top 500 LEAST variable genes.  
-> Change the colour scheme to "PiYG" and redo the heatmap. Try
-> `brewer.pal.info` 
-> and `display.brewer.all` to see what other colour schemes are available.  
-> Change the sample names to `group` using the `labCol` argument  
-> Remove the gene names from the righthand side of the plot using `labRow`  
-
-```{r solutionChallenge2, echo=FALSE, fig.height=8, fig.width=6}
-
-
-
-
-```
-
-
------
-
 
 # Convert counts to **DESeqDataSet** object
 
@@ -591,7 +497,7 @@ plotMA(logNormalizedCounts, array = 11)
 abline(h=0,col="grey")
 ```
 
-> ### Challenge 3
+> ### Challenge 2
 >
 > Plot the biased and unbiased MA plots both samples side by side to see the 
 > before and after normalisation.
