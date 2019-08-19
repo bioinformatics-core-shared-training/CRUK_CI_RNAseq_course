@@ -1,7 +1,7 @@
 ---
 title: "RNA-seq Analysis in R"
-subtitle: "Annotation and Visualisation of RNA-seq results"
-author: "Stephane Ballereau, Mark Dunning, Abbi Edwards, Oscar Rueda, Ashley Sawle"
+subtitle: "Annotation and Visualisation of Differential Expression Results"
+author: "Stephane Ballereau, Dominique-Laurent Couturier, Mark Dunning, Abbi Edwards, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
   html_notebook:
@@ -53,6 +53,18 @@ today.
 
 The first step is to select the Biomart database we are going to access and 
 which data set we are going to use.
+
+There are multiple mirror sites that we could use for access. The default is to 
+use the European servers, however if the server is busy or inaccessible for some
+reason it is possible to access one of the three mirror sites. See the instructions
+at [here](https://www.ensembl.org/info/data/biomart/biomart_r_package.html) for detailed
+instruction on using different mirrors, but in brief simply add the `host` argument to
+the `listMarts` and `useMart` functions below.   
+
+e.g to use the US West mirror:  
+  `ensembl=useMart("ENSEMBL_MART_ENSEMBL", host="uswest.ensembl.org")`  
+
+# list the available datasets (species)
 
 ```{r connect}
 # view the available databases
@@ -114,9 +126,10 @@ head(annot)
 dim(annot) # why are there more than 1000 rows?
 length(unique(annot$ensembl_gene_id))
 
-isDup <- duplicated(annot$ensembl_gene_id)
-dup <- annot$ensembl_gene_id[isDup]
-annot[annot$ensembl_gene_id%in%dup,]
+# find all rows containing duplicated ensembl ids
+annot %>%  
+    add_count(ensembl_gene_id) %>%  
+    filter(n>1)
 ```
 
 There are a couple of genes that have multiple entries in the retrieved 
@@ -276,29 +289,11 @@ displays a measure of significance on the y-axis and fold-change on the x-axis.
 An example of what your plot should look like:
 ![](../images/Volcano.png)   
 
-## Strip chart for gene expression
+### Interactive StripChart with Glimma
 
 Before following up on the DE genes with further lab work, a recommended *sanity
 check* is to have a look at the expression levels of the individual samples for 
-the genes of interest. We can quickly look at grouped expression by using 
-`plotCounts` function of `DESeq2` to retrieve the normalised expression values 
-from the `ddsObj` object and then plotting with `ggplot2`.
-
-```{r plotGeneCounts}
-# Let's look at the most significantly differentially expressed gene
-topgene <- filter(shrinkLvV, Symbol=="Wap")
-geneID <- topgene$GeneID
-
-plotCounts(ddsObj, gene = geneID, intgroup = c("CellType", "Status"),
-           returnData = T) %>% 
-    ggplot(aes(x=Status, y=log2(count))) +
-      geom_point(aes(fill=Status), shape=21, size=2) +
-      facet_wrap(~CellType) +
-      expand_limits(y=0)
-```
-
-
-### Interactive StripChart with Glimma
+the genes of interest. 
 
 An interactive version of the volcano plot above that includes the raw per 
 sample values in a separate panel is possible via the `glXYPlot` function in the
