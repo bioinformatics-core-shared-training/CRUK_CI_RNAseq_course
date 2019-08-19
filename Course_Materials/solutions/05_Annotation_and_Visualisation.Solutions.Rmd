@@ -1,12 +1,9 @@
 ---
 title: "RNA-seq Analysis in R"
 subtitle: "Annotation and Visualisation of RNA-seq results - Solutions"
-author: "Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle"
+author: "Stephane Ballereau, Dominique-Laurent Couturier, Mark Dunning, Abbi Edwards, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
-  html_notebook:
-    toc: yes
-    toc_float: yes
   html_document:
     toc: yes
     toc_float: yes
@@ -21,50 +18,84 @@ library(DESeq2)
 library(tidyverse)
 ```
 
-```{r prepareData, cache=TRUE}
+```{r prepareData, echo=FALSE, message=FALSE, warning=FALSE}
 # load data
 load("../Robjects/DE.RData")
 ## set up connection to ensembl database
-ensembl=useMart("ENSEMBL_MART_ENSEMBL")
+ensembl <- useMart("ENSEMBL_MART_ENSEMBL")
 # list the available datasets (species)
 listDatasets(ensembl) %>% 
     filter(str_detect(description, "Mouse"))
 # specify a data set to use
-ensembl = useDataset("mmusculus_gene_ensembl", mart=ensembl)
-# Set the filter type and values
-filterType <- "ensembl_gene_id"
-# annotated
+ensembl <- useDataset("mmusculus_gene_ensembl", mart=ensembl)
+# annotations
 load("../Robjects/Ensembl_annotations.RData")
+load("../Robjects/Full_annotation.RData")
+
 annotLvV <- as.data.frame(resLvV) %>% 
     rownames_to_column("GeneID") %>% 
     left_join(ensemblAnnot, "GeneID") %>% 
     rename(logFC=log2FoldChange, FDR=padj)
+ddsShrink <- lfcShrink(ddsObj, coef="Status_lactate_vs_virgin")
+shrinkLvV <- as.data.frame(ddsShrink) %>%
+    rownames_to_column("GeneID") %>% 
+    left_join(ensemblAnnot, "GeneID") %>% 
+    rename(logFC=log2FoldChange, FDR=padj)
+```
+
+```{r prepareData3, echo=FALSE, message=FALSE, warning=FALSE}
 # txdb object
-txMm <- makeTxDbFromBiomart(dataset="mmusculus_gene_ensembl")
+txMm <- makeTxDbFromGFF("../data/counts/Mus_musculus.GRCm38.97.gtf.gz")
 ```
 
 
-> ### Challenge 1 {.challenge}
-> That was just 1000 genes. We need annotations for the entire results table.
-> Also, there may be some other interesting columns in BioMart that we wish to
-> retrieve.  
->
+### Challenge 1
+
+That was just 1000 genes. We need annotations for the entire results table.
+Also, there may be some other interesting columns in BioMart that we wish to
+retrieve.  
+
 > (a) Search the attributes and add the following to our list of attributes:  
 >       (i) The gene description   
->       (ii) The genomic position - chromosome, start, end, and strand (4 columns) 
->       (iii) The gene biotype  
+>       (ii) The gene biotype  
 > (b) Query BioMart using all of the genes in our results table (`resLvV`)  
 > (c) How many Ensembl genes have multipe Entrez IDs associated with them?  
-> (d) How many Ensembl genes in `resLvV` don't have any annotation? Why is this?
 
-```{r solutionChallenge1}
+```{r solutionChallenge1code, eval=FALSE, message=FALSE, warnings=FALSE}
+# Set the filter type and values
+ourFilterType <- "ensembl_gene_id"
+
+# set the values for the filter
 filterValues <- rownames(resLvV)
 
 # check the available "attributes" - things you can retreive
 listAttributes(ensembl) %>%
-    head(20)
+    filter(str_detect(name, "description"))
+
+listAttributes(ensembl) %>%
+    filter(str_detect(name, "biotype"))
+```
+
+```{r solutionChallenge1, echo=FALSE, message=FALSE, warnings=FALSE}
+# Set the filter type and values
+ourFilterType <- "ensembl_gene_id"
+
+# set the values for the filter
+filterValues <- rownames(resLvV)
+
+# check the available "attributes" - things you can retreive
+listAttributes(ensembl) %>%
+    filter(str_detect(name, "description"))
+
+listAttributes(ensembl) %>%
+    filter(str_detect(name, "biotype"))
+
+```
+
+```{r solutionChallenge1acode, eval=FALSE, message=FALSE, warnings=FALSE}
+# set attributes
 attributeNames <- c('ensembl_gene_id',
-                    'entrezgene',
+                    'entrezgene_id',
                     'external_gene_name',
                     'description',
                     'gene_biotype')
@@ -75,19 +106,29 @@ annot <- getBM(attributes=attributeNames,
                values = filterValues,
                mart = ensembl)
 
-# dulicate ids
-sum(duplicated(annot$ensembl_gene_id))
-
-# missing gens
-missingGenes <- !rownames(resLvV)%in%annot$ensembl_gene_id
-rownames(resLvV)[missingGenes]
+# count duplicate ids
+annot %>%
+  add_count(ensembl_gene_id) %>% 
+  filter(n>1) %>% 
+  distinct(ensembl_gene_id) %>% 
+  nrow()
 ```
 
+```{r solutionChallenge1a, echo=FALSE, message=FALSE, warnings=FALSE}
+# duplicate ids
+annot %>%
+  add_count(ensembl_gene_id) %>% 
+  filter(n>1) %>% 
+  distinct(ensembl_gene_id) %>% 
+  nrow()
+```
 
-> ### Challenge 2 {.challenge}
+### Challenge 2 {.challenge}
 
-> Use the log2 fold change (`logFC`) on the x-axis, and use `-log10(FDR)` on the y-axis. (This >`-log10` transformation is commonly used for p-values as it means that more significant genes have a >higher scale) 
->
+Use the log2 fold change (`logFC`) on the x-axis, and use `-log10(FDR)` on the
+y-axis. (This >`-log10` transformation is commonly used for p-values as it
+means that more significant genes have a higher scale).
+
 > (a) Create a column of -log10(FDR) values
 >
 > (b) Create a plot with points coloured by if FDR < 0.05
@@ -104,17 +145,18 @@ ggplot(filtTab, aes(x = logFC, y=`-log10(FDR)`)) +
 ```
 
 
-> ### Challenge 3 {.challenge} - In Supplementary Materials
->
-> Use the txMm to retrieve the exon coordinates for the genes: 
-    + `ENSMUSG00000021604`
-    + `ENSMUSG00000022146`
-    + `ENSMUSG00000040118` 
->
+### Challenge 3 - In Supplementary Materials
 
-```{r solutionChallenge3, echo=FALSE, warning=FALSE, message=FALSE}
+Use the txMm to retrieve the exon coordinates for the genes: 
+
+> * `ENSMUSG00000021604`  
+> * `ENSMUSG00000022146`  
+> * `ENSMUSG00000040118`   
+
+
+```{r solutionChallenge3, warning=FALSE, message=FALSE}
 keyList <- c("ENSMUSG00000021604", "ENSMUSG00000022146", "ENSMUSG00000040118")
-select(txMm, 
+AnnotationDbi::select(txMm, 
        keys=keyList,
        keytype = "GENEID",
        columns=c("TXNAME", "TXCHROM", "TXSTART", "TXEND", "TXSTRAND", "TXTYPE")
