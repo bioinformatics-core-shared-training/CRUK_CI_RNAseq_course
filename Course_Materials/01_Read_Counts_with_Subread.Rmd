@@ -1,13 +1,13 @@
 ---
 title: "RNA-seq analysis in R"
-author: "Stephane Ballereau, Mark Dunning, Abbi Edwards, Oscar Rueda, Ashley Sawle"
+subtitle: "Pre-processsing RNA-seq data - solutions"
+author: "Stephane Ballereau, Dominique-Laurent Couturier, Mark Dunning, Abbi Edwards, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
   html_document:
     toc: yes
 minutes: 300
 layout: page
-subtitle: Counting
 bibliography: ref.bib
 ---
 
@@ -107,7 +107,7 @@ head MCL1.DG.featureCounts
 The full results table begins with a line containing the command used to
 generate the counts. It then has a table of 7 columns. The first column is the
 gene identifier, this will vary depending on the GTF file used, in our case
-this is a UCSC gene id. The second to fifth columns describe the genes
+this is an Ensembl gene id. The second to fifth columns describe the genes
 location, and the sixth column is the length of the gene. The final column
 contains the number of reads assigned to the gene. Note that
 **`featureCounts`** outputs a row for every gene in the GTF, even the ones with
