@@ -1,7 +1,7 @@
 ---
 title: "RNA-seq analysis in R"
 subtitle: "Differential Expression of RNA-seq data"
-author: "Stephane Ballereau, Mark Dunning, Abbi Edwards, Oscar Rueda, Ashley Sawle"
+author: "Stephane Ballereau, Dominique-Laurent Couturier, Mark Dunning, Abbi Edwards, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
   html_notebook:
