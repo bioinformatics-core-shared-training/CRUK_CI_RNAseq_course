@@ -1,19 +1,16 @@
 ---
 title: "RNA-seq analysis in R"
-author: "Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle"
+subtitle: "Pre-processsing RNA-seq data - solutions"
+author: "Stephane Ballereau, Dominique-Laurent Couturier, Mark Dunning, Abbi Edwards, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
-  html_notebook:
-    toc: yes
-    toc_float: yes
   html_document:
     toc: yes
     toc_float: yes
 layout: page
-subtitle: Pre-processsing RNA-seq data - Challenge Solutions
 ---
 
-## Data 
+### Data 
 
 ```{r setup, message = FALSE}
 library(DESeq2)
@@ -23,7 +20,7 @@ library(limma)
 library(tidyverse)
 ```
 
-```{r prepareData, message=FALSE}
+```{r prepareData, message=FALSE, include=FALSE}
 # Read the sample information into R
 sampleinfo <- read.delim("../data/SampleInfo.Corrected.txt", 
                          stringsAsFactors = F)
@@ -57,7 +54,7 @@ normalizedCounts <- counts(ddsObj, normalized=TRUE)
 logNormalizedCounts <- log2(normalizedCounts + 1)
 ```
 
-> ### Challenge 1
+### Challenge 1
 >
 > 1. Use the `DESeq2` function `rlog` to transform the count data. This function
 > also normalises for library size.
@@ -79,46 +76,13 @@ abline(h=median(as.matrix(logcounts)), col="blue")
 
 ```
 
-> ### Challenge 2 {.challenge}
->
-> Redo the heatmap using the top 500 LEAST variable genes.
-> Change the colour scheme to "PiYG" and redo the heatmap. Try `?RColorBrewer` and see what other colour schemes are available.
-> Change the sample names to `group` using the `labCol` argument
-> Remove the gene names from the righthand side of the plot using `labRow`
-
-**Solution**
-```{r solutionChallenge2, fig.height=15, fig.width=10}
-
-# Get the gene names for the top 500 least variable genes
-lowVar <- order(countVar)[1:500]
-# Subset logcounts matrix
-hmData <- rlogcounts[lowVar,]
-
-## Get some nicer colours
-mypalette <- brewer.pal(11,"PiYG")
-## http://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3
-morecols <- colorRampPalette(mypalette)
-# Set up colour vector for celltype variable
-col.cell <- c("purple","orange")[sampleinfo$CellType]
-
-# Plot the heatmap
-heatmap.2(hmData, 
-          col=rev(morecols(50)),
-          trace="none", 
-          main="Top 500 most variable genes across samples",
-          ColSideColors=col.cell,scale="row",
-          labCol=sampleinfo$Group, 
-          labRow = NA)
-
-```
-
-> ### Challenge 3
+### Challenge 2
 >
 > Plot the biased and unbiased MA plots both samples side by side to see the 
 > before and after normalisation.
 >
 
-```{r solutionChallenge3, fig.height=10, fig.width=10}
+```{r solutionChallenge3, fig.height=10, fig.width=10, collapse=TRUE}
 par(mfrow=c(2,2))
 plotMA(logcounts, array = 7, main="MCL1.LA - Raw")
 abline(h=0,col="grey")
