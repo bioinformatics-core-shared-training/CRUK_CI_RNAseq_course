@@ -1,17 +1,13 @@
---q
+---
 title: "RNA-seq analysis in R"
-author: "Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle"
+subtitle: "Gene Set Testing for RNA-seq - Solutions"
+author: "Stephane Ballereau, Dominique-Laurent Couturier, Mark Dunning, Abbi Edwards, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
-  html_notebook:
-    toc: yes
-    toc_float: yes
   html_document:
     toc: yes
     toc_float: yes
-minutes: 300
 layout: page
-subtitle: Gene Set Testing for RNA-seq - Solutions
 ---
 
 ```{r setup, include=FALSE}
@@ -37,17 +33,18 @@ sigGenes <- na.exclude(sigGenes)
 kk <- enrichKEGG(gene = sigGenes, organism = 'mmu')
 ```
 
-> ## Challenge 1 {.challenge}
->
-> Another common way to rank the genes is to order by pvalue, but also, sorting
-> so that upregulated genes are at start and downregulated at the other - 
-> you can do this combining the sign of the fold change and the pvalue.
+### Challenge 1
+
+Another common way to rank the genes is to order by pvalue, but also, sorting
+so that upregulated genes are at start and downregulated at the other - 
+you can do this combining the sign of the fold change and the pvalue.
+
 > 1. Rank the genes by statisical significance - you will need to create
-> a new ranking value using `-log10({p value}) * sign({Fold Change})`
-> 2. Load the "C2" pathways from the the `data/mouse_c2_v5.RData` file
-> 3. Run `fgsea` using the new ranked genes and the C2 pathways
+> a new ranking value using `-log10({p value}) * sign({Fold Change})`  
+> 2. Load the "C2" pathways from the the `data/mouse_c2_v5.RData` file  
+> 3. Run `fgsea` using the new ranked genes and the C2 pathways  
 > 4. Run `fgsea` using the new ranked genes and the H pathways. How do these 
-> results differ from the ones we got when ranking by the fold change alone?
+> results differ from the ones we got when ranking by the fold change alone?  
 
 ```{r solution1}
 ranks <- -log10(gseaDat$pvalue) * sign(gseaDat$logFC)
@@ -64,13 +61,13 @@ head(fgseaResH[order(padj, -abs(NES)), ], n=20)
 
 ```
 
-> ## Challenge 2 {.challenge}
->
+### Challenge 2
+
 > 1. Create a gene list for genes that are up-regulated by at least 4x (logFC>2)
-> in lactating mice
-> 2. Run a `goseq` analysis on this gene list
-> 3. Plot the results
-> 4. How is this result different to the previous GO analysis?
+> in lactating mice  
+> 2. Run a `goseq` analysis on this gene list  
+> 3. Plot the results  
+> 4. How is this result different to the previous GO analysis?  
 
 Look at genes that are up regulated by at least 4x (logFC>2) in lactating mices
 
@@ -98,8 +95,8 @@ goResultsUp %>%
         labs(x="Hits (%)", y="GO term", colour="p value", size="Count")
 ```
 
-> ## Challenge 3 {.challenge}
->
+### Challenge 3
+
 > 1. Use `pathview` to export a figure for "mmu04060", but this time only
 > use genes that are statistically significant at FDR < 0.01
 
