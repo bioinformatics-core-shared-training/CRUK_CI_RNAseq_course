@@ -1,12 +1,9 @@
 ---
 title: "RNA-seq analysis in R"
 subtitle: "Differential Expression of RNA-seq data - Solutions"
-author: "Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle"
+author: "Stephane Ballereau, Dominique-Laurent Couturier, Mark Dunning, Abbi Edwards, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
-  html_notebook:
-    toc: yes
-    toc_float: yes
   html_document:
     toc: yes
     toc_float: yes
@@ -39,9 +36,10 @@ ddsObj <- DESeq(ddsObj)
 ```
 
 
-> #### Challenge 1 {.challenge}
-> Obtain results for luminal vs basal and find the top 200 genes (call the new
-> results object `resLvB`.
+### Challenge 1
+
+Obtain results for luminal vs basal and find the top 200 genes (call the new
+results object `resLvB`.
 
 ```{r solutionChallenge1}
 resLvB <- results(ddsObj, name="CellType_luminal_vs_basal", alpha=0.05)
@@ -52,12 +50,14 @@ topGenesLvB <- as.data.frame(resLvB) %>%
 head(topGenesLvB, 10)
 ```
 
-> ### Challenge 2 {.challenge}
-> When we looked at the PCA it did seem that an interaction model might be
-> warranted. Let's test that.
-> 1.Fit a model with interaction: What is the rationale to include the 
+### Challenge 2
+
+When we looked at the PCA it did seem that an interaction model might be
+warranted. Let's test that.   
+
+> 1. Fit a model with interaction: What is the rationale to include the 
 > interaction?  
-> 2. Use the LRT to compare the two models.
+> 2. Use the LRT to compare the two models.  
 > 3. Is the number of replicates good enough to include the interaction?  
 > 4. Is the interaction needed in the model?  
 

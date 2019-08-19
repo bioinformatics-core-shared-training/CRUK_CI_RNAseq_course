@@ -7,9 +7,10 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle" />
+<meta name="author" content="Stephane Ballereau, Dominique-Laurent Couturier, Mark Dunning, Abbi Edwards, Ashley Sawle" />
 
 
 <title>RNA-seq analysis in R</title>
@@ -161,48 +162,9 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -288,16 +250,15 @@ div.tocify {
 
 <h1 class="title toc-ignore">RNA-seq analysis in R</h1>
 <h3 class="subtitle">Differential Expression of RNA-seq data - Solutions</h3>
-<h4 class="author">Stephane Ballereau, Mark Dunning, Oscar Rueda, Ashley Sawle</h4>
-<h4 class="date">Last modified: 12 Jul 2019</h4>
+<h4 class="author">Stephane Ballereau, Dominique-Laurent Couturier, Mark Dunning, Abbi Edwards, Ashley Sawle</h4>
+<h4 class="date">Last modified: 19 Aug 2019</h4>
 
 </div>
 
 
-<blockquote>
-<h4 id="challenge-1" class="challenge">Challenge 1</h4>
+<div id="challenge-1" class="section level3">
+<h3>Challenge 1</h3>
 <p>Obtain results for luminal vs basal and find the top 200 genes (call the new results object <code>resLvB</code>.</p>
-</blockquote>
 <pre class="r"><code>resLvB &lt;- results(ddsObj, name=&quot;CellType_luminal_vs_basal&quot;, alpha=0.05)
 topGenesLvB &lt;- as.data.frame(resLvB) %&gt;%
     rownames_to_column(&quot;GeneID&quot;) %&gt;% 
@@ -326,11 +287,20 @@ head(topGenesLvB, 10)</code></pre>
 ## 8     0
 ## 9     0
 ## 10    0</code></pre>
+</div>
+<div id="challenge-2" class="section level3">
+<h3>Challenge 2</h3>
+<p>When we looked at the PCA it did seem that an interaction model might be warranted. Let’s test that.</p>
 <blockquote>
-<h3 id="challenge-2" class="challenge">Challenge 2</h3>
-<p>When we looked at the PCA it did seem that an interaction model might be warranted. Let’s test that. 1.Fit a model with interaction: What is the rationale to include the interaction?<br />
-2. Use the LRT to compare the two models. 3. Is the number of replicates good enough to include the interaction?<br />
-4. Is the interaction needed in the model?</p>
+<ol style="list-style-type: decimal">
+<li>Fit a model with interaction: What is the rationale to include the interaction?<br />
+</li>
+<li>Use the LRT to compare the two models.<br />
+</li>
+<li>Is the number of replicates good enough to include the interaction?<br />
+</li>
+<li>Is the interaction needed in the model?</li>
+</ol>
 </blockquote>
 <pre class="r"><code>designI &lt;- as.formula(~ CellType * Status)
 
@@ -389,6 +359,7 @@ head(resIvA)</code></pre>
 ## ENSMUSG00000103922 4.80683955870523e-15</code></pre>
 <pre class="r"><code>length(which(resIvA$padj&lt;=0.05))</code></pre>
 <pre><code>## [1] 9119</code></pre>
+</div>
 
 
 
@@ -408,6 +379,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
