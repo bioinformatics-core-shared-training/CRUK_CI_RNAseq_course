@@ -8,6 +8,7 @@ A lot of this can be based on Guillermo's materials from the March course.
 1. Introductory lecture - already have from previous 3 day course
 
 2. Explanation of FASTQ format  
+          - Have one simple slide/picture and then...
           - do this at the terminal as a bit of 'live coding' to introduce them
             to the terminal.  
           ~~- We should clean the fastq, they've come from SRA and they have~~
