@@ -1,0 +1,106 @@
+---
+title: "RNA-seq analysis in R"
+subtitle: "Read alignment with HISAT2 - exercise solutions"
+author: "Stephane Ballereau, Dominique-Laurent Couturier, Abbi Edwards, Guillermo Parada Gonzalez, Ashley Sawle"
+output: html_notebook
+---
+
+## 1 Indexing the genome for Hisat2
+
+### Exercise 1
+
+> 1. Go to `Course_Materials/` directory using the command `cd` (change
+>    directory).
+> 
+> `cd ~/Course_Materials` 
+> 2. Use `ls` to list the contents of the directory.  
+> 
+> `ls`
+>
+> 3. Use `ls references` to list the contents of the `references` directory.   
+> 
+> `ls references`
+>
+> 4. Make a directory called `hisat2_index_chr1` inside the `references`
+>    directory.  This is where we will create our chr1 index.  
+> 
+> `mkdir references/hisat2_index_chr1`
+>
+> 5. Create the hisat2 index by runnning the following command: 
+> 
+> `hisat2-build -p 7 references/Mus_musculus.GRCm38.chr1.fa references/hisat2_index_chr1/grcm38`
+>    
+> A) Why do we use `-p 7`? Take a look at `hisat2-build` help.
+>
+The `-p` flag is used to instruct hisat2 about how many threads (processors) it
+should use when running an operation. Using multiple processors in parallel
+speeds up the analysis.  In our case, the machines we are using have 8
+processors and so we tell hisat2 to use 7 of these which leaves one free.
+>
+> B) How many files are created? 
+>
+Hisat2 always creates 8 index files that start with our base name end with `.X.ht2`.
+So in this case we have `mmu.GRCm38.1.ht2` to `mmu.GRCm38.8.ht2`.
+
+## 2 Align with Hisat2
+
+### Exercise 2 
+
+> 1. Identify the smallest file in the fastq directory. hint: use `ls -lS` to
+>    list the files and sort by size
+>
+> `ls -lS fastq`
+> ```
+> total 27461520
+> -rw-rw-r-- 1 user01 bioinformatics 2544727040 Aug 23 15:15 MCL1.DI.fastq.gz
+> -rw-rw-r-- 1 user01 bioinformatics 2421094995 Aug 23 15:15 MCL1.LB.fastq.gz
+> -rw-rw-r-- 1 user01 bioinformatics 2417795588 Aug 23 15:12 MCL1.DG.fastq.gz
+> -rw-rw-r-- 1 user01 bioinformatics 2408367553 Aug 23 15:14 MCL1.LC.fastq.gz
+> -rw-rw-r-- 1 user01 bioinformatics 2398767461 Aug 23 15:14 MCL1.LE.fastq.gz
+> -rw-rw-r-- 1 user01 bioinformatics 2392474426 Aug 23 15:16 MCL1.LF.fastq.gz
+> -rw-rw-r-- 1 user01 bioinformatics 2383025600 Aug 23 15:16 MCL1.DJ.fastq.gz
+> -rw-rw-r-- 1 user01 bioinformatics 2349919347 Aug 23 15:12 MCL1.LD.fastq.gz
+> -rw-rw-r-- 1 user01 bioinformatics 2279940489 Aug 23 15:13 MCL1.DH.fastq.gz
+> -rw-rw-r-- 1 user01 bioinformatics 2272671664 Aug 23 15:13 MCL1.LA.fastq.gz
+> -rw-rw-r-- 1 user01 bioinformatics 2200151237 Aug 23 15:14 MCL1.DK.fastq.gz
+> -rw-rw-r-- 1 user01 bioinformatics 2051581379 Aug 23 15:13 MCL1.DL.fastq.gz
+> ```
+> The 5th column shows the file size in bytes. MCL1.DL.fastq.gz is the smallest
+> fastq file.
+>
+> 2. Create a directory called `bam` (BAM will be our final aligned file
+>    format, but we have one more step after alignment to get there).
+>
+> `mkdir bam`
+>
+> 3. Use hisat2 to align the fastq file. Use the following parameters
+>       * Index (the full genome this time) - `references/hisat_index/mmu.GRCm38`
+>       * Fastq file - `fastq/MCL1.DL.fastq.gz`
+>       * Output file - `bam/SMCL1.DL.sam`
+>       * Set the number of threads (number of processors to use) to 7 - check
+>         the help page to find the appropriate flag
+>
+> ```
+> hisat2 -x references/hisat_index/mmu.GRCm38 \
+>        -U fastq/MCL1.DL.fastq.gz \
+>        -S bam/MCL1.DL.sam \
+>        -p 7
+> ```
+
+## 3 Convert the SAM output to BAM 
+
+### Exercise 3
+
+> 1. Transform your aligned SAM file in to a BAM file.
+>
+> `samtools view -b bam/MCL1.DL.sam > bam/MCL1.DL.bam`
+>
+> 2. Sort the BAM file
+>
+> `samtools sort bam/MCL1.DL.bam > bam/MCL1.DL.sorted.bam`
+>
+> 3. Index the sorted BAM file
+>
+> `samtools index bam/MCL1.DL.sorted.bam`  
+> generates the file `bam/MCL1.DL.sorted.bam.bai`
+>
