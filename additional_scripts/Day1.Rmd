@@ -1,0 +1,481 @@
+---
+title: " Reproducible RNA-seq Proceessing - Day1 "
+output: html_notebook
+---
+
+
+# 1. Basic Unix
+
+
+UNIX is an operating system that was developed in the 1960s and it has been the base of widely used operating systems such as Linux and Mac OS. As the data coming out from biological outputs growing exponentially through time, Knowing the UNIX basics have become essential to do bioinformatics. Here there is a list of the most used commands:
+
+
+|Commad| Use| Examples|  
+|--:|--:|-----:|
+|`cd` | Tove between directories| `cd FASTQ` (to enter a folder)|
+|`cd ..` | To change to the parent of the current directory| |
+|`cd -` | To go to previous directory| |
+|`pwd` | Where am I?| |
+|`ls` | List files | `ls` (on this directory); `ls FASTQ` (list files inside FASTQ) |
+|`mkdir` | make new directory| `mkdir my_folder` |
+|`mv` | move a file or directory| `mv file my_folder/` (move file to a folder) |
+|`cp` | copy file| `cp my_folder/* new_folder/` (copy all files of al folder) |
+|`rm` |Remove a file or folder| `rm file`; `rm -rf folder` |
+|`less` |Displays the contents of a file| `less file.txt` (press `q` to quit) |
+|`head`| Displays the first ten lines of a file | |
+|`tail`| Displays the last ten lines of a file | |
+|`cat` |Print file content|`cat file1 file2 > file.total` (merge files)|
+|`zcat` |Print file content of compresed files|`zcat SRR7889597.fastq.gz` |
+|`gzcat` |mac OSx version of zcat   |`gzcat SRR7889597.fastq.gz` |
+|`wc` | word count | `wc -l file ` (count lines inside of a file)|
+|`grep` | Pattern matching | `grep patern file` (get lines that match the patern)|
+| `cut` | extract columns from files | `cut -f 2 file` (extract second column)
+|`sort` | sort file by column |`sort -nr -k 2 file` (sort file by second column) | 
+
+
+**Exercise 1.0.1**
+
+On the course directory, create a folder named `test_folder` and copy the smallest file inside `FASTQ/` folder. Then change the name of the folder that you just create to `to_delete` and finally remove this folder. 
+
+
+## 1.2 Efficient use of the terminal 
+
+
+To accelerate our interaction with the terminal, we can use the TAB key:  
+
+![](Images/TAB.png) 
+
+For instance, if you are at course folder and you write `ls Gene_` and then press TAB key once, it will complete the command to `ls Gene_annotation`. But if you just write `ls G` and press TAB two times, it will show you the two options (Gene_annotation and Genome).
+
+Another powerful thing is to pipe (`|`) the output of one command into and another command. For example you can do:
+
+`ls FASTQ/*.fastq.gz | wc -l`
+
+To count all the FASTQ files that are stored inside of `FASTQ/` folder.
+
+Finally, if you want to know more, every command has its own options, you can see the entire description of a command using `man`. For instance, use man to know more about `head` typing on the command line:
+
+`man head`
+
+**Exercise 1.2.1**
+
+Read the manual of `head` command. Then use it to extract the first 100 lines of `Gene_annotation/dm6.Ensembl.genes.gtf` and count all the lines that have `CDS` in the third column. 
+
+# 2. Input data format
+
+
+In order to quantify mRNA by RNA-seq analysis, different files are required which as a different format. RNA-Seq reads are normally formatted as [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format), SRA or CRAM. To process this data, the most common initial step is to map the reads to the genome, which is often formatted as [FASTA](https://en.wikipedia.org/wiki/FASTA_format). Finally, to quantify gene expression, we need to know which part of the genome encodes for genes. This information can be found at gene annotation files, which can be formatted as [GTF](http://mblab.wustl.edu/GTF22.html#fields) or [BED](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) files. Explore the different hyperlinks provided for detailed information about the different file formats.
+
+
+## 2.1 FASTA format
+
+FASTA files contain nucleotide or amino acid sequence information. The data is composed of identifiers, which starts with `>` and nucleotide o amino acid sequences. Hundred of thousands of genomes coming from different species are available in public repositories as FASTA files. It is important to notice that a given species can have different genomic assemblies. For instance, a popular assembly human genome assembly is `hg19` that was published in February 2009, and as a huge amount of data is available for that assembly some researchers keep doing their analyses with that version. But other recent analyses have started to use `hg38` instead, which was published in December 2013 and represent a more curated version of the human genome.
+
+For today's practice, we are going to work with a smaller genome. We already have downloaded for you the `dm6` assembly of D. melanogaster's genome, an invertebrate organism widely used as a model organism for genetic and behavioral studies. The genome file is at course material folder at `Genome/dm6.fa`. 
+
+**Exercise 2.1.1**
+
+Count the number of sequences present at `dm6.fa` (hint: count lines that start with `>`, but as this is a special UNIX character, refer to it as `\>`. Which command can be used for pattern matching and count lines?). 
+
+If each sequence is related to a chromosome, why do we find so many sequences? How many main scaffolds can you see?
+
+**Exercise 2.1.2**
+
+Can you calculate the exact number of nucleotides that this D. melanogaster assembly is made of? (hint: explore additional options of `grep` and `wc`)
+
+
+## 2.2 FASTQ format
+
+RNA-seq reads often come as FASTQ, which is an extension of FASTA file format. Every read is represented by four lines:
+
+* First line: start with `@` and correspond to a read identifier. 
+* Second line: read nucleotide sequence.
+* Third line: Start with `+` and it can be followed by additional information, but often it is just `+`.
+* Fourth line:  Phred quality score represent the reliability of a base call (as higher the better). It is encoded as ASCII characters. It can have different encodings, such as Sanger, Solexa, Illumina 1.3+ or Illumina 1.8+. Please check [FASTQ format description](https://en.wikipedia.org/wiki/FASTQ_format) for more details.
+
+**Exercise 2.2.1**
+
+Which of the fastq files found at `FASTQ/` has the highest and the lowest amount of reads? How many reads do they have? What is the read length?
+
+
+## 2.3 Gene annotation
+
+Efforts have been made to identify the genomic regions that encode for genes. This information can be stored as BED or GTF files (among other formats). BED files store information about genomic coordinates. Each row of a BED file represents a genomic interval, in the case of gene annotation file, it represents the start and end of a transcript. Exons coordinates are encoded as `blocks`, where the `blockStarts` column is a list of all exon starts relative to the transcript starts and `blockSizes` column contain all the exon sizes. Please read [BED description format](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) for more information. 
+
+GTF files instead are gene-centric annotations, in which a gene can be described by multiple rows. Each row contains the coordinates and additional information of a particular gene feature. Please check the full [GTF description](http://mblab.wustl.edu/GTF22.html)
+
+
+**Exercise 2.3.1**
+
+
+Get D. melanogaster gene annotation files for `dm6` assembly in from [UCSC Table Browser](http://genome-euro.ucsc.edu/cgi-bin/hgTables). Choosing the following values:
+
+* clade: Insect.
+* genome: D. melanogaster.
+* assembly: Aug. 2014 (BDGP Release 6 + ISO1 MT/dm6).
+* group: Gene and Gene Predictions.
+* track: Ensembl Genes.
+* table: ensGene.
+
+And get the annotation files as BED and GTF (choosing the right output formats). Save the BED file as `dm6.Ensembl.genes.bed12` and GTF as `dm6.Ensembl.genes.gtf` at `Gene_annotation` folder.
+
+
+**Exercise 2.3.2**
+
+Process `dm6.Ensembl.genes.bed12` to find the five transcripts with the highest number of exons. (hint use `sort`, look for `-r` and `-k` flags at its manual). 
+
+**Exercise 2.3.3**
+
+Process `dm6.Ensembl.genes.gtf` to find the total number of genes
+
+
+# 3. Quality control before alingment
+
+
+## 3.1 FASTQC
+
+
+To perform a QC of the Fastq files we can use *FastQC*. We can access to a basic manual of this tool by typing on `fastqc --help` on terminal.
+
+
+
+**Exercise 3.1.1**
+
+Create a directory named `QC`. Read `fastqc` help manual to run it for `FASTQ/SRR7889585.fastq.gz` and store the results at the newly created folder (`QC`). To speed it up, use 7 threads (which it will allow our machines to use 7 processors). You will get an html file as output; Open it with an internet browser (Chrome, Firefox, etc) and answer the following questions:
+
+A) What is the read length?
+B) Does the quality score very through the read length?
+C) How is the data's quality?
+
+
+
+## 3.2 Metadata analysis on R-studio
+
+
+The fastq.gz files that we have at `/FASTQ` correspond to RNA-seq data extracted from D. melanogaster brain samples. The data corresponding to a full study published last year on [Cell Reports](https://www.ncbi.nlm.nih.gov//pubmed/30355484) and the full study was published in [SRA archive](https://trace.ncbi.nlm.nih.gov/Traces/sra/?study=SRP162335). 
+
+**Exercise 3.2.1**
+
+Check the [study runs](https://trace.ncbi.nlm.nih.gov/Traces/study/?acc=SRP162335) and compare with the file names from `FASTQ/` folder. Which tissues the samples were extracted from? Select the Runs that correspond to the files that we have and download the `RunInfo Table` corresponding to these tables and save it as `SraRunTable.txt` on the course folder. 
+
+**Exercise 3.2.2**
+
+Open R-studio and open the `Day1.Rmd` file that is located at the course folder. This is an R-notebook file, that has all the code used to generate this document. But, now when you open this file you will be able to run `chunks` of code interactively inside R-studio. Run the following chunk by clicking at the green play button.
+
+```{r}
+
+library(data.table)
+
+metadata <- fread("./SraRunTable.txt") #Please be sure to place the file under ./Course_Materials/00_Reproducible_RNA-Seq_Processing/
+
+metadata
+```
+
+
+By running this code, we imported the metadata as a data.table object, which corresponds to a very convenient structure to manipulate data in R. For more information visit this [link](https://www.datacamp.com/community/tutorials/data-table-cheat-sheet). We can now easily manipulate the data! For example, we can filter the metadata rows, so we only see the ones corresponding to "central neurons"
+
+
+```{r}
+metadata[source_name=="central neurons" , ]
+```
+
+
+We can also get explore if we have a lowly sequenced sample filtering by the `MBases` values
+
+```{r}
+metadata[MBases < 100 , ]
+```
+
+
+Or get the average Mega bases across this sample
+
+```{r}
+
+metadata[  , mean(MBases) ]
+
+```
+
+
+To explore this visually, we can plot with ggplot2. This is one of the most popular packages to visualize data. A basic code to visualize the Mbases distribution can be run as:
+
+```{r}
+library(ggplot2)
+
+ggplot(data = metadata) +  # Frist layer - Data input
+  geom_bar(aes(x=Run, y=MBases), stat = "identity")   # second layer - type of plot and axis
+
+```
+
+
+We can rotate the text to make it more visible
+
+```{r}
+
+ggplot(data=metadata) +
+  geom_bar(aes(x=Run, y=MBases, ), stat = "identity") + 
+  theme(axis.text.x = element_text(angle = 45))  # Third layer -  visual configuration
+
+```
+
+
+inside `aes( )` are the variables and we can also define a variable as the colour:
+
+
+```{r}
+ggplot(data=metadata) +
+  geom_bar(aes(x=Run, y=MBases, colour=source_name), stat = "identity") + 
+  theme(axis.text.x = element_text(angle = 45))
+```
+
+But for this particular type of graph, filling the bar with one colour is more suitable
+
+```{r}
+ggplot(data=metadata) +
+  geom_bar(aes(x=Run, y=MBases, fill=source_name), stat = "identity") + 
+  theme(axis.text.x = element_text(angle = 45))
+```
+
+
+From this plot, we can clearly see that one of the samples that were taken from central neurons is much smaller than the rest. This factor needs to be considered at the time we analyze the samples, as this poorly sequenced sample might have lead to less accurate mRNA quantification and it might need to be removed for quantitative analyses. 
+
+
+
+# 4. Mapping reads to the genome and getting raw counts
+
+After we have a diagnosis of the data quality, we can start to analyse the data. Usually, the first step into the analysis requires mapping the RNA-seq reads to the genome. There are numerous tools to do perform short read alignment and the choice of it should be carefully made according to the analysis goals and requirements. Hisat2 is a very fastq tool that has been shown to have a good performance on published benchmarks. 
+
+
+## 4.1 Indexing the genome for Hisat2
+
+
+To start mapping RNA-seq reads to the genome, we need to index the genome. The command to do this is `hisat2-build`. 
+
+`hisat2-build --help`
+
+**Exercise 4.1.1.**
+
+
+Go to `Course_Materials/00_Reproducible_RNA-Seq_Processing` directory using `cd` (This is going to be our base directory to solve all the following exercises). Do `ls` to list the directories and create a new folder called `Index` inside `Genome` folder. Then run the following command: 
+
+`hisat2-build -p 7 Genome/dm6.fa Genome/Index/dm6`
+
+This command will use the genome (located at `Genome/dm6.fa`) and it will generate the index files on `Genome/Index/`. All the files will start with `dm6` prefix. Take a look at `hisat2-build` help, 
+
+A) Why do we use `-p 7` and what is the maximun=m value we should use on these machines?
+B) How many files are created on this process? 
+
+
+## 4.2 Hisat2
+
+
+To map the reads to the genome we need to run hisat2. Take a quick look to hisat2's description
+
+`hisat2 --help`
+
+**Exercise 4.2.1**
+
+Run hisat2 for the smallest file, located at FASTQ folder using 7 proccesors. Save the results inside a folder named `hisat2` (create it before using `mkdir`) and save the results using the right extension (`.sam`).
+hint: use `hisat --help` and look for -p -U -x flags and tt the end of the command use `>` to save the resuls to a file. 
+
+
+## 4.3 Samtools
+
+The output of hisat2 is a SAM file, which is a plain text file that has the alignment information. As they tend to be very large, is not a good idea to store them forever. BAM files are the binary form of SAM files, which means their information is much more compressed, which make them easier to store them, but also enable quicker processing of their data. We can transform from SAM to BAM following this general formula:
+
+`samtools view -b sample.sam > sample.bam`
+
+Where `sample` is just a generic name to reffer to our samples. 
+
+**Exercise 4.3.1**
+
+Get a BAM file from the SAM file you just generated. 
+
+
+## 4.4 Visualise BAM files
+
+BAMs can be used for different downstream analyses. But most of them require the BAM files to be `sorted`. When a BAM file is sorted, the alignments are ordered by the position they map to. BAM files can be sorted using `samtools sort` and following this formula:
+
+`samtools sort  sample.bam -o sample.sorted.bam`
+
+To visualise a BAM's alignment, we need to index it first. Which can be made with `samtools index`:
+
+`samtools index sample.sorted.bam`
+
+**Exercise 4.4.1**
+
+A) Sort and Index your BAM file.
+B) Open IGV, load D. melanogaster's genome (dm6) and load the sorted bamfile.
+
+**IGV help**
+
+*Load the reference genome*. On the top menu bar find the genomes dropdown (top-left) and  then find  `D. melanogaster` assembly dm6. You might need to click on ‘More...’ to see a list of available genomes.
+
+*Load the BAM file*. On the top menu bar go to ‘File –> Load from File...’ and select the sorted BAM file you have created on the previous step.
+
+Zoom in into a particular gene to see the read alignments. 
+
+
+## 4.5 FeatureCounts
+
+To count the number of reads we will use FeatureCounts, which uses a gene annotation file (GTF) to process the genomic intervals of every gene and count all the reads that map to the exonic regions. 
+
+**Exercise 4.2.2**
+
+Run featureCounts providing the transcript annotation and the same file you produced with hisat2. To do this, read the featureCount help manual and find the rights flags run featureCounts (hint: read the `Required arguments` section).
+
+**Exercise 4.2.2**
+
+Find the gene with the highest number of counts. Can we say this gene is the one with higher expression levels on this sample?
+
+
+# 5. Introduction to reporducible bioinformatics
+
+Until this point, we have introduced every command mannually in the terminal. Please check how many files do we have at `FASTQ/`. Do you think you can get the raw counts from all the samples without having errors? what about processing hundred of samples, is it reasonable to do it manually?  
+
+The answer is clearly *no*. We need systematic ways to process data to avoid errors and enable reproducibility in our analyses. This is why we are going to use a workflow manager to execute the remaining steps to get the raw counts from our samples. 
+
+Snakemake is currently one most popular workflow managers to work with bioinformatic software. To install snakemake please the following command:
+
+`conda create -n snakemake_env snakemake `
+
+By doing this we created a virtual environment, called `snakemake_env` that has latest version of snakemake and our it dependencies installed. Now to activate this environment, write:
+
+`conda activate snakemake_env`
+
+As we already wrote a `snakemake` pipeline for you, we are going to demonstrate you some of its properties and how to use it. To see the code from the this pipeline, Use `Atom` (or any text editor) to open the `Snakefile`. Can you recognize some of the steps that we have done already?. Every `rule`represent a step of the analysis. For example:
+
+
+```{python}
+
+rule hisat2_Genome_index:
+    input:
+        "Genome/dm6.fa"
+    output:
+        "Genome/Index/dm6.1.ht2"
+    threads: 7
+    conda:
+        "envs/core.yaml"
+    log:
+        "logs/hisat2_Genome_index.log"
+    shell:
+        "hisat2-build -p {threads} {input} Genome/Index/dm6 2> {log}"
+```
+
+This code correspond to the indexing step, in which it takes `Genome/dm6.fa` as input and `Genome/Index/dm6.1.ht2` as output. The rules have several `key` words by which different parts of the command are declared:
+* input: set of intput files, in this case just "Genome/dm6.fa"
+* output: set of output files. In this case, more output files are created, but they do not have to be pointed by the commands, we can just refer to one of the files that is created. Snakemake will check if this file is successfully created after the process is finished.
+* threads: number of processors
+* conda: the virtual environment in which the process will be run.
+* log : file that store anything that hisat2 outputs while is creating the index.
+* shell : This is the formula to create the shell command given all the parameters described above.  
+The indexing rule is directly connected to the following mapping rule:
+
+```{python}
+
+rule hisat2_to_Genome:
+    input:
+        fastq = "FASTQ/{sample}.fastq.gz",
+        genome = "Genome/Index/dm6.1.ht2"
+    output:
+        temp("hisat2/{sample}.sam")   # Temporary output
+    threads: 3
+    conda:
+        "envs/core.yaml"
+    log:
+        "logs/hisat2_to_Genome.{sample}.log"
+    shell:
+        "hisat2 -p 3 -U {input.fastq} -x  Genome/Index/dm6  > {output} 2> {log}"
+
+```
+
+This rule takes fastq files as input and also the genome index files. All the sample names were obtained from`NCBI_accession_list.txt` file, which contains the SRA accession codes corresponding to all the samples that we are analysing. Inside the rule `{sample}` takes the value of every accession code, and allow snakemake to generate all the mapping commands for every sample. As we here set `threads` as 3, every mapping process will use 3 processors, which means that 2 mapping processes can be run in parallel when 7 cores are provided. 
+
+The next rule `bamstats` take every SAM file and transform it to BAM, but also the BAM file is sorted and indexed at the same time:
+
+```{python}
+
+rule samTobam:
+    input:
+        "hisat2/{sample}.sam"
+    output:
+        "hisat2/{sample}.sorted.bam"
+    conda:
+        "envs/core.yaml"
+    shell:
+        "samtools view -b  {input}  | samtools sort - -o {output} && samtools index {output} "
+
+```
+
+Because SAM files were produced as temporary files (`temp("hisat2/{sample}.sam")` ), 
+as soon as `samTobam` finishes, SAM files are deleted. This optimizes the disk space, which is important when a large number of samples are processed. 
+
+Finally, all these steps converge at:
+
+```{python}
+rule featureCounts:
+    input:
+        gtf = "Gene_annotation/dm6.Ensembl.genes.gtf",
+        bam = expand("hisat2/{sample}.sorted.bam", sample=SAMPLES)
+    output:
+        "featureCounts/total_samples.gene_count.txt"
+    threads: 1
+    conda:
+        "envs/core.yaml"
+    log:
+        "logs/featureCounts.total.log"
+    shell:
+        "featureCounts -a {input.gtf} -o {output} {input.bam} 2> {log}"
+```
+
+Where `{input.gtf}` list all the sorted bam that we generated. Notice that this Snakefile starts with `include: "rules/00_download_data.skm" `, which is a statement that connects this Snakefile with `rules/00_download_data.skm`. This is a script that read all accession codes from `NCBI_accession_list.txt` and stores those at `SAMPLES`, which is then used by `expand("hisat2/{sample}.sorted.bam", sample=SAMPLES)` to generate the list of all sorted BAM files. 
+
+
+## 5.1 Quantifying all the samples at once
+
+We have only qualified one sample so far, but now executing the Snakefie, we can process all the other samples in parallel. For this, we first are going to do a `dry-run` to check the list of commands that snakemake will run for us. On the command line (in our base folder, `00_Reproducible_RNA-Seq_Processing`), please write:
+
+`snakemake -np featureCounts`
+
+This command shows us all the steps that snakemake will until executing a rule named *featureCounts* (see Snakefile's code) which run `featureCounts` over all the samples. Where `-n` prevent snakemake from running the pipeline and `-p` prints the commands for each step.  
+
+To visualise these steps run:
+
+`snakemake featureCounts --dag | dot -Tpng > featureCounts.png`
+
+This will produce the following image:
+
+![](Images/featureCounts.png)
+
+Which help us to understand the planned job execution.
+
+Finally, to run these steps we need to enable snakemake to use the environment files are needed for each rule by including `--use-conda` and also we should limit the number of processors to 7 with `--cores 7`.
+
+**Exercise 5.1.1**
+
+Execute `snakemake` to quantify all the samples using featureCounts. Look inside `Snakefile`code to see where the final output of featureCount will be stored and compare it with the output we previously had using featureCounts.  
+
+
+**Exercise 5.1.2**
+
+Snakemake can have individual files as a target. The following rule:
+
+```{python}
+rule bamstats:
+    input:
+        "hisat2/{sample}.sorted.bam"
+    output:
+        stats_txt = "QC/{sample}/{sample}.stats",
+        stats_html = "QC/{sample}/{sample}.plots.html"
+    params:
+        "QC/{sample}/{sample}.plots"
+    conda:
+        "envs/core.yaml"
+    shell:
+        "samtools stats {input} > {output.stats_txt} && plot-bamstats -p {params} {output.stats_txt}"
+```
+
+Was not included as part of our workflow, as it was not required to run featureCounts. To run this rule for a particular file, you have target one of the output that is generated by this rule for a particular file using the following formula:
+
+`snakemake --use-conda QC/SAMPLE/SAMPLE.plots.html`
+
+Where SAMPLE can be any of the accession codes from `NCBI_accession_list.txt`. Can you run this rule? What useful information can be found on the output html file>
