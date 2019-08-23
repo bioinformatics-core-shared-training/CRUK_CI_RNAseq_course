@@ -253,12 +253,13 @@ There should be file called <code>Mus_musculus.GRCm38.chr1.fa</code>. This is th
 <li>Create a directory called <code>bam</code> (BAM will be our final aligned file format, but we have one more step after alignment to get there).</li>
 <li>Use hisat2 to align the fastq file. Use the following parameters
 <ul>
-<li>Fastq file - <code>fastq/SRR1552455.fastq.gz</code></li>
 <li>Index (the full genome this time) - <code>references/hisat_index/mmu.GRCm38</code></li>
-<li>Output file - <code>bam/SRR1552455.sam</code></li>
+<li>Fastq file - <code>fastq/MCL1.DL.fastq.gz</code></li>
+<li>Output file - <code>bam/MCL1.DL.sam</code></li>
 <li>Set the number of threads (number of processors to use) to 7 - check the help page to find the appropriate flag</li>
 </ul></li>
 </ol>
+<p><strong>Note</strong>: when the command runs successfully, there will be no indication that it is doing anything except that the command prompt disappears and the terminal will appear <em>frozen</em> (this is a helpful feature of many unix/linux tools). The alignment take 5-10 minutes.</p>
 </blockquote>
 </div>
 </div>
@@ -270,18 +271,19 @@ There should be file called <code>Mus_musculus.GRCm38.chr1.fa</code>. This is th
 <p>We can transform from SAM to BAM using <code>samtools</code>. <code>samtools</code> is a toolkit that provides a number of useful tools for working with SAM/BAM files. In this case we will use the <code>view</code> command to transform the SAM file into a BAM file.</p>
 <p>The general command is:</p>
 <p><code>samtools view -b my_sample.sam &gt; my_sample.bam</code></p>
+<p><code>view</code> is the tool for viewing a sam or bam file. It can take many arguments which can do things such as filter for particular read characteristics. Normally it outputs in SAM format so that the results can be read by a human, in this case the <code>-b</code> flag tells it to output in BAM format.</p>
 <p>After we have transformed the SAM file to a BAM file we will want to index it, but first we should sort the file so that the reads are in order with regard to chromosome number and position.</p>
 <p>To sort the file the general command is:</p>
 <p><code>samtools sort my_sample.bam &gt; my_sample.sorted.bam</code></p>
 <p>Finally, we can index with the <code>index</code> command.</p>
 <p><code>samtools index my_sample.sorted.bam</code></p>
-<p>This will create a new file called <code>my_sample.bai</code> (<strong>ba</strong>m <strong>i</strong>ndex).</p>
+<p>This will create a new file called <code>my_sample.bam.bai</code> (<strong>ba</strong>m <strong>i</strong>ndex).</p>
 <div id="exercise-3" class="section level3">
 <h3>Exercise 3</h3>
 <blockquote>
 <ol style="list-style-type: decimal">
 <li>Transform your aligned SAM file in to a BAM file.</li>
-<li>Sort the BAM file</li>
+<li>Sort the BAM file Sorting can take 5-10 minutes</li>
 <li>Index the sorted BAM file</li>
 </ol>
 </blockquote>
