@@ -1,0 +1,184 @@
+---
+title: "RNA-seq analysis in R"
+subtitle: "Read alignment with HISAT2"
+author: "Stephane Ballereau, Dominique-Laurent Couturier, Abbi Edwards, Guillermo Parada Gonzalez, Ashley Sawle"
+output: html_notebook
+---
+
+# Mapping reads to a reference genome
+
+Once we are happy with the data quality, we can start to analyse the data.
+Usually, the first step into the analysis requires mapping the RNA-seq reads to
+the genome. There are numerous tools we could use to perform short read
+alignment and the choice should be made carefully according to the analysis
+goals and requirements. For RNAseq gene expression analysis Hisat2 is a very
+fast tool that has been shown to have a good performance on published
+benchmarks. 
+
+We are going to be aligning the reads from the fastq against the GRCm38 
+reference genome from Ensembl. This can be obtained here:
+ftp://ftp.ensembl.org/pub/release-97/fasta/mus_musculus/dna/Mus_musculus.GRCm38.dna.primary_assembly.fa.gz
+
+## 1 Indexing the genome for Hisat2
+
+Typically our genome reference will be in [FASTA
+format](https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=BlastHelp).
+Before we can start mapping RNA-seq reads to the genome, we need to create an
+index to the genome. This index allows HISAT2 to quickly search the genome for
+possible mapping positions for each read. It is analagous to an index in a
+book: if you what to find out where in the book a particular word occurs it is
+quicker to look at the index than to search through the book page by page, then
+you can jump straight to the correct page to find the exact line and position
+of the word.
+
+The command to index the genome for hisat2 is `hisat2-build`. 
+
+Access the help page to find the basic usage an other options:
+
+`hisat2-build --help`
+
+The **Usage** is:
+
+```
+hisat2-build [options]* <reference_in> <ht2_index_base>
+    reference_in            comma-separated list of files with ref sequences
+    hisat2_index_base       write ht2 data to files with this dir/basename
+```
+
+This means that we have to use the command `hisat2-build` to run the programme
+and then we need to provide the reference genome files `<reference_in>` and
+a base name for the index files `<hisat2_index_base>`. HISAT2 is going to
+generate a number of files for the index and their names will all start with
+our 'basename'.
+
+### Exercise 1
+
+> 1. Go to `Course_Materials/` directory using the command `cd` (change
+>    directory).
+> 2. Use `ls` to list the contents of the directory.  
+>    There should be a `references` directory.  This will contain various
+>    reference materials that we will need throughout analysis, such as the
+>    mouse genome and gene annotations.
+> 3. Use `ls references` to list the contents of the `references` directory.   
+>    There should be file called `Mus_musculus.GRCm38.chr1.fa`. This is the
+>    reference genome sequence for chromosome 1 in FASTA format. We are just
+>    going to work with chromosome 1 for this exercise as indexing the entire
+>    genome would take too long.
+>    You'll also notice a directory called `hisat_index`, this is the index for
+>    the entire genome, which has already been generated. We'll be using this
+>    later.
+> 4. Make a directory called `hisat2_index_chr1` inside the `references`
+>    directory.  This is where we will create our chr1 index.
+> 5. To create the hisat2 index run the following command: 
+> 
+> `hisat2-build -p 7 references/Mus_musculus.GRCm38.chr1.fa references/hisat2_index_chr1/grcm38`
+>    
+>    Here we are providing the fasta file
+>    `references/Mus_musculus.GRCm38.chr1.fa` for the `<reference_in>` and
+>    setting the `<hisat2_index_base>` to
+>    `references/hisat2_index_chr1/mmu.GRCm38`, so all the files will be created in
+>    the directory `references/hisat2_index_chr1` and their names will start
+>    with `mmu.GRCm38`.
+> 
+> A) Why do we use `-p 7`? Take a look at `hisat2-build` help.
+> B) How many files are created? 
+
+
+## 2 Align with Hisat2
+
+To map the reads to the genome we need to run `hisat2`. 
+
+We will need to provide the command with three pieces of information:  
+* A fastq file containing our unaligned reads
+* The path to the index files - we do this by just supplying the basename for
+  the index as in the previous command
+* A name for the output file
+
+We should also instruct hisat2 how many threads (processors) it should use (these
+machines have 8 processors, so we should let hisat2 use 7 of them, keeping 1 free).
+
+Take a quick look to hisat2's description
+
+`hisat2 --help`
+
+The usage is:
+```
+Usage:
+  hisat2 [options]* -x <ht2-idx> {-1 <m1> -2 <m2> | -U <r>} [-S <sam>]
+
+      <ht2-idx>  Index filename prefix (minus trailing .X.ht2).
+      <m1>       Files with #1 mates, paired with files in <m2>.
+                 Could be gzip'ed (extension: .gz) or bzip2'ed (extension: .bz2).
+      <m2>       Files with #2 mates, paired with files in <m1>.
+                 Could be gzip'ed (extension: .gz) or bzip2'ed (extension: .bz2).
+      <r>        Files with unpaired reads.
+                 Could be gzip'ed (extension: .gz) or bzip2'ed (extension: .bz2).
+      <sam>      File for SAM output (default: stdout)
+
+      <m1>, <m2>, <r> can be comma-separated lists (no whitespace) and can be
+      specified many times.  E.g. '-U file1.fq,file2.fq -U file3.fq'.
+```
+
+So we need to provide the path to the index after the `-x` flag, the path to
+out fastq file after the `-U` flag (if we had paired end data we would have 2
+fastq files and would use the -1 and -2 flags), and the name for the output
+file after the `-S` flag.  The output file format is SAM, so the output
+filename should end `.sam`.
+
+There many additional options that allow us to tweak the parameters used in the
+alignment. As a general rule, unless you really know what you are doing you 
+should stick to the defaults.
+
+### Exercise 2 
+
+> 1. Identify the smallest file in the fastq directory. hint: use `ls -lS` to
+>    list the files and sort by size
+> 2. Create a directory called `bam` (BAM will be our final aligned file
+>    format, but we have one more step after alignment to get there).
+> 3. Use hisat2 to align the fastq file. Use the following parameters
+>       * Fastq file - `fastq/SRR1552455.fastq.gz`
+>       * Index (the full genome this time) - `references/hisat_index/mmu.GRCm38`
+>       * Output file - `bam/SRR1552455.sam`
+>       * Set the number of threads (number of processors to use) to 7 - check
+>         the help page to find the appropriate flag
+
+
+## 3 Convert the SAM output to BAM 
+
+The output of hisat2 is a SAM file. This is the a standardized format for presenting
+aligned sequence data. You can read details of the specifications here:
+
+https://samtools.github.io/hts-specs/SAMv1.pdf
+
+Unfortunately, this is a plain text file and they tend to be very large. BAM
+files are the binary (compressed) version of SAM files. They are much smaller
+and can be indexed making them quicker to access and process.
+
+We can transform from SAM to BAM using `samtools`. `samtools` is a toolkit that
+provides a number of useful tools for working with SAM/BAM files. In this case
+we will use the `view` command to transform the SAM file into a BAM file.
+
+The general command is:
+
+`samtools view -b my_sample.sam > my_sample.bam`
+
+After we have transformed the SAM file to a BAM file we will want to index it,
+but first we should sort the file so that the reads are in order with regard
+to chromosome number and position.
+
+To sort the file the general command is:
+
+`samtools sort my_sample.bam > my_sample.sorted.bam`
+
+Finally, we can index with the `index` command.
+
+`samtools index my_sample.sorted.bam`
+
+This will create a new file called `my_sample.bai` (**ba**m **i**ndex).
+
+### Exercise 3
+
+> 1. Transform your aligned SAM file in to a BAM file.
+> 2. Sort the BAM file
+> 3. Index the sorted BAM file
+
