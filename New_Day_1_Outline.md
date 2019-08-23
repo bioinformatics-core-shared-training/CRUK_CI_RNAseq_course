@@ -10,9 +10,9 @@ A lot of this can be based on Guillermo's materials from the March course.
 2. Explanation of FASTQ format  
           - do this at the terminal as a bit of 'live coding' to introduce them
             to the terminal.  
-          ~~- We should clean the fastq, they've come from SRA and they have
-          ~~added the reads name in the third line after the '+'. Let's remove
-          ~~this as it isn't typical.  
+          ~~- We should clean the fastq, they've come from SRA and they have~~
+          ~~added the reads name in the third line after the '+'. Let's remove~~
+          ~~this as it isn't typical.~~  
           - printed cheatsheet with common commands  
 
 3. FASTQC - practical
