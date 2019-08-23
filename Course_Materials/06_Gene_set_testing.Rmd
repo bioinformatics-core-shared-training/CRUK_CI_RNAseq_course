@@ -157,7 +157,7 @@ plotGseaTable(pathwaysH[topPathways],
 > you can do this combining the sign of the fold change and the pvalue.  
 > 1. Rank the genes by statisical significance - you will need to create
 > a new ranking value using `-log10({p value}) * sign({Fold Change})`  
-> 2. Load the "C2" pathways from the the `data/mouse_c2_v5.RData` file   
+> 2. Load the "C2" pathways from the the `Robjects/mouse_c2_v5.RData` file   
 > 3. Run `fgsea` using the new ranked genes and the C2 pathways  
 > 4. Run `fgsea` using the new ranked genes and the H pathways. How do these 
 > results differ from the ones we got when ranking by the fold change alone?  
