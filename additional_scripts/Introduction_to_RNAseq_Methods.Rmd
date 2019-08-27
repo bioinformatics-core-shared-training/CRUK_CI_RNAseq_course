@@ -394,3 +394,10 @@ Replicates are from the same individual but processed separately
 ### Multiplexing
 
 <img src="images/multiplexing.jpg" class="centerimg" style="width: 65%">
+
+## Differential Gene Expression Analysis Workflow {#less_space_after_title}
+
+<div style="line-height: 50%;"><br></div>
+
+<img src="images/workflow_3Day.svg" class="centerimg" style="width: 60%; margin-top: 60px;">
+<!-- <img src="images/workflow.svg" class="centerimg" style="width: 60%;"> -->
