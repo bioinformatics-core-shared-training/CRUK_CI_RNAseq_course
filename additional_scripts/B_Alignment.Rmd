@@ -1,0 +1,70 @@
+---
+title: "Short Read Alignment"
+author: "Ashley Sawle"
+date: "September 2019"
+output:
+  ioslides_presentation:
+    css: stylesheet.css
+    logo: images/CRUK_Cambridge_Institute.png
+    smaller: yes
+    widescreen: yes
+  beamer_presentation: default
+  slidy_presentation: default
+---
+
+## Differential Gene Expression Analysis Workflow {#less_space_after_title}
+
+<div style="line-height: 50%;"><br></div>
+
+<img src="images/workflow_3Day.svg" class="centerimg" style="width: 60%; margin-top: 60px;">
+
+## Alignment
+
+AIM: Given a reference sequence and a set of short reads, align each read to
+the reference sequence finding the most likely origin of the read sequence.
+
+<img src="images/SRAlignment.svg" class="centerimg" style="width: 100%; margin-top: 60px;">
+
+## Alignment - Gap aware alignment
+
+<img src="images/GappedAlignment.svg" class="centerimg" style="width: 100%; margin-top: 60px;">
+
+## SAM format
+
+**S**equence **A**lignment/**M**ap (SAM) format is the standard format for files
+containing aligned reads.
+
+Definition of the format is avaiable at https://samtools.github.io/hts-specs/SAMv1.pdf.
+
+Two main parts:  
+
+* Header  
+  	- contains meta data (source of the reads, ref. genome, aligner, etc.)  
+  	- Header lines necessarily start with “@”.  
+  	- Header fields have standardized two-letter codes for easy parsing   
+  	
+* Alignment section  
+    - 1 line for each alignment  
+    - Contains details of alignment position, mapping, quality etc.  
+    - 11 required fields, but other content may vary depending on aligner and other
+      tools used to the create the file
+      
+## SAM format - header
+
+<img src="images/SAM_header_1.png" style="width: 23%; margin-top: 10px;">  
+..........................  
+..........................  
+..........................  
+<img src="images/SAM_header_2.png" class="centerimg" style="width: 100%; margin-top: 10px;">
+
+## SAM format - alignment
+
+<img src="images/SAM_alignment_1.png" class="centerimg" style="width: 100%; margin-top: 10px;">
+
+## SAM format - alignment
+
+<img src="images/SAM_alignment_1b.png" class="centerimg" style="width: 100%; margin-top: 10px;">
+
+## SAM format - alignment
+
+<img src="images/SAM_alignment_1c.png" class="centerimg" style="width: 100%; margin-top: 10px;">
