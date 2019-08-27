@@ -1,0 +1,12 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+**Exercise 3.1.1**
+
+Create a directory named `QC`. Read `fastqc` help manual to run it for `FASTQ/SRR7889585.fastq.gz` and store the results at the newly created folder (`QC`). To speed it up, use 7 threads (which it will allow our machines to use 7 processors). You will get an html file as output; Open it with an internet browser (Chrome, Firefox, etc) and answer the following questions:
+
+A) What is the read length?
+B) Does the quality score vary through the read length?
+C) How is the data's quality?
