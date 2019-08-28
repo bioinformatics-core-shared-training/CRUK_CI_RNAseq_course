@@ -227,12 +227,12 @@ head references/Mus_musculus.GRCm38.97.gtf</code></pre>
 <p>The summary table reports the numbers of unassigned reads and the reasons why they are not assigned (eg. ambiguity, multi-mapping, secondary alignment, mapping quality, fragment length, chimera, read duplicate, non-junction and so on), in addition to the number of successfully assigned reads for each library. See <a href="http://bioinf.wehi.edu.au/subread-package/SubreadUsersGuide.pdf">subread documentation</a> (‘Program output’ section).</p>
 <pre><code>head counts/MCL1.DL.featureCounts</code></pre>
 <p>The full results table begins with a line containing the command used to generate the counts. It then has a table of 7 columns. The first column is the gene identifier, this will vary depending on the GTF file used, in our case this is an Ensembl gene id. The second to fifth columns describe the genes location, and the sixth column is the length of the gene. The final column contains the number of reads assigned to the gene. Note that <strong><code>featureCounts</code></strong> outputs a row for every gene in the GTF, even the ones with no reads assigned, and the row order is determined by the order in the GTF. This means that if featureCounts is used on mutliple samples with same GTF file, the separate files can be combined easily as the rows always refer to the same gene.</p>
-<p>In fact we can have <strong><code>featureCounts</code></strong> do this for us by running all of our libraries together in one command. To save time for this we will use versions of our BAM files that only include alignments to chromosome 15. You can find these in <strong><code>small_bams</code></strong> directory.</p>
+<p>In fact we can have <strong><code>featureCounts</code></strong> do this for us by running all of our libraries together in one command. To save time for this we will use versions of our BAM files that only include alignments to chromosome 15. You can find these in <strong><code>small_bams</code></strong> directory. There is also a chromosome 15 only gtf in the reference directory.</p>
 <pre><code>  featureCounts \
       -t exon \
       -g gene_id \
       --primary \
-      -a small_bams/Mus_musculus.GRCm38.97.chr15.gtf  \
+      -a references/Mus_musculus.GRCm38.97.chr15.gtf  \
       -o counts/GSE60450_Lactation.chr15.featureCounts \
       small_bams/MCL*.bam</code></pre>
 <p>This gives us a combined counts table as an output with the first 6 columns as before but now the folowing columns contain the counts for all of the samples.</p>

@@ -121,14 +121,15 @@ same gene.
 In fact we can have **`featureCounts`** do this for us by running all of our
 libraries together in one command. To save time for this we will use versions
 of our BAM files that only include alignments to chromosome 15. You can find
-these in **`small_bams`** directory.
+these in **`small_bams`** directory. There is also a chromosome 15 only gtf 
+in the reference directory.
 
 ```
   featureCounts \
       -t exon \
       -g gene_id \
       --primary \
-      -a small_bams/Mus_musculus.GRCm38.97.chr15.gtf  \
+      -a references/Mus_musculus.GRCm38.97.chr15.gtf  \
       -o counts/GSE60450_Lactation.chr15.featureCounts \
       small_bams/MCL*.bam
 ```
