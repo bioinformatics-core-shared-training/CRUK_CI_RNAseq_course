@@ -53,10 +53,11 @@ Picard is java based programme and so to run a particular Picard tool the
 general format for the command is:
 
 ```
-java -jar picard.jar PicardToolName OPTION1=value1 OPTION2=value2...
+java -jar picard/picard.jar PicardToolName OPTION1=value1 OPTION2=value2...
 ```
 
-* `picard.jar` is the **J**ava **AR**chive file that contains all the tools  
+* `picard.jar` is the **J**ava **AR**chive file that contains all the tools. It
+  can be found in the *picard* directory under *Course_Materials*. 
 * `PicardToolName` is the name of the tools that you wish to use. 
 
 This is then followed by a series of options/arguments for that particular
@@ -66,7 +67,7 @@ website](https://broadinstitute.github.io/picard/), or by using the `--help``
 command:
 
 ```
-java -jar picard.jar PicardToolName --help
+java -jar picard/picard.jar PicardToolName --help
 ```
 
 ### 2.1 Duplication metrics
@@ -86,13 +87,17 @@ that contains information about the duplication rate.
 
 > 1. Run Picard's MarkDuplicates tool on the sorted bam file using the
 >    following command:
-> ```
-> java -jar /home/sawle01/Software/picard_2.20.6/picard.jar MarkDuplicates \
->     INPUT=bam/MCL1.DL.sorted.bam \
->     OUTPUT=bam/MCL1.DL.mkdup.bam \
->     METRICS_FILE=bam/MCL1.DL.mkdup_metrics.txt \
->     CREATE_INDEX=true
-> ```
+```
+java -jar picard/picard.jar MarkDuplicates \
+     INPUT=bam/MCL1.DL.sorted.bam \
+     OUTPUT=bam/MCL1.DL.mkdup.bam \
+     METRICS_FILE=bam/MCL1.DL.mkdup_metrics.txt \
+     CREATE_INDEX=true
+```
+> **Note**: The `\` at the end of each line tells the terminal that when you press 
+> `Enter`, you have not yet finished typing the command. You can if you wish, type
+> the whole command on a single line, omitting the `\` - The command is written across
+> multiple lines here just to make it easier to read.
 >
 > Q. What is the duplication rate for this bam file?
 
