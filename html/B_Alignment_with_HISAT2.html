@@ -207,7 +207,7 @@ summary {
 <li>Use <code>ls</code> to list the contents of the directory.<br />
 There should be a <code>references</code> directory. This will contain various reference materials that we will need throughout analysis, such as the mouse genome and gene annotations.</li>
 <li>Use <code>ls references</code> to list the contents of the <code>references</code> directory.<br />
-There should be file called <code>Mus_musculus.GRCm38.chr1.fa</code>. This is the reference genome sequence for chromosome 1 in FASTA format. We are just going to work with chromosome 1 for this exercise as indexing the entire genome would take too long. You’ll also notice a directory called <code>hisat_index</code>, this is the index for the entire genome, which has already been generated. We’ll be using this later.</li>
+There should be file called <code>Mus_musculus.GRCm38.chr1.fa</code>. This is the reference genome sequence for chromosome 1 in FASTA format. We are just going to work with chromosome 1 for this exercise as indexing the entire genome would take too long. You’ll also notice a directory called <code>hisat2_index</code>, this is the index for the entire genome, which has already been generated. We’ll be using this later.</li>
 <li>Make a directory called <code>hisat2_index_chr1</code> inside the <code>references</code> directory. This is where we will create our chr1 index.</li>
 <li>To create the hisat2 index run the following command:</li>
 </ol>
@@ -253,7 +253,7 @@ There should be file called <code>Mus_musculus.GRCm38.chr1.fa</code>. This is th
 <li>Create a directory called <code>bam</code> (BAM will be our final aligned file format, but we have one more step after alignment to get there).</li>
 <li>Use hisat2 to align the fastq file. Use the following parameters
 <ul>
-<li>Index (the full genome this time) - <code>references/hisat_index/mmu.GRCm38</code></li>
+<li>Index (the full genome this time) - <code>references/hisat2_index/mmu.GRCm38</code></li>
 <li>Fastq file - <code>fastq/MCL1.DL.fastq.gz</code></li>
 <li>Output file - <code>bam/MCL1.DL.sam</code></li>
 <li>Set the number of threads (number of processors to use) to 7 - check the help page to find the appropriate flag</li>
@@ -286,7 +286,7 @@ There should be file called <code>Mus_musculus.GRCm38.chr1.fa</code>. This is th
 <li>Sort the BAM file Sorting can take 5-10 minutes</li>
 <li>Index the sorted BAM file</li>
 <li>Now that you have a bam file view the header of the file with the command:<br />
-&gt; <code>samtools view -H my_sample.sorted.bam</code><br />
+<code>samtools view -H my_sample.sorted.bam</code><br />
 Replacing “<code>mysample.sorted.bam</code>” with name of your bam file.</li>
 <li>View the first few aligned sequences with the command: <code>samtools view my_sample.sorted.bam | head</code><br />
 The <code>|</code> symbol is known as the “pipe”, it “pipes” the output of the first command into the next command. Take a look at the SAM format specifications <a href="https://samtools.github.io/hts-specs/SAMv1.pdf">here</a>. Jump to section 1.4 &quot; The alignment section: mandatory fields&quot; and see if you can begin to interpret the the first 11 fields of the alignment information in your bam file.</li>

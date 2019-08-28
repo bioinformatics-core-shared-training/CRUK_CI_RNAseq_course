@@ -64,7 +64,7 @@ our 'basename'.
 >    reference genome sequence for chromosome 1 in FASTA format. We are just
 >    going to work with chromosome 1 for this exercise as indexing the entire
 >    genome would take too long.
->    You'll also notice a directory called `hisat_index`, this is the index for
+>    You'll also notice a directory called `hisat2_index`, this is the index for
 >    the entire genome, which has already been generated. We'll be using this
 >    later.
 > 4. Make a directory called `hisat2_index_chr1` inside the `references`
@@ -136,7 +136,7 @@ should stick to the defaults.
 > 2. Create a directory called `bam` (BAM will be our final aligned file
 >    format, but we have one more step after alignment to get there).
 > 3. Use hisat2 to align the fastq file. Use the following parameters
->       * Index (the full genome this time) - `references/hisat_index/mmu.GRCm38`
+>       * Index (the full genome this time) - `references/hisat2_index/mmu.GRCm38`
 >       * Fastq file - `fastq/MCL1.DL.fastq.gz`
 >       * Output file - `bam/MCL1.DL.sam`
 >       * Set the number of threads (number of processors to use) to 7 - check
