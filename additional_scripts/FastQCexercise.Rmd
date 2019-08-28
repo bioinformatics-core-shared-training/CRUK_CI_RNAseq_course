@@ -7,6 +7,16 @@ output: html_notebook
 
 Create a directory named `QC`. Read `fastqc` help manual to run it for `FASTQ/SRR7889585.fastq.gz` and store the results at the newly created folder (`QC`). To speed it up, use 7 threads (which it will allow our machines to use 7 processors). You will get an html file as output; Open it with an internet browser (Chrome, Firefox, etc) and answer the following questions:
 
-A) What is the read length?
-B) Does the quality score vary through the read length?
-C) How is the data's quality?
+1) navigate to the fastq directory
+  cd fastq/
+  
+2) check we have our fastq files here
+  ls
+  
+3) run fastqc on one of our samples
+  fastqc MCL1.DL.fastq.gz
+  
+4) open the html report in a browser and see if you can answer these questions.
+  A) What is the read length?
+  B) Does the quality score vary through the read length?
+  C) How is the data's quality?

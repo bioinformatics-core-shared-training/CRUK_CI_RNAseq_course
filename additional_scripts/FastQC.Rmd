@@ -12,6 +12,11 @@ output:
   slidy_presentation: default
 ---
 
+## Fastq file format
+
+
+
+
 ## QC is important
 
 Check for any problems before we put time and effort into analysing potentially bad data
