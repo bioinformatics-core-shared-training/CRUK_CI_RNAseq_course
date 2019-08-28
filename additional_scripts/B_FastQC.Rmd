@@ -61,9 +61,10 @@ but there are lots of other parameters which you can find to tailor your QC by t
             padding-bottom: 20px;">
 <img src="images/good1.png" class="centerimg" style="width: 95%">
 </div>
+</div>
 
 <div style="width: 45%;
-            float: right;">
+            float: none;">
 <div style="text-align: center;">
 <span style="color: #2e2892;">**Bad Data**</span>
 </div>
@@ -71,6 +72,25 @@ but there are lots of other parameters which you can find to tailor your QC by t
             padding-bottom: 20px;">
 <img src="images/bad1.png" class="centerimg" style="width: 95%">
 </div> 
+</div>
+
+## Per base sequence quality 2
+
+<div style="width: 47%; 
+            float: left">
+<div style="text-align: center;">
+   <span style="color: #2e2892;">**Good Data**</span>
+</div>
+<img src="images/good1.png" style="width: 100%">
+</div>
+
+<div style="width: 47%;
+            float: right;">
+<div style="text-align: center;">
+   <span style="color: #2e2892;">**Bad Data**</span>
+</div>
+<img src="images/good1.png" style="width: 100%">
+</div>
 
 ## Per base sequence content
 
