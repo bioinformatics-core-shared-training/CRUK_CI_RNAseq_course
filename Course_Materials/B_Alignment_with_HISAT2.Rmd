@@ -2,7 +2,7 @@
 title: "RNA-seq analysis in R"
 subtitle: "Read alignment with HISAT2"
 author: "Stephane Ballereau, Dominique-Laurent Couturier, Abbi Edwards, Guillermo Parada Gonzalez, Ashley Sawle"
-output: html_notebook
+output: html_document
 ---
 
 # Mapping reads to a reference genome
@@ -183,7 +183,7 @@ Finally, we can index with the `index` command.
 
 `samtools index my_sample.sorted.bam`
 
-This will create a new file called `my_sample.bam.bai` (**ba**m **i**ndex).
+This will create a new file called `my_sample.sorted.bam.bai` (**ba**m **i**ndex).
 
 ### Exercise 3
 
@@ -191,4 +191,14 @@ This will create a new file called `my_sample.bam.bai` (**ba**m **i**ndex).
 > 2. Sort the BAM file
 > Sorting can take 5-10 minutes 
 > 3. Index the sorted BAM file
-
+> 4. Now that you have a bam file view the header of the file with the command:  
+> `samtools view -H my_sample.sorted.bam`  
+> Replacing "`mysample.sorted.bam`" with name of your bam file.
+> 5. View the first few aligned sequences with the command:
+> `samtools view my_sample.sorted.bam | head`  
+> The `|` symbol is known as the "pipe", it "pipes" the output of the first 
+> command into the next command.
+> Take a look at the SAM format specifications [here](https://samtools.github.io/hts-specs/SAMv1.pdf).
+> Jump to section 1.4 " The alignment section:  mandatory fields" and see if you
+> can begin to interpret the the first 11 fields of the alignment information
+> in your bam file.

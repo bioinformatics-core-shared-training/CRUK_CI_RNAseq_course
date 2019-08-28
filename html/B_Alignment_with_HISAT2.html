@@ -277,7 +277,7 @@ There should be file called <code>Mus_musculus.GRCm38.chr1.fa</code>. This is th
 <p><code>samtools sort my_sample.bam &gt; my_sample.sorted.bam</code></p>
 <p>Finally, we can index with the <code>index</code> command.</p>
 <p><code>samtools index my_sample.sorted.bam</code></p>
-<p>This will create a new file called <code>my_sample.bam.bai</code> (<strong>ba</strong>m <strong>i</strong>ndex).</p>
+<p>This will create a new file called <code>my_sample.sorted.bam.bai</code> (<strong>ba</strong>m <strong>i</strong>ndex).</p>
 <div id="exercise-3" class="section level3">
 <h3>Exercise 3</h3>
 <blockquote>
@@ -285,6 +285,11 @@ There should be file called <code>Mus_musculus.GRCm38.chr1.fa</code>. This is th
 <li>Transform your aligned SAM file in to a BAM file.</li>
 <li>Sort the BAM file Sorting can take 5-10 minutes</li>
 <li>Index the sorted BAM file</li>
+<li>Now that you have a bam file view the header of the file with the command:<br />
+&gt; <code>samtools view -H my_sample.sorted.bam</code><br />
+Replacing “<code>mysample.sorted.bam</code>” with name of your bam file.</li>
+<li>View the first few aligned sequences with the command: <code>samtools view my_sample.sorted.bam | head</code><br />
+The <code>|</code> symbol is known as the “pipe”, it “pipes” the output of the first command into the next command. Take a look at the SAM format specifications <a href="https://samtools.github.io/hts-specs/SAMv1.pdf">here</a>. Jump to section 1.4 &quot; The alignment section: mandatory fields&quot; and see if you can begin to interpret the the first 11 fields of the alignment information in your bam file.</li>
 </ol>
 </blockquote>
 </div>
