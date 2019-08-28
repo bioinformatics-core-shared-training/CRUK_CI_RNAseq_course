@@ -246,6 +246,12 @@ $(document).ready(function () {
 <!-- rnb-text-begin -->
 <p><strong>Exercise 3.1.1</strong></p>
 <p>Create a directory named <code>QC</code>. Read <code>fastqc</code> help manual to run it for <code>FASTQ/SRR7889585.fastq.gz</code> and store the results at the newly created folder (<code>QC</code>). To speed it up, use 7 threads (which it will allow our machines to use 7 processors). You will get an html file as output; Open it with an internet browser (Chrome, Firefox, etc) and answer the following questions:</p>
+<ol style="list-style-type: decimal">
+<li><p>navigate to the fastq directory cd fastq/</p></li>
+<li><p>check we have our fastq files here ls</p></li>
+<li><p>run fastqc on one of our samples fastqc MCL1.DL.fastq.gz</p></li>
+<li>open the html report in a browser and see if you can answer these questions.</li>
+</ol>
 <ol style="list-style-type: upper-alpha">
 <li>What is the read length?</li>
 <li>Does the quality score vary through the read length?</li>
@@ -253,7 +259,7 @@ $(document).ready(function () {
 </ol>
 <!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKKipFeGVyY2lzZSAzLjEuMSoqCgpDcmVhdGUgYSBkaXJlY3RvcnkgbmFtZWQgYFFDYC4gUmVhZCBgZmFzdHFjYCBoZWxwIG1hbnVhbCB0byBydW4gaXQgZm9yIGBGQVNUUS9TUlI3ODg5NTg1LmZhc3RxLmd6YCBhbmQgc3RvcmUgdGhlIHJlc3VsdHMgYXQgdGhlIG5ld2x5IGNyZWF0ZWQgZm9sZGVyIChgUUNgKS4gVG8gc3BlZWQgaXQgdXAsIHVzZSA3IHRocmVhZHMgKHdoaWNoIGl0IHdpbGwgYWxsb3cgb3VyIG1hY2hpbmVzIHRvIHVzZSA3IHByb2Nlc3NvcnMpLiBZb3Ugd2lsbCBnZXQgYW4gaHRtbCBmaWxlIGFzIG91dHB1dDsgT3BlbiBpdCB3aXRoIGFuIGludGVybmV0IGJyb3dzZXIgKENocm9tZSwgRmlyZWZveCwgZXRjKSBhbmQgYW5zd2VyIHRoZSBmb2xsb3dpbmcgcXVlc3Rpb25zOgoKQSkgV2hhdCBpcyB0aGUgcmVhZCBsZW5ndGg/CkIpIERvZXMgdGhlIHF1YWxpdHkgc2NvcmUgdmFyeSB0aHJvdWdoIHRoZSByZWFkIGxlbmd0aD8KQykgSG93IGlzIHRoZSBkYXRhJ3MgcXVhbGl0eT8=</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKKipFeGVyY2lzZSAzLjEuMSoqCgpDcmVhdGUgYSBkaXJlY3RvcnkgbmFtZWQgYFFDYC4gUmVhZCBgZmFzdHFjYCBoZWxwIG1hbnVhbCB0byBydW4gaXQgZm9yIGBGQVNUUS9TUlI3ODg5NTg1LmZhc3RxLmd6YCBhbmQgc3RvcmUgdGhlIHJlc3VsdHMgYXQgdGhlIG5ld2x5IGNyZWF0ZWQgZm9sZGVyIChgUUNgKS4gVG8gc3BlZWQgaXQgdXAsIHVzZSA3IHRocmVhZHMgKHdoaWNoIGl0IHdpbGwgYWxsb3cgb3VyIG1hY2hpbmVzIHRvIHVzZSA3IHByb2Nlc3NvcnMpLiBZb3Ugd2lsbCBnZXQgYW4gaHRtbCBmaWxlIGFzIG91dHB1dDsgT3BlbiBpdCB3aXRoIGFuIGludGVybmV0IGJyb3dzZXIgKENocm9tZSwgRmlyZWZveCwgZXRjKSBhbmQgYW5zd2VyIHRoZSBmb2xsb3dpbmcgcXVlc3Rpb25zOgoKMSkgbmF2aWdhdGUgdG8gdGhlIGZhc3RxIGRpcmVjdG9yeQogIGNkIGZhc3RxLwogIAoyKSBjaGVjayB3ZSBoYXZlIG91ciBmYXN0cSBmaWxlcyBoZXJlCiAgbHMKICAKMykgcnVuIGZhc3RxYyBvbiBvbmUgb2Ygb3VyIHNhbXBsZXMKICBmYXN0cWMgTUNMMS5ETC5mYXN0cS5negogIAo0KSBvcGVuIHRoZSBodG1sIHJlcG9ydCBpbiBhIGJyb3dzZXIgYW5kIHNlZSBpZiB5b3UgY2FuIGFuc3dlciB0aGVzZSBxdWVzdGlvbnMuCiAgQSkgV2hhdCBpcyB0aGUgcmVhZCBsZW5ndGg/CiAgQikgRG9lcyB0aGUgcXVhbGl0eSBzY29yZSB2YXJ5IHRocm91Z2ggdGhlIHJlYWQgbGVuZ3RoPwogIEMpIEhvdyBpcyB0aGUgZGF0YSdzIHF1YWxpdHk/Cg==</div>
 
 
 
