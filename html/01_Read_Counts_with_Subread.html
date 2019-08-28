@@ -85,7 +85,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -181,7 +180,7 @@ summary {
 <h1 class="title toc-ignore">RNA-seq analysis in R</h1>
 <h3 class="subtitle">Pre-processsing RNA-seq data - solutions</h3>
 <h4 class="author">Stephane Ballereau, Dominique-Laurent Couturier, Mark Dunning, Abbi Edwards, Ashley Sawle</h4>
-<h4 class="date">Last modified: 19 Aug 2019</h4>
+<h4 class="date">Last modified: 28 Aug 2019</h4>
 
 </div>
 
@@ -203,17 +202,19 @@ summary {
 <p>GTF/GFF files define genomic regions covered by different types of genomic features, e.g. genes, transcripts, exons, or UTRs. The necessary GTF is already in the directory <code>Course_Materials/data</code>. Instruction on where and how to download the GTF can be found in the <a href="../Supplementary_Materials/S1_Getting_raw_reads_from_SRA.html">Supplementary Materials</a>.</p>
 <p>When using a GTF/GFF file we need to tell <strong><code>featureCounts</code></strong> what feature type to use to count reads, and what attribute type to summarise the results at. For RNAseq we most commonly wish to count reads aligning to exons, and then to summarise at the gene level.</p>
 <p>Lets have a quick look at the top of a GTF file so we can see what data it contains and what <strong>feature type</strong> and <strong>attribute type</strong> mean:</p>
-<pre><code>cd ~/CourseMaterials/data/counts
+<pre><code>cd ~/CourseMaterials/
   
-head Mus_musculus.GRCm38.97.gtf</code></pre>
+head references/Mus_musculus.GRCm38.97.gtf</code></pre>
 <p>The code below uses <strong><code>featureCounts</code></strong> to count reads in a BAM file against a GTF for the mouse GRCm38 genome assembly.</p>
-<pre><code>  featureCounts \
+<pre><code>  mkdir counts
+
+  featureCounts \
       -t exon \
       -g gene_id \
       --primary \
-      -a Mus_musculus.GRCm38.97.gtf \
-      -o MCL1_DG.featureCounts \
-      MCL1_DG.bam</code></pre>
+      -a references/Mus_musculus.GRCm38.97.gtf \
+      -o counts/MCL1.DL.featureCounts \
+      bam/MCL1.DL.bam</code></pre>
 <ul>
 <li><strong><code>-t exon</code></strong> - the <strong>feature</strong> type to count reads against, in this case exons</li>
 <li><strong><code>-g gene_id</code></strong> - the <strong>attribute</strong> type to summarise counts by, in this case the gene ID</li>
@@ -222,9 +223,9 @@ head Mus_musculus.GRCm38.97.gtf</code></pre>
 <p><strong><code>featureCounts</code></strong> has many additional options that can be used to alter the ways in which it does the counting.</p>
 <pre><code>featureCounts --help</code></pre>
 <p>Running featureCounts generates two output files. A summary statistics table (<strong><code>MCL1.DG.featureCounts.summary</code></strong>) and a full table of counts (<strong><code>MCL1.DG.featureCounts</code></strong>) for each feature (gene in this case). Let take a look at each file.</p>
-<pre><code>cat MCL1.DG.featureCounts.summary</code></pre>
+<pre><code>cat counts/MCL1.DL.featureCounts.summary</code></pre>
 <p>The summary table reports the numbers of unassigned reads and the reasons why they are not assigned (eg. ambiguity, multi-mapping, secondary alignment, mapping quality, fragment length, chimera, read duplicate, non-junction and so on), in addition to the number of successfully assigned reads for each library. See <a href="http://bioinf.wehi.edu.au/subread-package/SubreadUsersGuide.pdf">subread documentation</a> (‘Program output’ section).</p>
-<pre><code>head MCL1.DG.featureCounts</code></pre>
+<pre><code>head counts/MCL1.DL.featureCounts</code></pre>
 <p>The full results table begins with a line containing the command used to generate the counts. It then has a table of 7 columns. The first column is the gene identifier, this will vary depending on the GTF file used, in our case this is an Ensembl gene id. The second to fifth columns describe the genes location, and the sixth column is the length of the gene. The final column contains the number of reads assigned to the gene. Note that <strong><code>featureCounts</code></strong> outputs a row for every gene in the GTF, even the ones with no reads assigned, and the row order is determined by the order in the GTF. This means that if featureCounts is used on mutliple samples with same GTF file, the separate files can be combined easily as the rows always refer to the same gene.</p>
 <p>In fact we can have <strong><code>featureCounts</code></strong> do this for us by running all of our libraries together in one command. To save time for this we will use versions of our BAM files that only include alignments to chromosome 15. You can find these in <strong><code>small_bams</code></strong> directory.</p>
 <pre><code>  featureCounts \
@@ -232,10 +233,10 @@ head Mus_musculus.GRCm38.97.gtf</code></pre>
       -g gene_id \
       --primary \
       -a small_bams/Mus_musculus.GRCm38.97.chr15.gtf  \
-      -o GSE60450_Lactation.chr15.featureCounts \
+      -o counts/GSE60450_Lactation.chr15.featureCounts \
       small_bams/MCL*.bam</code></pre>
 <p>This gives us a combined counts table as an output with the first 6 columns as before but now the folowing columns contain the counts for all of the samples.</p>
-<pre><code>head GSE60450_Lactation.chr15.featureCounts</code></pre>
+<pre><code>head counts/GSE60450_Lactation.chr15.featureCounts</code></pre>
 <blockquote>
 <h2 id="challenge" class="challenge">Challenge</h2>
 <ol style="list-style-type: decimal">

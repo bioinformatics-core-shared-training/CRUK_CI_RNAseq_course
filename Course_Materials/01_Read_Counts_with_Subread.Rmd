@@ -53,22 +53,24 @@ Lets have a quick look at the top of a GTF file so we can see what data it
 contains and what **feature type** and **attribute type** mean:
 
 ```
-cd ~/CourseMaterials/data/counts
+cd ~/CourseMaterials/
   
-head Mus_musculus.GRCm38.97.gtf
+head references/Mus_musculus.GRCm38.97.gtf
 ```
 
 The code below uses **`featureCounts`** to count reads in a BAM file against a
 GTF for the mouse GRCm38 genome assembly.
 
 ```
+  mkdir counts
+
   featureCounts \
       -t exon \
       -g gene_id \
       --primary \
-      -a Mus_musculus.GRCm38.97.gtf \
-      -o MCL1_DG.featureCounts \
-      MCL1_DG.bam
+      -a references/Mus_musculus.GRCm38.97.gtf \
+      -o counts/MCL1.DL.featureCounts \
+      bam/MCL1.DL.bam
 ```
 * **`-t exon`** - the **feature** type to count reads against, in this case
   exons
@@ -89,7 +91,7 @@ Running featureCounts generates two output files. A summary statistics table
 look at each file.
 
 ```
-cat MCL1.DG.featureCounts.summary
+cat counts/MCL1.DL.featureCounts.summary
 ```
 
 The summary table reports the numbers of unassigned reads and the reasons why
@@ -101,7 +103,7 @@ documentation](http://bioinf.wehi.edu.au/subread-package/SubreadUsersGuide.pdf)
 ('Program output' section).
 
 ```
-head MCL1.DG.featureCounts
+head counts/MCL1.DL.featureCounts
 ```
 
 The full results table begins with a line containing the command used to
@@ -127,7 +129,7 @@ these in **`small_bams`** directory.
       -g gene_id \
       --primary \
       -a small_bams/Mus_musculus.GRCm38.97.chr15.gtf  \
-      -o GSE60450_Lactation.chr15.featureCounts \
+      -o counts/GSE60450_Lactation.chr15.featureCounts \
       small_bams/MCL*.bam
 ```
 
@@ -135,7 +137,7 @@ This gives us a combined counts table as an output with the first 6 columns as
 before but now the folowing columns contain the counts for all of the samples.
 
 ```
-head GSE60450_Lactation.chr15.featureCounts
+head counts/GSE60450_Lactation.chr15.featureCounts
 ```
 
 > ## Challenge {.challenge}
