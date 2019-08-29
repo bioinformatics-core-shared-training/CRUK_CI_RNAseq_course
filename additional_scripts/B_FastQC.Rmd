@@ -12,14 +12,24 @@ output:
   slidy_presentation: default
 ---
 
-## Fastq file format
+## Differential Gene Expression Analysis Workflow {#less_space_after_title}
+
+<div style="line-height: 50%;"><br></div>
+
+<img src="images/workflow_3Day.svg" class="centerimg" style="width: 60%; margin-top: 60px;">
 
 ## Fastq file format
-header
-## Fastq file format
-sequence
-## Fastq file format
-quality scores
+<img src="images/fq.png" style="width: 95%">
+
+## Fastq file format - Headers
+<img src="images/fq_headers.png" style="width: 95%">
+
+## Fastq file format - Sequences
+<img src="images/fq_seq.png" style="width: 95%">
+
+## Fastq file format - Quality Scores
+<img src="images/fq_quality.png" style="width: 95%">
+
 ## QC is important
 
 Check for any problems before we put time and effort into analysing potentially bad data
