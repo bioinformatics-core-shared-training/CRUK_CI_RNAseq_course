@@ -1,0 +1,41 @@
+---
+title: "RNA-seq analysis in R"
+subtitle: "Counting reads with SubRead - Solutions"
+author: "Stephane Ballereau, Dominique-Laurent Couturier, Mark Dunning, Abbi Edwards, Ashley Sawle"
+date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
+output: html_document
+---
+
+
+> ## Challenge {.challenge}
+>
+> 1. Redo the counting over the exons, rather than the genes. Use
+>    `featureCounts --help` to find the option you need to use. Make sure
+>    featureCounts outputs the results to a new file.
+```
+  featureCounts \
+      -t exon \
+      -g exon \
+      --primary \
+      -a references/Mus_musculus.GRCm38.97.gtf \
+      -o counts/MCL1.DL.exons.featureCounts \
+      bam/MCL1.DL.bam
+```
+
+
+> 2. Redo the counting over genes, allowing for multimapping reads. Compare the
+>    results to our intial counts.
+>
+> You need to add the `-M` flag to count multimapped reads as well as uniquely 
+> mapped reads.
+```
+  featureCounts \
+      -t exon \
+      -g gene_id \
+      --primary \
+      -a references/Mus_musculus.GRCm38.97.gtf \
+      -M \
+      -o counts/MCL1.DL.multimapped.featureCounts \
+      bam/MCL1.DL.bam
+```
+

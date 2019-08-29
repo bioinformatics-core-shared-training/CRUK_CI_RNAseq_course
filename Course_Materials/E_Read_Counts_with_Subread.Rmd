@@ -1,6 +1,6 @@
 ---
 title: "RNA-seq analysis in R"
-subtitle: "Pre-processsing RNA-seq data - solutions"
+subtitle: "Counting reads with SubRead"
 author: "Stephane Ballereau, Dominique-Laurent Couturier, Mark Dunning, Abbi Edwards, Ashley Sawle"
 date: '`r format(Sys.time(), "Last modified: %d %b %Y")`'
 output:
