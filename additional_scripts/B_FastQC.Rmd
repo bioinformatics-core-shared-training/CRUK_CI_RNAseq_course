@@ -14,9 +14,12 @@ output:
 
 ## Fastq file format
 
-
-
-
+## Fastq file format
+header
+## Fastq file format
+sequence
+## Fastq file format
+quality scores
 ## QC is important
 
 Check for any problems before we put time and effort into analysing potentially bad data
