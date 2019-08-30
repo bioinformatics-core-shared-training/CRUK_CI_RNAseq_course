@@ -19,7 +19,7 @@ or
 |`cd` | Move between (**c**hange) **d**irectories| `cd fastq` (move into the fastq directory)|
 ||| `cd fastq/data1` (move into the `data1` directory inside the `fastq` directory)|
 |||`cd ..` (To move to the parent of the current directory) |
-|||`cd ~` (To move to the top of the directory tree) |
+|||`cd ~` (To move to "home" directory) |
 |`mkdir` | make new directory| `mkdir my_folder` |
 |`pwd` | Where am I?| |
 |`mv` | move a file or directory| `mv my_file my_folder/.` (move `my_file` into a `my_folder`) |
