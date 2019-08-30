@@ -1,0 +1,40 @@
+---
+title: "Unix Cheatsheet - Common Commands"
+output: pdf_document
+classoption: landscape
+geometry: margin=1.5cm
+fontsize: 12pt
+---
+
+
+To get the help page/manual for any linux command either type  
+`man <command>` e.g. `man ls`  
+or  
+`<command> --help` e.g. rm \-\-help  
+
+|Command| Use| Examples|  
+|:--|:----------------------|:---------------------------------------------|
+|`ls` | List files | `ls` (list files in current directory) |
+|||`ls fastq` (list files inside fastq directory) |
+|`cd` | Move between (**c**hange) **d**irectories| `cd fastq` (move into the fastq directory)|
+||| `cd fastq/data1` (move into the `data1` directory inside the `fastq` directory)|
+|||`cd ..` (To move to the parent of the current directory) |
+|||`cd ~` (To move to the top of the directory tree) |
+|`mkdir` | make new directory| `mkdir my_folder` |
+|`pwd` | Where am I?| |
+|`mv` | move a file or directory| `mv my_file my_folder/.` (move `my_file` into a `my_folder`) |
+||| `mv my_file my_new_file` (equivalent of renaming `my_file` to `my_new_file`) |
+|`cp` | copy file| `cp my_file new_file` |
+|`cp -r`|copy folder| `cp -r my_folder my_new_folder`|
+|`rm` | Remove a file | `rm file` |
+|`rm -r` | Remove a folder| `rm -r folder` |
+|`cat` |Print file content|`cat my_file` |
+|`zcat` |Print file content of compressed files|`zcat SRR7889597.fastq.gz` |
+|`less` | Displays the contents of a file | `less my_file.txt` (press `q` to quit) |
+|`head`| Displays the first ten lines of a file | `head my_file.txt` |
+|`tail`| Displays the last ten lines of a file | `tail my_file.txt` |
+|`wc` | count lines, words and characters | `wc my_file ` |
+|`grep` | Pattern matching | `grep hello my_file` (get lines in `my_file` that contain the word "hello")|
+| `cut` | extract columns from files | `cut -f 2 my_file.txt` (extract second column)
+|`sort` | sort the rows of a file | `sort my_file.txt` | 
+|`uniq` | keep unique rows (remove duplicates) | `uniq my_file.txt` | 
